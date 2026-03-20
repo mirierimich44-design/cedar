@@ -55,35 +55,13 @@
         @endif
     @endif
 
-    {{-- Credit Dropdown --}}
+    {{-- Credit Button --}}
     @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
         @if(empty($pos_settings['disable_credit_sale_button']))
-        <div class="btn-group pos-credit-dropdown-wrap" style="width:100%; display:block; margin-bottom:0;">
-            <button type="button" class="pos-action-btn pos-action-credit dropdown-toggle" id="pos-credit-sale-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Credit Options" style="width:100%;">
-                <i class="fas fa-handshake"></i>
-                <span class="btn-text">Credit <span class="caret" style="margin-left:4px;"></span></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-right pos-credit-dropdown-menu" style="width:100%; min-width:200px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.18); border:1px solid #e2e8f0; padding:6px 0; z-index:9999;">
-                <li>
-                    <a href="#" id="credit_complete_sale_dropdown_btn" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
-                        <i class="fas fa-check-circle" style="color:#7c3aed; width:16px;"></i> Complete Credit Sale
-                    </a>
-                </li>
-                @if(auth()->user()->can('sell.payments'))
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#collect_debt_modal" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
-                        <i class="fas fa-hand-holding-usd" style="color:#0369a1; width:16px;"></i> Collect Debt
-                    </a>
-                </li>
-                @endif
-                <li role="separator" class="divider" style="margin:4px 0;"></li>
-                <li>
-                    <a href="#" class="btn-modal" data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}" data-container=".contact_modal" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
-                        <i class="fas fa-user-plus" style="color:#059669; width:16px;"></i> Add Customer
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" title="Credit Options">
+            <i class="fas fa-handshake"></i>
+            <span class="btn-text">Credit</span>
+        </button>
         @endif
     @endif
 
@@ -489,9 +467,64 @@
 
 @include('sale_pos.partials.edit_shipping_modal')
 
-{{-- Credit Sale Customer Search Modal --}}
+{{-- Credit Options Modal --}}
 @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
     @if(empty($pos_settings['disable_credit_sale_button']))
+
+    {{-- Step 1: Credit Options Chooser --}}
+    <div class="modal fade" id="credit_options_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm" role="document" style="max-width:340px; margin:80px auto;">
+            <div class="modal-content" style="border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%); border:none; padding:18px 20px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1;font-size:26px;text-shadow:none;">&times;</button>
+                    <h4 class="modal-title" style="color:white;font-weight:700;font-size:17px;">
+                        <i class="fas fa-handshake"></i> Credit Options
+                    </h4>
+                </div>
+                <div class="modal-body" style="padding:16px 14px; display:flex; flex-direction:column; gap:10px;">
+
+                    {{-- Option 1: Complete Credit Sale --}}
+                    <button type="button" id="copt_complete_credit_sale" class="btn btn-block" style="padding:14px 16px; background:#f5f3ff; border:2px solid #7c3aed; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-check-circle" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Complete Credit Sale</strong>
+                            <small style="color:#64748b;font-size:11px;">Sell now, collect payment later</small>
+                        </span>
+                    </button>
+
+                    {{-- Option 2: Collect Debt --}}
+                    @if(auth()->user()->can('sell.payments'))
+                    <button type="button" id="copt_collect_debt" class="btn btn-block" style="padding:14px 16px; background:#f0f9ff; border:2px solid #0369a1; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#0369a1,#0ea5e9);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-hand-holding-usd" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Collect Debt</strong>
+                            <small style="color:#64748b;font-size:11px;">Receive payment from a customer</small>
+                        </span>
+                    </button>
+                    @endif
+
+                    {{-- Option 3: Add Customer --}}
+                    <button type="button" id="copt_add_customer" class="btn btn-block" style="padding:14px 16px; background:#f0fdf4; border:2px solid #059669; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;"
+                        data-add-customer-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#059669,#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-user-plus" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Add Customer</strong>
+                            <small style="color:#64748b;font-size:11px;">Create a new customer profile</small>
+                        </span>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Step 2: Credit Sale Customer Search Modal --}}
     <div class="modal fade" id="credit_sale_customer_modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
@@ -500,7 +533,7 @@
                         <span>&times;</span>
                     </button>
                     <h4 class="modal-title" style="color: white; font-weight: 700; font-size: 20px;">
-                        <i class="fas fa-handshake"></i> Credit Sale - Select Customer
+                        <i class="fas fa-handshake"></i> Credit Sale — Select Customer
                     </h4>
                 </div>
                 <div class="modal-body" style="padding: 25px;">
@@ -509,14 +542,13 @@
                             <label style="font-weight: 600; color: #374151; margin-bottom: 0;">
                                 <i class="fas fa-search" style="color: #7c3aed;"></i> Search Customer (Name or Phone)
                             </label>
-                            <button type="button" class="btn btn-xs btn-primary btn-modal" 
-                                data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}" 
+                            <button type="button" class="btn btn-xs btn-primary btn-modal"
+                                data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}"
                                 data-container=".contact_modal">
                                 <i class="fa fa-plus"></i> Add New
                             </button>
                         </div>
-                        <select id="credit_sale_customer_search" class="form-control" style="width: 100%;">
-                        </select>
+                        <select id="credit_sale_customer_search" class="form-control" style="width: 100%;"></select>
                     </div>
 
                     <div id="credit_customer_details" class="hide" style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -543,9 +575,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 15px 25px; background: #f8fafc;">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">
-                        Cancel
-                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">Cancel</button>
                     <button type="button" id="confirm_credit_sale" class="btn btn-primary" disabled style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border: none; border-radius: 6px; padding: 10px 25px;">
                         <i class="fas fa-check"></i> Complete Credit Sale
                     </button>
@@ -555,201 +585,198 @@
     </div>
 
     <script type="text/javascript">
-    $(document).ready(function() {
-        // ── Complete Credit Sale — validation before opening modal ──────
-        $('#credit_complete_sale_dropdown_btn').on('click', function(e) {
-            e.preventDefault();
-            // Check cart has items
-            var finalTotal = parseFloat($('#final_total_input').val()) || 0;
-            var hasProducts = finalTotal > 0;
-            // Check customer is selected (not walk-in, walk-in id is typically 1)
-            var customerId = $('#customer_id').val();
-            var walkInId = $('input[name="default_customer_id"]').val() || '1';
-            var hasCustomer = customerId && customerId != walkInId;
-
-            if (!hasProducts && !hasCustomer) {
-                toastr.warning('Please add products and select a customer first.');
+    (function() {
+        function initCredit() {
+            if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+                setTimeout(initCredit, 200);
                 return;
             }
-            if (!hasProducts) {
-                toastr.warning('Please add products to the cart first.');
-                return;
-            }
-            if (!hasCustomer) {
-                toastr.warning('Please select a customer before completing a credit sale.');
-                return;
-            }
-            // Both conditions met — open modal
-            $('#credit_sale_customer_modal').modal('show');
-        });
+            var $ = jQuery;
 
-        // Auto-populate customer if already selected on main POS screen
-        $('#credit_sale_customer_modal').on('shown.bs.modal', function () {
-            var main_customer_id = $('#customer_id').val();
-            var main_customer_name = $('#customer_id').select2('data')[0]?.text;
+            // ── Open credit options popup ────────────────────────────────
+            $(document).on('click', '#pos-credit-sale-btn', function() {
+                $('#credit_options_modal').modal('show');
+            });
 
-            if (main_customer_id && main_customer_id != 1) { // 1 is usually walk-in
-                var newOption = new Option(main_customer_name, main_customer_id, true, true);
-                $('#credit_sale_customer_search').append(newOption).trigger('change');
-                $('#credit_sale_customer_search').trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: { id: main_customer_id, text: main_customer_name }
-                    }
-                });
-            }
-        });
+            // ── Option 1: Complete Credit Sale ───────────────────────────
+            $(document).on('click', '#copt_complete_credit_sale', function() {
+                $('#credit_options_modal').modal('hide');
 
-        // Initialize Select2 for customer search
-        $('#credit_sale_customer_search').select2({
-            ajax: {
-                url: '/contacts/customers',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        q: params.term,
-                        page: params.page
-                    };
-                },
-                processResults: function(data) {
-                    return { results: data };
+                var finalTotal = parseFloat($('#final_total_input').val()) || 0;
+                if (finalTotal <= 0) {
+                    toastr.warning('Please add products to the cart first.');
+                    return;
                 }
-            },
-            placeholder: 'Type customer name or phone number...',
-            minimumInputLength: 1,
-            allowClear: true,
-            dropdownParent: $('#credit_sale_customer_modal'),
-            templateResult: function(customer) {
-                if (!customer.id) return customer.text;
-                var mobile = customer.mobile ? ' - ' + customer.mobile : '';
-                return $('<span><strong>' + customer.text + '</strong>' + mobile + '</span>');
-            }
-        });
 
-        // Listen for new contact added via modal
-        $(document).on('contact_added', function(e, contact) {
-            if ($('#credit_sale_customer_modal').is(':visible')) {
-                var newOption = new Option(contact.name, contact.id, true, true);
-                $('#credit_sale_customer_search').append(newOption).trigger('change');
-                $('#credit_sale_customer_search').trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: contact
-                    }
-                });
-            }
-        });
+                // Pre-populate if customer already selected
+                setTimeout(function() {
+                    $('#credit_sale_customer_modal').modal('show');
+                }, 300);
+            });
 
-        // On customer selection
-        $('#credit_sale_customer_search').on('select2:select', function(e) {
-            var data = e.params.data;
-            var customerId = data.id;
+            // ── Option 2: Collect Debt ───────────────────────────────────
+            $(document).on('click', '#copt_collect_debt', function() {
+                $('#credit_options_modal').modal('hide');
+                setTimeout(function() {
+                    $('#collect_debt_modal').modal('show');
+                }, 300);
+            });
 
-            // Fetch customer details
-            $.ajax({
-                url: '/contacts/' + customerId,
-                dataType: 'json',
-                success: function(result) {
-                    if (result.data && result.data.length > 0) {
-                        var customer = result.data[0];
-                        $('#credit_customer_name').text(customer.name || '-');
-                        $('#credit_customer_phone').text(customer.mobile || customer.landline || '-');
-                        $('#credit_customer_balance').text(__currency_trans_from_en(customer.total_due || 0));
-                        $('#credit_customer_limit').text(customer.credit_limit ? __currency_trans_from_en(customer.credit_limit) : 'Unlimited');
-                        $('#credit_customer_details').removeClass('hide');
-
-                        // Check credit limit
-                        var currentTotal = parseFloat($('#final_total_input').val()) || 0;
-                        var totalDue = parseFloat(customer.total_due) || 0;
-                        var creditLimit = customer.credit_limit ? parseFloat(customer.credit_limit) : null;
-
-                        if (creditLimit !== null && (totalDue + currentTotal) > creditLimit) {
-                            $('#credit_warning_message').text('This sale will exceed the customer credit limit!');
-                            $('#credit_sale_warning').removeClass('hide');
-                        } else {
-                            $('#credit_sale_warning').addClass('hide');
+            // ── Option 3: Add Customer ───────────────────────────────────
+            $(document).on('click', '#copt_add_customer', function() {
+                $('#credit_options_modal').modal('hide');
+                var href = $(this).data('add-customer-href');
+                setTimeout(function() {
+                    $.ajax({
+                        url: href,
+                        success: function(result) {
+                            $('.contact_modal').html(result).modal('show');
                         }
+                    });
+                }, 300);
+            });
 
-                        $('#confirm_credit_sale').prop('disabled', false);
-                    }
+            // ── Auto-populate customer on credit sale modal open ─────────
+            $('#credit_sale_customer_modal').on('shown.bs.modal', function() {
+                var main_id   = $('#customer_id').val();
+                var main_data = $('#customer_id').select2('data');
+                var main_name = (main_data && main_data[0]) ? main_data[0].text : '';
+
+                if (main_id && main_id != '1') {
+                    var opt = new Option(main_name, main_id, true, true);
+                    $('#credit_sale_customer_search').append(opt).trigger('change');
+                    $('#credit_sale_customer_search').trigger({
+                        type: 'select2:select',
+                        params: { data: { id: main_id, text: main_name } }
+                    });
                 }
             });
-        });
 
-        // Clear on modal close
-        $('#credit_sale_customer_modal').on('hidden.bs.modal', function() {
-            $('#credit_sale_customer_search').val(null).trigger('change');
-            $('#credit_customer_details').addClass('hide');
-            $('#credit_sale_warning').addClass('hide');
-            $('#confirm_credit_sale').prop('disabled', true);
-        });
+            // ── Init Select2 for credit customer search ──────────────────
+            $('#credit_sale_customer_search').select2({
+                ajax: {
+                    url: '/contacts/customers',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) { return { q: params.term, page: params.page }; },
+                    processResults: function(data) { return { results: data }; }
+                },
+                placeholder: 'Type customer name or phone number...',
+                minimumInputLength: 1,
+                allowClear: true,
+                dropdownParent: $('#credit_sale_customer_modal'),
+                templateResult: function(c) {
+                    if (!c.id) return c.text;
+                    return $('<span><strong>' + c.text + '</strong>' + (c.mobile ? ' - ' + c.mobile : '') + '</span>');
+                }
+            });
 
-        // Confirm credit sale
-        $('#confirm_credit_sale').on('click', function() {
-            var customerId = $('#credit_sale_customer_search').val();
-            var customerName = $('#credit_sale_customer_search').select2('data')[0]?.text;
+            // ── On customer selection — fetch details ────────────────────
+            $('#credit_sale_customer_search').on('select2:select', function(e) {
+                var customerId = e.params.data.id;
+                $.ajax({
+                    url: '/contacts/' + customerId,
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.data && result.data.length > 0) {
+                            var customer = result.data[0];
+                            $('#credit_customer_name').text(customer.name || '-');
+                            $('#credit_customer_phone').text(customer.mobile || customer.landline || '-');
+                            $('#credit_customer_balance').text(__currency_trans_from_en(customer.total_due || 0));
+                            $('#credit_customer_limit').text(customer.credit_limit ? __currency_trans_from_en(customer.credit_limit) : 'Unlimited');
+                            $('#credit_customer_details').removeClass('hide');
 
-            if (customerId) {
-                // Set the customer in main POS form
-                if ($('#customer_id').length) {
-                    var newOption = new Option(customerName, customerId, true, true);
-                    $('#customer_id').append(newOption).trigger('change');
+                            var currentTotal = parseFloat($('#final_total_input').val()) || 0;
+                            var totalDue = parseFloat(customer.total_due) || 0;
+                            var creditLimit = customer.credit_limit ? parseFloat(customer.credit_limit) : null;
+
+                            if (creditLimit !== null && (totalDue + currentTotal) > creditLimit) {
+                                $('#credit_warning_message').text('This sale will exceed the customer credit limit!');
+                                $('#credit_sale_warning').removeClass('hide');
+                            } else {
+                                $('#credit_sale_warning').addClass('hide');
+                            }
+                            $('#confirm_credit_sale').prop('disabled', false);
+                        }
+                    }
+                });
+            });
+
+            // ── Clear on credit modal close ──────────────────────────────
+            $('#credit_sale_customer_modal').on('hidden.bs.modal', function() {
+                $('#credit_sale_customer_search').val(null).trigger('change');
+                $('#credit_customer_details').addClass('hide');
+                $('#credit_sale_warning').addClass('hide');
+                $('#confirm_credit_sale').prop('disabled', true);
+            });
+
+            // ── New contact added — update credit modal search ───────────
+            $(document).on('contact_added', function(e, contact) {
+                if ($('#credit_sale_customer_modal').is(':visible')) {
+                    var opt = new Option(contact.name, contact.id, true, true);
+                    $('#credit_sale_customer_search').append(opt).trigger('change');
+                    $('#credit_sale_customer_search').trigger({ type: 'select2:select', params: { data: contact } });
+                }
+            });
+
+            // ── Confirm & submit credit sale ─────────────────────────────
+            $(document).on('click', '#confirm_credit_sale', function() {
+                var customerId   = $('#credit_sale_customer_search').val();
+                var sel2data     = $('#credit_sale_customer_search').select2('data');
+                var customerName = (sel2data && sel2data[0]) ? sel2data[0].text : '';
+
+                if (!customerId) { toastr.warning('Please select a customer.'); return; }
+
+                // Set customer on main POS form if not already set
+                if ($('#customer_id').val() != customerId) {
+                    var opt = new Option(customerName, customerId, true, true);
+                    $('#customer_id').append(opt).trigger('change');
                 }
 
-                // Close modal and trigger credit sale
                 $('#credit_sale_customer_modal').modal('hide');
 
-                // Small delay to ensure customer is set
                 setTimeout(function() {
-                    // Trigger the express finalize with credit_sale pay method
-                    var form = $('form#add_pos_sell_form').length > 0 ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
-
-                    // Set payment method to credit
+                    var form = $('form#add_pos_sell_form').length ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
                     if ($('input[name="payment[0][method]"]').length) {
                         $('input[name="payment[0][method]"]').val('credit');
                     }
-
-                    // Set status
                     $('input#status').val('final');
 
-                    // Submit via AJAX like express finalize
-                    var data = form.serialize();
-                    data += '&is_credit_sale=1';
+                    var data = form.serialize() + '&is_credit_sale=1';
+                    var $btn = $('#confirm_credit_sale').prop('disabled', true);
 
                     $.ajax({
                         method: 'POST',
                         url: form.attr('action'),
                         dataType: 'json',
                         data: data,
-                        beforeSend: function(xhr) {
-                            __disable_submit_button(form.find('button[type="submit"]'));
-                        },
                         success: function(result) {
+                            $btn.prop('disabled', false);
                             if (result.success == 1) {
-                                // Reset form
                                 reset_pos_form();
-
-                                // Print receipt if enabled
                                 if (result.receipt && result.receipt.html_content) {
                                     pos_print(result.receipt);
                                 }
-
                                 toastr.success(result.msg || 'Credit sale completed successfully');
                             } else {
                                 toastr.error(result.msg || 'Error processing credit sale');
                             }
-                            __enable_submit_button(form.find('button[type="submit"]'));
                         },
-                        error: function(xhr) {
-                            __enable_submit_button(form.find('button[type="submit"]'));
+                        error: function() {
+                            $btn.prop('disabled', false);
                             toastr.error('Error processing credit sale');
                         }
                     });
                 }, 300);
-            }
-        });
-    });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCredit);
+        } else {
+            setTimeout(initCredit, 100);
+        }
+    })();
     </script>
     @endif
 @endif
