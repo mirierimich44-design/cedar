@@ -795,7 +795,16 @@
                     <label style="font-weight:600; color:#374151; margin-bottom:8px; display:block;">
                         <i class="fas fa-search" style="color:#0369a1;"></i> Search Customer (Name or Phone)
                     </label>
-                    <select id="cd_customer_search" class="form-control" style="width:100%;"></select>
+                    <div style="position:relative;">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="cd_customer_input" class="form-control"
+                                   placeholder="Type customer name or phone number..."
+                                   autocomplete="off">
+                        </div>
+                        <div id="cd_customer_dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100000; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); max-height:300px; overflow-y:auto; margin-top:4px; padding:4px 0;"></div>
+                    </div>
+                    <small class="text-muted">Type at least 2 characters to search</small>
                 </div>
 
                 {{-- Step 2: Customer card --}}
@@ -1022,7 +1031,11 @@
             cds.mpesaTxnId = null;
             stopTimers();
 
-            $('#cd_customer_search').val(null).trigger('change');
+            if (cdXhr) { cdXhr.abort(); cdXhr = null; }
+            clearTimeout(cdTimer);
+            $cdInput.val('');
+            $cdDrop.hide().empty();
+            cds.customerId = null;
             $('#cd_customer_card, #cd_payment_section, #cd_zero_balance_banner').addClass('hide');
             $('#cd_success_banner').hide();
 
@@ -1067,28 +1080,71 @@
             }
         }
 
-        // ── Select2 customer search ──────────────────────────────────────
-        $('#cd_customer_search').select2({
-            ajax: {
-                url: '/contacts/customers',
-                dataType: 'json',
-                delay: 250,
-                data: function(p) { return { q: p.term, page: p.page }; },
-                processResults: function(d) { return { results: d }; }
-            },
-            placeholder: 'Type name or phone number...',
-            minimumInputLength: 1,
-            allowClear: true,
-            dropdownParent: $('#collect_debt_modal'),
-            templateResult: function(c) {
-                if (!c.id) return c.text;
-                return $('<span><strong>' + c.text + '</strong>' + (c.mobile ? ' — ' + c.mobile : '') + '</span>');
+        // ── Custom customer search (same pattern as Lost Sale / POS search) ──
+        var cdTimer  = null;
+        var cdXhr    = null;
+        var $cdInput = $('#cd_customer_input');
+        var $cdDrop  = $('#cd_customer_dropdown');
+
+        function cdRenderDropdown(customers) {
+            $cdDrop.empty();
+            if (!customers.length) {
+                $cdDrop.append($('<div>').css({ padding:'14px', textAlign:'center', color:'#94a3b8', fontSize:'13px' }).text('No customers found')).show();
+                return;
+            }
+            $.each(customers, function(i, c) {
+                var $row = $('<div>').css({ display:'flex', alignItems:'center', padding:'10px 16px', borderBottom:'1px solid #f1f5f9', cursor:'pointer', background:'#fff' });
+                var $info = $('<div>').css({ flex:'1' });
+                $('<div>').css({ fontWeight:'700', fontSize:'13px', color:'#1e293b' }).text(c.text || c.name || '—').appendTo($info);
+                if (c.mobile) {
+                    $('<div>').css({ fontSize:'11px', color:'#64748b', marginTop:'2px' }).text(c.mobile).appendTo($info);
+                }
+                $row.append($info);
+                $row.on('mouseenter', function() { $(this).css('background','#f0f9ff'); })
+                    .on('mouseleave', function() { $(this).css('background','#fff'); })
+                    .on('click', function() {
+                        $cdDrop.hide().empty();
+                        $cdInput.val(c.text || c.name || '');
+                        cdLoadCustomer(c.id);
+                    });
+                $cdDrop.append($row);
+            });
+            $cdDrop.show();
+        }
+
+        $cdInput.on('input', function() {
+            var term = $(this).val().trim();
+            clearTimeout(cdTimer);
+            if (term.length < 2) {
+                if (cdXhr) { cdXhr.abort(); cdXhr = null; }
+                $cdDrop.hide().empty();
+                return;
+            }
+            cdTimer = setTimeout(function() {
+                if (cdXhr) { cdXhr.abort(); }
+                $cdDrop.show().html('<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
+                cdXhr = $.ajax({
+                    url: '/contacts/customers',
+                    dataType: 'json',
+                    data: { q: term },
+                    success: function(data) {
+                        cdRenderDropdown(Array.isArray(data) ? data : []);
+                    },
+                    error: function(xhr) {
+                        if (xhr.statusText !== 'abort') { $cdDrop.hide().empty(); }
+                    }
+                });
+            }, 300);
+        });
+
+        // Close dropdown when clicking outside
+        $(document).on('click.cdDropdown', function(e) {
+            if (!$(e.target).closest('#cd_customer_input, #cd_customer_dropdown').length) {
+                $cdDrop.hide().empty();
             }
         });
 
-        // ── On customer selected ─────────────────────────────────────────
-        $('#cd_customer_search').on('select2:select', function(e) {
-            var cid = e.params.data.id;
+        function cdLoadCustomer(cid) {
             $.ajax({
                 url: '/contacts/credit-info/' + cid,
                 dataType: 'json',
@@ -1118,13 +1174,7 @@
                 },
                 error: function() { toastr.error('Failed to load customer info'); }
             });
-        });
-
-        $('#cd_customer_search').on('select2:unselect', function() {
-            cds.customerId = null;
-            $('#cd_customer_card, #cd_payment_section, #cd_zero_balance_banner').addClass('hide');
-            $('#cd_success_banner').hide();
-        });
+        }
 
         // ── Full-balance checkbox ────────────────────────────────────────
         $('#cd_full_balance_chk').on('change', function() {
@@ -1326,8 +1376,7 @@
         $('#collect_debt_modal').on('show.bs.modal',   cdReset);
         $('#collect_debt_modal').on('hidden.bs.modal', function() { stopTimers(); });
         $('#collect_debt_modal').on('shown.bs.modal',  function() {
-            // Open the Select2 dropdown so the user can start typing immediately
-            try { $('#cd_customer_search').select2('open'); } catch(e) {}
+            $cdInput.focus();
         });
     }
 
