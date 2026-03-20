@@ -494,14 +494,14 @@
                         </span>
                     </button>
 
-                    {{-- Option 2: Collect Debt --}}
+                    {{-- Option 2: Collect Payment --}}
                     @if(auth()->user()->can('sell.payments'))
                     <button type="button" id="copt_collect_debt" class="btn btn-block" style="padding:14px 16px; background:#f0f9ff; border:2px solid #0369a1; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;">
                         <span style="width:36px;height:36px;background:linear-gradient(135deg,#0369a1,#0ea5e9);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fas fa-hand-holding-usd" style="color:white;font-size:16px;"></i>
                         </span>
                         <span style="text-align:left;">
-                            <strong style="display:block;color:#1e293b;font-size:14px;">Collect Debt</strong>
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Collect Payment</strong>
                             <small style="color:#64748b;font-size:11px;">Receive payment from a customer</small>
                         </span>
                     </button>
@@ -608,10 +608,14 @@
                     return;
                 }
 
-                // Pre-populate if customer already selected
-                setTimeout(function() {
-                    $('#credit_sale_customer_modal').modal('show');
-                }, 300);
+                var customerId = $('#customer_id').val();
+                if (customerId && customerId != '1') {
+                    // Customer already selected on POS — finalize immediately
+                    setTimeout(function() { doCompleteCreditSale(customerId, null); }, 300);
+                } else {
+                    // No customer selected — ask user to pick one
+                    setTimeout(function() { $('#credit_sale_customer_modal').modal('show'); }, 300);
+                }
             });
 
             // ── Option 2: Collect Debt ───────────────────────────────────
@@ -719,7 +723,49 @@
                 }
             });
 
-            // ── Confirm & submit credit sale ─────────────────────────────
+            // ── Shared credit sale submitter ──────────────────────────────
+            function doCompleteCreditSale(customerId, customerName) {
+                var form = $('form#add_pos_sell_form').length ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
+
+                // Ensure customer is set on the POS form
+                if (customerId && $('#customer_id').val() != customerId) {
+                    var opt = new Option(customerName || customerId, customerId, true, true);
+                    $('#customer_id').append(opt).trigger('change');
+                }
+
+                if ($('input[name="payment[0][method]"]').length) {
+                    $('input[name="payment[0][method]"]').val('credit');
+                }
+                $('input#status').val('final');
+
+                var data = form.serialize() + '&is_credit_sale=1';
+                $('#confirm_credit_sale').prop('disabled', true);
+
+                $.ajax({
+                    method: 'POST',
+                    url: form.attr('action'),
+                    dataType: 'json',
+                    data: data,
+                    success: function(result) {
+                        $('#confirm_credit_sale').prop('disabled', false);
+                        if (result.success == 1) {
+                            reset_pos_form();
+                            if (result.receipt && result.receipt.html_content) {
+                                pos_print(result.receipt);
+                            }
+                            toastr.success(result.msg || 'Credit sale completed successfully');
+                        } else {
+                            toastr.error(result.msg || 'Error processing credit sale');
+                        }
+                    },
+                    error: function() {
+                        $('#confirm_credit_sale').prop('disabled', false);
+                        toastr.error('Error processing credit sale');
+                    }
+                });
+            }
+
+            // ── Confirm & submit credit sale (from customer modal) ────────
             $(document).on('click', '#confirm_credit_sale', function() {
                 var customerId   = $('#credit_sale_customer_search').val();
                 var sel2data     = $('#credit_sale_customer_search').select2('data');
@@ -727,47 +773,8 @@
 
                 if (!customerId) { toastr.warning('Please select a customer.'); return; }
 
-                // Set customer on main POS form if not already set
-                if ($('#customer_id').val() != customerId) {
-                    var opt = new Option(customerName, customerId, true, true);
-                    $('#customer_id').append(opt).trigger('change');
-                }
-
                 $('#credit_sale_customer_modal').modal('hide');
-
-                setTimeout(function() {
-                    var form = $('form#add_pos_sell_form').length ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
-                    if ($('input[name="payment[0][method]"]').length) {
-                        $('input[name="payment[0][method]"]').val('credit');
-                    }
-                    $('input#status').val('final');
-
-                    var data = form.serialize() + '&is_credit_sale=1';
-                    var $btn = $('#confirm_credit_sale').prop('disabled', true);
-
-                    $.ajax({
-                        method: 'POST',
-                        url: form.attr('action'),
-                        dataType: 'json',
-                        data: data,
-                        success: function(result) {
-                            $btn.prop('disabled', false);
-                            if (result.success == 1) {
-                                reset_pos_form();
-                                if (result.receipt && result.receipt.html_content) {
-                                    pos_print(result.receipt);
-                                }
-                                toastr.success(result.msg || 'Credit sale completed successfully');
-                            } else {
-                                toastr.error(result.msg || 'Error processing credit sale');
-                            }
-                        },
-                        error: function() {
-                            $btn.prop('disabled', false);
-                            toastr.error('Error processing credit sale');
-                        }
-                    });
-                }, 300);
+                setTimeout(function() { doCompleteCreditSale(customerId, customerName); }, 300);
             });
         }
 
@@ -786,7 +793,7 @@
      ════════════════════════════════════════════════════════════════ --}}
 @if(auth()->user()->can('sell.payments'))
 <div class="modal fade" id="collect_debt_modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-md" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content" style="border-radius:12px; overflow:hidden;">
 
             {{-- Header --}}
@@ -795,7 +802,7 @@
                     <span>&times;</span>
                 </button>
                 <h4 class="modal-title" style="color:white; font-weight:700; font-size:20px;">
-                    <i class="fas fa-hand-holding-usd"></i> Collect Debt
+                    <i class="fas fa-hand-holding-usd"></i> Collect Payment
                 </h4>
             </div>
 
@@ -1081,11 +1088,16 @@
         // ── Select2 customer search ──────────────────────────────────────
         $('#cd_customer_search').select2({
             ajax: {
-                url: '/contacts/customers',
+                url: '{{ url("/contacts/customers") }}',
                 dataType: 'json',
-                delay: 250,
-                data: function(p) { return { q: p.term, page: p.page }; },
-                processResults: function(d) { return { results: d }; }
+                delay: 300,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                data: function(p) { return { q: p.term }; },
+                processResults: function(d) {
+                    var arr = Array.isArray(d) ? d : (typeof d === 'string' ? JSON.parse(d) : []);
+                    return { results: arr };
+                },
+                error: function() { toastr.error('Customer search failed'); }
             },
             placeholder: 'Type name or phone number...',
             minimumInputLength: 1,
