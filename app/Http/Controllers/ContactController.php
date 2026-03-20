@@ -1696,14 +1696,28 @@ class ContactController extends Controller
             + max(0, ($sell_data->opening_balance ?? 0) - ($sell_data->opening_balance_paid ?? 0))
         );
 
+        // Aging: oldest unpaid/partial sell transaction date
+        $oldest_unpaid_date = DB::table('transactions as t')
+            ->where('t.contact_id', $contact_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->whereIn('t.payment_status', ['due', 'partial'])
+            ->min('t.transaction_date');
+
+        $days_not_paid = null;
+        if ($oldest_unpaid_date) {
+            $days_not_paid = (int) \Carbon\Carbon::parse($oldest_unpaid_date)->diffInDays(\Carbon\Carbon::now());
+        }
+
         return response()->json([
-            'id'            => $contact->id,
-            'name'          => $contact->name,
-            'mobile'        => $contact->mobile ?? '',
-            'credit_limit'  => $contact->credit_limit,
-            'total_due'     => round($due, 4),
-            'sell_due'      => round($sell_due, 4),
+            'id'                 => $contact->id,
+            'name'               => $contact->name,
+            'mobile'             => $contact->mobile ?? '',
+            'credit_limit'       => $contact->credit_limit,
+            'total_due'          => round($due, 4),
+            'sell_due'           => round($sell_due, 4),
             'sell_due_formatted' => $this->transactionUtil->num_f($sell_due, true),
+            'days_not_paid'      => $days_not_paid,
         ]);
     }
 

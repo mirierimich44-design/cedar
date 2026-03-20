@@ -55,13 +55,40 @@
         @endif
     @endif
 
-    {{-- Credit Sale --}}
+    {{-- Credit (Dropdown: Settle Credit / Complete Credit Sale / Add Customer) --}}
     @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
         @if(empty($pos_settings['disable_credit_sale_button']))
-        <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" data-toggle="modal" data-target="#credit_sale_customer_modal" title="@lang('lang_v1.credit_sale')">
-            <i class="fas fa-handshake"></i>
-            <span class="btn-text">Credit</span>
-        </button>
+        <div class="dropdown pos-credit-dropdown" style="display:inline-block;position:relative;">
+            <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-dropdown-toggle"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                title="Credit Options">
+                <i class="fas fa-handshake"></i>
+                <span class="btn-text">Credit <i class="fas fa-caret-down" style="font-size:9px;vertical-align:middle;"></i></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="pos-credit-dropdown-toggle"
+                style="min-width:190px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);border:1px solid #e2e8f0;padding:5px 0;z-index:99999;">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#settle_credit_modal"
+                        style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#0369a1;font-weight:600;font-size:13px;">
+                        <i class="fas fa-coins" style="width:16px;color:#0369a1;"></i> Settle Credit
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#credit_sale_customer_modal"
+                        style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#7c3aed;font-weight:600;font-size:13px;">
+                        <i class="fas fa-handshake" style="width:16px;color:#7c3aed;"></i> Complete Credit Sale
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="btn-modal"
+                        data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}"
+                        data-container=".contact_modal"
+                        style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#059669;font-weight:600;font-size:13px;">
+                        <i class="fas fa-user-plus" style="width:16px;color:#059669;"></i> Add Customer
+                    </a>
+                </li>
+            </ul>
+        </div>
         @endif
     @endif
 
@@ -474,6 +501,263 @@
 @endif
 
 @include('sale_pos.partials.edit_shipping_modal')
+
+{{-- Settle Credit Modal --}}
+@if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+    @if(empty($pos_settings['disable_credit_sale_button']))
+    <div class="modal fade" id="settle_credit_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content" style="border-radius:12px;overflow:hidden;">
+                <div class="modal-header" style="background:linear-gradient(135deg,#0369a1 0%,#0ea5e9 100%);border:none;padding:20px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1;font-size:28px;text-shadow:none;">
+                        <span>&times;</span>
+                    </button>
+                    <h4 class="modal-title" style="color:white;font-weight:700;font-size:20px;">
+                        <i class="fas fa-coins"></i> Settle Credit
+                    </h4>
+                </div>
+                <div class="modal-body" style="padding:25px;">
+
+                    {{-- Customer Search --}}
+                    <div class="form-group">
+                        <label style="font-weight:600;color:#374151;margin-bottom:8px;display:block;">
+                            <i class="fas fa-search" style="color:#0369a1;"></i> Search Customer (Name or Phone)
+                        </label>
+                        <select id="settle_credit_customer_search" class="form-control" style="width:100%;"></select>
+                    </div>
+
+                    {{-- Customer Details + Payment --}}
+                    <div id="settle_credit_details" class="hide">
+
+                        {{-- Info Card --}}
+                        <div style="padding:15px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;margin-bottom:15px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                <span style="color:#64748b;font-size:13px;">Customer</span>
+                                <strong id="sc_customer_name" style="color:#1e293b;"></strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                <span style="color:#64748b;font-size:13px;">Phone</span>
+                                <strong id="sc_customer_phone" style="color:#1e293b;"></strong>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                <span style="color:#64748b;font-size:13px;">Days Not Paid</span>
+                                <span id="sc_days_not_paid_wrap">
+                                    <strong id="sc_days_not_paid" style="color:#b45309;"></strong>
+                                </span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #bae6fd;">
+                                <span style="color:#64748b;font-size:13px;font-weight:600;">Amount Due</span>
+                                <strong id="sc_amount_due" style="color:#dc2626;font-size:18px;"></strong>
+                            </div>
+                        </div>
+
+                        {{-- Payment Method Tabs --}}
+                        <label style="font-weight:600;color:#374151;margin-bottom:8px;display:block;">Payment Method</label>
+                        <ul class="nav nav-pills" id="sc_payment_tabs" style="margin-bottom:15px;">
+                            <li class="active">
+                                <a href="#sc_cash_tab" data-toggle="tab" style="border-radius:6px;padding:8px 18px;font-weight:600;">
+                                    <i class="fas fa-money-bill-wave"></i> Cash
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#sc_mpesa_tab" data-toggle="tab" style="border-radius:6px;padding:8px 18px;font-weight:600;">
+                                    <i class="fas fa-mobile-alt"></i> M-Pesa
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            {{-- Cash Tab --}}
+                            <div class="tab-pane active" id="sc_cash_tab">
+                                <div class="form-group">
+                                    <label style="font-weight:600;color:#374151;font-size:13px;">Amount to Pay <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fas fa-coins"></i></span>
+                                        <input type="number" id="sc_cash_amount" class="form-control"
+                                            step="0.01" min="0.01" placeholder="Enter amount...">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:600;color:#374151;font-size:13px;">Note</label>
+                                    <input type="text" id="sc_cash_note" class="form-control" placeholder="Optional note...">
+                                </div>
+                            </div>
+
+                            {{-- M-Pesa Tab --}}
+                            <div class="tab-pane" id="sc_mpesa_tab">
+                                <div class="form-group">
+                                    <label style="font-weight:600;color:#374151;font-size:13px;">M-Pesa Reference No.</label>
+                                    <input type="text" id="sc_mpesa_ref" class="form-control"
+                                        placeholder="e.g. QJ1234XYZ">
+                                    <small class="text-muted">Enter the M-Pesa transaction code</small>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:600;color:#374151;font-size:13px;">Amount Paid <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fas fa-coins"></i></span>
+                                        <input type="number" id="sc_mpesa_amount" class="form-control"
+                                            step="0.01" min="0.01" placeholder="Enter amount...">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:600;color:#374151;font-size:13px;">Note</label>
+                                    <input type="text" id="sc_mpesa_note" class="form-control" placeholder="Optional note...">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>{{-- /settle_credit_details --}}
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #e2e8f0;padding:15px 25px;background:#f8fafc;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:6px;">Cancel</button>
+                    <button type="button" id="sc_pay_btn" class="btn btn-primary" disabled
+                        style="background:linear-gradient(135deg,#0369a1 0%,#0ea5e9 100%);border:none;border-radius:6px;padding:10px 25px;">
+                        <i class="fas fa-check"></i> Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+
+        // ── Settle Credit: Initialize Select2 ────────────────────────────
+        $('#settle_credit_customer_search').select2({
+            ajax: {
+                url: '/contacts/customers',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) { return { q: params.term, page: params.page }; },
+                processResults: function(data) { return { results: data }; }
+            },
+            placeholder: 'Type customer name or phone number...',
+            minimumInputLength: 1,
+            allowClear: true,
+            dropdownParent: $('#settle_credit_modal'),
+            templateResult: function(c) {
+                if (!c.id) return c.text;
+                var ph = c.mobile ? ' &mdash; ' + c.mobile : '';
+                return $('<span>').append($('<strong>').text(c.text)).append(ph);
+            }
+        });
+
+        // ── On customer select: fetch credit info ─────────────────────────
+        $('#settle_credit_customer_search').on('select2:select', function(e) {
+            var customerId = e.params.data.id;
+            $('#sc_pay_btn').prop('disabled', true);
+            $('#settle_credit_details').addClass('hide');
+
+            $.ajax({
+                url: '/contacts/credit-info/' + customerId,
+                dataType: 'json',
+                success: function(data) {
+                    $('#sc_customer_name').text(data.name || '-');
+                    $('#sc_customer_phone').text(data.mobile || '-');
+
+                    if (data.days_not_paid !== null && data.days_not_paid !== undefined) {
+                        $('#sc_days_not_paid').html(data.days_not_paid + ' day' + (data.days_not_paid == 1 ? '' : 's'));
+                    } else {
+                        $('#sc_days_not_paid').html('<span class="text-muted">—</span>');
+                    }
+
+                    var due = parseFloat(data.sell_due || 0);
+                    $('#sc_amount_due').text(
+                        typeof __currency_trans_from_en === 'function'
+                            ? __currency_trans_from_en(due)
+                            : due.toFixed(2)
+                    );
+
+                    // Pre-fill amounts
+                    $('#sc_cash_amount').val(due > 0 ? due.toFixed(2) : '');
+                    $('#sc_mpesa_amount').val(due > 0 ? due.toFixed(2) : '');
+                    $('#settle_credit_modal').data('contact_id', customerId);
+
+                    $('#settle_credit_details').removeClass('hide');
+                    $('#sc_pay_btn').prop('disabled', due <= 0);
+                },
+                error: function() {
+                    toastr.error('Could not load customer credit details.');
+                }
+            });
+        });
+
+        // ── Clear on customer deselect ────────────────────────────────────
+        $('#settle_credit_customer_search').on('select2:unselect', function() {
+            $('#settle_credit_details').addClass('hide');
+            $('#sc_pay_btn').prop('disabled', true);
+        });
+
+        // ── Record Payment ────────────────────────────────────────────────
+        $('#sc_pay_btn').on('click', function() {
+            var contactId  = $('#settle_credit_modal').data('contact_id');
+            var activeTab  = $('#sc_payment_tabs li.active a').attr('href');
+            var isCash     = (activeTab === '#sc_cash_tab');
+
+            var amount = isCash
+                ? parseFloat($('#sc_cash_amount').val())
+                : parseFloat($('#sc_mpesa_amount').val());
+            var note   = isCash ? $('#sc_cash_note').val() : $('#sc_mpesa_note').val();
+            var method = isCash ? 'cash' : 'mpesa';
+            var mpesaRef = !isCash ? $('#sc_mpesa_ref').val().trim() : '';
+
+            if (!contactId) { toastr.error('Please select a customer.'); return; }
+            if (!amount || amount <= 0) { toastr.error('Please enter a valid amount.'); return; }
+            if (!isCash && !mpesaRef) { toastr.warning('M-Pesa reference is optional but recommended.'); }
+
+            var $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+
+            $.ajax({
+                url: '/payments/pay-contact-due',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    _token:           '{{ csrf_token() }}',
+                    contact_id:       contactId,
+                    amount:           amount,
+                    method:           method,
+                    note:             note,
+                    due_payment_type: 'sell',
+                    card_transaction_number: mpesaRef || undefined
+                },
+                success: function(result) {
+                    if (result.success) {
+                        toastr.success('Payment recorded successfully!');
+                        $('#settle_credit_modal').modal('hide');
+                    } else {
+                        toastr.error(result.msg || 'Error recording payment.');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error recording payment. Please try again.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html('<i class="fas fa-check"></i> Record Payment');
+                }
+            });
+        });
+
+        // ── Reset modal on close ──────────────────────────────────────────
+        $('#settle_credit_modal').on('hidden.bs.modal', function() {
+            $('#settle_credit_customer_search').val(null).trigger('change');
+            $('#settle_credit_details').addClass('hide');
+            $('#sc_pay_btn').prop('disabled', true);
+            $('#sc_cash_amount, #sc_cash_note, #sc_mpesa_ref, #sc_mpesa_amount, #sc_mpesa_note').val('');
+            // reset to Cash tab
+            $('#sc_payment_tabs li').removeClass('active');
+            $('#sc_payment_tabs li:first').addClass('active');
+            $('#sc_cash_tab').addClass('active');
+            $('#sc_mpesa_tab').removeClass('active');
+        });
+
+        $('#settle_credit_modal').on('shown.bs.modal', function() {
+            setTimeout(function() { $('#settle_credit_customer_search').select2('open'); }, 200);
+        });
+
+    });
+    </script>
+    @endif
+@endif
 
 {{-- Credit Sale Customer Search Modal --}}
 @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
