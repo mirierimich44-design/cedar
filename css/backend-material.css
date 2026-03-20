@@ -1,0 +1,499 @@
+/* ============================================================
+   MichPOS - Global Backend Material Design v2.0
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Primary Design Tokens (Matching POS Material) */
+    --pos-primary: #4F46E5;
+    --pos-primary-light: #818CF8;
+    --pos-primary-dark: #3730A3;
+    --pos-primary-subtle: #EEF2FF;
+
+    --pos-success: #10B981;
+    --pos-success-light: #D1FAE5;
+    --pos-warning: #F59E0B;
+    --pos-warning-light: #FEF3C7;
+    --pos-error: #EF4444;
+    --pos-error-light: #FEE2E2;
+
+    --pos-bg: #F8FAFC;
+    --pos-surface: #FFFFFF;
+    --pos-border: #E2E8F0;
+    --pos-text: #1E293B;
+    --pos-text-secondary: #64748B;
+
+    --pos-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --pos-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --pos-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+
+    --pos-radius-md: 10px;
+    --pos-radius-lg: 14px;
+}
+
+/* Global Transitions */
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.backend-material {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: var(--pos-bg) !important;
+    color: var(--pos-text) !important;
+}
+
+/* ============================================================
+   BOXES -> MATERIAL CARDS
+   ============================================================ */
+.box {
+    border: none !important;
+    box-shadow: var(--pos-shadow-md) !important;
+    border-radius: var(--pos-radius-lg) !important;
+    background: var(--pos-surface) !important;
+    margin-bottom: 24px !important;
+    overflow: hidden !important;
+}
+
+.box-header {
+    background: transparent !important;
+    border-bottom: 1.5px solid var(--pos-border) !important;
+    padding: 16px 20px !important;
+}
+
+.box-title {
+    font-weight: 700 !important;
+    color: var(--pos-text) !important;
+    font-size: 16px !important;
+}
+
+.box-body {
+    padding: 24px !important;
+}
+
+.box-footer {
+    background: #FAFBFC !important;
+    border-top: 1.5px solid var(--pos-border) !important;
+    padding: 16px 24px !important;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    border-radius: var(--pos-radius-md) !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+    box-shadow: var(--pos-shadow-sm) !important;
+    transition: all 0.2s ease !important;
+    text-transform: none !important;
+}
+
+.btn-primary {
+    background: var(--pos-primary) !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background: var(--pos-primary-dark) !important;
+    box-shadow: var(--pos-shadow-md) !important;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--pos-success) !important;
+    border: none !important;
+}
+
+.btn-danger {
+    background: var(--pos-error) !important;
+    border: none !important;
+}
+
+.btn-warning {
+    background: var(--pos-warning) !important;
+    border: none !important;
+}
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+.form-control {
+    border-radius: var(--pos-radius-md) !important;
+    border: 1.5px solid var(--pos-border) !important;
+    height: 42px !important;
+    padding: 0 12px !important;
+    box-shadow: none !important;
+}
+
+.form-control:focus {
+    border-color: var(--pos-primary) !important;
+    box-shadow: 0 0 0 3px var(--pos-primary-subtle) !important;
+}
+
+label {
+    font-weight: 600 !important;
+    color: var(--pos-text-secondary) !important;
+    margin-bottom: 6px !important;
+}
+
+/* ============================================================
+   TABLES - Excel Spreadsheet Style
+   ============================================================ */
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #b0b0b0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.table-material {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #b0b0b0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #e8f5e9 !important;
+    border: 1px solid #a5d6a7 !important;
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    padding: 8px 12px !important;
+}
+
+.table tbody tr:nth-child(odd) {
+    background: #ffffff !important;
+}
+
+.table tbody tr:nth-child(even) {
+    background: #c8e6c9 !important;
+}
+
+.table tbody tr:hover {
+    background: #a5d6a7 !important;
+}
+
+.table td {
+    vertical-align: middle !important;
+    border: 1px solid #d1d5db !important;
+    color: var(--pos-text) !important;
+    padding: 8px 12px !important;
+}
+
+/* ============================================================
+   DASHBOARD & TW OVERRIDES
+   ============================================================ */
+.backend-material .tw-bg-white.tw-rounded-xl {
+    box-shadow: var(--pos-shadow-md) !important;
+    border: 1.5px solid var(--pos-border) !important;
+    border-radius: var(--pos-radius-lg) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.backend-material .tw-bg-white.tw-rounded-xl:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--pos-shadow-lg) !important;
+    border-color: var(--pos-primary-light) !important;
+}
+
+.backend-material .tw-from-primary-800 {
+    background: linear-gradient(135deg, var(--pos-primary-dark) 0%, var(--pos-primary) 100%) !important;
+}
+
+.backend-material h1.tw-text-white {
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+}
+
+.backend-material .tw-bg-sky-100 {
+    background-color: #E0F2FE !important;
+}
+
+.backend-material .tw-text-sky-500 {
+    color: #0EA5E9 !important;
+}
+
+.backend-material .tw-bg-green-100 {
+    background-color: #DCFCE7 !important;
+}
+
+.backend-material .tw-text-green-500 {
+    color: #10B981 !important;
+}
+
+.backend-material .tw-bg-yellow-100 {
+    background-color: #FEF3C7 !important;
+}
+
+.backend-material .tw-text-yellow-500 {
+    color: #F59E0B !important;
+}
+
+.backend-material .tw-bg-red-100 {
+    background-color: #FEE2E2 !important;
+}
+
+.backend-material .tw-text-red-500 {
+    color: #EF4444 !important;
+}
+
+/* Filter button */
+#dashboard_date_filter {
+    border: 1.5px solid var(--pos-border) !important;
+    font-weight: 700 !important;
+    color: var(--pos-text) !important;
+}
+
+#dashboard_date_filter:hover {
+    border-color: var(--pos-primary) !important;
+    color: var(--pos-primary) !important;
+    background: var(--pos-primary-subtle) !important;
+}
+
+/* ============================================================
+   SIDEBAR & HEADER override
+   ============================================================ */
+.backend-material .thetop>div:first-child {
+    background: white !important;
+    border-bottom: 1.5px solid var(--pos-border) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Header Buttons styling */
+.backend-material .thetop button,
+.backend-material .thetop a.sm\:tw-inline-flex {
+    background: var(--pos-bg) !important;
+    color: var(--pos-text) !important;
+    border: 1.5px solid var(--pos-border) !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+    border-radius: var(--pos-radius-md) !important;
+}
+
+.backend-material .thetop button:hover,
+.backend-material .thetop a.sm\:tw-inline-flex:hover {
+    background: var(--pos-primary-subtle) !important;
+    border-color: var(--pos-primary-light) !important;
+    color: var(--pos-primary) !important;
+}
+
+.backend-material .thetop button i,
+.backend-material .thetop button svg,
+.backend-material .thetop a.sm\:tw-inline-flex svg {
+    color: var(--pos-text-secondary) !important;
+}
+
+.backend-material .thetop button:hover i,
+.backend-material .thetop button:hover svg,
+.backend-material .thetop a.sm\:tw-inline-flex:hover svg {
+    color: var(--pos-primary) !important;
+}
+
+.backend-material .side-bar {
+    background: white !important;
+    border-right: 1.5px solid var(--pos-border) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02) !important;
+}
+
+.backend-material .side-bar a {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.backend-material .side-bar .active-pill {
+    background: var(--pos-primary-subtle) !important;
+    color: var(--pos-primary) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1) !important;
+}
+
+.backend-material .side-bar i,
+.backend-material .side-bar svg {
+    font-size: 1.25rem !important;
+    transition: transform 0.2s ease !important;
+}
+
+.backend-material .side-bar a:hover i,
+.backend-material .side-bar a:hover svg {
+    transform: scale(1.1) !important;
+}
+
+.backend-material a.tw-items-center.tw-justify-start.tw-bg-white {
+    background: white !important;
+}
+
+/* ============================================================
+   SELECT2 & PLUGINS
+   ============================================================ */
+.select2-container--default .select2-selection--single {
+    border-radius: var(--pos-radius-md) !important;
+    border: 1.5px solid var(--pos-border) !important;
+    height: 42px !important;
+    padding-top: 6px !important;
+    background: var(--pos-surface) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+}
+
+.select2-dropdown {
+    border: none !important;
+    box-shadow: var(--pos-shadow-lg) !important;
+    border-radius: var(--pos-radius-md) !important;
+    overflow: hidden !important;
+}
+
+/* Date Range Picker */
+.daterangepicker {
+    border: none !important;
+    box-shadow: var(--pos-shadow-lg) !important;
+    border-radius: var(--pos-radius-lg) !important;
+    padding: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.daterangepicker .calendar-table {
+    border: none !important;
+}
+
+.daterangepicker td.active,
+.daterangepicker td.active:hover {
+    background-color: var(--pos-primary) !important;
+    border-radius: var(--pos-radius-sm) !important;
+}
+
+/* Pagination */
+.pagination>.active>a,
+.pagination>.active>a:focus,
+.pagination>.active>a:hover,
+.pagination>.active>span,
+.pagination>.active>span:focus,
+.pagination>.active>span:hover {
+    background-color: var(--pos-primary) !important;
+    border-color: var(--pos-primary) !important;
+}
+
+.pagination>li>a,
+.pagination>li>span {
+    border-radius: var(--pos-radius-sm) !important;
+    margin: 0 2px !important;
+    color: var(--pos-text-secondary) !important;
+    border: 1.5px solid var(--pos-border) !important;
+}
+
+/* Modals */
+.modal-content {
+    border-radius: var(--pos-radius-lg) !important;
+    box-shadow: var(--pos-shadow-lg) !important;
+    border: none !important;
+}
+
+.modal-header {
+    border-bottom: 1.5px solid var(--pos-border) !important;
+    padding: 20px 24px !important;
+}
+
+.modal-footer {
+    border-top: 1.5px solid var(--pos-border) !important;
+    padding: 16px 24px !important;
+    background: #FAFBFC !important;
+}
+
+/* ============================================================
+   MATERIAL INPUT COMPONENTS (Global)
+   ============================================================ */
+.material-input-group {
+    margin-bottom: 20px !important;
+}
+
+.material-input-group label {
+    display: block !important;
+    font-weight: 700 !important;
+    margin-bottom: 8px !important;
+    color: var(--pos-text) !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+}
+
+.material-input-wrapper {
+    display: flex !important;
+    align-items: stretch !important;
+    border: 1.5px solid var(--pos-border) !important;
+    border-radius: var(--pos-radius-md) !important;
+    transition: all 0.2s ease !important;
+    overflow: hidden !important;
+    background: var(--pos-surface) !important;
+    min-height: 40px !important;
+}
+
+.material-input-wrapper:focus-within {
+    border-color: var(--pos-primary) !important;
+    box-shadow: 0 0 0 3px var(--pos-primary-subtle) !important;
+}
+
+.material-input-wrapper .input-prefix {
+    background: #F1F5F9 !important;
+    padding: 0 12px !important;
+    font-weight: 700 !important;
+    color: var(--pos-text-secondary) !important;
+    border-right: 1.5px solid var(--pos-border) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+}
+
+.material-input-wrapper input,
+.material-pricing-table input,
+.add-product-price-table input {
+    border: none !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    outline: none !important;
+    background: transparent !important;
+    height: 100% !important;
+    text-align: center !important;
+}
+
+.material-input-wrapper input:focus {
+    box-shadow: none !important;
+}
+
+/* ============================================================
+   DASHBOARD STATS
+   ============================================================ */
+.info-box {
+    box-shadow: var(--pos-shadow-md) !important;
+    border-radius: var(--pos-radius-lg) !important;
+    border: none !important;
+    padding: 12px !important;
+}
+
+.info-box-icon {
+    border-radius: var(--pos-radius-md) !important;
+    height: 60px !important;
+    width: 60px !important;
+    line-height: 60px !important;
+}
+
+.info-box-content {
+    margin-left: 70px !important;
+}
+
+.info-box-text {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: var(--pos-text-secondary) !important;
+}
+
+.info-box-number {
+    font-weight: 700 !important;
+    font-size: 20px !important;
+}

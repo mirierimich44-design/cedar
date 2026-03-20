@@ -1,0 +1,170 @@
+/*
+ * MichPOS Modern Minimal Design System
+ * Focus: Whitespace, 12px Corners, Soft Shadows, Glassmorphism
+ */
+
+:root {
+    --primary-modern: #6366f1;
+    --primary-modern-hover: #4f46e5;
+    --success-modern: #10b981;
+    --danger-modern: #f43f5e;
+    --warning-modern: #f59e0b;
+    --bg-modern: #f8fafc;
+    --surface-modern: #ffffff;
+    --text-modern: #0f172a;
+    --text-muted-modern: #64748b;
+    --radius-modern: 12px;
+    --shadow-modern: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-modern-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Base Overrides */
+body {
+    font-family: 'Inter', sans-serif !important;
+    background-color: var(--bg-modern) !important;
+    color: var(--text-modern) !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--text-modern) !important;
+}
+
+/* Premium Card / Widget Style */
+.box,
+.card,
+.widget,
+.panel,
+.tw-shadow-sm {
+    border: none !important;
+    border-radius: var(--radius-modern) !important;
+    box-shadow: var(--shadow-modern) !important;
+    background: var(--surface-modern) !important;
+    overflow: hidden;
+}
+
+.box-header,
+.card-header {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* Modern Button System */
+.btn,
+button,
+.tw-dw-btn {
+    border-radius: var(--radius-modern) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-modern) !important;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background-color: var(--primary-modern) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-modern-hover) !important;
+}
+
+.btn-success {
+    background-color: var(--success-modern) !important;
+}
+
+.btn-danger {
+    background-color: var(--danger-modern) !important;
+}
+
+/* Form Minimalist Styling */
+.form-control,
+input,
+select,
+textarea {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    /* Slightly smaller than cards */
+    padding: 0.6rem 0.75rem !important;
+    transition: all 0.2s !important;
+}
+
+.form-control:focus {
+    border-color: var(--primary-modern) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+/* POS Specific Cleanup */
+.pos-header {
+    background: transparent !important;
+}
+
+.pos-header>div {
+    border-radius: var(--radius-modern) !important;
+}
+
+/* Tables - Excel Spreadsheet Style */
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #b0b0b0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #e8f5e9 !important;
+    border: 1px solid #a5d6a7 !important;
+    color: #1a1a1a !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-weight: 700 !important;
+    padding: 0.6rem 0.75rem !important;
+}
+
+.table tbody td {
+    border: 1px solid #d1d5db !important;
+    padding: 0.5rem 0.75rem !important;
+    vertical-align: middle !important;
+}
+
+.table tbody tr:nth-child(odd) td {
+    background: #ffffff !important;
+}
+
+.table tbody tr:nth-child(even) td {
+    background: #c8e6c9 !important;
+}
+
+.table tbody tr:hover td {
+    background: #a5d6a7 !important;
+}
+
+.table tbody tr td:first-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.table tbody tr td:last-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}

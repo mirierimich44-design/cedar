@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:/Users/MICH/desktop/cedar -type f -name *.php -o -name *.html)",
+      "Bash(find C:/Users/MICH/desktop/cedar -name *.sql -o -name *migration*.php)",
+      "Bash(find C:/Users/MICH/desktop/cedar -maxdepth 2 -type f \\\\\\(-name index.* -o -name *.html \\\\\\))",
+      "Bash(find C:/Users/MICH/desktop/cedar -maxdepth 3 -name *.php -path */views/*)",
+      "Bash(find C:/Users/MICH/desktop/cedar -name *.php -path */database/*)",
+      "Bash(find C:/Users/MICH/desktop/cedar -name *.sql)",
+      "Bash(xargs grep:*)",
+      "Bash(find . -type f -name *[Ss]ell* -o -name *[Pp]ayment* -o -name *[Cc]redit* -o -name *[Tt]ransaction*)",
+      "Bash(grep -E \"\\\\.\\(php|js\\)$\")",
+      "Bash(find resources/views -name *sell* -o -name *payment* -o -name *credit*)",
+      "Bash(grep -r \"credit_limit\\\\|balance\" app/*.php)",
+      "Bash(find C:/Users/MICH/Desktop/cedar/routes -name *.php)"
+    ]
+  }
+}

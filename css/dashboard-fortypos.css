@@ -1,0 +1,256 @@
+/**
+ * FortyPOS-style Dashboard Aesthetic
+ * Clean, modern, light theme inspired by FortyPOS
+ */
+
+/* Dashboard Container */
+.dashboard-fortypos .content-wrapper {
+    background: #f8f9fa !important;
+    min-height: 100vh;
+}
+
+/* Override content header to be cleaner */
+.dashboard-fortypos .content-header {
+    background: transparent;
+    padding: 15px 20px;
+}
+
+/* Main stat cards - make them pop more */
+.dashboard-fortypos .tw-bg-white {
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid #f0f0f0 !important;
+    transition: all 0.3s ease !important;
+}
+
+.dashboard-fortypos .tw-bg-white:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Icon circles - FortyPOS style */
+.dashboard-fortypos .tw-rounded-full {
+    border-radius: 12px !important;
+}
+
+/* Stat card icon backgrounds */
+.dashboard-fortypos .tw-bg-sky-100 {
+    background: #e3f2fd !important;
+}
+
+.dashboard-fortypos .tw-bg-green-100 {
+    background: #e8f5e9 !important;
+}
+
+.dashboard-fortypos .tw-bg-purple-100 {
+    background: #f3e5f5 !important;
+}
+
+.dashboard-fortypos .tw-bg-red-100 {
+    background: #ffebee !important;
+}
+
+.dashboard-fortypos .tw-bg-yellow-100 {
+    background: #fff8e1 !important;
+}
+
+.dashboard-fortypos .tw-bg-orange-100 {
+    background: #fff3e0 !important;
+}
+
+/* Text styling */
+.dashboard-fortypos .tw-text-gray-500 {
+    color: #6b7280 !important;
+    font-size: 13px !important;
+}
+
+.dashboard-fortypos .tw-text-gray-900 {
+    color: #1a1a2e !important;
+    font-weight: 700 !important;
+}
+
+/* Chart card styling */
+.dashboard-fortypos .tw-border-gray-200.tw-border-dashed {
+    border: none !important;
+    background: #ffffff !important;
+}
+
+/* Live ticker styling */
+.dashboard-fortypos .tw-bg-white\/10 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 12px !important;
+    border: none !important;
+}
+
+/* Table styling */
+.dashboard-fortypos .table {
+    margin-bottom: 0;
+}
+
+.dashboard-fortypos .table thead th {
+    background: #f8f9fa !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 12px;
+}
+
+.dashboard-fortypos .table tbody td {
+    font-size: 13px;
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dashboard-fortypos .table-hover tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Box styling */
+.dashboard-fortypos .box {
+    border-radius: 16px !important;
+    border: 1px solid #f0f0f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dashboard-fortypos .box-header {
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 16px 20px !important;
+}
+
+.dashboard-fortypos .box-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #1a1a2e !important;
+}
+
+/* DataTables overrides */
+.dashboard-fortypos .dataTables_wrapper {
+    font-size: 13px;
+}
+
+.dashboard-fortypos .dataTables_filter input {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    padding: 6px 12px;
+}
+
+.dashboard-fortypos .dataTables_length select {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    padding: 4px 8px;
+}
+
+.dashboard-fortypos .dataTables_paginate .paginate_button {
+    border-radius: 6px !important;
+}
+
+/* Select2 overrides */
+.dashboard-fortypos .select2-container--default .select2-selection--single {
+    border-radius: 8px !important;
+    border-color: #e0e0e0 !important;
+    height: 38px !important;
+}
+
+.dashboard-fortypos .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+}
+
+.dashboard-fortypos .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}
+
+/* Buttons */
+.dashboard-fortypos .btn-date-filter,
+.dashboard-fortypos button[id="dashboard_date_filter"] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    color: #333 !important;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dashboard-fortypos .btn-date-filter:hover,
+.dashboard-fortypos button[id="dashboard_date_filter"]:hover {
+    background: #f5f5f5 !important;
+    border-color: #ccc !important;
+}
+
+/* Gradient header - FortyPOS uses lighter header */
+.dashboard-fortypos .tw-bg-gradient-to-r {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Card values - larger and bolder */
+.dashboard-fortypos .total_sell,
+.dashboard-fortypos .net,
+.dashboard-fortypos .total_purchase,
+.dashboard-fortypos .invoice_due,
+.dashboard-fortypos .purchase_due,
+.dashboard-fortypos .total_expense,
+.dashboard-fortypos .total_sell_return,
+.dashboard-fortypos .total_purchase_return {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+/* Card grid - better spacing */
+.dashboard-fortypos .tw-grid {
+    gap: 20px !important;
+}
+
+/* Ring/border removal for cleaner look */
+.dashboard-fortypos .tw-ring-1,
+.dashboard-fortypos .tw-ring-gray-200 {
+    --tw-ring-shadow: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-fortypos .content-wrapper {
+        padding: 15px !important;
+    }
+
+    .dashboard-fortypos .tw-grid {
+        gap: 15px !important;
+    }
+
+    .dashboard-fortypos .total_sell,
+    .dashboard-fortypos .net,
+    .dashboard-fortypos .total_purchase,
+    .dashboard-fortypos .invoice_due,
+    .dashboard-fortypos .purchase_due,
+    .dashboard-fortypos .total_expense {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-fortypos .tw-p-4 {
+        padding: 12px !important;
+    }
+
+    .dashboard-fortypos .total_sell,
+    .dashboard-fortypos .net,
+    .dashboard-fortypos .total_purchase,
+    .dashboard-fortypos .invoice_due,
+    .dashboard-fortypos .purchase_due,
+    .dashboard-fortypos .total_expense {
+        font-size: 16px !important;
+    }
+
+    .dashboard-fortypos .tw-text-gray-500 {
+        font-size: 11px !important;
+    }
+}
