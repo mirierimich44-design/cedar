@@ -724,45 +724,27 @@
             });
 
             // ── Shared credit sale submitter ──────────────────────────────
+            // Uses the existing POS submit flow (pos_form_obj / jQuery validate)
+            // exactly like .pos-express-finalize[data-pay_method="credit_sale"] does.
             function doCompleteCreditSale(customerId, customerName) {
-                var form = $('form#add_pos_sell_form').length ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
+                var form = $('form#add_pos_sell_form').length
+                    ? $('form#add_pos_sell_form')
+                    : $('form#edit_pos_sell_form');
 
-                // Ensure customer is set on the POS form
+                // Ensure the customer is set on the main POS form
                 if (customerId && $('#customer_id').val() != customerId) {
                     var opt = new Option(customerName || customerId, customerId, true, true);
                     $('#customer_id').append(opt).trigger('change');
                 }
 
-                if ($('input[name="payment[0][method]"]').length) {
-                    $('input[name="payment[0][method]"]').val('credit');
+                // Set the hidden is_credit_sale flag that pos.js already reads
+                if ($('#is_credit_sale').length) {
+                    $('#is_credit_sale').val(1);
                 }
-                $('input#status').val('final');
 
-                var data = form.serialize() + '&is_credit_sale=1';
-                $('#confirm_credit_sale').prop('disabled', true);
-
-                $.ajax({
-                    method: 'POST',
-                    url: form.attr('action'),
-                    dataType: 'json',
-                    data: data,
-                    success: function(result) {
-                        $('#confirm_credit_sale').prop('disabled', false);
-                        if (result.success == 1) {
-                            reset_pos_form();
-                            if (result.receipt && result.receipt.html_content) {
-                                pos_print(result.receipt);
-                            }
-                            toastr.success(result.msg || 'Credit sale completed successfully');
-                        } else {
-                            toastr.error(result.msg || 'Error processing credit sale');
-                        }
-                    },
-                    error: function() {
-                        $('#confirm_credit_sale').prop('disabled', false);
-                        toastr.error('Error processing credit sale');
-                    }
-                });
+                // Trigger the normal POS form submit — goes through pos.js
+                // submitHandler which builds products, handles receipt & reset
+                form.submit();
             }
 
             // ── Confirm & submit credit sale (from customer modal) ────────
@@ -1088,16 +1070,11 @@
         // ── Select2 customer search ──────────────────────────────────────
         $('#cd_customer_search').select2({
             ajax: {
-                url: '{{ url("/contacts/customers") }}',
+                url: '/contacts/customers',
                 dataType: 'json',
-                delay: 300,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                data: function(p) { return { q: p.term }; },
-                processResults: function(d) {
-                    var arr = Array.isArray(d) ? d : (typeof d === 'string' ? JSON.parse(d) : []);
-                    return { results: arr };
-                },
-                error: function() { toastr.error('Customer search failed'); }
+                delay: 250,
+                data: function(p) { return { q: p.term, page: p.page }; },
+                processResults: function(d) { return { results: d }; }
             },
             placeholder: 'Type name or phone number...',
             minimumInputLength: 1,
