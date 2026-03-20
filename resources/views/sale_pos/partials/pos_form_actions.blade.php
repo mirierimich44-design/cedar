@@ -55,22 +55,36 @@
         @endif
     @endif
 
-    {{-- Credit Sale --}}
+    {{-- Credit Dropdown --}}
     @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
         @if(empty($pos_settings['disable_credit_sale_button']))
-        <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" data-toggle="modal" data-target="#credit_sale_customer_modal" title="@lang('lang_v1.credit_sale')">
-            <i class="fas fa-handshake"></i>
-            <span class="btn-text">Credit</span>
-        </button>
+        <div class="btn-group pos-credit-dropdown-wrap" style="width:100%; display:block; margin-bottom:0;">
+            <button type="button" class="pos-action-btn pos-action-credit dropdown-toggle" id="pos-credit-sale-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Credit Options" style="width:100%;">
+                <i class="fas fa-handshake"></i>
+                <span class="btn-text">Credit <span class="caret" style="margin-left:4px;"></span></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right pos-credit-dropdown-menu" style="width:100%; min-width:200px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.18); border:1px solid #e2e8f0; padding:6px 0; z-index:9999;">
+                <li>
+                    <a href="#" id="credit_complete_sale_dropdown_btn" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
+                        <i class="fas fa-check-circle" style="color:#7c3aed; width:16px;"></i> Complete Credit Sale
+                    </a>
+                </li>
+                @if(auth()->user()->can('sell.payments'))
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#collect_debt_modal" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
+                        <i class="fas fa-hand-holding-usd" style="color:#0369a1; width:16px;"></i> Collect Debt
+                    </a>
+                </li>
+                @endif
+                <li role="separator" class="divider" style="margin:4px 0;"></li>
+                <li>
+                    <a href="#" class="btn-modal" data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}" data-container=".contact_modal" style="padding:10px 16px; display:flex; align-items:center; gap:10px; color:#374151; font-weight:600; text-decoration:none; white-space:nowrap;">
+                        <i class="fas fa-user-plus" style="color:#059669; width:16px;"></i> Add Customer
+                    </a>
+                </li>
+            </ul>
+        </div>
         @endif
-    @endif
-
-    {{-- Collect Debt --}}
-    @if(auth()->user()->can('sell.payments'))
-    <button type="button" class="pos-action-btn pos-action-collect-debt" data-toggle="modal" data-target="#collect_debt_modal" id="pos-collect-debt" title="Collect Customer Debt" style="background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);">
-        <i class="fas fa-hand-holding-usd"></i>
-        <span class="btn-text">Collect</span>
-    </button>
     @endif
 
     {{-- Orders --}}
@@ -542,6 +556,33 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+        // ── Complete Credit Sale — validation before opening modal ──────
+        $('#credit_complete_sale_dropdown_btn').on('click', function(e) {
+            e.preventDefault();
+            // Check cart has items
+            var finalTotal = parseFloat($('#final_total_input').val()) || 0;
+            var hasProducts = finalTotal > 0;
+            // Check customer is selected (not walk-in, walk-in id is typically 1)
+            var customerId = $('#customer_id').val();
+            var walkInId = $('input[name="default_customer_id"]').val() || '1';
+            var hasCustomer = customerId && customerId != walkInId;
+
+            if (!hasProducts && !hasCustomer) {
+                toastr.warning('Please add products and select a customer first.');
+                return;
+            }
+            if (!hasProducts) {
+                toastr.warning('Please add products to the cart first.');
+                return;
+            }
+            if (!hasCustomer) {
+                toastr.warning('Please select a customer before completing a credit sale.');
+                return;
+            }
+            // Both conditions met — open modal
+            $('#credit_sale_customer_modal').modal('show');
+        });
+
         // Auto-populate customer if already selected on main POS screen
         $('#credit_sale_customer_modal').on('shown.bs.modal', function () {
             var main_customer_id = $('#customer_id').val();
@@ -711,4 +752,574 @@
     });
     </script>
     @endif
+@endif
+
+{{-- ════════════════════════════════════════════════════════════════
+     COLLECT DEBT MODAL
+     ════════════════════════════════════════════════════════════════ --}}
+@if(auth()->user()->can('sell.payments'))
+<div class="modal fade" id="collect_debt_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+
+            {{-- Header --}}
+            <div class="modal-header" style="background:linear-gradient(135deg,#0369a1 0%,#0ea5e9 100%); border:none; padding:20px;">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1; font-size:28px; text-shadow:none;">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" style="color:white; font-weight:700; font-size:20px;">
+                    <i class="fas fa-hand-holding-usd"></i> Collect Debt
+                </h4>
+            </div>
+
+            <div class="modal-body" style="padding:25px;">
+
+                {{-- Step 1: Customer Search --}}
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:600; color:#374151; margin-bottom:8px; display:block;">
+                        <i class="fas fa-search" style="color:#0369a1;"></i> Search Customer (Name or Phone)
+                    </label>
+                    <select id="cd_customer_search" class="form-control" style="width:100%;"></select>
+                </div>
+
+                {{-- Step 2: Customer card --}}
+                <div id="cd_customer_card" class="hide" style="margin-bottom:15px; padding:16px; background:#f0f9ff; border-radius:10px; border:1px solid #bae6fd;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:#64748b;"><i class="fas fa-user" style="width:16px;"></i> Name:</span>
+                        <strong id="cd_cust_name" style="color:#1e293b;"></strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:#64748b;"><i class="fas fa-phone" style="width:16px;"></i> Phone:</span>
+                        <strong id="cd_cust_phone" style="color:#1e293b;"></strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;"><i class="fas fa-wallet" style="width:16px;"></i> Outstanding:</span>
+                        <strong id="cd_cust_balance" style="color:#dc2626; font-size:16px;"></strong>
+                    </div>
+                </div>
+
+                {{-- Zero-balance notice --}}
+                <div id="cd_zero_balance_banner" class="hide" style="padding:12px 16px; background:#fef3c7; border-radius:8px; color:#92400e; margin-bottom:12px;">
+                    <i class="fas fa-info-circle"></i> This customer has no outstanding balance.
+                </div>
+
+                {{-- Step 3+4: Amount + Payment (shown after customer selected and has balance) --}}
+                <div id="cd_payment_section" class="hide">
+
+                    {{-- Amount row --}}
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label style="font-weight:600; color:#374151; margin-bottom:6px; display:block;">Amount to Collect</label>
+                        <div style="display:flex; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                            <span style="background:#f1f5f9; padding:10px 14px; font-weight:700; color:#64748b; border-right:2px solid #e2e8f0;">KES</span>
+                            <input type="number" id="cd_amount" class="form-control"
+                                   step="0.01" min="0.01"
+                                   style="border:none; padding:10px 14px; font-size:16px; font-weight:700; outline:none; flex:1; box-shadow:none;">
+                        </div>
+                        <div id="cd_remaining_info" style="margin-top:5px; font-size:12px; color:#64748b;"></div>
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="cursor:pointer; font-size:13px; color:#374151; font-weight:500;">
+                            <input type="checkbox" id="cd_full_balance_chk" checked style="margin-right:5px;">
+                            Pay full outstanding balance
+                        </label>
+                    </div>
+
+                    {{-- Payment method tabs --}}
+                    <ul class="nav nav-tabs" id="cd_payment_tabs" style="margin-bottom:15px; border-bottom:2px solid #e2e8f0;">
+                        <li class="active" id="cd_tab_cash_li">
+                            <a href="#cd_cash_tab" data-toggle="tab" style="font-weight:600; color:#374151; border-radius:6px 6px 0 0;">
+                                <i class="fas fa-money-bill-wave" style="color:#16a34a;"></i> Cash
+                            </a>
+                        </li>
+                        <li id="cd_tab_mpesa_li">
+                            <a href="#cd_mpesa_tab" data-toggle="tab" style="font-weight:600; color:#374151; border-radius:6px 6px 0 0;">
+                                <i class="fas fa-mobile-alt" style="color:#00B09B;"></i> M-Pesa
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        {{-- ── Cash Tab ── --}}
+                        <div id="cd_cash_tab" class="tab-pane active" style="padding:5px 0;">
+                            <div class="form-group">
+                                <label style="font-weight:600; color:#374151; font-size:13px;">Note (optional)</label>
+                                <input type="text" id="cd_cash_note" class="form-control" placeholder="e.g. Cash received at counter">
+                            </div>
+                            <button type="button" id="cd_cash_submit_btn" class="btn btn-success btn-block"
+                                    style="padding:12px; font-weight:700; border-radius:8px; font-size:15px;">
+                                <i class="fas fa-check"></i> Record Cash Payment
+                            </button>
+                        </div>
+
+                        {{-- ── M-Pesa Tab ── --}}
+                        <div id="cd_mpesa_tab" class="tab-pane" style="padding:5px 0;">
+
+                            {{-- Mode toggle --}}
+                            <div style="display:flex; gap:8px; margin-bottom:15px;">
+                                <button type="button" id="cd_mpesa_stk_mode_btn" class="btn btn-sm btn-primary"
+                                        style="flex:1; border-radius:6px; font-weight:600;">
+                                    <i class="fas fa-paper-plane"></i> STK Push
+                                </button>
+                                <button type="button" id="cd_mpesa_manual_mode_btn" class="btn btn-sm btn-default"
+                                        style="flex:1; border-radius:6px; font-weight:600;">
+                                    <i class="fas fa-keyboard"></i> Manual
+                                </button>
+                            </div>
+
+                            {{-- STK section --}}
+                            <div id="cd_stk_section">
+
+                                {{-- STK input --}}
+                                <div id="cd_stk_input_area">
+                                    <div class="form-group">
+                                        <label style="font-weight:600; color:#374151; font-size:13px;">Customer Phone</label>
+                                        <div style="display:flex; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                                            <span style="background:#f1f5f9; padding:10px 12px; font-weight:700; color:#64748b; border-right:2px solid #e2e8f0;">+254</span>
+                                            <input type="tel" id="cd_stk_phone" maxlength="9" placeholder="712345678"
+                                                   style="flex:1; border:none; padding:10px 12px; font-size:15px; font-weight:600; outline:none;">
+                                        </div>
+                                    </div>
+                                    <button type="button" id="cd_send_stk_btn" class="btn btn-block"
+                                            style="padding:12px; background:linear-gradient(135deg,#00B09B 0%,#96C93D 100%); color:white; border:none; border-radius:8px; font-weight:700; font-size:14px;">
+                                        <i class="fas fa-paper-plane"></i> Send STK Push
+                                    </button>
+                                </div>
+
+                                {{-- Waiting state --}}
+                                <div id="cd_stk_waiting" style="display:none; text-align:center; padding:20px 10px;">
+                                    <div style="width:50px; height:50px; background:#fef3c7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                                        <i class="fas fa-spinner fa-spin" style="color:#f59e0b; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#1e293b; margin-bottom:6px;">Waiting for PIN...</h4>
+                                    <p style="color:#64748b; margin-bottom:12px;">Customer should check their phone</p>
+                                    <span id="cd_stk_countdown" style="display:inline-block; background:#fef3c7; color:#d97706; font-size:22px; font-weight:800; padding:10px 20px; border-radius:8px;">2:00</span>
+                                    <div style="margin-top:12px;">
+                                        <button type="button" id="cd_stk_cancel_btn" class="btn btn-sm btn-default">Cancel</button>
+                                    </div>
+                                </div>
+
+                                {{-- STK success state --}}
+                                <div id="cd_stk_success" style="display:none; text-align:center; padding:15px 10px;">
+                                    <div style="width:50px; height:50px; background:#d1fae5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                                        <i class="fas fa-check" style="color:#10b981; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#10b981; margin-bottom:4px;">Payment Received!</h4>
+                                    <p style="color:#64748b; margin-bottom:4px;">Ref: <strong id="cd_stk_receipt" style="font-family:monospace; letter-spacing:1px;"></strong></p>
+                                    <button type="button" id="cd_stk_confirm_btn" class="btn btn-success btn-block"
+                                            style="border-radius:8px; font-weight:700; padding:12px; margin-top:12px;">
+                                        <i class="fas fa-check-double"></i> Confirm &amp; Record
+                                    </button>
+                                </div>
+
+                                {{-- STK error / timeout state --}}
+                                <div id="cd_stk_error" style="display:none; text-align:center; padding:15px 10px;">
+                                    <div style="width:50px; height:50px; background:#fee2e2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                                        <i class="fas fa-times" style="color:#ef4444; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#ef4444; margin-bottom:4px;">No Response</h4>
+                                    <p id="cd_stk_err_msg" style="color:#64748b; margin-bottom:12px;"></p>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="button" id="cd_stk_retry_btn" class="btn btn-primary" style="flex:1; border-radius:6px; font-weight:600;">Retry</button>
+                                        <button type="button" id="cd_stk_fallback_manual_btn" class="btn btn-default" style="flex:1; border-radius:6px; font-weight:600;">Enter Manually</button>
+                                    </div>
+                                </div>
+
+                            </div>{{-- /cd_stk_section --}}
+
+                            {{-- Manual section --}}
+                            <div id="cd_manual_section" style="display:none;">
+                                <div class="form-group">
+                                    <label style="font-weight:600; color:#374151; font-size:13px;">M-Pesa Reference No.</label>
+                                    <input type="text" id="cd_manual_ref" class="form-control"
+                                           placeholder="e.g. QZK92PX..."
+                                           style="font-family:monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:600; color:#374151; font-size:13px;">Note (optional)</label>
+                                    <input type="text" id="cd_manual_note" class="form-control" placeholder="optional">
+                                </div>
+                                <button type="button" id="cd_manual_submit_btn" class="btn btn-block"
+                                        style="padding:12px; background:linear-gradient(135deg,#00B09B 0%,#96C93D 100%); color:white; border:none; border-radius:8px; font-weight:700; font-size:14px;">
+                                    <i class="fas fa-check"></i> Record M-Pesa Payment
+                                </button>
+                            </div>
+
+                        </div>{{-- /cd_mpesa_tab --}}
+                    </div>{{-- /tab-content --}}
+
+                </div>{{-- /cd_payment_section --}}
+
+                {{-- Success banner --}}
+                <div id="cd_success_banner" style="display:none; margin-top:15px; padding:12px 16px; background:#d1fae5; border-radius:8px; color:#065f46; font-weight:600; text-align:center;">
+                    <i class="fas fa-check-circle"></i> <span id="cd_success_msg"></span>
+                </div>
+
+            </div>{{-- /modal-body --}}
+
+            <div class="modal-footer" style="border-top:1px solid #e2e8f0; padding:15px 25px; background:#f8fafc;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+    function initCollectDebt() {
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+            setTimeout(initCollectDebt, 200);
+            return;
+        }
+        var $ = jQuery;
+
+        // ── State ────────────────────────────────────────────────────────
+        var cds = {
+            customerId: null,
+            balance: 0,
+            phone: '',
+            mpesaTxnId: null,
+            pollInterval: null,
+            countdownInterval: null
+        };
+
+        // ── Helpers ──────────────────────────────────────────────────────
+        function stopTimers() {
+            if (cds.pollInterval)     { clearInterval(cds.pollInterval);     cds.pollInterval     = null; }
+            if (cds.countdownInterval){ clearInterval(cds.countdownInterval); cds.countdownInterval = null; }
+        }
+
+        function formatPhoneLocal(phone) {
+            if (!phone) return '';
+            phone = String(phone).replace(/\D/g, '');
+            if (phone.startsWith('254')) phone = phone.substring(3);
+            if (phone.startsWith('0'))   phone = phone.substring(1);
+            return phone;
+        }
+
+        // ── Full reset ───────────────────────────────────────────────────
+        function cdReset() {
+            cds.customerId = null;
+            cds.balance = 0;
+            cds.phone = '';
+            cds.mpesaTxnId = null;
+            stopTimers();
+
+            $('#cd_customer_search').val(null).trigger('change');
+            $('#cd_customer_card, #cd_payment_section, #cd_zero_balance_banner').addClass('hide');
+            $('#cd_success_banner').hide();
+
+            // amount
+            $('#cd_amount').val('');
+            $('#cd_full_balance_chk').prop('checked', true);
+            $('#cd_remaining_info').text('');
+
+            // cash
+            $('#cd_cash_note').val('');
+
+            // tabs back to Cash
+            $('#cd_tab_cash_li').addClass('active'); $('#cd_tab_mpesa_li').removeClass('active');
+            $('#cd_cash_tab').addClass('active');    $('#cd_mpesa_tab').removeClass('active');
+
+            // stk / manual
+            stkReset();
+            cdShowStk(true);
+        }
+
+        // ── STK reset ────────────────────────────────────────────────────
+        function stkReset() {
+            stopTimers();
+            cds.mpesaTxnId = null;
+            $('#cd_stk_input_area').show();
+            $('#cd_stk_waiting, #cd_stk_success, #cd_stk_error').hide();
+            $('#cd_stk_receipt').text('');
+            $('#cd_stk_countdown').text('2:00');
+            $('#cd_stk_phone').val(formatPhoneLocal(cds.phone));
+        }
+
+        // ── STK / Manual toggle ──────────────────────────────────────────
+        function cdShowStk(show) {
+            if (show) {
+                $('#cd_stk_section').show(); $('#cd_manual_section').hide();
+                $('#cd_mpesa_stk_mode_btn').removeClass('btn-default').addClass('btn-primary');
+                $('#cd_mpesa_manual_mode_btn').removeClass('btn-primary').addClass('btn-default');
+            } else {
+                $('#cd_stk_section').hide(); $('#cd_manual_section').show();
+                $('#cd_mpesa_stk_mode_btn').removeClass('btn-primary').addClass('btn-default');
+                $('#cd_mpesa_manual_mode_btn').removeClass('btn-default').addClass('btn-primary');
+            }
+        }
+
+        // ── Select2 customer search ──────────────────────────────────────
+        $('#cd_customer_search').select2({
+            ajax: {
+                url: '/contacts/customers',
+                dataType: 'json',
+                delay: 250,
+                data: function(p) { return { q: p.term, page: p.page }; },
+                processResults: function(d) { return { results: d }; }
+            },
+            placeholder: 'Type name or phone number...',
+            minimumInputLength: 1,
+            allowClear: true,
+            dropdownParent: $('#collect_debt_modal'),
+            templateResult: function(c) {
+                if (!c.id) return c.text;
+                return $('<span><strong>' + c.text + '</strong>' + (c.mobile ? ' — ' + c.mobile : '') + '</span>');
+            }
+        });
+
+        // ── On customer selected ─────────────────────────────────────────
+        $('#cd_customer_search').on('select2:select', function(e) {
+            var cid = e.params.data.id;
+            $.ajax({
+                url: '/contacts/credit-info/' + cid,
+                dataType: 'json',
+                success: function(r) {
+                    cds.customerId = r.id;
+                    cds.balance    = parseFloat(r.sell_due) || 0;
+                    cds.phone      = r.mobile || '';
+
+                    $('#cd_cust_name').text(r.name || '—');
+                    $('#cd_cust_phone').text(r.mobile || '—');
+                    $('#cd_cust_balance').text(r.sell_due_formatted || ('KES ' + cds.balance.toFixed(2)));
+                    $('#cd_customer_card').removeClass('hide');
+                    $('#cd_success_banner').hide();
+
+                    if (cds.balance <= 0) {
+                        $('#cd_zero_balance_banner').removeClass('hide');
+                        $('#cd_payment_section').addClass('hide');
+                    } else {
+                        $('#cd_zero_balance_banner').addClass('hide');
+                        $('#cd_payment_section').removeClass('hide');
+                        $('#cd_amount').val(cds.balance.toFixed(2));
+                        $('#cd_full_balance_chk').prop('checked', true);
+                        $('#cd_remaining_info').text('');
+                        $('#cd_stk_phone').val(formatPhoneLocal(cds.phone));
+                        stkReset();
+                    }
+                },
+                error: function() { toastr.error('Failed to load customer info'); }
+            });
+        });
+
+        $('#cd_customer_search').on('select2:unselect', function() {
+            cds.customerId = null;
+            $('#cd_customer_card, #cd_payment_section, #cd_zero_balance_banner').addClass('hide');
+            $('#cd_success_banner').hide();
+        });
+
+        // ── Full-balance checkbox ────────────────────────────────────────
+        $('#cd_full_balance_chk').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#cd_amount').val(cds.balance.toFixed(2));
+                $('#cd_remaining_info').text('');
+            }
+        });
+
+        // ── Amount input — show remaining ────────────────────────────────
+        $('#cd_amount').on('input', function() {
+            var val = parseFloat($(this).val()) || 0;
+            if (val >= cds.balance) {
+                $('#cd_full_balance_chk').prop('checked', true);
+                $('#cd_remaining_info').text('');
+            } else {
+                $('#cd_full_balance_chk').prop('checked', false);
+                $('#cd_remaining_info').html('<span style="color:#f59e0b;"><i class="fas fa-info-circle"></i> Remaining after this payment: <strong>KES ' + (cds.balance - val).toFixed(2) + '</strong></span>');
+            }
+        });
+
+        // ── Mode toggle buttons ──────────────────────────────────────────
+        $('#cd_mpesa_stk_mode_btn').on('click',    function() { cdShowStk(true);  });
+        $('#cd_mpesa_manual_mode_btn').on('click', function() { cdShowStk(false); });
+        $('#cd_stk_fallback_manual_btn').on('click', function() { cdShowStk(false); stkReset(); });
+        $('#cd_stk_retry_btn').on('click',  stkReset);
+        $('#cd_stk_cancel_btn').on('click', stkReset);
+
+        // ── Phone — digits only ──────────────────────────────────────────
+        $('#cd_stk_phone').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
+
+        // ── Submit helper ────────────────────────────────────────────────
+        function cdSubmitPayment(method, ref, note, $btn) {
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+            if (!cds.customerId) { toastr.error('No customer selected'); return; }
+            if (amount <= 0)     { toastr.error('Enter a valid amount');  return; }
+
+            if ($btn) $btn.prop('disabled', true).prepend('<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>');
+
+            var payload = {
+                _token:           $('meta[name="csrf-token"]').attr('content'),
+                contact_id:       cds.customerId,
+                amount:           amount,
+                method:           method,
+                note:             note || '',
+                due_payment_type: 'sell'
+            };
+            if (method === 'custom_pay_1' && ref) {
+                payload.transaction_no_1 = ref;
+            }
+
+            $.ajax({
+                url:    '/payments/pay-contact-due',
+                method: 'POST',
+                data:   payload,
+                success: function(r) {
+                    if ($btn) $btn.prop('disabled', false).find('.fa-spinner').remove();
+                    if (r.success) {
+                        var amtStr = 'KES ' + amount.toFixed(2);
+                        $('#cd_success_msg').text('Payment of ' + amtStr + ' recorded successfully!');
+                        $('#cd_success_banner').show();
+
+                        // Update local balance
+                        cds.balance = Math.max(0, cds.balance - amount);
+                        $('#cd_cust_balance').text('KES ' + cds.balance.toFixed(2));
+
+                        if (cds.balance <= 0) {
+                            $('#cd_payment_section').addClass('hide');
+                            $('#cd_zero_balance_banner').removeClass('hide');
+                        } else {
+                            $('#cd_amount').val(cds.balance.toFixed(2));
+                            $('#cd_full_balance_chk').prop('checked', true);
+                            $('#cd_remaining_info').text('');
+                        }
+                        // Reset payment inputs
+                        $('#cd_cash_note').val('');
+                        $('#cd_manual_ref, #cd_manual_note').val('');
+                        stkReset();
+                    } else {
+                        toastr.error(r.msg || 'Payment failed');
+                    }
+                },
+                error: function() {
+                    if ($btn) $btn.prop('disabled', false).find('.fa-spinner').remove();
+                    toastr.error('Error recording payment');
+                }
+            });
+        }
+
+        // ── Cash submit ──────────────────────────────────────────────────
+        $('#cd_cash_submit_btn').on('click', function() {
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+            if (amount <= 0) { toastr.error('Enter a valid amount'); return; }
+            cdSubmitPayment('cash', null, $('#cd_cash_note').val(), $(this));
+        });
+
+        // ── STK Push ─────────────────────────────────────────────────────
+        $('#cd_send_stk_btn').on('click', function() {
+            var phone  = $('#cd_stk_phone').val().trim();
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+
+            if (!phone || phone.length < 9) { toastr.error('Enter a valid 9-digit phone number'); return; }
+            if (amount <= 0)               { toastr.error('Enter a valid amount'); return; }
+
+            if (phone.startsWith('0')) phone = phone.substring(1);
+            phone = '254' + phone;
+
+            $('#cd_stk_input_area').hide();
+            $('#cd_stk_waiting').show();
+            $('#cd_stk_countdown').text('2:00');
+
+            $.ajax({
+                url:    '/mpesa/stk-push',
+                method: 'POST',
+                data: {
+                    _token:    $('meta[name="csrf-token"]').attr('content'),
+                    phone:     phone,
+                    amount:    Math.ceil(amount),
+                    reference: ('Debt-' + (cds.customerId || '')).substring(0, 12)
+                },
+                success: function(r) {
+                    if (r.success) {
+                        cds.mpesaTxnId = r.mpesa_transaction_id;
+                        toastr.success('STK push sent!');
+                        startStkPoll();
+                        startCountdown();
+                    } else {
+                        stkShowError(r.message || 'Failed to send STK push');
+                    }
+                },
+                error: function(xhr) {
+                    stkShowError((xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Request failed');
+                }
+            });
+        });
+
+        function startStkPoll() {
+            cds.pollInterval = setInterval(function() {
+                if (!cds.mpesaTxnId) { stopTimers(); return; }
+                $.post('/mpesa/check-payment-status', {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    mpesa_transaction_id: cds.mpesaTxnId
+                }, function(r) {
+                    if (r.is_paid) {
+                        stopTimers();
+                        stkShowSuccess(r.receipt_number);
+                    } else if (r.status === 'failed' || r.status === 'cancelled') {
+                        stopTimers();
+                        stkShowError(r.result_description || 'Payment failed or cancelled');
+                    }
+                });
+            }, 3000);
+        }
+
+        function startCountdown() {
+            var sec = 120;
+            cds.countdownInterval = setInterval(function() {
+                sec--;
+                $('#cd_stk_countdown').text(Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60));
+                if (sec <= 0) {
+                    stopTimers();
+                    stkShowError('No response received. Please enter the reference manually.');
+                }
+            }, 1000);
+        }
+
+        function stkShowSuccess(receipt) {
+            stopTimers();
+            $('#cd_stk_waiting').hide();
+            $('#cd_stk_receipt').text(receipt || 'CONFIRMED');
+            $('#cd_stk_success').show();
+            toastr.success('Payment received via M-Pesa!');
+        }
+
+        function stkShowError(msg) {
+            stopTimers();
+            $('#cd_stk_waiting').hide();
+            $('#cd_stk_err_msg').text(msg);
+            $('#cd_stk_error').show();
+        }
+
+        // ── STK Confirm & Record ─────────────────────────────────────────
+        $('#cd_stk_confirm_btn').on('click', function() {
+            var receipt = $('#cd_stk_receipt').text();
+            cdSubmitPayment('custom_pay_1', receipt, '', $(this));
+        });
+
+        // ── Manual M-Pesa submit ─────────────────────────────────────────
+        $('#cd_manual_submit_btn').on('click', function() {
+            var ref = $('#cd_manual_ref').val().trim().toUpperCase();
+            if (!ref) { toastr.error('Enter the M-Pesa reference number'); return; }
+            cdSubmitPayment('custom_pay_1', ref, $('#cd_manual_note').val(), $(this));
+        });
+
+        // ── Manual ref — uppercase on input ─────────────────────────────
+        $('#cd_manual_ref').on('input', function() { this.value = this.value.toUpperCase(); });
+
+        // ── Modal lifecycle ──────────────────────────────────────────────
+        $('#collect_debt_modal').on('show.bs.modal',   cdReset);
+        $('#collect_debt_modal').on('hidden.bs.modal', function() { stopTimers(); });
+        $('#collect_debt_modal').on('shown.bs.modal',  function() {
+            // Open the Select2 dropdown so the user can start typing immediately
+            try { $('#cd_customer_search').select2('open'); } catch(e) {}
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCollectDebt);
+    } else {
+        setTimeout(initCollectDebt, 100);
+    }
+})();
+</script>
 @endif
