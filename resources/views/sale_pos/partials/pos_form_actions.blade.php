@@ -526,7 +526,7 @@
 
     {{-- Step 2: Credit Sale Customer Search Modal --}}
     <div class="modal fade" id="credit_sale_customer_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border: none; padding: 20px;">
                     <button type="button" class="close" data-dismiss="modal" style="color: white; opacity: 1; font-size: 28px; text-shadow: none;">
