@@ -1018,7 +1018,8 @@ class ContactController extends Controller
             return view('contact.import')
                 ->with('notification', $output);
         } else {
-            return view('contact.import');
+            return view('contact.import')
+                ->with('notification', session('notification'));
         }
     }
 
@@ -1126,10 +1127,13 @@ class ContactController extends Controller
 
                 DB::beginTransaction();
                 foreach ($imported_data as $key => $value) {
+                    // Pad row to 27 columns — Excel drops trailing empty cells
+                    $value = array_pad((array) $value, 27, '');
+
                     //Check if 27 no. of columns exists
-                    if (count($value) != 27) {
+                    if (count($value) < 27) {
                         $is_valid = false;
-                        $error_msg = 'Number of columns mismatch';
+                        $error_msg = 'Number of columns mismatch (expected 27, got '.count($value).')';
                         break;
                     }
 
