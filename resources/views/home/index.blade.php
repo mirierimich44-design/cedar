@@ -722,6 +722,79 @@
                     </div>
                 </div>
 
+                {{-- Quick Actions Widget --}}
+                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200" style="overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%); padding:16px 18px; display:flex; align-items:center; gap:10px;">
+                        <span style="width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-bolt" style="color:white;font-size:15px;"></i>
+                        </span>
+                        <h4 style="color:white;font-weight:700;font-size:16px;margin:0;">{{ __('home.quick_actions') }}</h4>
+                    </div>
+                    <div style="padding:14px 12px; display:flex; flex-direction:column; gap:8px;">
+
+                        @if(auth()->user()->can('sell.create') || auth()->user()->can('direct_sell.access'))
+                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" style="padding:12px 14px; background:#f0fdf4; border:2px solid #059669; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
+                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#059669,#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-shopping-cart" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <span>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('sale.new_sale') }}</strong>
+                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_new_sale_desc') }}</small>
+                            </span>
+                        </a>
+                        @endif
+
+                        @if(auth()->user()->can('purchase.create'))
+                        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" style="padding:12px 14px; background:#eff6ff; border:2px solid #2563eb; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
+                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#60a5fa);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-truck" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <span>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('lang_v1.add_purchase') }}</strong>
+                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_purchase_desc') }}</small>
+                            </span>
+                        </a>
+                        @endif
+
+                        @if(auth()->user()->can('customer.create'))
+                        <a href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}" style="padding:12px 14px; background:#f5f3ff; border:2px solid #7c3aed; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
+                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-user-plus" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <span>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('contact.add_customer') }}</strong>
+                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_customer_desc') }}</small>
+                            </span>
+                        </a>
+                        @endif
+
+                        @if(auth()->user()->can('product.create'))
+                        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}" style="padding:12px 14px; background:#fff7ed; border:2px solid #ea580c; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
+                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#ea580c,#fb923c);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-box" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <span>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('product.add_product') }}</strong>
+                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_product_desc') }}</small>
+                            </span>
+                        </a>
+                        @endif
+
+                        @if(auth()->user()->can('profit_loss_report.view'))
+                        <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getProfitLoss']) }}" style="padding:12px 14px; background:#fdf4ff; border:2px solid #a21caf; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
+                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#a21caf,#e879f9);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-chart-line" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <span>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('report.profit_and_loss') }}</strong>
+                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_profit_loss_desc') }}</small>
+                            </span>
+                        </a>
+                        @endif
+
+                    </div>
+                </div>
+
                 @if (
                     !empty($common_settings['enable_purchase_requisition']) &&
                         (auth()->user()->can('purchase_requisition.view_all') || auth()->user()->can('purchase_requisition.view_own')))

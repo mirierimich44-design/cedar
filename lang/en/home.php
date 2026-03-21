@@ -29,4 +29,10 @@ return [
     'stock_expiry_alert' => 'Stock Expiry Alert',
     'todays_profit' => "Today's profit",
     'dashboard' => 'Dashboard',
+    'quick_actions' => 'Quick Actions',
+    'quick_action_new_sale_desc' => 'Open the point of sale screen',
+    'quick_action_add_purchase_desc' => 'Record a new supplier purchase',
+    'quick_action_add_customer_desc' => 'Create a new customer profile',
+    'quick_action_add_product_desc' => 'Add a product to your catalogue',
+    'quick_action_profit_loss_desc' => 'View profit & loss report',
 ];
