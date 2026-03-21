@@ -426,6 +426,17 @@ class PurchaseController extends Controller
 
             DB::commit();
 
+            // eTIMS Sync
+            $etims_business = Business::find($business_id);
+            if (!empty($etims_business->etims_enabled) && !empty($etims_business->digitax_api_key) && $transaction->status == 'received') {
+                if ($etims_business->etims_sync_mode == 'realtime') {
+                    $digitaxService = new \App\Utils\DigitaxService();
+                    $digitaxService->setApiKey($etims_business->digitax_api_key)->createPurchase($transaction);
+                } elseif ($etims_business->etims_sync_mode == 'background') {
+                    \App\Jobs\SyncEtimsPurchaseJob::dispatch($transaction->id);
+                }
+            }
+
             $output = ['success' => 1,
                 'msg' => __('purchase.purchase_add_success'),
             ];
@@ -758,6 +769,17 @@ class PurchaseController extends Controller
             PurchaseCreatedOrModified::dispatch($transaction);
 
             DB::commit();
+
+            // eTIMS Sync
+            $etims_business = Business::find($transaction->business_id);
+            if (!empty($etims_business->etims_enabled) && !empty($etims_business->digitax_api_key) && $transaction->status == 'received') {
+                if ($etims_business->etims_sync_mode == 'realtime') {
+                    $digitaxService = new \App\Utils\DigitaxService();
+                    $digitaxService->setApiKey($etims_business->digitax_api_key)->createPurchase($transaction);
+                } elseif ($etims_business->etims_sync_mode == 'background') {
+                    \App\Jobs\SyncEtimsPurchaseJob::dispatch($transaction->id);
+                }
+            }
 
             $output = ['success' => 1,
                 'msg' => __('purchase.purchase_update_success'),

@@ -615,7 +615,7 @@ class SellPosController extends Controller
 
                 // eTIMS Sync
                 $business = \App\Business::find($business_id);
-                if (!empty($business->digitax_api_key) && $transaction->type == 'sell' && $transaction->status == 'final') {
+                if (!empty($business->etims_enabled) && !empty($business->digitax_api_key) && $transaction->type == 'sell' && $transaction->status == 'final') {
                     if ($business->etims_sync_mode == 'realtime') {
                         $digitaxService = new \App\Utils\DigitaxService();
                         $digitaxService->setApiKey($business->digitax_api_key)->createSale($transaction);
@@ -1471,7 +1471,7 @@ class SellPosController extends Controller
 
                 // eTIMS Sync
                 $business = \App\Business::find($business_id);
-                if (!empty($business->digitax_api_key) && $transaction->type == 'sell' && $transaction->status == 'final') {
+                if (!empty($business->etims_enabled) && !empty($business->digitax_api_key) && $transaction->type == 'sell' && $transaction->status == 'final') {
                     if ($business->etims_sync_mode == 'realtime') {
                         $digitaxService = new \App\Utils\DigitaxService();
                         $digitaxService->setApiKey($business->digitax_api_key)->createSale($transaction);

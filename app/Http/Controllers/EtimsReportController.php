@@ -111,8 +111,9 @@ class EtimsReportController extends Controller
         $business = Business::findOrFail($business_id);
 
         $business->update([
+            'etims_enabled'   => $request->input('etims_enabled') == 1 ? 1 : 0,
             'digitax_api_key' => $request->digitax_api_key,
-            'etims_tpin' => $request->etims_tpin,
+            'etims_tpin'      => $request->etims_tpin,
             'etims_sync_mode' => $request->etims_sync_mode,
         ]);
 

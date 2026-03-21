@@ -22,6 +22,20 @@
         @endslot
 
         <div class="row">
+            <div class="col-sm-12" style="margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>
+                        {!! Form::hidden('etims_enabled', 0) !!}
+                        {!! Form::checkbox('etims_enabled', 1, $business->etims_enabled, ['id' => 'etims_enabled', 'class' => 'input-icheck']) !!}
+                        <strong>Enable eTIMS Integration</strong>
+                    </label>
+                    <p class="help-block">When disabled, no sales or purchases will be synced to eTIMS regardless of other settings.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="etims_fields" style="{{ $business->etims_enabled ? '' : 'display:none;' }}">
+        <div class="row">
             <div class="col-sm-6">
                 <div class="form-group {{ $errors->has('digitax_api_key') ? 'has-error' : '' }}">
                     {!! Form::label('digitax_api_key', 'Digitax API Key:') !!}
@@ -60,6 +74,7 @@
                 </div>
             </div>
         </div>
+        </div>{{-- close #etims_fields --}}
     @endcomponent
 
     @component('components.widget', ['class' => 'box-info'])
@@ -92,6 +107,14 @@
 <script>
     $(document).ready(function () {
         $('.select2').select2();
+
+        $(document).on('ifChecked ifUnchecked', '#etims_enabled', function (event) {
+            if (event.type === 'ifChecked') {
+                $('#etims_fields').slideDown();
+            } else {
+                $('#etims_fields').slideUp();
+            }
+        });
     });
 </script>
 @endsection

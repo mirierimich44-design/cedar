@@ -137,9 +137,68 @@ class DigitaxService
         }
     }
 
+    /**
+     * Create a purchase (incoming invoice) in eTIMS
+     */
+    public function createPurchase(Transaction $transaction)
+    {
+        try {
+            $transaction->load(['purchase_lines', 'purchase_lines.product', 'contact']);
+
+            $items = [];
+            foreach ($transaction->purchase_lines as $line) {
+                $items[] = [
+                    'item_id'         => $line->product->etims_item_id ?? $line->product->sku,
+                    'quantity'        => (float) $line->quantity,
+                    'unit_price'      => (float) $line->purchase_price_inc_tax,
+                    'discount_amount' => 0,
+                ];
+            }
+
+            $payload = [
+                'supplier_pin'       => $transaction->contact->tax_number ?? 'P000000000A',
+                'supplier_name'      => $transaction->contact->name ?? 'Supplier',
+                'transaction_type'   => 'PURCHASE',
+                'receipt_type'       => 'NORMAL',
+                'payment_method'     => 'CASH',
+                'items'              => $items,
+                'external_reference' => $transaction->ref_no,
+            ];
+
+            $response = $this->client->post('purchases', [
+                'headers' => $this->getHeaders(),
+                'json'    => $payload,
+            ]);
+
+            $result = json_decode($response->getBody()->getContents(), true);
+
+            if (in_array($response->getStatusCode(), [200, 201])) {
+                $transaction->etims_invoice_number = $result['invoice_number'] ?? null;
+                $transaction->etims_qr_url         = $result['qr_code_url'] ?? null;
+                $transaction->etims_signature      = $result['signature'] ?? null;
+                $transaction->etims_sync_status    = 'success';
+                $transaction->etims_synced_at      = now();
+                $transaction->save();
+
+                return ['success' => true, 'data' => $result];
+            }
+
+            return ['success' => false, 'error' => 'Unexpected status code: ' . $response->getStatusCode()];
+
+        } catch (\Exception $e) {
+            Log::error('Digitax Purchase Sync Error: ' . $e->getMessage());
+
+            $transaction->etims_sync_status = 'failed';
+            $transaction->etims_sync_error  = $e->getMessage();
+            $transaction->save();
+
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
     protected function mapPaymentMethod($transaction)
     {
         // Default mapping, can be expanded based on project payment methods
-        return 'CASH'; 
+        return 'CASH';
     }
 }
