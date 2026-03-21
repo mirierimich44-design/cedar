@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -10,17 +11,17 @@ class AddAgentToCoolerDealers extends Migration
 {
     public function up()
     {
-        // Add agent_id FK to cooler_dealers so each customer is owned by the agent who onboarded them
+        // Add agent_id FK to cooler_dealers
         Schema::table('cooler_dealers', function (Blueprint $table) {
             $table->unsignedInteger('agent_id')->nullable()->after('created_by');
             $table->foreign('agent_id')->references('id')->on('users')->onDelete('set null');
         });
 
-        // New agent-specific permissions
+        // New agent-specific permissions (global, no business_id)
         $agentPermissions = [
-            ['name' => 'cooler.agent.portal',   'guard_name' => 'web'], // access agent portal
-            ['name' => 'cooler.order.create',   'guard_name' => 'web'], // place orders for customers
-            ['name' => 'cooler.order.view',     'guard_name' => 'web'], // view own orders
+            ['name' => 'cooler.agent.portal', 'guard_name' => 'web'],
+            ['name' => 'cooler.order.create', 'guard_name' => 'web'],
+            ['name' => 'cooler.order.view',   'guard_name' => 'web'],
         ];
 
         $timestamp = \Carbon::now()->toDateTimeString();
@@ -29,9 +30,6 @@ class AddAgentToCoolerDealers extends Migration
                 Permission::create(array_merge($perm, ['created_at' => $timestamp]));
             }
         }
-
-        // Create 'Cooler Agent' role if it doesn't exist and assign permissions
-        $role = Role::firstOrCreate(['name' => 'Cooler Agent', 'guard_name' => 'web']);
 
         $rolePermissions = [
             'cooler.agent.portal',
@@ -47,7 +45,19 @@ class AddAgentToCoolerDealers extends Migration
         ];
 
         $perms = Permission::whereIn('name', $rolePermissions)->get();
-        $role->syncPermissions($perms);
+
+        // Roles are scoped per business — create 'Cooler Agent#<id>' for every business
+        $businesses = DB::table('business')->pluck('id');
+
+        foreach ($businesses as $businessId) {
+            $roleName = 'Cooler Agent#' . $businessId;
+            $role = Role::firstOrCreate([
+                'name'        => $roleName,
+                'guard_name'  => 'web',
+                'business_id' => $businessId,
+            ]);
+            $role->syncPermissions($perms);
+        }
     }
 
     public function down()
@@ -59,7 +69,7 @@ class AddAgentToCoolerDealers extends Migration
 
         Permission::whereIn('name', ['cooler.agent.portal', 'cooler.order.create', 'cooler.order.view'])->delete();
 
-        $role = Role::where('name', 'Cooler Agent')->first();
-        if ($role) $role->delete();
+        // Remove all Cooler Agent roles across all businesses
+        Role::where('name', 'like', 'Cooler Agent#%')->delete();
     }
 }
