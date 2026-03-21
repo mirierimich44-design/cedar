@@ -4,7 +4,7 @@
 
     @if (empty($header))
         @if (!empty($title) || !empty($tool))
-            <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
                 <div style="display:flex;align-items:center;gap:10px;">
                     @if (!empty($icon))
                         <span style="width:28px;height:28px;background:rgba(255,255,255,0.15);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
