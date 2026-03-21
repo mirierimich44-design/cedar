@@ -1,5 +1,5 @@
 <!-- Left side column. contains the logo and sidebar -->
-<aside class="side-bar tw-relative tw-hidden tw-h-full tw-w-64 xl:tw-w-64 lg:tw-flex lg:tw-flex-col tw-shrink-0">
+<aside class="side-bar tw-relative tw-hidden tw-h-full tw-w-64 xl:tw-w-64 lg:tw-flex lg:tw-flex-col tw-shrink-0" style="background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);border-right:1px solid rgba(255,255,255,0.06);">
 
     <a href="{{route('home')}}"
         class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-4 tw-shrink-0"
