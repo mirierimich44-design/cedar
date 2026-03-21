@@ -301,34 +301,33 @@ label {
 }
 
 .backend-material .side-bar {
-    background: white !important;
-    border-right: 1.5px solid var(--pos-border) !important;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02) !important;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.25) !important;
 }
 
 .backend-material .side-bar a {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.15s ease !important;
 }
 
-.backend-material .side-bar .active-pill {
-    background: var(--pos-primary-subtle) !important;
-    color: var(--pos-primary) !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1) !important;
+.backend-material .side-bar .active-sidebar-item {
+    border-left: 3px solid #38bdf8 !important;
+    padding-left: 13px !important;
 }
 
 .backend-material .side-bar i,
 .backend-material .side-bar svg {
-    font-size: 1.25rem !important;
-    transition: transform 0.2s ease !important;
+    font-size: 1rem !important;
+    transition: none !important;
+    color: #64748b;
 }
 
 .backend-material .side-bar a:hover i,
-.backend-material .side-bar a:hover svg {
-    transform: scale(1.1) !important;
-}
-
-.backend-material a.tw-items-center.tw-justify-start.tw-bg-white {
-    background: white !important;
+.backend-material .side-bar a:hover svg,
+.backend-material .side-bar .active-sidebar-item i,
+.backend-material .side-bar .active-sidebar-item svg {
+    transform: none !important;
+    color: white !important;
 }
 
 /* ============================================================

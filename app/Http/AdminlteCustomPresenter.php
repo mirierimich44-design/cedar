@@ -11,7 +11,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getOpenTagWrapper()
     {
-        return '<div class="tw-flex-1 tw-py-6 tw-px-3 tw-space-y-2 tw-overflow-y-auto" id="side-bar">' . PHP_EOL;
+        return '<div class="tw-flex-1 tw-py-3 tw-px-3 tw-space-y-0.5 tw-overflow-y-auto" id="side-bar">' . PHP_EOL;
     }
 
     /**
@@ -27,7 +27,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getMenuWithoutDropdownWrapper($item)
     {
-        return '<a href="' . $item->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-4 tw-px-5 tw-py-3 tw-text-sm tw-font-semibold tw-tracking-tight tw-transition-all tw-duration-200 tw-rounded-full tw-whitespace-nowrap hover:tw-bg-indigo-50/50 hover:tw-text-indigo-600 ' . $this->getActiveState($item) . '" ' . $item->getAttributes() . '>' .
+        return '<a href="' . $item->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-tracking-tight tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap hover:tw-bg-white/5 hover:tw-text-white ' . $this->getActiveState($item) . '" ' . $item->getAttributes() . '>' .
         $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
             '</a>' . PHP_EOL;
     }
@@ -35,9 +35,9 @@ class AdminlteCustomPresenter extends Presenter
     /**
      * {@inheritdoc}.
      */
-    public function getActiveState($item, $state = ' tw-bg-indigo-50 tw-text-indigo-700 tw-shadow-sm')
+    public function getActiveState($item, $state = 'active-sidebar-item tw-bg-white/10 tw-text-white')
     {
-        return $item->isActive() ? $state : 'tw-text-gray-600';
+        return $item->isActive() ? $state : 'tw-text-slate-400';
     }
 
     /**
@@ -47,7 +47,7 @@ class AdminlteCustomPresenter extends Presenter
      * @param  string  $state
      * @return null|string
      */
-    public function getActiveStateOnChild($item, $state = 'tw-bg-indigo-50/30 tw-text-indigo-700 tw-rounded-xl')
+    public function getActiveStateOnChild($item, $state = 'active-sidebar-parent tw-bg-white/5 tw-text-white')
     {
         return $item->hasActiveOnChild() ? $state : null;
     }
@@ -57,8 +57,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getDividerWrapper()
     {
-        // Assuming a divider is just a visual space in this design
-        return '<div class="tw-my-2"></div>';
+        return '<div class="tw-my-1 tw-border-t tw-border-white/5"></div>';
     }
 
     /**
@@ -66,7 +65,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getHeaderWrapper($item)
     {
-        return '<div class="tw-px-5 tw-pt-6 tw-pb-2 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-indigo-400">' . $item->title . '</div>';
+        return '<div class="tw-px-4 tw-pt-5 tw-pb-1 tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-slate-500">' . $item->title . '</div>';
     }
 
     /**
@@ -74,23 +73,15 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getMenuWithDropDownWrapper($item)
     {
-        $dropdownToggle = '<a href="#" title="" class="drop_down tw-flex tw-items-center tw-gap-4 tw-px-5 tw-py-3 tw-text-sm tw-font-semibold tw-tracking-tight tw-transition-all tw-duration-200 tw-rounded-full tw-whitespace-nowrap hover:tw-bg-indigo-50/50 hover:tw-text-indigo-600 ' . $this->getActiveStateOnChild($item, 'tw-bg-indigo-50 tw-text-indigo-700') . '" ' . $item->getAttributes() . '>' .
+        $dropdownToggle = '<a href="#" title="" class="drop_down tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-tracking-tight tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap hover:tw-bg-white/5 hover:tw-text-white ' . $this->getActiveStateOnChild($item) . '" ' . $item->getAttributes() . '>' .
         $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
-        '<svg aria-hidden="true" class="svg tw-ml-auto tw-text-indigo-400 tw-size-4 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $this->getArray($item) .
+        '<svg aria-hidden="true" class="svg tw-ml-auto tw-text-slate-500 tw-size-3.5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $this->getArray($item) .
             '</svg>' .
             '</a>';
 
-        $childItemsContainerStart = '';
-
-        $childItemsContainerEnd = '';
-
-        // Compile child menu items
         $childItems = $this->getChildMenuItems($item);
 
-        // echo "here";
-        // print_r($dropdownToggle);exit;
-
-        return '<div class="tw-mb-2">' . $dropdownToggle . $childItemsContainerStart . $childItems . $childItemsContainerEnd . '</div>' . PHP_EOL;
+        return '<div class="tw-mb-0.5">' . $dropdownToggle . $childItems . '</div>' . PHP_EOL;
     }
 
     /**
@@ -124,16 +115,16 @@ class AdminlteCustomPresenter extends Presenter
 
 
         if (count($item->getChilds()) > 0) {
-            
-            $children .= '<div class=" chiled tw-relative tw-mt-1 tw-mb-2 tw-pl-11" style="display:' . $displayStyle . '">
-            <div class="tw-absolute tw-inset-y-0 tw-w-0.5 tw-h-full tw-bg-indigo-100/50 tw-left-[22px]"></div>
-            <div class="tw-space-y-1">';
+
+            $children .= '<div class="chiled tw-relative tw-mt-0.5 tw-mb-1 tw-pl-9" style="display:' . $displayStyle . '">
+            <div class="tw-absolute tw-inset-y-0 tw-w-px tw-bg-white/10 tw-left-[18px]"></div>
+            <div class="tw-space-y-0.5">';
 
             foreach ($item->getChilds() as $child) {
 
-                $isActive = $child->isActive() ? 'tw-text-indigo-700 tw-font-bold' : 'tw-text-gray-500 hover:tw-text-indigo-600';
+                $isActive = $child->isActive() ? 'tw-text-sky-400 tw-font-semibold' : 'tw-text-slate-500 hover:tw-text-slate-200 hover:tw-bg-white/5';
 
-                $children .= '<a href="' . $child->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-tracking-tight tw-truncate tw-transition-all tw-duration-200 tw-rounded-full hover:tw-bg-indigo-50/50 tw-whitespace-nowrap ' . $isActive . '" ' . $child->getAttributes() . '>' .
+                $children .= '<a href="' . $child->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-tracking-tight tw-truncate tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap ' . $isActive . '" ' . $child->getAttributes() . '>' .
                 $child->getIcon() . ' <span>' . $child->title . '</span>' .
                     '</a>' . PHP_EOL;
             }
