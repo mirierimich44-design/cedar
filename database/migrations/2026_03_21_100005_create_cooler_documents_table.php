@@ -59,7 +59,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['documentable_type', 'documentable_id']);
+            // Note: morphs() already creates the documentable index
             $table->index(['document_type', 'status']);
             $table->index('expires_at');
         });
