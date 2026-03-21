@@ -80,7 +80,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                         @endif
                     </div>
                     @if (auth()->user()->can('dashboard.data'))
-                        <div class="tw-bg-white/10 tw-border tw-border-white/20 tw-rounded-xl tw-p-3 tw-mt-4 tw-flex tw-items-center tw-justify-between tw-text-white tw-backdrop-blur-sm">
+                        <div class="tw-rounded-xl tw-p-3 tw-mt-4 tw-flex tw-items-center tw-justify-between tw-text-white" style="background:rgba(0,0,0,0.18); border:1px solid rgba(255,255,255,0.15); backdrop-filter:blur(4px);">
                             <div class="tw-flex tw-items-center tw-gap-4">
                                 <div class="tw-animate-pulse tw-w-2 tw-h-2 tw-bg-green-400 tw-rounded-full"></div>
                                 <span class="tw-text-sm tw-font-medium">Live Sales Ticker: <span id="ticker_today_sales" class="tw-font-bold">{{ session('currency')['symbol'] }} 0.00</span></span>
@@ -223,9 +223,8 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
             @if ($is_admin)
                 <div class="tw-relative">
                     <div class="tw-absolute tw-inset-0 tw-grid" aria-hidden="true">
-                        <div class="tw-bg-gradient-to-r tw-from-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 tw-to-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-900"></div>
-                        <div class="tw-bg-gradient-to-r tw-from-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 tw-to-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-900 xl:tw-bg-none xl:tw-bg-gray-100">
-                        </div>
+                        <div style="background:linear-gradient(to right, var(--theme-dark), var(--theme-main));"></div>
+                        <div class="xl:tw-bg-gray-100" style="background:linear-gradient(to right, var(--theme-dark), var(--theme-main));"></div>
                     </div>
                     <div class="tw-px-5 tw-isolate">
                         <div
