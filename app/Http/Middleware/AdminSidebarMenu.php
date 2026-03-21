@@ -178,12 +178,12 @@ class AdminSidebarMenu
                         $sub->url(
                             action([\App\Http\Controllers\EtimsReportController::class, 'index']),
                             __('job.etims_invoices'),
-                            ['icon' => '<i class="fa fa-file-text-o"></i>', 'active' => request()->segment(1) == 'etims-report' && request()->segment(2) != 'settings']
+                            ['icon' => '', 'active' => request()->segment(1) == 'etims-report' && request()->segment(2) != 'settings']
                         );
                         $sub->url(
                             route('etims.settings'),
                             'eTIMS Settings',
-                            ['icon' => '<i class="fa fa-cog"></i>', 'active' => request()->segment(1) == 'etims-settings']
+                            ['icon' => '', 'active' => request()->segment(1) == 'etims-settings']
                         );
                     },
                     ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
