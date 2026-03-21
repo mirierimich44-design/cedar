@@ -172,15 +172,26 @@ class AdminSidebarMenu
 
             //eTIMS
             if (auth()->user()->can('access_etims_report')) {
-                $menu->url(
-                    action([\App\Http\Controllers\EtimsReportController::class, 'index']),
-                    __('job.etims_invoices'),
+                $menu->dropdown(
+                    'eTIMS',
+                    function ($sub) {
+                        $sub->url(
+                            action([\App\Http\Controllers\EtimsReportController::class, 'index']),
+                            __('job.etims_invoices'),
+                            ['icon' => '<i class="fa fa-file-text-o"></i>', 'active' => request()->segment(1) == 'etims-report' && request()->segment(2) != 'settings']
+                        );
+                        $sub->url(
+                            route('etims.settings'),
+                            'eTIMS Settings',
+                            ['icon' => '<i class="fa fa-cog"></i>', 'active' => request()->segment(1) == 'etims-settings']
+                        );
+                    },
                     ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M7 18a4.6 4.402 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
                 <path d="M9 15l3 -3l3 3" />
                 <path d="M12 12l0 9" />
-              </svg>', 'active' => request()->segment(1) == 'etims-report']
+              </svg>', 'active' => request()->segment(1) == 'etims-report' || request()->segment(1) == 'etims-settings']
                 )->order(17);
             }
 

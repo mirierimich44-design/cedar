@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Business;
 use App\Transaction;
 use App\Utils\DigitaxService;
 use App\Utils\ModuleUtil;
@@ -80,6 +81,42 @@ class EtimsReportController extends Controller
             )->first();
 
         return view('etims.index')->with(compact('stats'));
+    }
+
+    public function settings()
+    {
+        if (!auth()->user()->can('access_etims_report')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $business = Business::findOrFail($business_id);
+
+        return view('etims.settings', compact('business'));
+    }
+
+    public function saveSettings(Request $request)
+    {
+        if (!auth()->user()->can('access_etims_report')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'digitax_api_key' => 'nullable|string|max:255',
+            'etims_tpin' => 'nullable|string|max:50',
+            'etims_sync_mode' => 'required|in:realtime,background,manual',
+        ]);
+
+        $business_id = request()->session()->get('user.business_id');
+        $business = Business::findOrFail($business_id);
+
+        $business->update([
+            'digitax_api_key' => $request->digitax_api_key,
+            'etims_tpin' => $request->etims_tpin,
+            'etims_sync_mode' => $request->etims_sync_mode,
+        ]);
+
+        return redirect()->route('etims.settings')->with('status', 'eTIMS settings saved successfully.');
     }
 
     public function syncInvoice($id)
