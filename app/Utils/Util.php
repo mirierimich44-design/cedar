@@ -1295,7 +1295,11 @@ class Util
 
         $contact_payments = $query->first();
 
-        // + $contact_payments->sell_return_paid add this in due because after paymnet for sell return not calculated 
+        if (empty($contact_payments)) {
+            return 0;
+        }
+
+        // + $contact_payments->sell_return_paid add this in due because after paymnet for sell return not calculated
 
         $due = $contact_payments->total_invoice + $contact_payments->total_purchase - $contact_payments->total_paid - $contact_payments->purchase_paid + $contact_payments->opening_balance - $contact_payments->opening_balance_paid - $contact_payments->total_sell_return + $contact_payments->sell_return_paid;
 
