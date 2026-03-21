@@ -55,22 +55,14 @@
         @endif
     @endif
 
-    {{-- Credit Sale --}}
+    {{-- Credit Button --}}
     @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
         @if(empty($pos_settings['disable_credit_sale_button']))
-        <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" data-toggle="modal" data-target="#credit_sale_customer_modal" title="@lang('lang_v1.credit_sale')">
+        <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" title="Credit Options">
             <i class="fas fa-handshake"></i>
             <span class="btn-text">Credit</span>
         </button>
         @endif
-    @endif
-
-    {{-- Collect Debt --}}
-    @if(auth()->user()->can('sell.payments'))
-    <button type="button" class="pos-action-btn pos-action-collect-debt" data-toggle="modal" data-target="#collect_debt_modal" id="pos-collect-debt" title="Collect Customer Debt" style="background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);">
-        <i class="fas fa-hand-holding-usd"></i>
-        <span class="btn-text">Collect</span>
-    </button>
     @endif
 
     {{-- Orders --}}
@@ -280,7 +272,7 @@
                     );
 
                     lsXhr = $.ajax({
-                        url: '/products/list',
+                        url: '{{ url("products/list") }}',
                         dataType: 'json',
                         data: {
                             term:           term,
@@ -475,18 +467,73 @@
 
 @include('sale_pos.partials.edit_shipping_modal')
 
-{{-- Credit Sale Customer Search Modal --}}
+{{-- Credit Options Modal --}}
 @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
     @if(empty($pos_settings['disable_credit_sale_button']))
+
+    {{-- Step 1: Credit Options Chooser --}}
+    <div class="modal fade" id="credit_options_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%); border:none; padding:18px 20px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1;font-size:26px;text-shadow:none;">&times;</button>
+                    <h4 class="modal-title" style="color:white;font-weight:700;font-size:17px;">
+                        <i class="fas fa-handshake"></i> Credit Options
+                    </h4>
+                </div>
+                <div class="modal-body" style="padding:16px 14px; display:flex; flex-direction:column; gap:10px;">
+
+                    {{-- Option 1: Complete Credit Sale --}}
+                    <button type="button" id="copt_complete_credit_sale" class="btn btn-block" style="padding:14px 16px; background:#f5f3ff; border:2px solid #7c3aed; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-check-circle" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Complete Credit Sale</strong>
+                            <small style="color:#64748b;font-size:11px;">Sell now, collect payment later</small>
+                        </span>
+                    </button>
+
+                    {{-- Option 2: Collect Payment --}}
+                    @if(auth()->user()->can('sell.payments'))
+                    <button type="button" id="copt_collect_debt" class="btn btn-block" style="padding:14px 16px; background:#f0f9ff; border:2px solid #0369a1; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#0369a1,#0ea5e9);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-hand-holding-usd" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Collect Payment</strong>
+                            <small style="color:#64748b;font-size:11px;">Receive payment from a customer</small>
+                        </span>
+                    </button>
+                    @endif
+
+                    {{-- Option 3: Add Customer --}}
+                    <button type="button" id="copt_add_customer" class="btn btn-block" style="padding:14px 16px; background:#f0fdf4; border:2px solid #059669; border-radius:10px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer;"
+                        data-add-customer-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}">
+                        <span style="width:36px;height:36px;background:linear-gradient(135deg,#059669,#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-user-plus" style="color:white;font-size:16px;"></i>
+                        </span>
+                        <span style="text-align:left;">
+                            <strong style="display:block;color:#1e293b;font-size:14px;">Add Customer</strong>
+                            <small style="color:#64748b;font-size:11px;">Create a new customer profile</small>
+                        </span>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Step 2: Credit Sale Customer Search Modal --}}
     <div class="modal fade" id="credit_sale_customer_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border: none; padding: 20px;">
                     <button type="button" class="close" data-dismiss="modal" style="color: white; opacity: 1; font-size: 28px; text-shadow: none;">
                         <span>&times;</span>
                     </button>
                     <h4 class="modal-title" style="color: white; font-weight: 700; font-size: 20px;">
-                        <i class="fas fa-handshake"></i> Credit Sale - Select Customer
+                        <i class="fas fa-handshake"></i> Credit Sale — Select Customer
                     </h4>
                 </div>
                 <div class="modal-body" style="padding: 25px;">
@@ -495,14 +542,13 @@
                             <label style="font-weight: 600; color: #374151; margin-bottom: 0;">
                                 <i class="fas fa-search" style="color: #7c3aed;"></i> Search Customer (Name or Phone)
                             </label>
-                            <button type="button" class="btn btn-xs btn-primary btn-modal" 
-                                data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}" 
+                            <button type="button" class="btn btn-xs btn-primary btn-modal"
+                                data-href="{{action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer'])}}"
                                 data-container=".contact_modal">
                                 <i class="fa fa-plus"></i> Add New
                             </button>
                         </div>
-                        <select id="credit_sale_customer_search" class="form-control" style="width: 100%;">
-                        </select>
+                        <select id="credit_sale_customer_search" class="form-control" style="width: 100%;"></select>
                     </div>
 
                     <div id="credit_customer_details" class="hide" style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -529,9 +575,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 15px 25px; background: #f8fafc;">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">
-                        Cancel
-                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 6px;">Cancel</button>
                     <button type="button" id="confirm_credit_sale" class="btn btn-primary" disabled style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); border: none; border-radius: 6px; padding: 10px 25px;">
                         <i class="fas fa-check"></i> Complete Credit Sale
                     </button>
@@ -541,174 +585,810 @@
     </div>
 
     <script type="text/javascript">
-    $(document).ready(function() {
-        // Auto-populate customer if already selected on main POS screen
-        $('#credit_sale_customer_modal').on('shown.bs.modal', function () {
-            var main_customer_id = $('#customer_id').val();
-            var main_customer_name = $('#customer_id').select2('data')[0]?.text;
-
-            if (main_customer_id && main_customer_id != 1) { // 1 is usually walk-in
-                var newOption = new Option(main_customer_name, main_customer_id, true, true);
-                $('#credit_sale_customer_search').append(newOption).trigger('change');
-                $('#credit_sale_customer_search').trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: { id: main_customer_id, text: main_customer_name }
-                    }
-                });
+    (function() {
+        function initCredit() {
+            if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+                setTimeout(initCredit, 200);
+                return;
             }
-        });
+            var $ = jQuery;
 
-        // Initialize Select2 for customer search
-        $('#credit_sale_customer_search').select2({
-            ajax: {
-                url: '/contacts/customers',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        q: params.term,
-                        page: params.page
-                    };
-                },
-                processResults: function(data) {
-                    return { results: data };
+            // ── Open credit options popup ────────────────────────────────
+            $(document).on('click', '#pos-credit-sale-btn', function() {
+                $('#credit_options_modal').modal('show');
+            });
+
+            // ── Option 1: Complete Credit Sale ───────────────────────────
+            $(document).on('click', '#copt_complete_credit_sale', function() {
+                $('#credit_options_modal').modal('hide');
+
+                var finalTotal = parseFloat($('#final_total_input').val()) || 0;
+                if (finalTotal <= 0) {
+                    toastr.warning('Please add products to the cart first.');
+                    return;
                 }
-            },
-            placeholder: 'Type customer name or phone number...',
-            minimumInputLength: 1,
-            allowClear: true,
-            dropdownParent: $('#credit_sale_customer_modal'),
-            templateResult: function(customer) {
-                if (!customer.id) return customer.text;
-                var mobile = customer.mobile ? ' - ' + customer.mobile : '';
-                return $('<span><strong>' + customer.text + '</strong>' + mobile + '</span>');
-            }
-        });
 
-        // Listen for new contact added via modal
-        $(document).on('contact_added', function(e, contact) {
-            if ($('#credit_sale_customer_modal').is(':visible')) {
-                var newOption = new Option(contact.name, contact.id, true, true);
-                $('#credit_sale_customer_search').append(newOption).trigger('change');
-                $('#credit_sale_customer_search').trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: contact
+                var customerId = $('#customer_id').val();
+                var walkInId   = $('#default_customer_id').val() || '1';
+                if (customerId && customerId != walkInId) {
+                    // A real customer is already selected on the POS — finalize immediately
+                    setTimeout(function() { doCompleteCreditSale(customerId, null); }, 300);
+                } else {
+                    // Walk-in / no customer selected — ask user to pick one
+                    setTimeout(function() { $('#credit_sale_customer_modal').modal('show'); }, 300);
+                }
+            });
+
+            // ── Option 2: Collect Debt ───────────────────────────────────
+            $(document).on('click', '#copt_collect_debt', function() {
+                $('#credit_options_modal').modal('hide');
+                setTimeout(function() {
+                    $('#collect_debt_modal').modal('show');
+                }, 300);
+            });
+
+            // ── Option 3: Add Customer ───────────────────────────────────
+            $(document).on('click', '#copt_add_customer', function() {
+                $('#credit_options_modal').modal('hide');
+                var href = $(this).data('add-customer-href');
+                setTimeout(function() {
+                    $.ajax({
+                        url: href,
+                        success: function(result) {
+                            $('.contact_modal').html(result).modal('show');
+                        }
+                    });
+                }, 300);
+            });
+
+            // ── Auto-populate customer on credit sale modal open ─────────
+            $('#credit_sale_customer_modal').on('shown.bs.modal', function() {
+                var main_id   = $('#customer_id').val();
+                var main_data = $('#customer_id').select2('data');
+                var main_name = (main_data && main_data[0]) ? main_data[0].text : '';
+
+                if (main_id && main_id != '1') {
+                    var opt = new Option(main_name, main_id, true, true);
+                    $('#credit_sale_customer_search').append(opt).trigger('change');
+                    $('#credit_sale_customer_search').trigger({
+                        type: 'select2:select',
+                        params: { data: { id: main_id, text: main_name } }
+                    });
+                }
+            });
+
+            // ── Init Select2 for credit customer search ──────────────────
+            $('#credit_sale_customer_search').select2({
+                ajax: {
+                    url: '{{ url("contacts/customers") }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) { return { q: params.term, page: params.page }; },
+                    processResults: function(data) { return { results: data }; }
+                },
+                placeholder: 'Type customer name or phone number...',
+                minimumInputLength: 1,
+                allowClear: true,
+                dropdownParent: $('#credit_sale_customer_modal'),
+                templateResult: function(c) {
+                    if (!c.id) return c.text;
+                    return $('<span><strong>' + c.text + '</strong>' + (c.mobile ? ' - ' + c.mobile : '') + '</span>');
+                }
+            });
+
+            // ── On customer selection — fetch details ────────────────────
+            $('#credit_sale_customer_search').on('select2:select', function(e) {
+                var customerId = e.params.data.id;
+                $.ajax({
+                    url: '{{ url("contacts") }}/' + customerId,
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.data && result.data.length > 0) {
+                            var customer = result.data[0];
+                            $('#credit_customer_name').text(customer.name || '-');
+                            $('#credit_customer_phone').text(customer.mobile || customer.landline || '-');
+                            $('#credit_customer_balance').text(__currency_trans_from_en(customer.total_due || 0));
+                            $('#credit_customer_limit').text(customer.credit_limit ? __currency_trans_from_en(customer.credit_limit) : 'Unlimited');
+                            $('#credit_customer_details').removeClass('hide');
+
+                            var currentTotal = parseFloat($('#final_total_input').val()) || 0;
+                            var totalDue = parseFloat(customer.total_due) || 0;
+                            var creditLimit = customer.credit_limit ? parseFloat(customer.credit_limit) : null;
+
+                            if (creditLimit !== null && (totalDue + currentTotal) > creditLimit) {
+                                $('#credit_warning_message').text('This sale will exceed the customer credit limit!');
+                                $('#credit_sale_warning').removeClass('hide');
+                            } else {
+                                $('#credit_sale_warning').addClass('hide');
+                            }
+                            $('#confirm_credit_sale').prop('disabled', false);
+                        }
                     }
                 });
+            });
+
+            // ── Clear on credit modal close ──────────────────────────────
+            $('#credit_sale_customer_modal').on('hidden.bs.modal', function() {
+                $('#credit_sale_customer_search').val(null).trigger('change');
+                $('#credit_customer_details').addClass('hide');
+                $('#credit_sale_warning').addClass('hide');
+                $('#confirm_credit_sale').prop('disabled', true);
+            });
+
+            // ── New contact added — update credit modal search ───────────
+            $(document).on('contact_added', function(e, contact) {
+                if ($('#credit_sale_customer_modal').is(':visible')) {
+                    var opt = new Option(contact.name, contact.id, true, true);
+                    $('#credit_sale_customer_search').append(opt).trigger('change');
+                    $('#credit_sale_customer_search').trigger({ type: 'select2:select', params: { data: contact } });
+                }
+            });
+
+            // ── Shared credit sale submitter ──────────────────────────────
+            // Uses the existing POS submit flow (pos_form_obj / jQuery validate)
+            // exactly like .pos-express-finalize[data-pay_method="credit_sale"] does.
+            function doCompleteCreditSale(customerId, customerName) {
+                var form = $('form#add_pos_sell_form').length
+                    ? $('form#add_pos_sell_form')
+                    : $('form#edit_pos_sell_form');
+
+                // Ensure the customer is set on the main POS form
+                if (customerId && $('#customer_id').val() != customerId) {
+                    var opt = new Option(customerName || customerId, customerId, true, true);
+                    $('#customer_id').append(opt).trigger('change');
+                }
+
+                // Ensure is_credit_sale=1 is in the form — create the input
+                // if the POS setting that normally renders it is disabled
+                if ($('#is_credit_sale').length) {
+                    $('#is_credit_sale').val(1);
+                } else {
+                    form.append('<input type="hidden" name="is_credit_sale" id="is_credit_sale" value="1">');
+                }
+
+                // Trigger the normal POS form submit — goes through pos.js
+                // submitHandler which builds products, handles receipt & reset
+                form.submit();
+            }
+
+            // ── Confirm & submit credit sale (from customer modal) ────────
+            $(document).on('click', '#confirm_credit_sale', function() {
+                var customerId   = $('#credit_sale_customer_search').val();
+                var sel2data     = $('#credit_sale_customer_search').select2('data');
+                var customerName = (sel2data && sel2data[0]) ? sel2data[0].text : '';
+
+                if (!customerId) { toastr.warning('Please select a customer.'); return; }
+
+                $('#credit_sale_customer_modal').modal('hide');
+                setTimeout(function() { doCompleteCreditSale(customerId, customerName); }, 300);
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCredit);
+        } else {
+            setTimeout(initCredit, 100);
+        }
+    })();
+    </script>
+    @endif
+@endif
+
+{{-- ════════════════════════════════════════════════════════════════
+     COLLECT DEBT MODAL
+     ════════════════════════════════════════════════════════════════ --}}
+@if(auth()->user()->can('sell.payments'))
+<div class="modal fade" id="collect_debt_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+
+            {{-- Header --}}
+            <div class="modal-header" style="background:linear-gradient(135deg,#0369a1 0%,#0ea5e9 100%); border:none; padding:20px;">
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1; font-size:28px; text-shadow:none;">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" style="color:white; font-weight:700; font-size:20px;">
+                    <i class="fas fa-hand-holding-usd"></i> Collect Payment
+                </h4>
+            </div>
+
+            <div class="modal-body" style="padding:25px;">
+
+                {{-- Step 1: Customer Search --}}
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label style="font-weight:600; color:#374151; margin-bottom:8px; display:block;">
+                        <i class="fas fa-search" style="color:#0369a1;"></i> Search Customer (Name or Phone)
+                    </label>
+                    <div style="position:relative;">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="cd_customer_input" class="form-control"
+                                   placeholder="Type customer name or phone number..."
+                                   autocomplete="off">
+                        </div>
+                        <div id="cd_customer_dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100000; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.15); max-height:300px; overflow-y:auto; margin-top:4px; padding:4px 0;"></div>
+                    </div>
+                    <small class="text-muted">Type at least 2 characters to search</small>
+                </div>
+
+                {{-- Step 2: Customer card --}}
+                <div id="cd_customer_card" class="hide" style="margin-bottom:15px; padding:16px; background:#f0f9ff; border-radius:10px; border:1px solid #bae6fd;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:#64748b;"><i class="fas fa-user" style="width:16px;"></i> Name:</span>
+                        <strong id="cd_cust_name" style="color:#1e293b;"></strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="color:#64748b;"><i class="fas fa-phone" style="width:16px;"></i> Phone:</span>
+                        <strong id="cd_cust_phone" style="color:#1e293b;"></strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;"><i class="fas fa-wallet" style="width:16px;"></i> Outstanding:</span>
+                        <strong id="cd_cust_balance" style="color:#dc2626; font-size:16px;"></strong>
+                    </div>
+                </div>
+
+                {{-- Zero-balance notice --}}
+                <div id="cd_zero_balance_banner" class="hide" style="padding:12px 16px; background:#fef3c7; border-radius:8px; color:#92400e; margin-bottom:12px;">
+                    <i class="fas fa-info-circle"></i> This customer has no outstanding balance.
+                </div>
+
+                {{-- Step 3+4: Amount + Payment (shown after customer selected and has balance) --}}
+                <div id="cd_payment_section" class="hide">
+
+                    {{-- Amount row --}}
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label style="font-weight:600; color:#374151; margin-bottom:6px; display:block;">Amount to Collect</label>
+                        <div style="display:flex; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                            <span style="background:#f1f5f9; padding:10px 14px; font-weight:700; color:#64748b; border-right:2px solid #e2e8f0;">KES</span>
+                            <input type="number" id="cd_amount" class="form-control"
+                                   step="0.01" min="0.01"
+                                   style="border:none; padding:10px 14px; font-size:16px; font-weight:700; outline:none; flex:1; box-shadow:none;">
+                        </div>
+                        <div id="cd_remaining_info" style="margin-top:5px; font-size:12px; color:#64748b;"></div>
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="cursor:pointer; font-size:13px; color:#374151; font-weight:500;">
+                            <input type="checkbox" id="cd_full_balance_chk" checked style="margin-right:5px;">
+                            Pay full outstanding balance
+                        </label>
+                    </div>
+
+                    {{-- Payment method tabs --}}
+                    <ul class="nav nav-tabs" id="cd_payment_tabs" style="margin-bottom:15px; border-bottom:2px solid #e2e8f0;">
+                        <li class="active" id="cd_tab_cash_li">
+                            <a href="#cd_cash_tab" data-toggle="tab" style="font-weight:600; color:#374151; border-radius:6px 6px 0 0;">
+                                <i class="fas fa-money-bill-wave" style="color:#16a34a;"></i> Cash
+                            </a>
+                        </li>
+                        <li id="cd_tab_mpesa_li">
+                            <a href="#cd_mpesa_tab" data-toggle="tab" style="font-weight:600; color:#374151; border-radius:6px 6px 0 0;">
+                                <i class="fas fa-mobile-alt" style="color:#00B09B;"></i> M-Pesa
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        {{-- ── Cash Tab ── --}}
+                        <div id="cd_cash_tab" class="tab-pane active" style="padding:5px 0;">
+                            <div class="form-group">
+                                <label style="font-weight:600; color:#374151; font-size:13px;">Note (optional)</label>
+                                <input type="text" id="cd_cash_note" class="form-control" placeholder="e.g. Cash received at counter">
+                            </div>
+                            <button type="button" id="cd_cash_submit_btn" class="btn btn-success btn-block"
+                                    style="padding:12px; font-weight:700; border-radius:8px; font-size:15px;">
+                                <i class="fas fa-check"></i> Record Cash Payment
+                            </button>
+                        </div>
+
+                        {{-- ── M-Pesa Tab ── --}}
+                        <div id="cd_mpesa_tab" class="tab-pane" style="padding:5px 0;">
+
+                            {{-- Mode toggle --}}
+                            <div style="display:flex; gap:8px; margin-bottom:15px;">
+                                <button type="button" id="cd_mpesa_stk_mode_btn" class="btn btn-sm btn-primary"
+                                        style="flex:1; border-radius:6px; font-weight:600;">
+                                    <i class="fas fa-paper-plane"></i> STK Push
+                                </button>
+                                <button type="button" id="cd_mpesa_manual_mode_btn" class="btn btn-sm btn-default"
+                                        style="flex:1; border-radius:6px; font-weight:600;">
+                                    <i class="fas fa-keyboard"></i> Manual
+                                </button>
+                            </div>
+
+                            {{-- STK section --}}
+                            <div id="cd_stk_section">
+
+                                {{-- STK input --}}
+                                <div id="cd_stk_input_area">
+                                    <div class="form-group">
+                                        <label style="font-weight:600; color:#374151; font-size:13px;">Customer Phone</label>
+                                        <div style="display:flex; border:2px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                                            <span style="background:#f1f5f9; padding:10px 12px; font-weight:700; color:#64748b; border-right:2px solid #e2e8f0;">+254</span>
+                                            <input type="tel" id="cd_stk_phone" maxlength="9" placeholder="712345678"
+                                                   style="flex:1; border:none; padding:10px 12px; font-size:15px; font-weight:600; outline:none;">
+                                        </div>
+                                    </div>
+                                    <button type="button" id="cd_send_stk_btn" class="btn btn-block"
+                                            style="padding:12px; background:linear-gradient(135deg,#00B09B 0%,#96C93D 100%); color:white; border:none; border-radius:8px; font-weight:700; font-size:14px;">
+                                        <i class="fas fa-paper-plane"></i> Send STK Push
+                                    </button>
+                                </div>
+
+                                {{-- Waiting state --}}
+                                <div id="cd_stk_waiting" style="display:none; text-align:center; padding:20px 10px;">
+                                    <div style="width:50px; height:50px; background:#fef3c7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                                        <i class="fas fa-spinner fa-spin" style="color:#f59e0b; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#1e293b; margin-bottom:6px;">Waiting for PIN...</h4>
+                                    <p style="color:#64748b; margin-bottom:12px;">Customer should check their phone</p>
+                                    <span id="cd_stk_countdown" style="display:inline-block; background:#fef3c7; color:#d97706; font-size:22px; font-weight:800; padding:10px 20px; border-radius:8px;">2:00</span>
+                                    <div style="margin-top:12px;">
+                                        <button type="button" id="cd_stk_cancel_btn" class="btn btn-sm btn-default">Cancel</button>
+                                    </div>
+                                </div>
+
+                                {{-- STK success state --}}
+                                <div id="cd_stk_success" style="display:none; text-align:center; padding:15px 10px;">
+                                    <div style="width:50px; height:50px; background:#d1fae5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                                        <i class="fas fa-check" style="color:#10b981; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#10b981; margin-bottom:4px;">Payment Received!</h4>
+                                    <p style="color:#64748b; margin-bottom:4px;">Ref: <strong id="cd_stk_receipt" style="font-family:monospace; letter-spacing:1px;"></strong></p>
+                                    <button type="button" id="cd_stk_confirm_btn" class="btn btn-success btn-block"
+                                            style="border-radius:8px; font-weight:700; padding:12px; margin-top:12px;">
+                                        <i class="fas fa-check-double"></i> Confirm &amp; Record
+                                    </button>
+                                </div>
+
+                                {{-- STK error / timeout state --}}
+                                <div id="cd_stk_error" style="display:none; text-align:center; padding:15px 10px;">
+                                    <div style="width:50px; height:50px; background:#fee2e2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">
+                                        <i class="fas fa-times" style="color:#ef4444; font-size:20px;"></i>
+                                    </div>
+                                    <h4 style="font-weight:700; color:#ef4444; margin-bottom:4px;">No Response</h4>
+                                    <p id="cd_stk_err_msg" style="color:#64748b; margin-bottom:12px;"></p>
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="button" id="cd_stk_retry_btn" class="btn btn-primary" style="flex:1; border-radius:6px; font-weight:600;">Retry</button>
+                                        <button type="button" id="cd_stk_fallback_manual_btn" class="btn btn-default" style="flex:1; border-radius:6px; font-weight:600;">Enter Manually</button>
+                                    </div>
+                                </div>
+
+                            </div>{{-- /cd_stk_section --}}
+
+                            {{-- Manual section --}}
+                            <div id="cd_manual_section" style="display:none;">
+                                <div class="form-group">
+                                    <label style="font-weight:600; color:#374151; font-size:13px;">M-Pesa Reference No.</label>
+                                    <input type="text" id="cd_manual_ref" class="form-control"
+                                           placeholder="e.g. QZK92PX..."
+                                           style="font-family:monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px;">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight:600; color:#374151; font-size:13px;">Note (optional)</label>
+                                    <input type="text" id="cd_manual_note" class="form-control" placeholder="optional">
+                                </div>
+                                <button type="button" id="cd_manual_submit_btn" class="btn btn-block"
+                                        style="padding:12px; background:linear-gradient(135deg,#00B09B 0%,#96C93D 100%); color:white; border:none; border-radius:8px; font-weight:700; font-size:14px;">
+                                    <i class="fas fa-check"></i> Record M-Pesa Payment
+                                </button>
+                            </div>
+
+                        </div>{{-- /cd_mpesa_tab --}}
+                    </div>{{-- /tab-content --}}
+
+                </div>{{-- /cd_payment_section --}}
+
+                {{-- Success banner --}}
+                <div id="cd_success_banner" style="display:none; margin-top:15px; padding:12px 16px; background:#d1fae5; border-radius:8px; color:#065f46; font-weight:600; text-align:center;">
+                    <i class="fas fa-check-circle"></i> <span id="cd_success_msg"></span>
+                </div>
+
+            </div>{{-- /modal-body --}}
+
+            <div class="modal-footer" style="border-top:1px solid #e2e8f0; padding:15px 25px; background:#f8fafc;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function() {
+    function initCollectDebt() {
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
+            setTimeout(initCollectDebt, 200);
+            return;
+        }
+        var $ = jQuery;
+
+        // ── State ────────────────────────────────────────────────────────
+        var cds = {
+            customerId: null,
+            balance: 0,
+            phone: '',
+            mpesaTxnId: null,
+            pollInterval: null,
+            countdownInterval: null
+        };
+
+        // ── Helpers ──────────────────────────────────────────────────────
+        function stopTimers() {
+            if (cds.pollInterval)     { clearInterval(cds.pollInterval);     cds.pollInterval     = null; }
+            if (cds.countdownInterval){ clearInterval(cds.countdownInterval); cds.countdownInterval = null; }
+        }
+
+        function formatPhoneLocal(phone) {
+            if (!phone) return '';
+            phone = String(phone).replace(/\D/g, '');
+            if (phone.startsWith('254')) phone = phone.substring(3);
+            if (phone.startsWith('0'))   phone = phone.substring(1);
+            return phone;
+        }
+
+        // ── Full reset ───────────────────────────────────────────────────
+        function cdReset() {
+            cds.customerId = null;
+            cds.balance = 0;
+            cds.phone = '';
+            cds.mpesaTxnId = null;
+            stopTimers();
+
+            if (cdXhr) { cdXhr.abort(); cdXhr = null; }
+            clearTimeout(cdTimer);
+            $cdInput.val('');
+            $cdDrop.hide().empty();
+            cds.customerId = null;
+            $('#cd_customer_card, #cd_payment_section, #cd_zero_balance_banner').addClass('hide');
+            $('#cd_success_banner').hide();
+
+            // amount
+            $('#cd_amount').val('');
+            $('#cd_full_balance_chk').prop('checked', true);
+            $('#cd_remaining_info').text('');
+
+            // cash
+            $('#cd_cash_note').val('');
+
+            // tabs back to Cash
+            $('#cd_tab_cash_li').addClass('active'); $('#cd_tab_mpesa_li').removeClass('active');
+            $('#cd_cash_tab').addClass('active');    $('#cd_mpesa_tab').removeClass('active');
+
+            // stk / manual
+            stkReset();
+            cdShowStk(true);
+        }
+
+        // ── STK reset ────────────────────────────────────────────────────
+        function stkReset() {
+            stopTimers();
+            cds.mpesaTxnId = null;
+            $('#cd_stk_input_area').show();
+            $('#cd_stk_waiting, #cd_stk_success, #cd_stk_error').hide();
+            $('#cd_stk_receipt').text('');
+            $('#cd_stk_countdown').text('2:00');
+            $('#cd_stk_phone').val(formatPhoneLocal(cds.phone));
+        }
+
+        // ── STK / Manual toggle ──────────────────────────────────────────
+        function cdShowStk(show) {
+            if (show) {
+                $('#cd_stk_section').show(); $('#cd_manual_section').hide();
+                $('#cd_mpesa_stk_mode_btn').removeClass('btn-default').addClass('btn-primary');
+                $('#cd_mpesa_manual_mode_btn').removeClass('btn-primary').addClass('btn-default');
+            } else {
+                $('#cd_stk_section').hide(); $('#cd_manual_section').show();
+                $('#cd_mpesa_stk_mode_btn').removeClass('btn-primary').addClass('btn-default');
+                $('#cd_mpesa_manual_mode_btn').removeClass('btn-default').addClass('btn-primary');
+            }
+        }
+
+        // ── Custom customer search (same pattern as Lost Sale / POS search) ──
+        var cdTimer  = null;
+        var cdXhr    = null;
+        var $cdInput = $('#cd_customer_input');
+        var $cdDrop  = $('#cd_customer_dropdown');
+
+        function cdRenderDropdown(customers) {
+            $cdDrop.empty();
+            if (!customers.length) {
+                $cdDrop.append($('<div>').css({ padding:'14px', textAlign:'center', color:'#94a3b8', fontSize:'13px' }).text('No customers found')).show();
+                return;
+            }
+            $.each(customers, function(i, c) {
+                var $row = $('<div>').css({ display:'flex', alignItems:'center', padding:'10px 16px', borderBottom:'1px solid #f1f5f9', cursor:'pointer', background:'#fff' });
+                var $info = $('<div>').css({ flex:'1' });
+                $('<div>').css({ fontWeight:'700', fontSize:'13px', color:'#1e293b' }).text(c.text || c.name || '—').appendTo($info);
+                if (c.mobile) {
+                    $('<div>').css({ fontSize:'11px', color:'#64748b', marginTop:'2px' }).text(c.mobile).appendTo($info);
+                }
+                $row.append($info);
+                $row.on('mouseenter', function() { $(this).css('background','#f0f9ff'); })
+                    .on('mouseleave', function() { $(this).css('background','#fff'); })
+                    .on('click', function() {
+                        $cdDrop.hide().empty();
+                        $cdInput.val(c.text || c.name || '');
+                        cdLoadCustomer(c.id);
+                    });
+                $cdDrop.append($row);
+            });
+            $cdDrop.show();
+        }
+
+        $cdInput.on('input', function() {
+            var term = $(this).val().trim();
+            clearTimeout(cdTimer);
+            if (term.length < 2) {
+                if (cdXhr) { cdXhr.abort(); cdXhr = null; }
+                $cdDrop.hide().empty();
+                return;
+            }
+            cdTimer = setTimeout(function() {
+                if (cdXhr) { cdXhr.abort(); }
+                $cdDrop.show().html('<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
+                cdXhr = $.ajax({
+                    url: '{{ url("contacts/customers") }}',
+                    dataType: 'json',
+                    data: { q: term },
+                    success: function(data) {
+                        cdRenderDropdown(Array.isArray(data) ? data : []);
+                    },
+                    error: function(xhr) {
+                        if (xhr.statusText !== 'abort') { $cdDrop.hide().empty(); }
+                    }
+                });
+            }, 300);
+        });
+
+        // Close dropdown when clicking outside
+        $(document).on('click.cdDropdown', function(e) {
+            if (!$(e.target).closest('#cd_customer_input, #cd_customer_dropdown').length) {
+                $cdDrop.hide().empty();
             }
         });
 
-        // On customer selection
-        $('#credit_sale_customer_search').on('select2:select', function(e) {
-            var data = e.params.data;
-            var customerId = data.id;
-
-            // Fetch customer details
+        function cdLoadCustomer(cid) {
             $.ajax({
-                url: '/contacts/' + customerId,
+                url: '{{ url("contacts/credit-info") }}/' + cid,
                 dataType: 'json',
-                success: function(result) {
-                    if (result.data && result.data.length > 0) {
-                        var customer = result.data[0];
-                        $('#credit_customer_name').text(customer.name || '-');
-                        $('#credit_customer_phone').text(customer.mobile || customer.landline || '-');
-                        $('#credit_customer_balance').text(__currency_trans_from_en(customer.total_due || 0));
-                        $('#credit_customer_limit').text(customer.credit_limit ? __currency_trans_from_en(customer.credit_limit) : 'Unlimited');
-                        $('#credit_customer_details').removeClass('hide');
+                success: function(r) {
+                    cds.customerId = r.id;
+                    cds.balance    = parseFloat(r.sell_due) || 0;
+                    cds.phone      = r.mobile || '';
 
-                        // Check credit limit
-                        var currentTotal = parseFloat($('#final_total_input').val()) || 0;
-                        var totalDue = parseFloat(customer.total_due) || 0;
-                        var creditLimit = customer.credit_limit ? parseFloat(customer.credit_limit) : null;
+                    $('#cd_cust_name').text(r.name || '—');
+                    $('#cd_cust_phone').text(r.mobile || '—');
+                    $('#cd_cust_balance').text(r.sell_due_formatted || ('KES ' + cds.balance.toFixed(2)));
+                    $('#cd_customer_card').removeClass('hide');
+                    $('#cd_success_banner').hide();
 
-                        if (creditLimit !== null && (totalDue + currentTotal) > creditLimit) {
-                            $('#credit_warning_message').text('This sale will exceed the customer credit limit!');
-                            $('#credit_sale_warning').removeClass('hide');
-                        } else {
-                            $('#credit_sale_warning').addClass('hide');
-                        }
-
-                        $('#confirm_credit_sale').prop('disabled', false);
+                    if (cds.balance <= 0) {
+                        $('#cd_zero_balance_banner').removeClass('hide');
+                        $('#cd_payment_section').addClass('hide');
+                    } else {
+                        $('#cd_zero_balance_banner').addClass('hide');
+                        $('#cd_payment_section').removeClass('hide');
+                        $('#cd_amount').val(cds.balance.toFixed(2));
+                        $('#cd_full_balance_chk').prop('checked', true);
+                        $('#cd_remaining_info').text('');
+                        $('#cd_stk_phone').val(formatPhoneLocal(cds.phone));
+                        stkReset();
                     }
+                },
+                error: function() { toastr.error('Failed to load customer info'); }
+            });
+        }
+
+        // ── Full-balance checkbox ────────────────────────────────────────
+        $('#cd_full_balance_chk').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#cd_amount').val(cds.balance.toFixed(2));
+                $('#cd_remaining_info').text('');
+            }
+        });
+
+        // ── Amount input — show remaining ────────────────────────────────
+        $('#cd_amount').on('input', function() {
+            var val = parseFloat($(this).val()) || 0;
+            if (val >= cds.balance) {
+                $('#cd_full_balance_chk').prop('checked', true);
+                $('#cd_remaining_info').text('');
+            } else {
+                $('#cd_full_balance_chk').prop('checked', false);
+                $('#cd_remaining_info').html('<span style="color:#f59e0b;"><i class="fas fa-info-circle"></i> Remaining after this payment: <strong>KES ' + (cds.balance - val).toFixed(2) + '</strong></span>');
+            }
+        });
+
+        // ── Mode toggle buttons ──────────────────────────────────────────
+        $('#cd_mpesa_stk_mode_btn').on('click',    function() { cdShowStk(true);  });
+        $('#cd_mpesa_manual_mode_btn').on('click', function() { cdShowStk(false); });
+        $('#cd_stk_fallback_manual_btn').on('click', function() { cdShowStk(false); stkReset(); });
+        $('#cd_stk_retry_btn').on('click',  stkReset);
+        $('#cd_stk_cancel_btn').on('click', stkReset);
+
+        // ── Phone — digits only ──────────────────────────────────────────
+        $('#cd_stk_phone').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
+
+        // ── Submit helper ────────────────────────────────────────────────
+        function cdSubmitPayment(method, ref, note, $btn) {
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+            if (!cds.customerId) { toastr.error('No customer selected'); return; }
+            if (amount <= 0)     { toastr.error('Enter a valid amount');  return; }
+
+            if ($btn) $btn.prop('disabled', true).prepend('<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>');
+
+            var payload = {
+                _token:           $('meta[name="csrf-token"]').attr('content'),
+                contact_id:       cds.customerId,
+                amount:           amount,
+                method:           method,
+                note:             note || '',
+                due_payment_type: 'sell'
+            };
+            if (method === 'custom_pay_1' && ref) {
+                payload.transaction_no_1 = ref;
+            }
+
+            $.ajax({
+                url:    '{{ url("payments/pay-contact-due") }}',
+                method: 'POST',
+                data:   payload,
+                success: function(r) {
+                    if ($btn) $btn.prop('disabled', false).find('.fa-spinner').remove();
+                    if (r.success) {
+                        var amtStr = 'KES ' + amount.toFixed(2);
+                        $('#cd_success_msg').text('Payment of ' + amtStr + ' recorded successfully!');
+                        $('#cd_success_banner').show();
+
+                        // Update local balance
+                        cds.balance = Math.max(0, cds.balance - amount);
+                        $('#cd_cust_balance').text('KES ' + cds.balance.toFixed(2));
+
+                        if (cds.balance <= 0) {
+                            $('#cd_payment_section').addClass('hide');
+                            $('#cd_zero_balance_banner').removeClass('hide');
+                        } else {
+                            $('#cd_amount').val(cds.balance.toFixed(2));
+                            $('#cd_full_balance_chk').prop('checked', true);
+                            $('#cd_remaining_info').text('');
+                        }
+                        // Reset payment inputs
+                        $('#cd_cash_note').val('');
+                        $('#cd_manual_ref, #cd_manual_note').val('');
+                        stkReset();
+                    } else {
+                        toastr.error(r.msg || 'Payment failed');
+                    }
+                },
+                error: function() {
+                    if ($btn) $btn.prop('disabled', false).find('.fa-spinner').remove();
+                    toastr.error('Error recording payment');
+                }
+            });
+        }
+
+        // ── Cash submit ──────────────────────────────────────────────────
+        $('#cd_cash_submit_btn').on('click', function() {
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+            if (amount <= 0) { toastr.error('Enter a valid amount'); return; }
+            cdSubmitPayment('cash', null, $('#cd_cash_note').val(), $(this));
+        });
+
+        // ── STK Push ─────────────────────────────────────────────────────
+        $('#cd_send_stk_btn').on('click', function() {
+            var phone  = $('#cd_stk_phone').val().trim();
+            var amount = parseFloat($('#cd_amount').val()) || 0;
+
+            if (!phone || phone.length < 9) { toastr.error('Enter a valid 9-digit phone number'); return; }
+            if (amount <= 0)               { toastr.error('Enter a valid amount'); return; }
+
+            if (phone.startsWith('0')) phone = phone.substring(1);
+            phone = '254' + phone;
+
+            $('#cd_stk_input_area').hide();
+            $('#cd_stk_waiting').show();
+            $('#cd_stk_countdown').text('2:00');
+
+            $.ajax({
+                url:    '{{ url("mpesa/stk-push") }}',
+                method: 'POST',
+                data: {
+                    _token:    $('meta[name="csrf-token"]').attr('content'),
+                    phone:     phone,
+                    amount:    Math.ceil(amount),
+                    reference: ('Debt-' + (cds.customerId || '')).substring(0, 12)
+                },
+                success: function(r) {
+                    if (r.success) {
+                        cds.mpesaTxnId = r.mpesa_transaction_id;
+                        toastr.success('STK push sent!');
+                        startStkPoll();
+                        startCountdown();
+                    } else {
+                        stkShowError(r.message || 'Failed to send STK push');
+                    }
+                },
+                error: function(xhr) {
+                    stkShowError((xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Request failed');
                 }
             });
         });
 
-        // Clear on modal close
-        $('#credit_sale_customer_modal').on('hidden.bs.modal', function() {
-            $('#credit_sale_customer_search').val(null).trigger('change');
-            $('#credit_customer_details').addClass('hide');
-            $('#credit_sale_warning').addClass('hide');
-            $('#confirm_credit_sale').prop('disabled', true);
-        });
-
-        // Confirm credit sale
-        $('#confirm_credit_sale').on('click', function() {
-            var customerId = $('#credit_sale_customer_search').val();
-            var customerName = $('#credit_sale_customer_search').select2('data')[0]?.text;
-
-            if (customerId) {
-                // Set the customer in main POS form
-                if ($('#customer_id').length) {
-                    var newOption = new Option(customerName, customerId, true, true);
-                    $('#customer_id').append(newOption).trigger('change');
-                }
-
-                // Close modal and trigger credit sale
-                $('#credit_sale_customer_modal').modal('hide');
-
-                // Small delay to ensure customer is set
-                setTimeout(function() {
-                    // Trigger the express finalize with credit_sale pay method
-                    var form = $('form#add_pos_sell_form').length > 0 ? $('form#add_pos_sell_form') : $('form#edit_pos_sell_form');
-
-                    // Set payment method to credit
-                    if ($('input[name="payment[0][method]"]').length) {
-                        $('input[name="payment[0][method]"]').val('credit');
+        function startStkPoll() {
+            cds.pollInterval = setInterval(function() {
+                if (!cds.mpesaTxnId) { stopTimers(); return; }
+                $.post('{{ url("mpesa/check-payment-status") }}', {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    mpesa_transaction_id: cds.mpesaTxnId
+                }, function(r) {
+                    if (r.is_paid) {
+                        stopTimers();
+                        stkShowSuccess(r.receipt_number);
+                    } else if (r.status === 'failed' || r.status === 'cancelled') {
+                        stopTimers();
+                        stkShowError(r.result_description || 'Payment failed or cancelled');
                     }
+                });
+            }, 3000);
+        }
 
-                    // Set status
-                    $('input#status').val('final');
+        function startCountdown() {
+            var sec = 120;
+            cds.countdownInterval = setInterval(function() {
+                sec--;
+                $('#cd_stk_countdown').text(Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60));
+                if (sec <= 0) {
+                    stopTimers();
+                    stkShowError('No response received. Please enter the reference manually.');
+                }
+            }, 1000);
+        }
 
-                    // Submit via AJAX like express finalize
-                    var data = form.serialize();
-                    data += '&is_credit_sale=1';
+        function stkShowSuccess(receipt) {
+            stopTimers();
+            $('#cd_stk_waiting').hide();
+            $('#cd_stk_receipt').text(receipt || 'CONFIRMED');
+            $('#cd_stk_success').show();
+            toastr.success('Payment received via M-Pesa!');
+        }
 
-                    $.ajax({
-                        method: 'POST',
-                        url: form.attr('action'),
-                        dataType: 'json',
-                        data: data,
-                        beforeSend: function(xhr) {
-                            __disable_submit_button(form.find('button[type="submit"]'));
-                        },
-                        success: function(result) {
-                            if (result.success == 1) {
-                                // Reset form
-                                reset_pos_form();
+        function stkShowError(msg) {
+            stopTimers();
+            $('#cd_stk_waiting').hide();
+            $('#cd_stk_err_msg').text(msg);
+            $('#cd_stk_error').show();
+        }
 
-                                // Print receipt if enabled
-                                if (result.receipt && result.receipt.html_content) {
-                                    pos_print(result.receipt);
-                                }
-
-                                toastr.success(result.msg || 'Credit sale completed successfully');
-                            } else {
-                                toastr.error(result.msg || 'Error processing credit sale');
-                            }
-                            __enable_submit_button(form.find('button[type="submit"]'));
-                        },
-                        error: function(xhr) {
-                            __enable_submit_button(form.find('button[type="submit"]'));
-                            toastr.error('Error processing credit sale');
-                        }
-                    });
-                }, 300);
-            }
+        // ── STK Confirm & Record ─────────────────────────────────────────
+        $('#cd_stk_confirm_btn').on('click', function() {
+            var receipt = $('#cd_stk_receipt').text();
+            cdSubmitPayment('custom_pay_1', receipt, '', $(this));
         });
-    });
-    </script>
-    @endif
+
+        // ── Manual M-Pesa submit ─────────────────────────────────────────
+        $('#cd_manual_submit_btn').on('click', function() {
+            var ref = $('#cd_manual_ref').val().trim().toUpperCase();
+            if (!ref) { toastr.error('Enter the M-Pesa reference number'); return; }
+            cdSubmitPayment('custom_pay_1', ref, $('#cd_manual_note').val(), $(this));
+        });
+
+        // ── Manual ref — uppercase on input ─────────────────────────────
+        $('#cd_manual_ref').on('input', function() { this.value = this.value.toUpperCase(); });
+
+        // ── Modal lifecycle ──────────────────────────────────────────────
+        $('#collect_debt_modal').on('show.bs.modal',   cdReset);
+        $('#collect_debt_modal').on('hidden.bs.modal', function() { stopTimers(); });
+        $('#collect_debt_modal').on('shown.bs.modal',  function() {
+            $cdInput.focus();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCollectDebt);
+    } else {
+        setTimeout(initCollectDebt, 100);
+    }
+})();
+</script>
 @endif

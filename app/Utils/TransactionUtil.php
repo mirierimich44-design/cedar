@@ -1433,7 +1433,7 @@ class TransactionUtil extends Util
         } else {
             $discount = $transaction->discount_amount;
         }
-        $output['discount'] = ($discount != 0) ? $this->num_f($discount, $show_currency, $business_details) : 0;
+        $output['discount'] = $this->num_f($discount, $show_currency, $business_details);
 
         $output['discount_amount_unformatted'] = $discount;
 
@@ -1466,7 +1466,7 @@ class TransactionUtil extends Util
             $output['tax_label'] .= ' ('.$tax->name.')';
         }
         $output['tax_label'] .= ':';
-        $output['tax'] = ($transaction->tax_amount != 0) ? $this->num_f($transaction->tax_amount, $show_currency, $business_details) : 0;
+        $output['tax'] = $this->num_f($transaction->tax_amount, $show_currency, $business_details);
 
         if ($transaction->tax_amount != 0 && $tax->is_tax_group) {
             $transaction_group_tax_details = $this->groupTaxDetails($tax, $transaction->tax_amount);
@@ -1538,7 +1538,7 @@ class TransactionUtil extends Util
                 $payment_types = $this->payment_types($transaction->location_id, true);
                 if (! empty($payments)) {
                     foreach ($payments as $value) {
-                        $method = ! empty($payment_types[$value['method']]) ? $payment_types[$value['method']] : '';
+                        $method = ! empty($payment_types[$value['method']]) ? $payment_types[$value['method']] : ucwords(str_replace('_', ' ', $value['method']));
                         if ($value['method'] == 'cash') {
                             $output['payments'][] =
                                 ['method' => $method.($value['is_return'] == 1 ? ' ('.$il->change_return_label.')(-)' : ''),
@@ -3185,7 +3185,7 @@ class TransactionUtil extends Util
                     continue;
                 }
                 if ($total_amount > 0) {
-                    $total_paid = $this->getTotalPaid($transaction->id);
+                    $total_paid = $this->getTotalPaid($transaction->id) ?? 0;
                     $due = $transaction->final_total - $total_paid;
 
                     $now = \Carbon::now()->toDateTimeString();

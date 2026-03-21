@@ -1,6 +1,6 @@
 
 <div class="modal-dialog modal-xl" role="document">
-  <div class="modal-content">
+  <div class="modal-content" style="border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25); border:none;">
     @php
       $form_id = 'contact_add_form';
       if(isset($quick_add)){
@@ -20,259 +20,292 @@
     @endphp
     {!! Form::open(['url' => $url, 'method' => 'post', 'id' => $form_id ]) !!}
 
-    <div class="modal-header-material" style="background: linear-gradient(135deg, var(--pos-primary) 0%, #0d47a1 100%) !important; color: white !important;">
-      <h4 class="modal-title">
-        <i class="material-icons">person_add</i>
+    {{-- Scoped styles for this modal's inputs --}}
+    <style>
+      #contact_add_form input[type="text"],
+      #contact_add_form input[type="email"],
+      #contact_add_form input[type="number"],
+      #contact_add_form textarea,
+      #quick_add_contact input[type="text"],
+      #quick_add_contact input[type="email"],
+      #quick_add_contact input[type="number"],
+      #quick_add_contact textarea {
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        border: 1.5px solid #e2e8f0;
+        font-size: 14px;
+        padding: 9px 12px;
+        box-sizing: border-box;
+        background: #fff;
+        color: #1e293b;
+        transition: border-color 0.15s;
+      }
+      #contact_add_form input[type="text"]:focus,
+      #contact_add_form input[type="email"]:focus,
+      #contact_add_form input[type="number"]:focus,
+      #quick_add_contact input[type="text"]:focus,
+      #quick_add_contact input[type="email"]:focus,
+      #quick_add_contact input[type="number"]:focus {
+        border-color: #c0392b;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(192,57,43,0.12);
+      }
+      /* shift input text right when there's a prefix icon inside wrapper */
+      .contact-form-field .has-prefix input,
+      .contact-form-field .has-prefix select {
+        padding-left: 32px !important;
+      }
+      /* select2 container height fix */
+      #contact_add_form .select2-container .select2-selection--single,
+      #quick_add_contact .select2-container .select2-selection--single {
+        height: 40px !important;
+        border-radius: 8px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        display: flex;
+        align-items: center;
+      }
+      #contact_add_form .select2-container .select2-selection--single .select2-selection__rendered,
+      #quick_add_contact .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 40px !important;
+        padding-left: 12px !important;
+        font-size: 14px;
+        color: #1e293b;
+      }
+      #contact_add_form .select2-container .select2-selection--single .select2-selection__arrow,
+      #quick_add_contact .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+      }
+    </style>
+
+    {{-- Header --}}
+    <div style="background: linear-gradient(135deg, #c0392b 0%, #922b21 100%); padding: 18px 22px; display:flex; align-items:center; justify-content:space-between;">
+      <h4 style="margin:0; color:white; font-weight:700; font-size:17px; display:flex; align-items:center; gap:10px;">
+        <i class="fas fa-user-plus" style="font-size:18px;"></i>
         @lang('contact.add_contact')
       </h4>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+      <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1; font-size:24px; text-shadow:none; margin:0; padding:0; line-height:1;">&times;</button>
     </div>
 
-    <div class="modal-body" style="padding: 32px; background: #f8fafc;">
-        <div class="row">            
-            {{-- Contact Type & Basic Info Section --}}
-            <div class="col-md-12 mb-24">
-                <div class="material-summary-card" style="background: white !important; padding: 24px !important; border: 1.5px solid var(--pos-border) !important;">
-                    <div class="row">
-                        <div class="col-md-4 contact_type_div">
-                            <div class="material-input-group">
-                                {!! Form::label('type', __('contact.contact_type') . ':*' ) !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix"><i class="fa fa-user"></i></span>
-                                    {!! Form::select('type', $types, $type , ['class' => 'form-control select2', 'id' => 'contact_type', 'required', 'style' => 'width: 100%;']); !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="material-input-group" style="padding-top: 32px;">
-                                <label class="radio-inline" style="font-weight: 700; color: var(--pos-text);">
-                                    <input type="radio" name="contact_type_radio" id="inlineRadio1" value="individual" checked>
-                                    @lang('lang_v1.individual')
-                                </label>
-                                <label class="radio-inline" style="font-weight: 700; color: var(--pos-text); margin-left: 20px;">
-                                    <input type="radio" name="contact_type_radio" id="inlineRadio2" value="business">
-                                    @lang('business.business')
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="material-input-group">
-                                {!! Form::label('contact_id', __('lang_v1.contact_id') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix"><i class="fa fa-id-badge"></i></span>
-                                    {!! Form::text('contact_id', null, ['placeholder' => __('lang_v1.contact_id')]); !!}
-                                </div>
-                                <small class="text-muted">@lang('lang_v1.leave_empty_to_autogenerate')</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="modal-body" style="padding:20px 20px 10px; background:#f8fafc;">
+
+      {{-- Section 1: Contact Type --}}
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:14px; border:1px solid #e2e8f0;">
+        <div class="row" style="align-items:flex-end;">
+
+          {{-- Contact Type dropdown --}}
+          <div class="col-md-4 contact_type_div">
+            <label style="font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block;">
+              @lang('contact.contact_type') <span style="color:#e53e3e;">*</span>
+            </label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:10px; z-index:1; color:#94a3b8;"><i class="fa fa-user"></i></span>
+              {!! Form::select('type', $types, $type , ['class' => 'form-control select2', 'id' => 'contact_type', 'required', 'style' => 'width:100%; padding-left:32px; border-radius:8px; border:1.5px solid #e2e8f0; height:40px; font-size:14px;']); !!}
             </div>
+          </div>
 
-            {{-- Main Details Section --}}
-            <div class="col-md-12">
-                <div class="row">
-                    <div class="col-md-3 business" style="display: none;">
-                        <div class="material-input-group">
-                            {!! Form::label('supplier_business_name', __('business.business_name') . ':*') !!}
-                            <div class="material-input-wrapper">
-                                <span class="input-prefix"><i class="fa fa-briefcase"></i></span>
-                                {!! Form::text('supplier_business_name', null, ['placeholder' => __('business.business_name')]); !!}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-2 individual">
-                        <div class="material-input-group">
-                            {!! Form::label('prefix', __( 'business.prefix' ) . ':') !!}
-                            <div class="material-input-wrapper">
-                                {!! Form::text('prefix', null, ['placeholder' => __( 'business.prefix_placeholder' ) ]); !!}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 individual">
-                        <div class="material-input-group">
-                            {!! Form::label('first_name', __( 'business.first_name' ) . ':*') !!}
-                            <div class="material-input-wrapper">
-                                <span class="input-prefix"><i class="fa fa-user"></i></span>
-                                {!! Form::text('first_name', null, ['required', 'placeholder' => __( 'business.first_name' ) ]); !!}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 individual">
-                        <div class="material-input-group">
-                            {!! Form::label('middle_name', __( 'lang_v1.middle_name' ) . ':') !!}
-                            <div class="material-input-wrapper">
-                                {!! Form::text('middle_name', null, ['placeholder' => __( 'lang_v1.middle_name' ) ]); !!}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 individual">
-                        <div class="material-input-group">
-                            {!! Form::label('last_name', __( 'business.last_name' ) . ':') !!}
-                            <div class="material-input-wrapper">
-                                {!! Form::text('last_name', null, ['placeholder' => __( 'business.last_name' ) ]); !!}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="material-input-group">
-                            {!! Form::label('mobile', __('contact.mobile') . ':*') !!}
-                            <div class="material-input-wrapper">
-                                <span class="input-prefix"><i class="fa fa-mobile-alt"></i></span>
-                                {!! Form::text('mobile', null, ['required', 'placeholder' => __('contact.mobile')]); !!}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="material-input-group">
-                            {!! Form::label('email', __('business.email') . ':') !!}
-                            <div class="material-input-wrapper">
-                                <span class="input-prefix"><i class="fa fa-envelope"></i></span>
-                                {!! Form::email('email', null, ['placeholder' => __('business.email')]); !!}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 customer_fields">
-                        <div class="material-input-group">
-                            {!! Form::label('customer_group_id', __('lang_v1.customer_group') . ':') !!}
-                            <div class="material-input-wrapper">
-                                <span class="input-prefix"><i class="fa fa-users"></i></span>
-                                {!! Form::select('customer_group_id', $customer_groups, '', ['class' => 'form-control select2', 'style' => 'width: 100%;']); !!}
-                            </div>
-                        </div>
-                    </div>
-
-                    @if(config('constants.enable_contact_assign') && $type !== 'lead')
-                        <div class="col-md-3">
-                            <div class="material-input-group">
-                                {!! Form::label('assigned_to_users', __('lang_v1.assigned_to') . ':' ) !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix"><i class="fa fa-user-tag"></i></span>
-                                    {!! Form::select('assigned_to_users[]', $users ?? [], null , ['class' => 'form-control select2', 'id' => 'assigned_to_users', 'multiple', 'style' => 'width: 100%;']); !!}
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
+          {{-- Individual / Business toggle --}}
+          <div class="col-md-4">
+            <label style="font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block;">
+              @lang('lang_v1.contact_subtype')
+            </label>
+            <div style="display:inline-flex; background:#f1f5f9; border-radius:8px; padding:3px; gap:3px;">
+              <label style="margin:0; cursor:pointer;">
+                <input type="radio" name="contact_type_radio" id="inlineRadio1" value="individual" checked style="display:none;">
+                <span id="lbl_individual" style="display:block; padding:6px 16px; border-radius:6px; font-size:13px; font-weight:600; background:#c0392b; color:white; transition:all 0.2s; user-select:none;">
+                  <i class="fa fa-user" style="margin-right:5px;"></i>@lang('lang_v1.individual')
+                </span>
+              </label>
+              <label style="margin:0; cursor:pointer;">
+                <input type="radio" name="contact_type_radio" id="inlineRadio2" value="business" style="display:none;">
+                <span id="lbl_business" style="display:block; padding:6px 16px; border-radius:6px; font-size:13px; font-weight:600; background:transparent; color:#64748b; transition:all 0.2s; user-select:none;">
+                  <i class="fa fa-building" style="margin-right:5px;"></i>@lang('business.business')
+                </span>
+              </label>
             </div>
+          </div>
 
-            {{-- More Info Section --}}
-            <div class="col-md-12 mt-24">
-                <div style="border-top: 1.5px dashed var(--pos-border); padding-top: 24px; margin-bottom: 16px;">
-                    <button type="button" class="btn-material more_btn" data-target="#more_div" style="background: var(--pos-bg) !important; color: var(--pos-primary) !important; font-weight: 700 !important; width: 100% !important; height: 48px !important; border: 1.5px solid var(--pos-border) !important;">
-                        <i class="fa fa-chevron-down"></i> @lang('lang_v1.more_info')
-                    </button>
-                </div>
-
-                <div id="more_div" class="hide">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="material-input-group">
-                                {!! Form::label('tax_number', __('contact.tax_no') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix"><i class="fa fa-info-circle"></i></span>
-                                    {!! Form::text('tax_number', null, ['placeholder' => __('contact.tax_no')]); !!}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 opening_balance">
-                            <div class="material-input-group">
-                                {!! Form::label('opening_balance', __('lang_v1.opening_balance') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix">KES</span>
-                                    {!! Form::text('opening_balance', 0, ['class' => 'input_number']); !!}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 pay_term">
-                            <div class="material-input-group">
-                                {!! Form::label('pay_term_number', __('contact.pay_term') . ':') !!}
-                                <div style="display: flex; gap: 8px;">
-                                    <div class="material-input-wrapper" style="flex: 1;">
-                                        {!! Form::number('pay_term_number', null, ['placeholder' => 'No.']); !!}
-                                    </div>
-                                    <div class="material-input-wrapper" style="flex: 1.5;">
-                                        {!! Form::select('pay_term_type', ['months' => __('lang_v1.months'), 'days' => __('lang_v1.days')], '', ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12"><hr style="border-top: 1px solid var(--pos-border); margin: 24px 0;"></div>
-
-                        <div class="col-md-6">
-                            <div class="material-input-group">
-                                {!! Form::label('address_line_1', __('lang_v1.address_line_1') . ':') !!}
-                                <div class="material-input-wrapper" style="height: auto !important;">
-                                    {!! Form::text('address_line_1', null, ['style' => 'padding: 12px 16px !important;', 'placeholder' => __('lang_v1.address_line_1')]); !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="material-input-group">
-                                {!! Form::label('address_line_2', __('lang_v1.address_line_2') . ':') !!}
-                                <div class="material-input-wrapper" style="height: auto !important;">
-                                    {!! Form::text('address_line_2', null, ['style' => 'padding: 12px 16px !important;', 'placeholder' => __('lang_v1.address_line_2')]); !!}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="material-input-group">
-                                {!! Form::label('city', __('business.city') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    <span class="input-prefix"><i class="fa fa-map-marker-alt"></i></span>
-                                    {!! Form::text('city', null, ['placeholder' => __('business.city')]); !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="material-input-group">
-                                {!! Form::label('state', __('business.state') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    {!! Form::text('state', null, ['placeholder' => __('business.state')]); !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="material-input-group">
-                                {!! Form::label('zip_code', __('business.zip_code') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    {!! Form::text('zip_code', null, ['placeholder' => __('business.zip_code_placeholder')]); !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="material-input-group">
-                                {!! Form::label('country', __('business.country') . ':') !!}
-                                <div class="material-input-wrapper">
-                                    {!! Form::text('country', null, ['placeholder' => __('business.country')]); !!}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          {{-- Contact ID --}}
+          <div class="col-md-4">
+            <label style="font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block;">
+              @lang('lang_v1.contact_id')
+            </label>
+            <div style="position:relative; display:flex; align-items:center;">
+              <span style="position:absolute; left:10px; z-index:1; color:#94a3b8;"><i class="fa fa-id-badge"></i></span>
+              {!! Form::text('contact_id', null, ['placeholder' => __('lang_v1.contact_id'), 'style' => 'width:100%; padding:9px 12px 9px 32px; border-radius:8px; border:1.5px solid #e2e8f0; height:40px; font-size:14px; outline:none;']); !!}
             </div>
+            <small style="color:#94a3b8; font-size:11px;">@lang('lang_v1.leave_empty_to_autogenerate')</small>
+          </div>
+
         </div>
-        @include('layouts.partials.module_form_part')
+      </div>
+
+      {{-- Section 2: Name & Contact Details --}}
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:14px; border:1px solid #e2e8f0;">
+        <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin:0 0 14px 0;">
+          <i class="fa fa-address-card" style="margin-right:6px; color:#c0392b;"></i>Personal Information
+        </p>
+        <div class="row">
+
+          {{-- Business name (shown only for Business type) --}}
+          <div class="col-md-3 business" style="display: none;">
+            @include('contact.partials._field', ['icon' => 'fa-briefcase', 'label' => __('business.business_name').':*', 'field' => Form::text('supplier_business_name', null, ['placeholder' => __('business.business_name')])])
+          </div>
+
+          <div class="col-md-2 individual">
+            @include('contact.partials._field', ['label' => __('business.prefix').':','field' => Form::text('prefix', null, ['placeholder' => __('business.prefix_placeholder')])])
+          </div>
+          <div class="col-md-4 individual">
+            @include('contact.partials._field', ['icon' => 'fa-user', 'label' => __('business.first_name').':*', 'field' => Form::text('first_name', null, ['required', 'placeholder' => __('business.first_name')])])
+          </div>
+          <div class="col-md-3 individual">
+            @include('contact.partials._field', ['label' => __('lang_v1.middle_name').':', 'field' => Form::text('middle_name', null, ['placeholder' => __('lang_v1.middle_name')])])
+          </div>
+          <div class="col-md-3 individual">
+            @include('contact.partials._field', ['label' => __('business.last_name').':', 'field' => Form::text('last_name', null, ['placeholder' => __('business.last_name')])])
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #f1f5f9; margin:14px 0 14px;"></div>
+        <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin:0 0 14px 0;">
+          <i class="fa fa-phone" style="margin-right:6px; color:#0369a1;"></i>Contact Details
+        </p>
+
+        <div class="row">
+          <div class="col-md-3">
+            @include('contact.partials._field', ['icon' => 'fa-mobile-alt', 'label' => __('contact.mobile').':*', 'field' => Form::text('mobile', null, ['required', 'placeholder' => __('contact.mobile')])])
+          </div>
+          <div class="col-md-3">
+            @include('contact.partials._field', ['icon' => 'fa-envelope', 'label' => __('business.email').':', 'field' => Form::email('email', null, ['placeholder' => __('business.email')])])
+          </div>
+          <div class="col-md-3 customer_fields">
+            @include('contact.partials._field', ['icon' => 'fa-users', 'label' => __('lang_v1.customer_group').':', 'field' => Form::select('customer_group_id', $customer_groups, '', ['class' => 'form-control select2', 'style' => 'width:100%;'])])
+          </div>
+          @if(config('constants.enable_contact_assign') && $type !== 'lead')
+          <div class="col-md-3">
+            @include('contact.partials._field', ['icon' => 'fa-user-tag', 'label' => __('lang_v1.assigned_to').':', 'field' => Form::select('assigned_to_users[]', $users ?? [], null, ['class' => 'form-control select2', 'id' => 'assigned_to_users', 'multiple', 'style' => 'width:100%;'])])
+          </div>
+          @endif
+        </div>
+      </div>
+
+      {{-- More Info Section --}}
+      <div style="margin-bottom:6px;">
+        <button type="button" class="more_btn" data-target="#more_div"
+          style="width:100%; background:#f1f5f9; border:1.5px dashed #cbd5e1; border-radius:10px; padding:12px 20px; color:#475569; font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+          <i class="fa fa-chevron-down more_btn_icon" style="font-size:11px; transition:transform 0.2s;"></i>
+          @lang('lang_v1.more_info')
+        </button>
+
+        <div id="more_div" class="hide" style="margin-top:10px;">
+          <div style="background:white; border-radius:10px; padding:18px 20px; border:1px solid #e2e8f0;">
+            <div class="row">
+              <div class="col-md-4">
+                @include('contact.partials._field', ['icon' => 'fa-info-circle', 'label' => __('contact.tax_no').':', 'field' => Form::text('tax_number', null, ['placeholder' => __('contact.tax_no')])])
+              </div>
+              <div class="col-md-4 opening_balance">
+                @include('contact.partials._field', ['prefix_text' => 'KES', 'label' => __('lang_v1.opening_balance').':', 'field' => Form::text('opening_balance', 0, ['class' => 'input_number'])])
+              </div>
+              <div class="col-md-4 pay_term">
+                <label style="font-size:12px; font-weight:600; color:#64748b; margin-bottom:6px; display:block;">@lang('contact.pay_term'):</label>
+                <div style="display:flex; gap:8px;">
+                  <div style="flex:1; position:relative;">
+                    {!! Form::number('pay_term_number', null, ['placeholder' => 'No.', 'style' => 'width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #e2e8f0; height:40px; font-size:14px;']) !!}
+                  </div>
+                  <div style="flex:1.5;">
+                    {!! Form::select('pay_term_type', ['months' => __('lang_v1.months'), 'days' => __('lang_v1.days')], '', ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%;']) !!}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-12"><hr style="border-top:1px solid #f1f5f9; margin:16px 0;"></div>
+
+              <div class="col-md-6">
+                @include('contact.partials._field', ['label' => __('lang_v1.address_line_1').':', 'field' => Form::text('address_line_1', null, ['placeholder' => __('lang_v1.address_line_1')])])
+              </div>
+              <div class="col-md-6">
+                @include('contact.partials._field', ['label' => __('lang_v1.address_line_2').':', 'field' => Form::text('address_line_2', null, ['placeholder' => __('lang_v1.address_line_2')])])
+              </div>
+              <div class="col-md-3">
+                @include('contact.partials._field', ['icon' => 'fa-map-marker-alt', 'label' => __('business.city').':', 'field' => Form::text('city', null, ['placeholder' => __('business.city')])])
+              </div>
+              <div class="col-md-3">
+                @include('contact.partials._field', ['label' => __('business.state').':', 'field' => Form::text('state', null, ['placeholder' => __('business.state')])])
+              </div>
+              <div class="col-md-3">
+                @include('contact.partials._field', ['label' => __('business.zip_code').':', 'field' => Form::text('zip_code', null, ['placeholder' => __('business.zip_code_placeholder')])])
+              </div>
+              <div class="col-md-3">
+                @include('contact.partials._field', ['label' => __('business.country').':', 'field' => Form::text('country', null, ['placeholder' => __('business.country')])])
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @include('layouts.partials.module_form_part')
     </div>
-    
-    <div class="modal-footer" style="padding: 24px 32px !important; background: white !important; border-top: 1.5px solid var(--pos-border) !important;">
-      <button type="submit" class="btn-material" style="background: var(--pos-primary) !important; color: white !important; font-weight: 700 !important; padding: 0 32px !important; min-width: 160px !important; height: 48px !important;">
-        <i class="fa fa-save"></i> @lang( 'messages.save' )
+
+    {{-- Footer --}}
+    <div style="padding:16px 22px; background:white; border-top:1px solid #e2e8f0; display:flex; align-items:center; justify-content:flex-end; gap:10px;">
+      <button type="button" data-dismiss="modal"
+        style="padding:10px 22px; border-radius:8px; border:1.5px solid #e2e8f0; background:white; color:#475569; font-weight:600; font-size:14px; cursor:pointer;">
+        @lang('messages.close')
       </button>
-      <button type="button" class="btn-material" data-dismiss="modal" style="background: var(--pos-bg) !important; color: var(--pos-text) !important; border: 1.5px solid var(--pos-border) !important; padding: 0 24px !important; height: 48px !important;">
-        @lang( 'messages.close' )
+      <button type="submit"
+        style="padding:10px 28px; border-radius:8px; border:none; background:linear-gradient(135deg,#c0392b,#922b21); color:white; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;">
+        <i class="fa fa-save"></i> @lang('messages.save')
       </button>
     </div>
 
     {!! Form::close() !!}
-  
+
   </div>
 </div>
+
+{{-- Radio pill + More Info toggle JS --}}
+<script>
+(function() {
+    // Chevron rotation for More Info button
+    $(document).on('click', '.more_btn', function() {
+        var icon = $(this).find('.more_btn_icon');
+        var expanded = $(this).data('expanded');
+        if (expanded) {
+            icon.css('transform', 'rotate(0deg)');
+            $(this).data('expanded', false);
+        } else {
+            icon.css('transform', 'rotate(180deg)');
+            $(this).data('expanded', true);
+        }
+    });
+
+    function updatePillStyle() {
+        var isIndividual = document.getElementById('inlineRadio1').checked;
+        var lblInd = document.getElementById('lbl_individual');
+        var lblBiz = document.getElementById('lbl_business');
+        if (!lblInd || !lblBiz) return;
+        if (isIndividual) {
+            lblInd.style.background = '#c0392b';
+            lblInd.style.color = 'white';
+            lblBiz.style.background = 'transparent';
+            lblBiz.style.color = '#64748b';
+        } else {
+            lblBiz.style.background = '#c0392b';
+            lblBiz.style.color = 'white';
+            lblInd.style.background = 'transparent';
+            lblInd.style.color = '#64748b';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var r1 = document.getElementById('inlineRadio1');
+        var r2 = document.getElementById('inlineRadio2');
+        if (r1) r1.addEventListener('change', updatePillStyle);
+        if (r2) r2.addEventListener('change', updatePillStyle);
+        updatePillStyle();
+    });
+
+    // Also handle when modal is shown (for Ajax-loaded modals)
+    $(document).on('shown.bs.modal', function() { updatePillStyle(); });
+})();
+</script>

@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('business', function (Blueprint $table) {
-            $table->string('digitax_api_key')->nullable()->after('woocommerce_api_settings');
-            $table->enum('etims_sync_mode', ['realtime', 'background', 'manual'])->default('background')->after('digitax_api_key');
-            $table->string('etims_tpin')->nullable()->after('etims_sync_mode');
+            $table->string('digitax_api_key')->nullable();
+            $table->enum('etims_sync_mode', ['realtime', 'background', 'manual'])->default('background');
+            $table->string('etims_tpin')->nullable();
         });
     }
 

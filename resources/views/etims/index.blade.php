@@ -59,6 +59,14 @@
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
+        @slot('title')
+            eTIMS Invoices
+            <span class="pull-right">
+                <button id="sync_all_btn" class="tw-dw-btn tw-dw-btn-sm tw-dw-btn-primary tw-text-white">
+                    <i class="fa fa-refresh"></i> Sync All Pending
+                </button>
+            </span>
+        @endslot
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="etims_invoices_table">
                 <thead>
@@ -105,6 +113,31 @@
 
         $(document).on('change', '#sync_status_filter', function() {
             etims_invoices_table.ajax.reload();
+        });
+
+        $('#sync_all_btn').on('click', function() {
+            var btn = $(this);
+            btn.prop('disabled', true).html('<i class="fa fa-refresh fa-spin"></i> Syncing...');
+
+            $.ajax({
+                method: 'POST',
+                url: '{{ route("etims.sync-all") }}',
+                data: { _token: '{{ csrf_token() }}' },
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success) {
+                        toastr.success(result.msg);
+                        etims_invoices_table.ajax.reload();
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Sync All Pending');
+                },
+                error: function() {
+                    toastr.error('An error occurred. Please try again.');
+                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Sync All Pending');
+                }
+            });
         });
 
         $(document).on('click', 'button.sync-invoice', function() {
