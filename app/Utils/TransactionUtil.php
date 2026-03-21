@@ -3185,7 +3185,7 @@ class TransactionUtil extends Util
                     continue;
                 }
                 if ($total_amount > 0) {
-                    $total_paid = $this->getTotalPaid($transaction->id);
+                    $total_paid = $this->getTotalPaid($transaction->id) ?? 0;
                     $due = $transaction->final_total - $total_paid;
 
                     $now = \Carbon::now()->toDateTimeString();

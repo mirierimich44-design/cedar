@@ -609,11 +609,12 @@
                 }
 
                 var customerId = $('#customer_id').val();
-                if (customerId && customerId != '1') {
-                    // Customer already selected on POS — finalize immediately
+                var walkInId   = $('#default_customer_id').val() || '1';
+                if (customerId && customerId != walkInId) {
+                    // A real customer is already selected on the POS — finalize immediately
                     setTimeout(function() { doCompleteCreditSale(customerId, null); }, 300);
                 } else {
-                    // No customer selected — ask user to pick one
+                    // Walk-in / no customer selected — ask user to pick one
                     setTimeout(function() { $('#credit_sale_customer_modal').modal('show'); }, 300);
                 }
             });

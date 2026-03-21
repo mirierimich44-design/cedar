@@ -1301,7 +1301,14 @@ class Util
 
         // + $contact_payments->sell_return_paid add this in due because after paymnet for sell return not calculated
 
-        $due = $contact_payments->total_invoice + $contact_payments->total_purchase - $contact_payments->total_paid - $contact_payments->purchase_paid + $contact_payments->opening_balance - $contact_payments->opening_balance_paid - $contact_payments->total_sell_return + $contact_payments->sell_return_paid;
+        $due = ($contact_payments->total_invoice ?? 0)
+             + ($contact_payments->total_purchase ?? 0)
+             - ($contact_payments->total_paid ?? 0)
+             - ($contact_payments->purchase_paid ?? 0)
+             + ($contact_payments->opening_balance ?? 0)
+             - ($contact_payments->opening_balance_paid ?? 0)
+             - ($contact_payments->total_sell_return ?? 0)
+             + ($contact_payments->sell_return_paid ?? 0);
 
         return $due;
     }
