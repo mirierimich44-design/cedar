@@ -11,7 +11,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getOpenTagWrapper()
     {
-        return '<div class="tw-flex-1 tw-py-3 tw-px-3 tw-space-y-0.5 tw-overflow-y-auto" id="side-bar">' . PHP_EOL;
+        return '<div class="tw-flex-1 tw-py-3 tw-px-3 tw-space-y-1 tw-overflow-y-auto" id="side-bar">' . PHP_EOL;
     }
 
     /**
@@ -27,29 +27,30 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getMenuWithoutDropdownWrapper($item)
     {
-        return '<a href="' . $item->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-tracking-tight tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap hover:tw-bg-white/5 hover:tw-text-white ' . $this->getActiveState($item) . '" ' . $item->getAttributes() . '>' .
-        $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
+        $isActive = $item->isActive();
+        $style = $isActive
+            ? 'color:white;background:rgba(255,255,255,0.1);border-left:3px solid #38bdf8;padding-left:13px;'
+            : 'color:#94a3b8;';
+
+        return '<a href="' . $item->getUrl() . '" title="" class="sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $style . '" ' . $item->getAttributes() . '>' .
+            $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
             '</a>' . PHP_EOL;
     }
 
     /**
      * {@inheritdoc}.
      */
-    public function getActiveState($item, $state = 'active-sidebar-item tw-bg-white/10 tw-text-white')
+    public function getActiveState($item, $state = '')
     {
-        return $item->isActive() ? $state : 'tw-text-slate-400';
+        return '';
     }
 
     /**
      * Get active state on child items.
-     *
-     * @param $item
-     * @param  string  $state
-     * @return null|string
      */
-    public function getActiveStateOnChild($item, $state = 'active-sidebar-parent tw-bg-white/5 tw-text-white')
+    public function getActiveStateOnChild($item, $state = '')
     {
-        return $item->hasActiveOnChild() ? $state : null;
+        return '';
     }
 
     /**
@@ -57,7 +58,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getDividerWrapper()
     {
-        return '<div class="tw-my-1 tw-border-t tw-border-white/5"></div>';
+        return '<div style="border-top:1px solid rgba(255,255,255,0.06);margin:6px 0;"></div>';
     }
 
     /**
@@ -65,7 +66,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getHeaderWrapper($item)
     {
-        return '<div class="tw-px-4 tw-pt-5 tw-pb-1 tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-slate-500">' . $item->title . '</div>';
+        return '<div style="color:#64748b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:18px 16px 4px;">' . $item->title . '</div>';
     }
 
     /**
@@ -73,59 +74,54 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getMenuWithDropDownWrapper($item)
     {
-        $dropdownToggle = '<a href="#" title="" class="drop_down tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-tracking-tight tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap hover:tw-bg-white/5 hover:tw-text-white ' . $this->getActiveStateOnChild($item) . '" ' . $item->getAttributes() . '>' .
-        $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
-        '<svg aria-hidden="true" class="svg tw-ml-auto tw-text-slate-500 tw-size-3.5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $this->getArray($item) .
-            '</svg>' .
+        $hasActive = $item->hasActiveOnChild();
+        $parentStyle = $hasActive
+            ? 'color:white;background:rgba(255,255,255,0.05);'
+            : 'color:#94a3b8;';
+
+        $chevron = $hasActive
+            ? '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" />'
+            : '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" />';
+
+        $dropdownToggle = '<a href="#" title="" class="drop_down sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $parentStyle . '" ' . $item->getAttributes() . '>' .
+            $this->formatIcon($item->icon) .
+            ' <span class="tw-truncate">' . $item->title . '</span>' .
+            '<svg aria-hidden="true" class="svg" style="width:14px;height:14px;flex-shrink:0;margin-left:auto;color:#64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $chevron . '</svg>' .
             '</a>';
 
         $childItems = $this->getChildMenuItems($item);
 
-        return '<div class="tw-mb-0.5">' . $dropdownToggle . $childItems . '</div>' . PHP_EOL;
+        return '<div class="tw-mb-1">' . $dropdownToggle . $childItems . '</div>' . PHP_EOL;
     }
 
     /**
-     * Get multi-level dropdown wrapper.
-     *
-     * Note: This example doesn't directly implement a multi-level dropdown, as it wasn't specified, but you could extend
-     * the functionality similarly to `getMenuWithDropDownWrapper`, adjusting for deeper nesting.
-     *
-     * @param  \Nwidart\Menus\MenuItem  $item
-     * @return string
+     * {@inheritdoc}.
      */
     public function getMultiLevelDropdownWrapper($item)
     {
-        // Placeholder for multi-level dropdown functionality if needed
         return '';
     }
 
     /**
      * Get child menu items.
-     *
-     * @param  \Nwidart\Menus\MenuItem  $item
-     * @return string
      */
     public function getChildMenuItems($item)
     {
-
         $children = '';
         $displayStyle = $item->hasActiveOnChild() ? 'block' : 'none';
 
-        
-
-
         if (count($item->getChilds()) > 0) {
-
-            $children .= '<div class="chiled tw-relative tw-mt-0.5 tw-mb-1 tw-pl-9" style="display:' . $displayStyle . '">
-            <div class="tw-absolute tw-inset-y-0 tw-w-px tw-bg-white/10 tw-left-[18px]"></div>
-            <div class="tw-space-y-0.5">';
+            $children .= '<div class="chiled" style="display:' . $displayStyle . ';position:relative;margin-top:2px;margin-bottom:4px;padding-left:32px;">
+            <div style="position:absolute;top:0;bottom:0;left:18px;width:1px;background:rgba(255,255,255,0.1);"></div>
+            <div>';
 
             foreach ($item->getChilds() as $child) {
+                $childStyle = $child->isActive()
+                    ? 'color:#38bdf8;font-weight:600;'
+                    : 'color:#64748b;';
 
-                $isActive = $child->isActive() ? 'tw-text-sky-400 tw-font-semibold' : 'tw-text-slate-500 hover:tw-text-slate-200 hover:tw-bg-white/5';
-
-                $children .= '<a href="' . $child->getUrl() . '" title="" class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-tracking-tight tw-truncate tw-transition-all tw-duration-150 tw-rounded-lg tw-whitespace-nowrap ' . $isActive . '" ' . $child->getAttributes() . '>' .
-                $child->getIcon() . ' <span>' . $child->title . '</span>' .
+                $children .= '<a href="' . $child->getUrl() . '" title="" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $childStyle . '" ' . $child->getAttributes() . '>' .
+                    $child->getIcon() . ' <span>' . $child->title . '</span>' .
                     '</a>' . PHP_EOL;
             }
 
@@ -136,18 +132,13 @@ class AdminlteCustomPresenter extends Presenter
     }
 
     /**
-     * Returns the icon HTML. If the icon is SVG, it returns directly; otherwise, it assumes it's a FontAwesome class and wraps it in an <i> tag.
-     *
-     * @param string $icon
-     * @return string
+     * Returns the icon HTML.
      */
     protected function formatIcon($icon)
     {
-        // Check if the icon string contains "<svg", indicating it's an SVG icon
         if (strpos($icon, '<svg') !== false) {
-            return $icon; // Return the SVG icon directly
+            return $icon;
         } else {
-            // Assume it's a FontAwesome icon and return it wrapped in an <i> tag
             return '<i class="' . $icon . '"></i>';
         }
     }
@@ -162,5 +153,3 @@ class AdminlteCustomPresenter extends Presenter
         }
     }
 }
-
-
