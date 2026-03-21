@@ -904,6 +904,73 @@
         .select2-container {
             width: 100% !important;
         }
+
+        /* Dashboard compact table style */
+        .dashboard-fortypos .dataTables_wrapper table.dataTable,
+        .dashboard-fortypos table.table-bordered,
+        .dashboard-fortypos table.table-striped {
+            border: none !important;
+            border-collapse: collapse !important;
+        }
+        .dashboard-fortypos table.dataTable thead th,
+        .dashboard-fortypos table.table-bordered thead th,
+        .dashboard-fortypos table.table-striped thead th {
+            background: #f8fafc !important;
+            color: #64748b !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 6px 10px !important;
+            border: none !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            white-space: nowrap;
+        }
+        .dashboard-fortypos table.dataTable tbody td,
+        .dashboard-fortypos table.table-bordered tbody td,
+        .dashboard-fortypos table.table-striped tbody td {
+            padding: 5px 10px !important;
+            font-size: 12px !important;
+            border: none !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            vertical-align: middle !important;
+            line-height: 1.4 !important;
+        }
+        .dashboard-fortypos table.dataTable tbody tr:last-child td,
+        .dashboard-fortypos table.table-bordered tbody tr:last-child td,
+        .dashboard-fortypos table.table-striped tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+        .dashboard-fortypos table.dataTable tbody tr:hover td,
+        .dashboard-fortypos table.table-bordered tbody tr:hover td,
+        .dashboard-fortypos table.table-striped tbody tr:hover td {
+            background: #f8fafc !important;
+        }
+        /* Remove DataTables default striping */
+        .dashboard-fortypos table.dataTable.stripe tbody tr.odd,
+        .dashboard-fortypos table.dataTable.display tbody tr.odd {
+            background: transparent !important;
+        }
+        /* Compact dataTables controls */
+        .dashboard-fortypos .dataTables_wrapper .dataTables_info,
+        .dashboard-fortypos .dataTables_wrapper .dataTables_paginate {
+            font-size: 11px !important;
+            padding-top: 6px !important;
+        }
+        .dashboard-fortypos .dataTables_wrapper .dataTables_length,
+        .dashboard-fortypos .dataTables_wrapper .dataTables_filter {
+            font-size: 11px !important;
+        }
+        /* Tfoot styling */
+        .dashboard-fortypos table.dataTable tfoot td,
+        .dashboard-fortypos table.table-bordered tfoot td {
+            padding: 5px 10px !important;
+            font-size: 12px !important;
+            border-top: 2px solid #e2e8f0 !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-right: none !important;
+        }
     </style>
 @endsection
 
