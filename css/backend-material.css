@@ -141,49 +141,54 @@ label {
    TABLES - Excel Spreadsheet Style
    ============================================================ */
 .table {
-    border-collapse: separate !important;
+    border-collapse: collapse !important;
     border-spacing: 0 !important;
-    border: 1px solid #b0b0b0 !important;
-    border-radius: 10px !important;
-    overflow: hidden;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible;
 }
 
 .table-material {
-    border-collapse: separate !important;
+    border-collapse: collapse !important;
     border-spacing: 0 !important;
-    border: 1px solid #b0b0b0 !important;
-    border-radius: 10px !important;
-    overflow: hidden;
+    border: none !important;
+    border-radius: 0 !important;
 }
 
 .table thead th {
-    background: #e8f5e9 !important;
-    border: 1px solid #a5d6a7 !important;
-    color: #1a1a1a !important;
+    background: #f8fafc !important;
+    border: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    color: #64748b !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    font-size: 11px !important;
-    letter-spacing: 0.5px !important;
-    padding: 8px 12px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.06em !important;
+    padding: 6px 10px !important;
+    white-space: nowrap;
 }
 
-.table tbody tr:nth-child(odd) {
+.table tbody tr:nth-child(odd),
+.table tbody tr:nth-child(even) {
     background: #ffffff !important;
 }
 
-.table tbody tr:nth-child(even) {
-    background: #c8e6c9 !important;
-}
-
 .table tbody tr:hover {
-    background: #a5d6a7 !important;
+    background: #f8fafc !important;
 }
 
 .table td {
     vertical-align: middle !important;
-    border: 1px solid #d1d5db !important;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
     color: var(--pos-text) !important;
-    padding: 8px 12px !important;
+    padding: 5px 10px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none !important;
 }
 
 /* ============================================================
