@@ -15,9 +15,9 @@
         <div class="row">
             <div class="col-sm-4">
                 <div class="form-group">
-                    {!! Form::label('digitax_api_key', 'Digitax API Key' . ':') !!}
-                    {!! Form::text('digitax_api_key', $business->digitax_api_key, ['class' => 'form-control', 'placeholder' => 'Digitax API Key']); !!}
-                    <p class="help-block">Obtain from Digitax dashboard.</p>
+                    {!! Form::label('digitax_api_key', 'eTIMS API Key' . ':') !!}
+                    {!! Form::text('digitax_api_key', $business->digitax_api_key, ['class' => 'form-control', 'placeholder' => 'eTIMS API Key']); !!}
+                    <p class="help-block">Your eTIMS integration API key.</p>
                 </div>
             </div>
             <div class="col-sm-4">

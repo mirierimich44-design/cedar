@@ -18,7 +18,7 @@
     {!! Form::open(['route' => 'etims.settings.save', 'method' => 'post']) !!}
     @component('components.widget', ['class' => 'box-primary'])
         @slot('title')
-            <i class="fa fa-cog"></i> Digitax / eTIMS Configuration
+            <i class="fa fa-cog"></i> eTIMS Configuration
         @endslot
 
         <div class="row">
@@ -38,9 +38,9 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group {{ $errors->has('digitax_api_key') ? 'has-error' : '' }}">
-                    {!! Form::label('digitax_api_key', 'Digitax API Key:') !!}
-                    {!! Form::text('digitax_api_key', $business->digitax_api_key, ['class' => 'form-control', 'placeholder' => 'Enter your Digitax API Key']) !!}
-                    <p class="help-block">Obtain from your <strong>Digitax dashboard</strong> at digitax.tech.</p>
+                    {!! Form::label('digitax_api_key', 'eTIMS API Key:') !!}
+                    {!! Form::text('digitax_api_key', $business->digitax_api_key, ['class' => 'form-control', 'placeholder' => 'Enter your eTIMS API Key']) !!}
+                    <p class="help-block">Your eTIMS integration API key.</p>
                     @if($errors->has('digitax_api_key'))
                         <span class="help-block text-danger">{{ $errors->first('digitax_api_key') }}</span>
                     @endif
@@ -67,7 +67,7 @@
                         'background' => 'Background (Recommended) — queue-based sync',
                         'manual'     => 'Manual — sync invoices from the eTIMS Invoices page',
                     ], $business->etims_sync_mode ?? 'background', ['class' => 'form-control select2', 'style' => 'width:100%;']) !!}
-                    <p class="help-block">Controls when sales invoices are pushed to eTIMS via Digitax.</p>
+                    <p class="help-block">Controls when sales invoices are pushed to eTIMS.</p>
                     @if($errors->has('etims_sync_mode'))
                         <span class="help-block text-danger">{{ $errors->first('etims_sync_mode') }}</span>
                     @endif
