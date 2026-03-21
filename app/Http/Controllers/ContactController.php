@@ -1164,22 +1164,31 @@ class ContactController extends Controller
                     }
 
                     $contact_array['prefix'] = $value[1];
-                    //Check contact name
-                    if (! empty($value[2])) {
-                        $contact_array['first_name'] = $value[2];
-                    } else {
-                        $is_valid = false;
-                        $error_msg = "First name is required in row no. $row_no";
-                        break;
-                    }
                     $contact_array['middle_name'] = $value[3];
                     $contact_array['last_name'] = $value[4];
-                    $contact_array['name'] = implode(' ', [$contact_array['prefix'], $contact_array['first_name'], $contact_array['middle_name'], $contact_array['last_name']]);
 
                     //Check business name
                     if (! empty(trim($value[5]))) {
                         $contact_array['supplier_business_name'] = $value[5];
                     }
+
+                    //Check contact name — first name optional if business name provided
+                    if (! empty(trim($value[2]))) {
+                        $contact_array['first_name'] = trim($value[2]);
+                    } elseif (! empty($contact_array['supplier_business_name'])) {
+                        $contact_array['first_name'] = $contact_array['supplier_business_name'];
+                    } else {
+                        $is_valid = false;
+                        $error_msg = "First name or Business name is required in row no. $row_no";
+                        break;
+                    }
+
+                    $contact_array['name'] = trim(implode(' ', array_filter([
+                        $contact_array['prefix'],
+                        $contact_array['first_name'],
+                        $contact_array['middle_name'],
+                        $contact_array['last_name'],
+                    ])));
 
                     //Check supplier fields
                     if (in_array($contact_type, ['supplier', 'both'])) {
@@ -1314,8 +1323,9 @@ class ContactController extends Controller
                     }
                 }
 
+                $imported_count = count($formated_data);
                 $output = ['success' => 1,
-                    'msg' => __('product.file_imported_successfully'),
+                    'msg' => __('product.file_imported_successfully')." ($imported_count contacts imported)",
                 ];
 
                 DB::commit();
@@ -1325,7 +1335,7 @@ class ContactController extends Controller
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,
-                'msg' => $e->getMessage(),
+                'msg' => 'Import failed: '.$e->getMessage(),
             ];
 
             return redirect()->route('contacts.import')->with('notification', $output);

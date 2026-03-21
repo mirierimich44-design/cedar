@@ -12,19 +12,19 @@
 <!-- Main content -->
 <section class="content">
     
-    @if (session('notification') || !empty($notification))
+    @php
+        $importError = session('notification') ?: ($notification ?? null);
+    @endphp
+    @if(!empty($importError))
         <div class="row">
             <div class="col-sm-12">
-                <div class="alert alert-danger alert-dismissible">
+                <div class="alert alert-danger alert-dismissible" style="font-size:15px; padding:16px 20px; border-left: 5px solid #a00;">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    @if(!empty($notification['msg']))
-                        {{$notification['msg']}}
-                    @elseif(session('notification.msg'))
-                        {{ session('notification.msg') }}
-                    @endif
+                    <strong><i class="fa fa-exclamation-triangle"></i> Import Error:</strong>
+                    {{ $importError['msg'] ?? 'Unknown error' }}
                 </div>
-            </div>  
-        </div>     
+            </div>
+        </div>
     @endif
     
     <div class="row">
