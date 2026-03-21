@@ -171,11 +171,16 @@ class AdminSidebarMenu
             }
 
             // Cooler Management
-            if (auth()->user()->can('cooler.asset.view') || auth()->user()->can('cooler.dealer.view') || auth()->user()->can('cooler.compliance.view')) {
-                $isCoolerActive = in_array(request()->segment(2), ['assets', 'dealers', 'agreements', 'retrievals', 'compliance', 'reports']) && request()->segment(1) == 'cooler';
+            if (auth()->user()->can('cooler.asset.view') || auth()->user()->can('cooler.dealer.view') || auth()->user()->can('cooler.compliance.view') || auth()->user()->can('cooler.agent.portal')) {
+                $isCoolerActive = in_array(request()->segment(2), ['assets', 'dealers', 'agreements', 'retrievals', 'compliance', 'reports', 'agent']) && request()->segment(1) == 'cooler';
                 $menu->dropdown(
                     'Cooler Management',
                     function ($sub) {
+                        // Agent portal — shown only to agents
+                        if (auth()->user()->can('cooler.agent.portal')) {
+                            $sub->url(route('cooler.agent.dashboard'), 'My Portal',
+                                ['icon' => '', 'active' => request()->is('cooler/agent*')]);
+                        }
                         if (auth()->user()->can('cooler.compliance.view')) {
                             $sub->url(route('cooler.compliance.dashboard'), 'Dashboard',
                                 ['icon' => '', 'active' => request()->is('cooler/compliance*')]);
@@ -185,7 +190,7 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->is('cooler/assets*')]);
                         }
                         if (auth()->user()->can('cooler.dealer.view')) {
-                            $sub->url(route('cooler.dealers.index'), 'Dealers',
+                            $sub->url(route('cooler.dealers.index'), 'Customers',
                                 ['icon' => '', 'active' => request()->is('cooler/dealers*')]);
                         }
                         if (auth()->user()->can('cooler.agreement.view')) {

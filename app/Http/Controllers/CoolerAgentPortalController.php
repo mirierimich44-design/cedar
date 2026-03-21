@@ -197,6 +197,7 @@ class CoolerAgentPortalController extends Controller
 
             return \Yajra\DataTables\Facades\DataTables::of($retrievals)
                 ->addColumn('status_badge', fn ($row) => (new CoolerRetrieval(['status' => $row->status]))->status_badge)
+                ->addColumn('reason_label', fn ($row) => CoolerRetrieval::$reasons[$row->reason] ?? ucfirst(str_replace('_', ' ', $row->reason)))
                 ->addColumn('action', function ($row) {
                     $html = '<a href="' . route('cooler.retrievals.show', $row->id) . '" class="btn btn-xs btn-info"><i class="fa fa-eye"></i></a> ';
                     if ($row->status !== 'completed') {
@@ -204,7 +205,7 @@ class CoolerAgentPortalController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['status_badge', 'action'])
+                ->rawColumns(['status_badge', 'action', 'reason_label'])
                 ->make(true);
         }
 
