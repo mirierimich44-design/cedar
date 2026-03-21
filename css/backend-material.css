@@ -497,3 +497,67 @@ label {
     font-weight: 700 !important;
     font-size: 20px !important;
 }
+
+/* ============================================================
+   CARD-STYLE ACTION DROPDOWNS
+   ============================================================ */
+.dropdown-menu[role="menu"] {
+    min-width: 240px !important;
+    padding: 8px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.dropdown-menu[role="menu"] > li > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    margin-bottom: 3px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background: #f8fafc !important;
+    border: 1px solid #e8edf3 !important;
+    transition: background 0.15s, color 0.15s, border-color 0.15s !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+}
+
+.dropdown-menu[role="menu"] > li > a:hover,
+.dropdown-menu[role="menu"] > li > a:focus {
+    background: #eef2ff !important;
+    color: #4f46e5 !important;
+    border-color: #c7d2fe !important;
+    text-decoration: none !important;
+}
+
+.dropdown-menu[role="menu"] > li > a > i,
+.dropdown-menu[role="menu"] > li > a > .glyphicon {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
+    background: #e0e7ff !important;
+    color: #4f46e5 !important;
+    margin-right: 0 !important;
+}
+
+.dropdown-menu[role="menu"] > li.divider {
+    margin: 4px 0 !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* "Actions" toggle button card style */
+.btn-group > .tw-dw-btn.dropdown-toggle {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+}
