@@ -473,7 +473,7 @@
 
     {{-- Step 1: Credit Options Chooser --}}
     <div class="modal fade" id="credit_options_modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-sm" role="document" style="max-width:340px; margin:80px auto;">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
                 <div class="modal-header" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%); border:none; padding:18px 20px;">
                     <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1;font-size:26px;text-shadow:none;">&times;</button>

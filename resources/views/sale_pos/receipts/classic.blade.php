@@ -415,6 +415,7 @@
 						</tr>
 					@endif
 
+					@if($receipt_details->subtotal != $receipt_details->total)
 					<tr>
 						<th style="width:70%">
 							{!! $receipt_details->subtotal_label !!}
@@ -423,6 +424,7 @@
 							{{$receipt_details->subtotal}}
 						</td>
 					</tr>
+					@endif
 
 					<!-- Discount -->
 					@if( !empty($receipt_details->discount) )
@@ -498,8 +500,8 @@
 							@endforeach
 						@endif
 
-						<!-- Total Paid-->
-						@if(!empty($receipt_details->total_paid) && !empty($receipt_details->total_paid_label))
+						<!-- Total Paid (only shown when there are multiple payment lines) -->
+						@if(!empty($receipt_details->total_paid) && !empty($receipt_details->total_paid_label) && count($receipt_details->payments) > 1)
 							<tr>
 								<th>
 									{!! $receipt_details->total_paid_label !!}
