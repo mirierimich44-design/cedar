@@ -1334,11 +1334,9 @@ class ContactController extends Controller
             DB::rollBack();
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
-            $output = ['success' => 0,
-                'msg' => 'Import failed: '.$e->getMessage(),
-            ];
+            $notification = ['success' => 0, 'msg' => 'Import failed: '.$e->getMessage()];
 
-            return redirect()->route('contacts.import')->with('notification', $output);
+            return view('contact.import')->with('notification', $notification);
         }
 
         if ($output['success']) {
@@ -1349,7 +1347,10 @@ class ContactController extends Controller
             return redirect()->action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => $type])->with('status', $output);
         }
 
-        return redirect()->route('contacts.import')->with('notification', $output);
+        // No file uploaded or import produced no success
+        $notification = ['success' => 0, 'msg' => $output['msg']];
+
+        return view('contact.import')->with('notification', $notification);
     }
 
     /**
