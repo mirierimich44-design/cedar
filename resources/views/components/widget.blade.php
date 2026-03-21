@@ -35,11 +35,9 @@
         </div>
     @endif
 
-    <div class="tw-flow-root tw-border-gray-200">
-        <div class="">
-            <div class="tw-py-2 tw-align-middle sm:tw-px-3">
-                {{ $slot }}
-            </div>
+    <div class="tw-flow-root">
+        <div style="padding:8px 12px;">
+            {{ $slot }}
         </div>
     </div>
 </div>

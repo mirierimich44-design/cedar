@@ -30,7 +30,7 @@ class AdminlteCustomPresenter extends Presenter
         $isActive = $item->isActive();
         $style = $isActive
             ? 'color:white;background:rgba(255,255,255,0.1);border-left:3px solid #38bdf8;padding-left:13px;'
-            : 'color:#94a3b8;';
+            : 'color:rgba(255,255,255,0.72);';
 
         return '<a href="' . $item->getUrl() . '" title="" class="sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $style . '" ' . $item->getAttributes() . '>' .
             $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
@@ -77,7 +77,7 @@ class AdminlteCustomPresenter extends Presenter
         $hasActive = $item->hasActiveOnChild();
         $parentStyle = $hasActive
             ? 'color:white;background:rgba(255,255,255,0.05);'
-            : 'color:#94a3b8;';
+            : 'color:rgba(255,255,255,0.72);';
 
         $chevron = $hasActive
             ? '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" />'
@@ -117,8 +117,8 @@ class AdminlteCustomPresenter extends Presenter
 
             foreach ($item->getChilds() as $child) {
                 $childStyle = $child->isActive()
-                    ? 'color:#38bdf8;font-weight:600;'
-                    : 'color:#64748b;';
+                    ? 'color:#7dd3fc;font-weight:600;'
+                    : 'color:rgba(255,255,255,0.55);';
 
                 $children .= '<a href="' . $child->getUrl() . '" title="" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $childStyle . '" ' . $child->getAttributes() . '>' .
                     $child->getIcon() . ' <span>' . $child->title . '</span>' .
