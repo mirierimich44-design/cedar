@@ -178,6 +178,48 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('job-categories', JobCategoryController::class);
     Route::resource('job-templates', JobTemplateController::class);
 
+    // ── Cooler Management Module ─────────────────────────────────────────────
+    // Route names: cooler.assets.*, cooler.dealers.*, cooler.agreements.*, cooler.retrievals.*, etc.
+    Route::prefix('cooler')->name('cooler.')->group(function () {
+        // Assets  → cooler.assets.index, .create, .store, .show, .edit, .update, .destroy
+        Route::resource('assets', \App\Http\Controllers\CoolerAssetController::class);
+
+        // Dealers → cooler.dealers.*
+        Route::resource('dealers', \App\Http\Controllers\CoolerDealerController::class);
+
+        // Agreements → cooler.agreements.*
+        Route::resource('agreements', \App\Http\Controllers\CoolerAgreementController::class, ['except' => ['edit', 'update']]);
+        Route::get('agreements/{id}/sign',               [\App\Http\Controllers\CoolerAgreementController::class, 'sign'])->name('agreements.sign');
+        Route::post('agreements/{id}/sign',              [\App\Http\Controllers\CoolerAgreementController::class, 'captureSignature'])->name('agreements.capture-signature');
+        Route::post('agreements/{id}/terminate',         [\App\Http\Controllers\CoolerAgreementController::class, 'terminate'])->name('agreements.terminate');
+        Route::get('agreements/{id}/pdf',                [\App\Http\Controllers\CoolerAgreementController::class, 'downloadPdf'])->name('agreements.pdf');
+
+        // Retrievals → cooler.retrievals.*
+        Route::resource('retrievals', \App\Http\Controllers\CoolerRetrievalController::class, ['except' => ['edit', 'update']]);
+        Route::get('retrievals/{id}/execute',            [\App\Http\Controllers\CoolerRetrievalController::class, 'execute'])->name('retrievals.execute');
+        Route::post('retrievals/{id}/upload-photo',      [\App\Http\Controllers\CoolerRetrievalController::class, 'uploadPhoto'])->name('retrievals.upload-photo');
+        Route::post('retrievals/{id}/capture-signature', [\App\Http\Controllers\CoolerRetrievalController::class, 'captureSignature'])->name('retrievals.capture-signature');
+        Route::post('retrievals/{id}/upload-letter',     [\App\Http\Controllers\CoolerRetrievalController::class, 'uploadSignedLetter'])->name('retrievals.upload-letter');
+        Route::post('retrievals/{id}/complete',          [\App\Http\Controllers\CoolerRetrievalController::class, 'complete'])->name('retrievals.complete');
+        Route::get('retrievals/{id}/letter',             [\App\Http\Controllers\CoolerRetrievalController::class, 'downloadLetter'])->name('retrievals.letter');
+        Route::get('dealer/{dealer}/coolers',            [\App\Http\Controllers\CoolerRetrievalController::class, 'getDealerCoolers'])->name('dealer-coolers');
+
+        // Documents → cooler.documents.*
+        Route::get('documents/{id}/view',                [\App\Http\Controllers\CoolerDocumentController::class, 'view'])->name('documents.view');
+        Route::get('documents/{id}/download',            [\App\Http\Controllers\CoolerDocumentController::class, 'download'])->name('documents.download');
+        Route::post('documents/{id}/verify',             [\App\Http\Controllers\CoolerDocumentController::class, 'verify'])->name('documents.verify');
+        Route::post('documents/{id}/reject',             [\App\Http\Controllers\CoolerDocumentController::class, 'reject'])->name('documents.reject');
+        Route::delete('documents/{id}',                  [\App\Http\Controllers\CoolerDocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::get('documents/expiring-soon',            [\App\Http\Controllers\CoolerDocumentController::class, 'expiringSoon'])->name('documents.expiring-soon');
+
+        // Compliance & Reports
+        Route::get('compliance',                         [\App\Http\Controllers\CoolerComplianceController::class, 'dashboard'])->name('compliance.dashboard');
+        Route::get('reports',                            [\App\Http\Controllers\CoolerComplianceController::class, 'reports'])->name('reports');
+        Route::post('compliance/{dealer}/flag',          [\App\Http\Controllers\CoolerComplianceController::class, 'flagDealer'])->name('compliance.flag');
+        Route::post('compliance/{dealer}/recalculate',   [\App\Http\Controllers\CoolerComplianceController::class, 'recalculateScore'])->name('compliance.recalculate');
+    });
+    // ── End Cooler Management Module ─────────────────────────────────────────
+
     Route::get('etims-report', [EtimsReportController::class, 'index']);
     Route::get('etims-report/sync-invoice/{id}', [EtimsReportController::class, 'syncInvoice']);
     Route::post('etims-report/sync-all', [EtimsReportController::class, 'syncAll'])->name('etims.sync-all');
