@@ -11,11 +11,13 @@ class AddAgentToCoolerDealers extends Migration
 {
     public function up()
     {
-        // Add agent_id FK to cooler_dealers
-        Schema::table('cooler_dealers', function (Blueprint $table) {
-            $table->unsignedInteger('agent_id')->nullable()->after('created_by');
-            $table->foreign('agent_id')->references('id')->on('users')->onDelete('set null');
-        });
+        // Add agent_id FK to cooler_dealers (guard against partial previous run)
+        if (!Schema::hasColumn('cooler_dealers', 'agent_id')) {
+            Schema::table('cooler_dealers', function (Blueprint $table) {
+                $table->unsignedInteger('agent_id')->nullable()->after('created_by');
+                $table->foreign('agent_id')->references('id')->on('users')->onDelete('set null');
+            });
+        }
 
         // New agent-specific permissions (global, no business_id)
         $agentPermissions = [
