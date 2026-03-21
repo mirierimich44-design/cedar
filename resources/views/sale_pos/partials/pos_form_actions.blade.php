@@ -738,9 +738,12 @@
                     $('#customer_id').append(opt).trigger('change');
                 }
 
-                // Set the hidden is_credit_sale flag that pos.js already reads
+                // Ensure is_credit_sale=1 is in the form — create the input
+                // if the POS setting that normally renders it is disabled
                 if ($('#is_credit_sale').length) {
                     $('#is_credit_sale').val(1);
+                } else {
+                    form.append('<input type="hidden" name="is_credit_sale" id="is_credit_sale" value="1">');
                 }
 
                 // Trigger the normal POS form submit — goes through pos.js
