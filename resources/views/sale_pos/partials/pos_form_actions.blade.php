@@ -1314,7 +1314,7 @@
         function startStkPoll() {
             cds.pollInterval = setInterval(function() {
                 if (!cds.mpesaTxnId) { stopTimers(); return; }
-                $.post('/mpesa/check-payment-status', {
+                $.post('{{ url("mpesa/check-payment-status") }}', {
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     mpesa_transaction_id: cds.mpesaTxnId
                 }, function(r) {
