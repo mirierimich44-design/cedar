@@ -88,3 +88,102 @@
     {!! $__system_settings['additional_css'] !!}
 @endif
 
+{{-- GLOBAL TABLE STYLE — loaded last, beats everything --}}
+<style>
+/* ─── Table reset ─────────────────────────────────────────── */
+table.table,
+table.dataTable,
+.dataTables_wrapper table {
+    border: none !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    font-size: 13px !important;
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+table.table thead th,
+table.table thead td,
+table.dataTable thead th,
+table.dataTable thead td,
+.dataTables_wrapper table thead th,
+.dataTables_wrapper table thead td {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 6px 10px !important;
+    border: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    white-space: nowrap;
+}
+
+/* ─── Body cells ──────────────────────────────────────────── */
+table.table tbody td,
+table.table tbody th,
+table.dataTable tbody td,
+table.dataTable tbody th,
+.dataTables_wrapper table tbody td {
+    padding: 5px 10px !important;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+}
+
+/* ─── Last row: no divider ────────────────────────────────── */
+table.table tbody tr:last-child td,
+table.table tbody tr:last-child th,
+table.dataTable tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* ─── No striping ─────────────────────────────────────────── */
+table.table tbody tr,
+table.table tbody tr:nth-child(odd),
+table.table tbody tr:nth-child(even),
+table.table-striped tbody tr:nth-of-type(odd),
+table.table-striped tbody tr:nth-of-type(even),
+table.dataTable tbody tr,
+table.dataTable tbody tr:nth-child(odd),
+table.dataTable tbody tr:nth-child(even),
+.dataTables_wrapper table tbody tr,
+.dataTables_wrapper table tbody tr:nth-child(odd),
+.dataTables_wrapper table tbody tr:nth-child(even) {
+    background: #ffffff !important;
+}
+
+/* ─── Hover ───────────────────────────────────────────────── */
+table.table tbody tr:hover td,
+table.table tbody tr:hover th,
+table.dataTable tbody tr:hover td,
+.dataTables_wrapper table tbody tr:hover td {
+    background: #f8fafc !important;
+}
+
+/* ─── Footer ──────────────────────────────────────────────── */
+table.table tfoot th,
+table.table tfoot td,
+table.dataTable tfoot th,
+table.dataTable tfoot td {
+    background: #f8fafc !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 5px 10px !important;
+    border: none !important;
+    border-top: 2px solid #e2e8f0 !important;
+}
+
+/* ─── Remove all borders from bordered variant ────────────── */
+table.table-bordered td,
+table.table-bordered th {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+</style>
+
