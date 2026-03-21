@@ -22,7 +22,7 @@
             <table class="table table-bordered table-striped" id="retrievals-table">
                 <thead>
                     <tr>
-                        <th>Dealer</th>
+                        <th>Customer</th>
                         <th>Outlet</th>
                         <th>Cooler</th>
                         <th>Date</th>

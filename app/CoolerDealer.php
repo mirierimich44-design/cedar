@@ -14,7 +14,7 @@ class CoolerDealer extends Model
     protected $fillable = [
         'business_id', 'contact_id', 'name', 'id_number', 'kra_pin', 'postal_address', 'phone',
         'outlet_name', 'channel', 'building', 'road', 'area', 'years_in_business',
-        'brands_stocked', 'compliance_score', 'status', 'created_by',
+        'brands_stocked', 'compliance_score', 'status', 'created_by', 'agent_id',
     ];
 
     protected $casts = [
@@ -41,6 +41,16 @@ class CoolerDealer extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function scopeForAgent($query, $agent_id)
+    {
+        return $query->where('agent_id', $agent_id);
     }
 
     public function agreements()

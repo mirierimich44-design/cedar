@@ -28,7 +28,7 @@
             <div class="info-box">
                 <span class="info-box-icon bg-aqua"><i class="fa fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Active Dealers</span>
+                    <span class="info-box-text">Active Customers</span>
                     <span class="info-box-number">{{ $dealerStats['active'] }} / {{ $dealerStats['total'] }}</span>
                 </div>
             </div>
@@ -46,7 +46,7 @@
             <div class="info-box">
                 <span class="info-box-icon bg-red"><i class="fa fa-times-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Critical Dealers</span>
+                    <span class="info-box-text">Critical Customers</span>
                     <span class="info-box-number">{{ $dealerStats['critical'] }}</span>
                 </div>
             </div>

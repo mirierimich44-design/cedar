@@ -28,7 +28,7 @@
 
     {{-- Dealer compliance table --}}
     <div class="box box-default">
-        <div class="box-header with-border"><h3 class="box-title">Dealer Compliance Summary</h3></div>
+        <div class="box-header with-border"><h3 class="box-title">Customer Compliance Summary</h3></div>
         <div class="box-body">
             <table class="table table-bordered table-striped dataTable">
                 <thead><tr><th>Outlet</th><th>Channel</th><th>Area</th><th>Coolers</th><th>Agreements</th><th>Compliance Score</th><th>Status</th><th>Action</th></tr></thead>

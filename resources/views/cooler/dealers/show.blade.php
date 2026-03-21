@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Dealer — ' . $dealer->outlet_name)
+@section('title', 'Customer — ' . $dealer->outlet_name)
 
 @section('content')
 <section class="content-header">

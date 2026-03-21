@@ -27,7 +27,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         {!! Form::label('cooler_id', 'Cooler to Retrieve *') !!}
-                        {!! Form::select('cooler_id', [], old('cooler_id'), ['class' => 'form-control select2', 'required', 'id' => 'cooler-select', 'placeholder' => '— Select dealer first —']) !!}
+                        {!! Form::select('cooler_id', [], old('cooler_id'), ['class' => 'form-control select2', 'required', 'id' => 'cooler-select', 'placeholder' => '— Select customer first —']) !!}
                     </div>
                 </div>
                 <div class="col-md-6">

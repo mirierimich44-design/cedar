@@ -219,6 +219,25 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::post('compliance/{dealer}/flag',          [\App\Http\Controllers\CoolerComplianceController::class, 'flagDealer'])->name('compliance.flag');
         Route::post('compliance/{dealer}/recalculate',   [\App\Http\Controllers\CoolerComplianceController::class, 'recalculateScore'])->name('compliance.recalculate');
     });
+        // ── Agent Portal ── (requires 'Cooler Agent' role / cooler.agent.portal permission)
+        Route::prefix('agent')->name('agent.')->group(function () {
+            $ctrl = \App\Http\Controllers\CoolerAgentPortalController::class;
+
+            Route::get('/',                         [$ctrl, 'dashboard'])->name('dashboard');
+            // Customers
+            Route::get('customers',                 [$ctrl, 'customers'])->name('customers');
+            Route::get('customers/create',          [$ctrl, 'createCustomer'])->name('customers.create');
+            Route::post('customers',                [$ctrl, 'storeCustomer'])->name('customers.store');
+            Route::get('customers/{id}',            [$ctrl, 'showCustomer'])->name('customers.show');
+            // Retrievals
+            Route::get('retrievals',                [$ctrl, 'retrievals'])->name('retrievals');
+            Route::post('retrievals',               [$ctrl, 'storeRetrieval'])->name('retrievals.store');
+            // Orders + MPESA
+            Route::get('orders/create',             [$ctrl, 'createOrder'])->name('orders.create');
+            Route::post('orders',                   [$ctrl, 'storeOrder'])->name('orders.store');
+            Route::get('orders/check-payment',      [$ctrl, 'checkPayment'])->name('orders.check_payment');
+        });
+    });
     // ── End Cooler Management Module ─────────────────────────────────────────
 
     Route::get('etims-report', [EtimsReportController::class, 'index']);

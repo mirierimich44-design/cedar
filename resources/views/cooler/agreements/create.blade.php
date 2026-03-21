@@ -39,7 +39,7 @@
                     <div class="form-group">
                         {!! Form::label('sales_volume_target', 'Monthly Sales Target (KES)') !!}
                         {!! Form::number('sales_volume_target', null, ['class' => 'form-control', 'step' => '1000', 'min' => '0', 'placeholder' => 'e.g. 50000']) !!}
-                        <small class="help-block">Clause 8 — dealer-specific sales volume target</small>
+                        <small class="help-block">Clause 8 — customer-specific sales volume target</small>
                     </div>
                 </div>
             </div>

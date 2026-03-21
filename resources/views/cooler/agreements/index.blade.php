@@ -22,7 +22,7 @@
             <table class="table table-bordered table-striped" id="agreements-table">
                 <thead>
                     <tr>
-                        <th>Dealer</th>
+                        <th>Customer</th>
                         <th>Outlet</th>
                         <th>Asset #</th>
                         <th>Date</th>

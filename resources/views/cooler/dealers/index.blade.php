@@ -1,21 +1,21 @@
 @extends('layouts.app')
-@section('title', 'Cooler Dealers')
+@section('title', 'Cooler Customers')
 
 @section('content')
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">Dealers
-        <small class="tw-text-sm tw-text-gray-600 tw-font-semibold">SBC Kenya cooler loan dealers</small>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">Customers
+        <small class="tw-text-sm tw-text-gray-600 tw-font-semibold">SBC Kenya cooler loan customers</small>
     </h1>
 </section>
 
 <section class="content">
     <div class="box box-primary">
         <div class="box-header with-border">
-            <h3 class="box-title">All Dealers</h3>
+            <h3 class="box-title">All Customers</h3>
             @can('cooler.dealer.create')
             <div class="box-tools">
                 <a href="{{ route('cooler.dealers.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fa fa-plus"></i> Register Dealer
+                    <i class="fa fa-plus"></i> Register Customer
                 </a>
             </div>
             @endcan
@@ -60,7 +60,7 @@ $(function () {
     });
 
     $(document).on('click', '.btn-delete-dealer', function () {
-        if (!confirm('Delete this dealer?')) return;
+        if (!confirm('Delete this customer?')) return;
         var id = $(this).data('id');
         $.ajax({
             url: '/cooler/dealers/' + id,

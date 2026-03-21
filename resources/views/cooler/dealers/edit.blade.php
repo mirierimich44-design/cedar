@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Edit Dealer — ' . $dealer->outlet_name)
+@section('title', 'Edit Customer — ' . $dealer->outlet_name)
 
 @section('content')
 <section class="content-header">
-    <h1 class="tw-text-xl tw-font-bold tw-text-black">Edit Dealer — {{ $dealer->outlet_name }}</h1>
+    <h1 class="tw-text-xl tw-font-bold tw-text-black">Edit Customer — {{ $dealer->outlet_name }}</h1>
 </section>
 
 <section class="content">
@@ -79,7 +79,7 @@
     </div>
 
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Update Dealer</button>
+        <button type="submit" class="btn btn-primary">Update Customer</button>
         <a href="{{ route('cooler.dealers.show', $dealer->id) }}" class="btn btn-default">Cancel</a>
     </div>
 
