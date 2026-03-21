@@ -327,5 +327,51 @@ button.product-action-btn,
     height: auto !important;
     min-height: 0 !important;
 }
+
+/* ─── DataTables: Show X entries select ──────────────────── */
+.dataTables_wrapper .dataTables_length {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+.dataTables_wrapper .dataTables_length label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_length select.form-control {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    height: 32px !important;
+    padding: 0 8px !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+}
+
+/* ─── Mobile: prevent dark overlay on sidebar toggle tap ─── */
+.sidebar-overlay,
+.control-sidebar-bg,
+body.sidebar-open::after {
+    display: none !important;
+}
+@media (max-width: 991px) {
+    .main-sidebar { z-index: 1050; }
+    body.sidebar-open .content-wrapper,
+    body.sidebar-open .main-header { opacity: 1 !important; pointer-events: auto !important; }
+}
 </style>
 

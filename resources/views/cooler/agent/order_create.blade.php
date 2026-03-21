@@ -1,15 +1,35 @@
 @extends('layouts.app')
 @section('title', 'Place Customer Order')
 
+@section('css')
+<style>
+/* Mobile: hide cart panel by default, show only when toggled */
+@media (max-width: 767px) {
+    #cart-panel-wrapper { display: none; }
+    #cart-panel-wrapper.mobile-visible { display: block; }
+}
+</style>
+@endsection
+
 @section('content')
 <section class="content-header">
     <h1 class="tw-text-xl md:tw-text-2xl tw-font-bold tw-text-black">Place Customer Order</h1>
 </section>
 
 <section class="content">
-    <div class="row">
+    {{-- Mobile: cart toggle bar --}}
+    <div class="tw-flex tw-items-center tw-justify-between tw-mb-3 md:tw-hidden"
+         style="background:linear-gradient(135deg,var(--theme-dark),var(--theme-main));padding:10px 14px;border-radius:10px;">
+        <span class="tw-text-white tw-font-semibold tw-text-sm">Cart: <span id="cart-count-mobile">0 items</span> · <span id="cart-total-mobile">KES 0.00</span></span>
+        <button type="button" id="toggle-cart-mobile"
+                class="tw-text-white tw-text-xs tw-font-bold tw-bg-white/20 tw-px-3 tw-py-1 tw-rounded-lg">
+            View Cart
+        </button>
+    </div>
+
+    <div class="tw-flex tw-flex-col-reverse md:tw-grid md:tw-grid-cols-12 tw-gap-4">
         {{-- Left: customer + products --}}
-        <div class="col-md-8">
+        <div class="md:tw-col-span-8">
             <div class="box box-primary">
                 <div class="box-header with-border" style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-main) 100%);border:none;">
                     <h3 class="box-title tw-text-white"><i class="fa fa-shopping-cart tw-mr-2"></i>Order Details</h3>
@@ -62,7 +82,7 @@
         </div>
 
         {{-- Right: Cart + Payment --}}
-        <div class="col-md-4">
+        <div class="md:tw-col-span-4 tw-w-full" id="cart-panel-wrapper">
             <div class="box box-success" id="cart-box">
                 <div class="box-header with-border tw-bg-green-600">
                     <h3 class="box-title tw-text-white">Order Cart</h3>
@@ -199,7 +219,13 @@ $(function () {
         });
 
         $empty.toggle($.isEmptyObject(cart));
-        $('#cart-total').text('KES ' + total.toFixed(2));
+        var totalText = 'KES ' + total.toFixed(2);
+        $('#cart-total').text(totalText);
+
+        // Sync mobile summary bar
+        var count = Object.keys(cart).length;
+        $('#cart-count-mobile').text(count + (count === 1 ? ' item' : ' items'));
+        $('#cart-total-mobile').text(totalText);
     }
 
     $(document).on('click', '.btn-add-to-cart', function (e) {
@@ -237,6 +263,14 @@ $(function () {
             var name = $(this).data('product-name').toLowerCase() + ' ' + $(this).data('variation-name').toLowerCase();
             $(this).toggle(name.indexOf(q) > -1);
         });
+    });
+
+    // ── Mobile cart toggle ───────────────────────────────────────────────
+    $('#toggle-cart-mobile').on('click', function () {
+        var $panel = $('#cart-panel-wrapper');
+        var isVisible = $panel.hasClass('mobile-visible');
+        $panel.toggleClass('mobile-visible', !isVisible);
+        $(this).text(isVisible ? 'View Cart' : 'Hide Cart');
     });
 
     // ── Toggle MPESA phone field ─────────────────────────────────────────

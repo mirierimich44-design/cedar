@@ -12,7 +12,7 @@
     {!! Form::open(['route' => 'cooler.agent.customers.store', 'method' => 'POST', 'files' => true, 'id' => 'agent-customer-form']) !!}
 
     {{-- Step indicator --}}
-    <div class="tw-flex tw-items-center tw-gap-2 tw-mb-6">
+    <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-mb-6 tw-overflow-x-auto">
         @foreach(['Personal & ID', 'Business Info', 'Legal Docs'] as $i => $step)
         <div class="tw-flex tw-items-center tw-gap-2">
             <div class="tw-w-8 tw-h-8 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-sm tw-font-bold step-circle" data-step="{{ $i+1 }}">{{ $i+1 }}</div>
