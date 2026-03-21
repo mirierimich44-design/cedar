@@ -1023,6 +1023,70 @@ class ContactController extends Controller
     }
 
     /**
+     * Downloads the contacts import XLS template
+     */
+    public function getImportContactsTemplate()
+    {
+        if (! auth()->user()->can('supplier.create') && ! auth()->user()->can('customer.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $headers = [
+            'Contact Type (1=Customer, 2=Supplier, 3=Both)',
+            'Prefix',
+            'First Name',
+            'Middle Name',
+            'Last Name',
+            'Business Name',
+            'Contact ID',
+            'Tax Number',
+            'Opening Balance',
+            'Pay Term (number)',
+            'Pay Term Period (days/months)',
+            'Credit Limit',
+            'Email',
+            'Mobile',
+            'Alternate Contact Number',
+            'Landline',
+            'City',
+            'State',
+            'Country',
+            'Address Line 1',
+            'Address Line 2',
+            'Zip Code',
+            'Date of Birth (YYYY-MM-DD)',
+            'Custom Field 1',
+            'Custom Field 2',
+            'Custom Field 3',
+            'Custom Field 4',
+        ];
+
+        $sampleRow = [
+            1, '', 'John', '', 'Doe', '', '', '', '', '', '', '', 'john@example.com',
+            '0712345678', '', '', '', '', '', '', '', '', '', '', '', '', '',
+        ];
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        foreach ($headers as $col => $heading) {
+            $sheet->setCellValueByColumnAndRow($col + 1, 1, $heading);
+        }
+        foreach ($sampleRow as $col => $val) {
+            $sheet->setCellValueByColumnAndRow($col + 1, 2, $val);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+
+        $filename = 'import_contacts_template.xls';
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel',
+        ]);
+    }
+
+    /**
      * Imports contacts
      *
      * @param  \Illuminate\Http\Request
@@ -1033,6 +1097,9 @@ class ContactController extends Controller
         if (! auth()->user()->can('supplier.create') && ! auth()->user()->can('customer.create')) {
             abort(403, 'Unauthorized action.');
         }
+
+        $contact = null;
+        $output = ['success' => 0, 'msg' => __('messages.something_went_wrong')];
 
         try {
             $notAllowed = $this->commonUtil->notAllowedInDemo();
@@ -1077,8 +1144,8 @@ class ContactController extends Controller
                         3 => 'both',
                     ];
                     if (! empty($value[0])) {
-                        $contact_type = strtolower(trim($value[0]));
-                        if (in_array($contact_type, [1, 2, 3])) {
+                        $contact_type = (int) trim($value[0]);
+                        if (in_array($contact_type, [1, 2, 3], true)) {
                             $contact_array['type'] = $contact_types[$contact_type];
                             $contact_type = $contact_types[$contact_type];
                         } else {
@@ -1259,9 +1326,16 @@ class ContactController extends Controller
 
             return redirect()->route('contacts.import')->with('notification', $output);
         }
-        $type = ! empty($contact->type) && $contact->type != 'both' ? $contact->type : 'supplier';
 
-        return redirect()->action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => $type])->with('status', $output);
+        if ($output['success']) {
+            $type = ! empty($contact) && ! empty($contact->type) && $contact->type != 'both'
+                ? $contact->type
+                : 'customer';
+
+            return redirect()->action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => $type])->with('status', $output);
+        }
+
+        return redirect()->route('contacts.import')->with('notification', $output);
     }
 
     /**

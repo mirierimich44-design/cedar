@@ -165,6 +165,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/contacts/ledger', [ContactController::class, 'getLedger']);
     Route::post('/contacts/send-ledger', [ContactController::class, 'sendLedger']);
     Route::get('/contacts/import', [ContactController::class, 'getImportContacts'])->name('contacts.import');
+    Route::get('/contacts/import/template', [ContactController::class, 'getImportContactsTemplate'])->name('contacts.import.template');
     Route::post('/contacts/import', [ContactController::class, 'postImportContacts']);
     Route::post('/contacts/check-contacts-id', [ContactController::class, 'checkContactId']);
 
