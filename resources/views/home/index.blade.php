@@ -83,12 +83,11 @@
                             <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl  tw-ring-1 tw-ring-gray-200">
+                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl tw-ring-1 tw-ring-sky-200" style="background:#f0f9ff; overflow:hidden;">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0 tw-bg-sky-100 tw-text-sky-500">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                                     stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -97,15 +96,13 @@
                                                     <path d="M17 17h-11v-14h-2" />
                                                     <path d="M6 5l14 1l-1 7h-13" />
                                                 </svg>
-                                            </div>
+                                            </span>
 
                                             <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                                <p class="tw-text-sm tw-font-medium tw-text-sky-700 tw-truncate tw-whitespace-nowrap">
                                                     {{ __('home.total_sell') }}
                                                 </p>
-                                                <p
-                                                    class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                                <p class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                                 </p>
                                             </div>
                                         </div>
@@ -113,11 +110,10 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-green-200" style="background:#f0fdf4; overflow:hidden;">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-green-500 tw-bg-green-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0">
+                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#059669,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                                 <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                                     stroke-linecap="round" stroke-linejoin="round">
@@ -131,15 +127,13 @@
                                                     </path>
                                                     <path d="M12 6v10"></path>
                                                 </svg>
-                                            </div>
+                                            </span>
 
                                             <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                                <p class="tw-text-sm tw-font-medium tw-text-green-700 tw-truncate tw-whitespace-nowrap">
                                                     {{ __('lang_v1.net') }} @show_tooltip(__('lang_v1.net_home_tooltip'))
                                                 </p>
-                                                <p
-                                                    class="net tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                                <p class="net tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                                 </p>
                                             </div>
                                         </div>
@@ -147,32 +141,27 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-yellow-200" style="background:#fffbeb; overflow:hidden;">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#d97706,#fbbf24);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                                     stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                                                    <path
-                                                        d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                                                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
                                                     <path d="M9 7l1 0" />
                                                     <path d="M9 13l6 0" />
                                                     <path d="M13 17l2 0" />
                                                 </svg>
-                                            </div>
+                                            </span>
 
                                             <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                                <p class="tw-text-sm tw-font-medium tw-text-yellow-700 tw-truncate tw-whitespace-nowrap">
                                                     {{ __('home.invoice_due') }}
                                                 </p>
-                                                <p
-                                                    class="invoice_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                                <p class="invoice_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                                 </p>
                                             </div>
                                         </div>
@@ -180,34 +169,30 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                                     stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path d="M21 7l-18 0" />
                                                     <path d="M18 10l3 -3l-3 -3" />
                                                     <path d="M6 20l-3 -3l3 -3" />
                                                     <path d="M3 17l18 0" />
                                                 </svg>
-                                            </div>
+                                            </span>
 
                                             <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                                <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
                                                     {{ __('lang_v1.total_sell_return') }}
                                                     <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body"
                                                     data-toggle="popover" data-placement="auto bottom" id="total_srp"
                                                     data-value="{{ __('lang_v1.total_sell_return') }}-{{ __('lang_v1.total_sell_return_paid') }}"
                                                     data-content="" data-html="true" data-trigger="hover"></i>
                                                 </p>
-                                                <p
-                                                    class="total_sell_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                                <p class="total_sell_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                                 </p>
                                                 {{-- <p class="mb-0 text-muted fs-10 mt-5">{{ __('lang_v1.total_sell_return') }}: <span
                                                         class="total_sr"></span><br>
@@ -233,60 +218,52 @@
                         <div
                             class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-sky-200" style="background:#f0f9ff; overflow:hidden;">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0 bg-sky-100 tw-text-sky-500">
-                                            <svg aria-hidden="true" class="tw-w-6 tw-h-6"
+                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <svg aria-hidden="true" style="width:22px;height:22px;color:white;"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                 <path d="M12 3v12"></path>
                                                 <path d="M16 11l-4 4l-4 -4"></path>
                                                 <path d="M3 12a9 9 0 0 0 18 0"></path>
                                             </svg>
-                                        </div>
+                                        </span>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-sky-700 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('home.total_purchase') }}
                                             </p>
-                                            <p
-                                                class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                            <p class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-yellow-200" style="background:#fffbeb; overflow:hidden;">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                            <svg aria-hidden="true" class="tw-w-6 tw-h-6"
+                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,#d97706,#fbbf24);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <svg aria-hidden="true" style="width:22px;height:22px;color:white;"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                 <path d="M12 9v4" />
-                                                <path
-                                                    d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                                                <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
                                                 <path d="M12 16h.01" />
                                             </svg>
-                                        </div>
+                                        </span>
 
-                                        <div>
-                                            <p class="tw-text-sm tw-font-medium tw-text-gray-500">
+                                        <div class="tw-flex-1 tw-min-w-0">
+                                            <p class="tw-text-sm tw-font-medium tw-text-yellow-700">
                                                 {{ __('home.purchase_due') }}
                                             </p>
-                                            <p
-                                                class="purchase_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-
+                                            <p class="purchase_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
@@ -294,33 +271,29 @@
                             </div>
 
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                            <svg aria-hidden="true" class="tw-w-6 tw-h-6"
+                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <svg aria-hidden="true" style="width:22px;height:22px;color:white;"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path
-                                                    d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2" />
+                                                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2" />
                                                 <path d="M15 14v-2a2 2 0 0 0 -2 -2h-4l2 -2m0 4l-2 -2" />
                                             </svg>
-                                        </div>
+                                        </span>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('lang_v1.total_purchase_return') }}
                                                 <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body"
                                                 data-toggle="popover" data-placement="auto bottom" id="total_prp"
                                                 data-value="{{ __('lang_v1.total_purchase_return') }}-{{ __('lang_v1.total_purchase_return_paid') }}"
                                                 data-content="" data-html="true" data-trigger="hover"></i>
                                             </p>
-                                            <p
-                                                class="total_purchase_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                            <p class="total_purchase_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                             {{-- <p class="mb-0 text-muted fs-10 mt-5">
                                                 {{ __('lang_v1.total_purchase_return') }}: <span
@@ -333,35 +306,26 @@
                             </div>
 
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                            <svg aria-hidden="true" class="tw-w-6 tw-h-6"
+                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <svg aria-hidden="true" style="width:22px;height:22px;color:white;"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                <path
-                                                    d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2">
-                                                </path>
-                                                <path
-                                                    d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1">
-                                                </path>
+                                                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"></path>
+                                                <path d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
                                                 <path d="M12 6v10"></path>
                                             </svg>
-                                        </div>
+                                        </span>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('lang_v1.expense') }}
                                             </p>
-                                            <p
-                                                class="total_expense tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-
+                                            <p class="total_expense tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
@@ -384,32 +348,24 @@
                 @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
                     @if (!empty($all_locations))
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                            <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
+                                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                        <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                        <path d="M17 17h-11v-14h-2"></path>
+                                        <path d="M6 5l14 1l-1 7h-13"></path>
+                                    </svg>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.sells_last_30_days') }}</h3>
+                            </div>
                             <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                        <svg aria-hidden="true" class="tw-size-5 tw-text-sky-500 tw-shrink-0"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                            stroke="currentColor" fill="none" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                            <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                            <path d="M17 17h-11v-14h-2"></path>
-                                            <path d="M6 5l14 1l-1 7h-13"></path>
-                                        </svg>
-                                    </div>
-
-                                    <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                        {{ __('home.sells_last_30_days') }}
-                                    </h3>
-                                </div>
-                                <div class="tw-mt-5">
-                                    <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 " style="min-height: 250px;">
-                                        {!! $sells_chart_1->container() !!}
-                                    </div>
+                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                    {!! $sells_chart_1->container() !!}
                                 </div>
                             </div>
                         </div>
@@ -422,31 +378,24 @@
                     @endif --}}
                     @if (!empty($all_locations))
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                            <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
+                                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                        <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                                        <path d="M17 17h-11v-14h-2"></path>
+                                        <path d="M6 5l14 1l-1 7h-13"></path>
+                                    </svg>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.sells_current_fy') }}</h3>
+                            </div>
                             <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                        <svg aria-hidden="true" class="tw-size-5 tw-text-sky-500 tw-shrink-0"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                            stroke="currentColor" fill="none" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                            <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                            <path d="M17 17h-11v-14h-2"></path>
-                                            <path d="M6 5l14 1l-1 7h-13"></path>
-                                        </svg>
-                                    </div>
-                                    <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                        {{ __('home.sells_current_fy') }}
-                                    </h3>
-                                </div>
-                                <div class="tw-mt-5">
-                                    <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 " style="min-height: 250px;">
-                                        {!! $sells_chart_2->container() !!}
-                                    </div>
+                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                    {!! $sells_chart_2->container() !!}
                                 </div>
                             </div>
                         </div>
@@ -455,50 +404,41 @@
                 
                 {{-- Analytics Charts Phase 5 --}}
                 @if (auth()->user()->can('dashboard.data') && $is_admin)
-                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#2563eb 0%,#60a5fa 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fa fa-users" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Staff Performance (Last 30 Days)</h3>
+                        </div>
                         <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <i class="fa fa-users tw-text-blue-500"></i>
-                                </div>
-                                <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                    Staff Performance (Last 30 Days)
-                                </h3>
-                            </div>
-                            <div class="tw-mt-5">
-                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 " style="min-height: 250px;">
-                                    {!! $staff_performance_chart->container() !!}
-                                </div>
+                            <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                {!! $staff_performance_chart->container() !!}
                             </div>
                         </div>
                     </div>
 
-                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#059669 0%,#10b981 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fa fa-line-chart" style="color:white;font-size:14px;"></i>
+                            </span>
+                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Monthly Gross Profit (Current FY)</h3>
+                        </div>
                         <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <i class="fa fa-line-chart tw-text-green-500"></i>
-                                </div>
-                                <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                    Monthly Gross Profit (Current FY)
-                                </h3>
-                            </div>
-                            <div class="tw-mt-5">
-                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 " style="min-height: 250px;">
-                                    {!! $profit_margin_chart->container() !!}
-                                </div>
+                            <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                {!! $profit_margin_chart->container() !!}
                             </div>
                         </div>
                     </div>
                 @endif
                 @can('stock_report.view')
                     <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
+                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#d97706 0%,#fbbf24 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                         stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -506,26 +446,21 @@
                                         <path d="M12 8v4"></path>
                                         <path d="M12 16h.01"></path>
                                     </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            {{ __('home.product_stock_alert') }}
-                                            @show_tooltip(__('tooltip.product_stock_alert'))
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            {!! Form::select('stock_alert_location', $all_locations, null, [
-                                                'class' => 'form-control select2',
-                                                'placeholder' => __('lang_v1.select_location'),
-                                                'id' => 'stock_alert_location',
-                                            ]) !!}
-                                        @endif
-                                    </div>
-                                </div>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.product_stock_alert') }} @show_tooltip(__('tooltip.product_stock_alert'))</h3>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            @if (count($all_locations) > 1)
+                                <div style="min-width:140px;">
+                                    {!! Form::select('stock_alert_location', $all_locations, null, [
+                                        'class' => 'form-control select2',
+                                        'placeholder' => __('lang_v1.select_location'),
+                                        'id' => 'stock_alert_location',
+                                    ]) !!}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="tw-p-4 sm:tw-p-5">
+                            <div class="tw-flow-root tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="stock_alert_table"
@@ -545,20 +480,19 @@
                     </div>
 
                     <!-- Overall Reports Pie Chart -->
-                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-justify-between tw-gap-2.5">
-                                <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                        <svg aria-hidden="true" class="tw-text-blue-500 tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8"></path>
-                                            <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5"></path>
-                                        </svg>
-                                    </div>
-                                    <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">Overall Reports</h3>
-                                </div>
-                                <select id="overall_reports_year" class="tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-1.5 tw-text-sm">
+                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8"></path>
+                                        <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5"></path>
+                                    </svg>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Overall Reports</h3>
+                            </div>
+                            <select id="overall_reports_year" class="tw-border tw-border-white/30 tw-rounded-lg tw-px-3 tw-py-1.5 tw-text-sm tw-bg-white/10 tw-text-white">
                                     @for($y = date('Y'); $y >= date('Y') - 2; $y--)
                                         <option value="{{ $y }}">{{ $y }}</option>
                                     @endfor
@@ -598,36 +532,22 @@
 
                     @if (session('business.enable_product_expiry') == 1)
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                            <div style="background:linear-gradient(135deg,#ea580c 0%,#fb923c 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
+                                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 9v4"></path>
+                                        <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+                                        <path d="M12 16h.01"></path>
+                                    </svg>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.stock_expiry_alert') }} @show_tooltip(__('tooltip.stock_expiry_alert', ['days'=>session('business.stock_expiry_alert_days', 30)]))</h3>
+                            </div>
                             <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                        <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                            stroke="currentColor" fill="none" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M12 9v4"></path>
-                                            <path
-                                                d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                            </path>
-                                            <path d="M12 16h.01"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                        <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                                {{ __('home.stock_expiry_alert') }}
-                                                @show_tooltip(
-                                                __('tooltip.stock_expiry_alert', [
-                                                'days'
-                                                =>session('business.stock_expiry_alert_days', 30) ]) )
-                                            </h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                                <div class="tw-flow-root tw-border-gray-200">
                                     <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                         <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                             <input type="hidden" id="stock_expiry_alert_days"
@@ -650,16 +570,14 @@
                     @endif
                 @endcan
                 {{-- New Widgets Phase 1 --}}
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#b45309 0%,#fbbf24 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                        <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fa fa-trophy" style="color:white;font-size:14px;"></i>
+                        </span>
+                        <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Best Sellers (Weekly)</h3>
+                    </div>
                     <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl tw-flex tw-items-center tw-gap-2">
-                                <i class="fa fa-trophy tw-text-yellow-500"></i> Best Sellers (Weekly)
-                            </h3>
-                            <div class="tw-flex tw-gap-2">
-                                <!-- DataTables buttons will appear here -->
-                            </div>
-                        </div>
                         <div class="tw-flow-root">
                             <table class="table table-bordered table-striped" id="best_sellers_table" style="width: 100%;">
                                 <thead>
@@ -674,17 +592,17 @@
                     </div>
                 </div>
 
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                    <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl tw-flex tw-items-center tw-gap-2">
-                                <i class="fa fa-hourglass-end tw-text-red-500"></i> Expiring Soon
-                            </h3>
-                            <div class="tw-flex tw-items-center tw-gap-3">
-                                <span class="tw-text-xs tw-text-gray-400">Next 30 days</span>
-                                <!-- DataTables buttons will appear here -->
-                            </div>
+                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#dc2626 0%,#f87171 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fa fa-hourglass-end" style="color:white;font-size:13px;"></i>
+                            </span>
+                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Expiring Soon</h3>
                         </div>
+                        <span style="color:rgba(255,255,255,0.7);font-size:12px;">Next 30 days</span>
+                    </div>
+                    <div class="tw-p-4 sm:tw-p-5">
                         <div class="tw-flow-root">
                             <table class="table table-bordered table-striped" id="expiring_soon_table" style="width: 100%;">
                                 <thead>
@@ -699,14 +617,17 @@
                     </div>
                 </div>
 
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                    <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl tw-flex tw-items-center tw-gap-2">
-                                <i class="fa fa-shopping-cart tw-text-blue-500"></i> Reorder Suggestions
-                            </h3>
-                            <span class="tw-text-xs tw-text-gray-400">Based on sales velocity</span>
+                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fa fa-shopping-cart" style="color:white;font-size:13px;"></i>
+                            </span>
+                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Reorder Suggestions</h3>
                         </div>
+                        <span style="color:rgba(255,255,255,0.7);font-size:12px;">Based on sales velocity</span>
+                    </div>
+                    <div class="tw-p-4 sm:tw-p-5">
                         <div class="tw-flow-root">
                             <table class="table table-bordered table-striped" id="reorder_suggestions_table" style="width: 100%;">
                                 <thead>
@@ -799,15 +720,13 @@
                     !empty($common_settings['enable_purchase_requisition']) &&
                         (auth()->user()->can('purchase_requisition.view_all') || auth()->user()->can('purchase_requisition.view_own')))
                     <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
+                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#d97706 0%,#fbbf24 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                         <path d="M10 10v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1 -1v-4"></path>
                                         <path d="M9 6h6"></path>
@@ -817,25 +736,21 @@
                                         <path d="M15 16v4"></path>
                                         <path d="M9 20v-4"></path>
                                     </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.purchase_requisition')
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                                {!! Form::select('pr_location', $all_locations, null, [
-                                                    'class' => 'form-control select2',
-                                                    'placeholder' => __('lang_v1.select_location'),
-                                                    'id' => 'pr_location',
-                                                ]) !!}
-                                            @endif
-                                    </div>
-                                </div>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.purchase_requisition')</h3>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            @if (count($all_locations) > 1)
+                                <div style="min-width:140px;">
+                                    {!! Form::select('pr_location', $all_locations, null, [
+                                        'class' => 'form-control select2',
+                                        'placeholder' => __('lang_v1.select_location'),
+                                        'id' => 'pr_location',
+                                    ]) !!}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="tw-p-4 sm:tw-p-5">
+                            <div class="tw-flow-root tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
@@ -864,40 +779,34 @@
                         (auth()->user()->can('purchase_order.view_all') || auth()->user()->can('purchase_order.view_own')))
 
                     <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
+                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                        stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                         <rect x="4" y="4" width="16" height="16" rx="2" />
                                         <line x1="4" y1="10" x2="20" y2="10" />
                                         <line x1="12" y1="4" x2="12" y2="20" />
                                         <line x1="12" y1="10" x2="16" y2="10" />
                                     </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.purchase_order')
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            {!! Form::select('po_location', $all_locations, null, [
-                                                'class' => 'form-control select2',
-                                                'placeholder' => __('lang_v1.select_location'),
-                                                'id' => 'po_location',
-                                            ]) !!}
-                                        @endif
-                                    </div>
-                                </div>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.purchase_order')</h3>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            @if (count($all_locations) > 1)
+                                <div style="min-width:140px;">
+                                    {!! Form::select('po_location', $all_locations, null, [
+                                        'class' => 'form-control select2',
+                                        'placeholder' => __('lang_v1.select_location'),
+                                        'id' => 'po_location',
+                                    ]) !!}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="tw-p-4 sm:tw-p-5">
+                            <div class="tw-flow-root tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
@@ -924,33 +833,22 @@
                 @endif
                 @if (auth()->user()->can('account.access') && config('constants.show_payments_recovered_today') == true)
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#059669 0%,#10b981 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
+                                    stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M12 3v12"></path>
+                                    <path d="M16 11l-4 4l-4 -4"></path>
+                                    <path d="M3 12a9 9 0 0 0 18 0"></path>
+                                </svg>
+                            </span>
+                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.payment_recovered_today')</h3>
+                        </div>
                         <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <path d="M12 9v4"></path>
-                                        <path
-                                            d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                        </path>
-                                        <path d="M12 16h.01"></path>
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.payment_recovered_today')
-                                        </h3>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="cash_flow_table">
