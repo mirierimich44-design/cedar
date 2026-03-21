@@ -23,13 +23,32 @@ class AdminlteCustomPresenter extends Presenter
     }
 
     /**
+     * Map theme color name to active accent hex color.
+     */
+    protected function getThemeAccentColor(): string
+    {
+        $accentMap = [
+            'primary' => '#818cf8',
+            'purple'  => '#c4b5fd',
+            'green'   => '#6ee7b7',
+            'red'     => '#fca5a5',
+            'yellow'  => '#fcd34d',
+            'orange'  => '#fdba74',
+            'sky'     => '#7dd3fc',
+        ];
+        $theme = session('business.theme_color', 'primary');
+        return $accentMap[$theme] ?? $accentMap['primary'];
+    }
+
+    /**
      * {@inheritdoc}.
      */
     public function getMenuWithoutDropdownWrapper($item)
     {
         $isActive = $item->isActive();
+        $accent = $this->getThemeAccentColor();
         $style = $isActive
-            ? 'color:white;background:rgba(255,255,255,0.1);border-left:3px solid #38bdf8;padding-left:13px;'
+            ? 'color:white;background:rgba(255,255,255,0.1);border-left:3px solid ' . $accent . ';padding-left:13px;'
             : 'color:rgba(255,255,255,0.72);';
 
         return '<a href="' . $item->getUrl() . '" title="" class="sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $style . '" ' . $item->getAttributes() . '>' .
@@ -75,8 +94,9 @@ class AdminlteCustomPresenter extends Presenter
     public function getMenuWithDropDownWrapper($item)
     {
         $hasActive = $item->hasActiveOnChild();
+        $accent = $this->getThemeAccentColor();
         $parentStyle = $hasActive
-            ? 'color:white;background:rgba(255,255,255,0.05);'
+            ? 'color:' . $accent . ';background:rgba(255,255,255,0.05);'
             : 'color:rgba(255,255,255,0.72);';
 
         $chevron = $hasActive
@@ -117,7 +137,7 @@ class AdminlteCustomPresenter extends Presenter
 
             foreach ($item->getChilds() as $child) {
                 $childStyle = $child->isActive()
-                    ? 'color:#7dd3fc;font-weight:600;'
+                    ? 'color:' . $this->getThemeAccentColor() . ';font-weight:600;'
                     : 'color:rgba(255,255,255,0.55);';
 
                 $children .= '<a href="' . $child->getUrl() . '" title="" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $childStyle . '" ' . $child->getAttributes() . '>' .
