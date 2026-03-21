@@ -16,7 +16,7 @@ $__homeColors = [
 $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
 @endphp
     <div class="dashboard-fortypos">
-    <div class="tw-pb-6 tw-bg-gradient-to-r tw-from-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 tw-to-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-900 xl:tw-pb-0 ">
+    <div class="tw-pb-6 xl:tw-pb-0" style="background: linear-gradient(to right, var(--theme-dark), var(--theme-main));">
         <div class="tw-px-5 tw-pt-3">
             {{-- <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
                 <h1 class="tw-text-2xl tw-font-medium tw-tracking-tight tw-text-white">

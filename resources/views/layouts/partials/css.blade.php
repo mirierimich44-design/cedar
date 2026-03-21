@@ -89,6 +89,17 @@ $__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
     --theme-ring:   {{ $__cv['ring'] }};
 }
 
+/* ─── Header buttons (sidebar toggles, dropdowns) ─── */
+.header-theme-btn {
+    background-color: var(--theme-dark) !important;
+    color: white !important;
+}
+.header-theme-btn:hover,
+.header-theme-btn:focus {
+    background-color: var(--theme-hover) !important;
+    color: white !important;
+}
+
 /* ─── Override hardcoded indigo/blue gradient buttons system-wide ─── */
 .tw-from-indigo-600.tw-to-blue-500,
 .tw-from-indigo-500.tw-to-blue-500,

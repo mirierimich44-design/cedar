@@ -1,5 +1,5 @@
 <div class="tw-transition-all tw-mb-4 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200" style="overflow:hidden;">
-    <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:10px 16px; cursor:pointer;" data-toggle="collapse" data-parent="#accordion" href="#collapseFilter">
+    <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-main) 100%); padding:10px 16px; cursor:pointer;" data-toggle="collapse" data-parent="#accordion" href="#collapseFilter">
         <div style="display:flex;align-items:center;gap:10px;">
             <span style="width:26px;height:26px;background:rgba(255,255,255,0.15);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 @if (!empty($icon))
