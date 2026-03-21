@@ -173,6 +173,8 @@
     </div>
 
     {!! Form::close() !!}
+
+    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 

@@ -85,6 +85,8 @@
             </thead>
         </table>
     @endcomponent
+
+    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 

@@ -10,6 +10,22 @@
 </section>
 
 <section class="content">
+    {{-- Mobile: large action buttons (hidden on desktop, shown on mobile) --}}
+    <div class="tw-grid tw-grid-cols-2 tw-gap-3 tw-mb-4 lg:tw-hidden">
+        <a href="{{ route('cooler.agent.customers.create') }}"
+           class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-2xl tw-py-5 tw-text-white tw-no-underline"
+           style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-main) 100%);box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <i class="fa fa-user-plus" style="font-size:30px;"></i>
+            <span class="tw-text-sm tw-font-bold tw-text-center tw-leading-tight">Register<br>Customer</span>
+        </a>
+        <a href="{{ route('cooler.agent.retrievals') }}"
+           class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-2xl tw-py-5 tw-text-white tw-no-underline"
+           style="background:linear-gradient(135deg,#b45309 0%,#d97706 100%);box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <i class="fa fa-truck" style="font-size:30px;"></i>
+            <span class="tw-text-sm tw-font-bold tw-text-center tw-leading-tight">Cooler<br>Retrieval</span>
+        </a>
+    </div>
+
     {{-- Stats row --}}
     <div class="tw-grid tw-grid-cols-2 xl:tw-grid-cols-4 tw-gap-4 tw-mb-6">
         <div class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-ring-1 tw-ring-gray-200 tw-p-4">
@@ -34,6 +50,11 @@
                    class="tw-inline-flex tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-text-white tw-px-3 tw-py-1.5 tw-rounded-lg"
                    style="background:var(--theme-main);">
                     <i class="fa fa-user-plus"></i> Register Customer
+                </a>
+                <a href="{{ route('cooler.agent.retrievals') }}"
+                   class="tw-inline-flex tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-text-white tw-px-3 tw-py-1.5 tw-rounded-lg"
+                   style="background:#d97706;">
+                    <i class="fa fa-truck"></i> Cooler Retrieval
                 </a>
                 <a href="{{ route('cooler.agent.orders.create') }}"
                    class="tw-inline-flex tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-text-white tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-green-600">
@@ -106,5 +127,7 @@
             </div>
         </div>
     </div>
+
+    @include('cooler.agent._mobile_nav')
 </section>
 @endsection

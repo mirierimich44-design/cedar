@@ -30,6 +30,8 @@
             </table>
         </div>
     </div>
+
+    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 

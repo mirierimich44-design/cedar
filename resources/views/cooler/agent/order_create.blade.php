@@ -143,6 +143,8 @@
         </div>
     </div>
 
+    @include('cooler.agent._mobile_nav')
+
     {{-- MPESA Polling Modal --}}
     <div class="modal fade" id="mpesa-modal" tabindex="-1" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-sm tw-max-w-sm" role="document">
