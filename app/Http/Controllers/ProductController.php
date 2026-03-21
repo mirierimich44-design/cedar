@@ -204,7 +204,7 @@ class ProductController extends Controller
                         $html = '<div class="tw-flex tw-items-center tw-gap-1">';
 
                         $html .= '<div class="btn-group">
-                                    <button type="button" class="btn btn-xs btn-primary dropdown-toggle" style="padding:2px 8px;font-size:11px;border-radius:4px;" data-toggle="dropdown" aria-expanded="false">
+                                    <button type="button" class="btn btn-xs btn-primary dropdown-toggle product-action-btn" data-toggle="dropdown" aria-expanded="false">
                                         '.__('messages.actions').' <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-left" role="menu">

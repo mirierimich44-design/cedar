@@ -185,5 +185,20 @@ table.table-bordered th {
     border: none !important;
     border-bottom: 1px solid #f1f5f9 !important;
 }
+
+/* ─── Compact action button for datatables ───────────────── */
+button.product-action-btn,
+.product-action-btn.btn,
+.product-action-btn {
+    padding: 1px 7px !important;
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transform: none !important;
+    font-weight: 500 !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
 </style>
 
