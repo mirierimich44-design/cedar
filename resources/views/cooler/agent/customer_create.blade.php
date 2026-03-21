@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.agent-portal')
 @section('title', 'Register Customer')
 
 @section('content')
@@ -174,7 +174,6 @@
 
     {!! Form::close() !!}
 
-    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 

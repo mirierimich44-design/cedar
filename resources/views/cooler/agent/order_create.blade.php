@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.agent-portal')
 @section('title', 'Place Customer Order')
 
 @section('css')
@@ -143,7 +143,6 @@
         </div>
     </div>
 
-    @include('cooler.agent._mobile_nav')
 
     {{-- MPESA Polling Modal --}}
     <div class="modal fade" id="mpesa-modal" tabindex="-1" role="dialog" data-backdrop="static">

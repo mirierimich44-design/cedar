@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.agent-portal')
 @section('title', 'My Retrievals')
 
 @section('content')
@@ -86,7 +86,6 @@
         </table>
     @endcomponent
 
-    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 

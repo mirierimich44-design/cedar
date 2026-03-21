@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.agent-portal')
 @section('title', 'My Customers')
 
 @section('content')
@@ -31,7 +31,6 @@
         </div>
     </div>
 
-    @include('cooler.agent._mobile_nav')
 </section>
 @endsection
 
