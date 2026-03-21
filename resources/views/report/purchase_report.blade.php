@@ -44,6 +44,46 @@
         </div>
     @endcomponent
 
+    {{-- KPI Summary Cards --}}
+    <div class="row" id="purchase_kpi_row" style="display:none;">
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-navy">
+                <div class="inner">
+                    <h4 id="purchase_kpi_total">0.00</h4>
+                    <p>Total Purchases</p>
+                </div>
+                <div class="icon"><i class="fa fa-truck"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <h4 id="purchase_kpi_count">0</h4>
+                    <p>Purchase Orders</p>
+                </div>
+                <div class="icon"><i class="fa fa-list-alt"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h4 id="purchase_kpi_tax">0.00</h4>
+                    <p>Tax (Input)</p>
+                </div>
+                <div class="icon"><i class="fa fa-percent"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h4 id="purchase_kpi_discount">0.00</h4>
+                    <p>Total Discounts</p>
+                </div>
+                <div class="icon"><i class="fa fa-tags"></i></div>
+            </div>
+        </div>
+    </div>
+
     @component('components.widget', ['class' => 'box-primary'])
         <div class="table-responsive">
     <table class="table table-bordered table-striped ajax_view" id="purchase_report_table">
@@ -140,6 +180,7 @@
                          #purchase_list_filter_status',
             function() {
                 purchase_report_table.ajax.reload();
+                loadPurchaseKpi();
             }
         );
         $('#purchase_list_filter_date_range').daterangepicker(
@@ -147,11 +188,38 @@
             function (start, end) {
                 $('#purchase_list_filter_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format));
                purchase_report_table.ajax.reload();
+               loadPurchaseKpi();
             }
         );
         $('#purchase_list_filter_date_range').on('cancel.daterangepicker', function(ev, picker) {
             $('#purchase_list_filter_date_range').val('');
             purchase_report_table.ajax.reload();
+            loadPurchaseKpi();
+        });
+
+        function fmt(v) { return parseFloat(v||0).toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+        function loadPurchaseKpi() {
+            var params = {};
+            if ($('#purchase_list_filter_date_range').val()) {
+                params.start_date = $('input#purchase_list_filter_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                params.end_date   = $('input#purchase_list_filter_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+            }
+            params.location_id  = $('#purchase_list_filter_location_id').val() || '';
+            params.supplier_id  = $('#purchase_list_filter_supplier_id').val() || '';
+            params.status       = $('#purchase_list_filter_status').val() || '';
+
+            $.get('/reports/purchase-report-summary', params, function(d) {
+                $('#purchase_kpi_total').text(fmt(d.total));
+                $('#purchase_kpi_count').text(d.count);
+                $('#purchase_kpi_tax').text(fmt(d.tax));
+                $('#purchase_kpi_discount').text(fmt(d.discount));
+                $('#purchase_kpi_row').show();
+            });
+        }
+
+        purchase_report_table.on('draw', function() {
+            loadPurchaseKpi();
         });
     });
 </script>

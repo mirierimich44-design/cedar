@@ -5369,8 +5369,89 @@ class ReportController extends Controller
         }
 
         $business_locations = BusinessLocation::forDropdown($business_id, true);
+        $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
 
-        return view('report.daily_reconciliation', compact('business_locations', 'paymentLabels'));
+        return view('report.daily_reconciliation', compact('business_locations', 'paymentLabels', 'payment_types'));
+    }
+
+    /**
+     * Returns summary totals for the sale report (KPI cards).
+     */
+    public function getSaleReportSummary(Request $request)
+    {
+        if (! auth()->user()->can('sell.view') && ! auth()->user()->can('sell.create') && ! auth()->user()->can('direct_sell.access')) {
+            abort(403, 'Unauthorized action.');
+        }
+        $business_id = $request->session()->get('user.business_id');
+
+        $query = Transaction::where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final');
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween(DB::raw('DATE(transaction_date)'), [$request->start_date, $request->end_date]);
+        }
+        if ($request->filled('location_id')) {
+            $query->where('transactions.location_id', $request->location_id);
+        }
+        if ($request->filled('customer_id')) {
+            $query->where('transactions.contact_id', $request->customer_id);
+        }
+
+        $summary = $query->select(
+            DB::raw('COUNT(*) as count'),
+            DB::raw('COALESCE(SUM(final_total), 0) as total'),
+            DB::raw('COALESCE(SUM(tax_amount), 0) as tax'),
+            DB::raw('COALESCE(SUM(discount_amount), 0) as discount')
+        )->first();
+
+        return response()->json([
+            'count'    => (int)$summary->count,
+            'total'    => (float)$summary->total,
+            'tax'      => (float)$summary->tax,
+            'discount' => (float)$summary->discount,
+        ]);
+    }
+
+    /**
+     * Returns summary totals for the purchase report (KPI cards).
+     */
+    public function getPurchaseReportSummary(Request $request)
+    {
+        if (! auth()->user()->can('purchase.view') && ! auth()->user()->can('purchase.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+        $business_id = $request->session()->get('user.business_id');
+
+        $query = Transaction::where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'purchase');
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween(DB::raw('DATE(transaction_date)'), [$request->start_date, $request->end_date]);
+        }
+        if ($request->filled('location_id')) {
+            $query->where('transactions.location_id', $request->location_id);
+        }
+        if ($request->filled('supplier_id')) {
+            $query->where('transactions.contact_id', $request->supplier_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('transactions.status', $request->status);
+        }
+
+        $summary = $query->select(
+            DB::raw('COUNT(*) as count'),
+            DB::raw('COALESCE(SUM(final_total), 0) as total'),
+            DB::raw('COALESCE(SUM(tax_amount), 0) as tax'),
+            DB::raw('COALESCE(SUM(discount_amount), 0) as discount')
+        )->first();
+
+        return response()->json([
+            'count'    => (int)$summary->count,
+            'total'    => (float)$summary->total,
+            'tax'      => (float)$summary->tax,
+            'discount' => (float)$summary->discount,
+        ]);
     }
 }
 

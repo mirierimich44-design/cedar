@@ -45,6 +45,64 @@
     {{-- Report Output --}}
     <div id="reconciliation_report" style="display:none;">
 
+        {{-- KPI Cards Row --}}
+        <div class="row" id="recon_kpi_row">
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h4 id="recon_kpi_gross">0.00</h4>
+                        <p>Gross Sales</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-shopping-cart"></i></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h4 id="recon_kpi_net">0.00</h4>
+                        <p>Net Sales</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-line-chart"></i></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-navy">
+                    <div class="inner">
+                        <h4 id="recon_kpi_profit">0.00</h4>
+                        <p>Gross Profit</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-money"></i></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-purple" style="background-color:#605ca8 !important;">
+                    <div class="inner">
+                        <h4 id="recon_kpi_margin">0%</h4>
+                        <p>Profit Margin</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-percent"></i></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h4 id="recon_kpi_transactions">0</h4>
+                        <p>Transactions</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-ticket"></i></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <div class="small-box bg-red">
+                    <div class="inner">
+                        <h4 id="recon_kpi_expenses">0.00</h4>
+                        <p>Expenses</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-minus-circle"></i></div>
+                </div>
+            </div>
+        </div>
+
         <div id="print_area">
         <div class="text-center" style="margin-bottom:15px;">
             <h3 id="report_title">Daily Cash Reconciliation</h3>
@@ -185,6 +243,57 @@
         </div>
         </div>{{-- end print_area --}}
 
+        {{-- Register Report Section --}}
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-cash-register"></i> Register Sessions for the Day</h3>
+            </div>
+            <div class="box-body no-padding">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-condensed" id="recon_register_table">
+                        <thead>
+                            <tr>
+                                <th>Open Time</th>
+                                <th>Close Time</th>
+                                <th>Location</th>
+                                <th>User</th>
+                                <th>{{ $payment_types['custom_pay_1'] ?? 'M-Pesa' }}</th>
+                                <th>Cash</th>
+                                <th>Card</th>
+                                <th>Cheque</th>
+                                <th>Bank Transfer</th>
+                                <th>{{ $payment_types['custom_pay_2'] ?? 'Custom Pay 2' }}</th>
+                                <th>{{ $payment_types['custom_pay_3'] ?? 'Custom Pay 3' }}</th>
+                                <th>Other</th>
+                                <th>Advance</th>
+                                <th><strong>Total</strong></th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recon_register_body">
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray font-17 text-center">
+                                <td colspan="4"><strong>Total:</strong></td>
+                                <td class="recon_reg_custom1">—</td>
+                                <td class="recon_reg_cash">—</td>
+                                <td class="recon_reg_card">—</td>
+                                <td class="recon_reg_cheque">—</td>
+                                <td class="recon_reg_bank">—</td>
+                                <td class="recon_reg_custom2">—</td>
+                                <td class="recon_reg_custom3">—</td>
+                                <td class="recon_reg_other">—</td>
+                                <td class="recon_reg_advance">—</td>
+                                <td class="recon_reg_total">—</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>{{-- end reconciliation_report --}}
 
     <div id="reconciliation_loading" style="display:none;" class="text-center tw-py-10">
@@ -192,6 +301,7 @@
         <p class="text-muted">Loading report…</p>
     </div>
 </section>
+<div class="modal fade view_register" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
 @endsection
 
 @section('javascript')
@@ -226,6 +336,14 @@ $(document).ready(function() {
                 if (!d.success) { toastr.error('Failed to load report.'); return; }
 
                 $('#report_date_label').text(d.date_label);
+
+                // KPI Cards
+                $('#recon_kpi_gross').text(fmt(d.gross_sales));
+                $('#recon_kpi_net').text(fmt(d.net_sales));
+                $('#recon_kpi_profit').text(fmt(d.gross_profit));
+                $('#recon_kpi_margin').text(d.profit_margin + '%');
+                $('#recon_kpi_transactions').text(d.total_transactions);
+                $('#recon_kpi_expenses').text(fmt(d.total_expenses));
 
                 // Sales
                 $('#r_gross_sales').text(fmt(d.gross_sales));
@@ -270,10 +388,88 @@ $(document).ready(function() {
                 $('#r_pay_total_amount').text(fmt(totalAmt));
 
                 $('#reconciliation_report').show();
+
+                // Load register report for this date
+                loadRegisterReport(date, location);
             },
             error: function() {
                 $('#reconciliation_loading').hide();
                 toastr.error('Server error loading report.');
+            }
+        });
+    }
+
+    // Register report for reconciliation date
+    var recon_register_table = null;
+
+    function loadRegisterReport(date, location_id) {
+        if (recon_register_table) {
+            recon_register_table.destroy();
+            $('#recon_register_body').empty();
+        }
+
+        recon_register_table = $('#recon_register_table').DataTable({
+            processing: true,
+            serverSide: true,
+            paging: false,
+            searching: false,
+            info: false,
+            scrollX: true,
+            ajax: {
+                url: '/reports/register-report',
+                data: { start_date: date, end_date: date, location_id: location_id || '' }
+            },
+            columns: [
+                { data: 'created_at', name: 'created_at' },
+                { data: 'closed_at', name: 'closed_at' },
+                { data: 'location_name', name: 'bl.name' },
+                { data: 'user_name', name: 'user_name', render: function(d){ return $('<div>').html(d).text(); } },
+                { data: 'total_custom_pay_1', name: 'total_custom_pay_1', searchable: false },
+                { data: 'total_cash_payment', name: 'total_cash_payment', searchable: false },
+                { data: 'total_card_payment', name: 'total_card_payment', searchable: false },
+                { data: 'total_cheque_payment', name: 'total_cheque_payment', searchable: false },
+                { data: 'total_bank_transfer_payment', name: 'total_bank_transfer_payment', searchable: false },
+                { data: 'total_custom_pay_2', name: 'total_custom_pay_2', searchable: false },
+                { data: 'total_custom_pay_3', name: 'total_custom_pay_3', searchable: false },
+                { data: 'total_other_payment', name: 'total_other_payment', searchable: false },
+                { data: 'total_advance_payment', name: 'total_advance_payment', searchable: false },
+                { data: 'total', name: 'total', orderable: false, searchable: false },
+                { data: 'status', name: 'status', orderable: false, searchable: false,
+                  render: function(d) {
+                    var cls = d === 'open' ? 'bg-green' : 'bg-red';
+                    return '<span class="label ' + cls + '">' + (d || '-') + '</span>';
+                  }
+                },
+                { data: 'action', name: 'action', orderable: false, searchable: false },
+            ],
+            footerCallback: function(row, data) {
+                var totals = { c1: 0, cash: 0, card: 0, cheque: 0, bank: 0, c2: 0, c3: 0, other: 0, adv: 0, total: 0 };
+                for (var r in data) {
+                    totals.c1    += parseFloat($(data[r].total_custom_pay_1).data('orig-value') || 0);
+                    totals.cash  += parseFloat($(data[r].total_cash_payment).data('orig-value') || 0);
+                    totals.card  += parseFloat($(data[r].total_card_payment).data('orig-value') || 0);
+                    totals.cheque += parseFloat($(data[r].total_cheque_payment).data('orig-value') || 0);
+                    totals.bank  += parseFloat($(data[r].total_bank_transfer_payment).data('orig-value') || 0);
+                    totals.c2    += parseFloat($(data[r].total_custom_pay_2).data('orig-value') || 0);
+                    totals.c3    += parseFloat($(data[r].total_custom_pay_3).data('orig-value') || 0);
+                    totals.other += parseFloat($(data[r].total_other_payment).data('orig-value') || 0);
+                    totals.adv   += parseFloat($(data[r].total_advance_payment).data('orig-value') || 0);
+                    totals.total += parseFloat($(data[r].total).data('orig-value') || 0);
+                }
+                function f(v) { return parseFloat(v).toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+                $('.recon_reg_custom1').text(f(totals.c1));
+                $('.recon_reg_cash').text(f(totals.cash));
+                $('.recon_reg_card').text(f(totals.card));
+                $('.recon_reg_cheque').text(f(totals.cheque));
+                $('.recon_reg_bank').text(f(totals.bank));
+                $('.recon_reg_custom2').text(f(totals.c2));
+                $('.recon_reg_custom3').text(f(totals.c3));
+                $('.recon_reg_other').text(f(totals.other));
+                $('.recon_reg_advance').text(f(totals.adv));
+                $('.recon_reg_total').html('<strong>' + f(totals.total) + '</strong>');
+            },
+            drawCallback: function() {
+                __currency_convert_recursively($('#recon_register_table'));
             }
         });
     }
@@ -297,4 +493,9 @@ $(document).ready(function() {
     loadReport();
 });
 </script>
+<style>
+    .small-box h4 { font-size: 18px; font-weight: bold; }
+    .small-box > .inner { padding: 10px 15px; }
+    #recon_register_table td, #recon_register_table th { white-space: nowrap; font-size: 12px; }
+</style>
 @endsection

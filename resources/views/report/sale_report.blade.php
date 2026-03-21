@@ -15,6 +15,46 @@
         @include('sell.partials.sell_list_filters')
     @endcomponent
 
+    {{-- KPI Summary Cards --}}
+    <div class="row" id="sale_kpi_row" style="display:none;">
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <h4 id="sale_kpi_total">0.00</h4>
+                    <p>Total Sales</p>
+                </div>
+                <div class="icon"><i class="fa fa-shopping-cart"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <h4 id="sale_kpi_count">0</h4>
+                    <p>Invoices</p>
+                </div>
+                <div class="icon"><i class="fa fa-ticket"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h4 id="sale_kpi_tax">0.00</h4>
+                    <p>Tax Collected</p>
+                </div>
+                <div class="icon"><i class="fa fa-percent"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-6">
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h4 id="sale_kpi_discount">0.00</h4>
+                    <p>Total Discounts</p>
+                </div>
+                <div class="icon"><i class="fa fa-tags"></i></div>
+            </div>
+        </div>
+    </div>
+
     @component('components.widget', ['class' => 'box-primary'])
         <div class="table-responsive">
     <table class="table table-bordered table-striped ajax_view" id="sale_report_table">
@@ -95,6 +135,33 @@
 
         $(document).on('change', '#sell_list_filter_location_id, #sell_list_filter_customer_id, #sell_list_filter_payment_status, #created_by, #sales_cmsn_agnt, #service_staffs',  function() {
             sale_report_table.ajax.reload();
+            loadSaleKpi();
+        });
+
+        function fmt(v) { return parseFloat(v||0).toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+        function loadSaleKpi() {
+            var params = {};
+            if ($('#sell_list_filter_date_range').val()) {
+                params.start_date = $('#sell_list_filter_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                params.end_date   = $('#sell_list_filter_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+            }
+            params.location_id  = $('#sell_list_filter_location_id').val() || '';
+            params.customer_id  = $('#sell_list_filter_customer_id').val() || '';
+            params.payment_status = $('#sell_list_filter_payment_status').val() || '';
+
+            $.get('/reports/sale-report-summary', params, function(d) {
+                $('#sale_kpi_total').text(fmt(d.total));
+                $('#sale_kpi_count').text(d.count);
+                $('#sale_kpi_tax').text(fmt(d.tax));
+                $('#sale_kpi_discount').text(fmt(d.discount));
+                $('#sale_kpi_row').show();
+            });
+        }
+
+        // Load KPI on initial draw
+        sale_report_table.on('draw', function() {
+            loadSaleKpi();
         });
     });
 </script>

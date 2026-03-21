@@ -40,6 +40,43 @@
             @endcomponent
         </div>
     </div>
+    {{-- KPI Summary Cards --}}
+    @php
+        $expense_total_sum = $expenses->sum('total_expense');
+        $expense_category_count = $expenses->count();
+    @endphp
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-6">
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h4><span class="display_currency" data-currency_symbol="true">{{ $expense_total_sum }}</span></h4>
+                    <p>Total Expenses</p>
+                </div>
+                <div class="icon"><i class="fa fa-money"></i></div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-6">
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h4>{{ $expense_category_count }}</h4>
+                    <p>Categories</p>
+                </div>
+                <div class="icon"><i class="fa fa-tags"></i></div>
+            </div>
+        </div>
+        @if($expense_category_count > 0)
+        <div class="col-md-4 col-sm-6 col-xs-6">
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <h4><span class="display_currency" data-currency_symbol="true">{{ round($expense_total_sum / $expense_category_count, 2) }}</span></h4>
+                    <p>Avg per Category</p>
+                </div>
+                <div class="icon"><i class="fa fa-bar-chart"></i></div>
+            </div>
+        </div>
+        @endif
+    </div>
+
     <div class="row">
         <div class="col-xs-12">
             @component('components.widget', ['class' => 'box-primary'])
