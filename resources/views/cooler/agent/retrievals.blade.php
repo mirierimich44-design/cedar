@@ -120,6 +120,9 @@ $(function () {
     });
 
     // DataTable
+    if ($.fn.DataTable.isDataTable('#agent-retrievals-table')) {
+        $('#agent-retrievals-table').DataTable().destroy();
+    }
     $('#agent-retrievals-table').DataTable({
         processing: true,
         serverSide: true,

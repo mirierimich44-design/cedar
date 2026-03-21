@@ -158,27 +158,23 @@
         </a>
     </nav>
 
-    {{-- Flash message display --}}
+    @include('layouts.partials.javascripts')
+
+    @yield('javascript')
+
+    {{-- Flash message — runs after jQuery + toastr are loaded --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        $(function () {
             var statusEl = document.getElementById('status_span');
             if (statusEl) {
                 var ok  = statusEl.dataset.status;
                 var msg = statusEl.dataset.msg;
                 if (msg) {
-                    if (typeof toastr !== 'undefined') {
-                        ok === '1' ? toastr.success(msg) : toastr.error(msg);
-                    } else {
-                        ok === '1' ? alert(msg) : alert('Error: ' + msg);
-                    }
+                    ok === '1' ? toastr.success(msg) : toastr.error(msg);
                 }
             }
         });
     </script>
-
-    @include('layouts.partials.javascripts')
-
-    @yield('javascript')
 
     <div class="modal fade view_modal" tabindex="-1" role="dialog"></div>
 

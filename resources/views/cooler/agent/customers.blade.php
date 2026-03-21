@@ -36,6 +36,9 @@
 
 @section('javascript')
 <script>
+if ($.fn.DataTable.isDataTable('#agent-customers-table')) {
+    $('#agent-customers-table').DataTable().destroy();
+}
 $('#agent-customers-table').DataTable({
     processing: true,
     serverSide: true,
