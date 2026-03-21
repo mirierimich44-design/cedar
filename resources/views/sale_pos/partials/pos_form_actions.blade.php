@@ -272,7 +272,7 @@
                     );
 
                     lsXhr = $.ajax({
-                        url: '/products/list',
+                        url: '{{ url("products/list") }}',
                         dataType: 'json',
                         data: {
                             term:           term,
@@ -659,7 +659,7 @@
             // ── Init Select2 for credit customer search ──────────────────
             $('#credit_sale_customer_search').select2({
                 ajax: {
-                    url: '/contacts/customers',
+                    url: '{{ url("contacts/customers") }}',
                     dataType: 'json',
                     delay: 250,
                     data: function(params) { return { q: params.term, page: params.page }; },
@@ -679,7 +679,7 @@
             $('#credit_sale_customer_search').on('select2:select', function(e) {
                 var customerId = e.params.data.id;
                 $.ajax({
-                    url: '/contacts/' + customerId,
+                    url: '{{ url("contacts") }}/' + customerId,
                     dataType: 'json',
                     success: function(result) {
                         if (result.data && result.data.length > 0) {
@@ -1124,7 +1124,7 @@
                 if (cdXhr) { cdXhr.abort(); }
                 $cdDrop.show().html('<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa fa-spinner fa-spin"></i> Searching...</div>');
                 cdXhr = $.ajax({
-                    url: '/contacts/customers',
+                    url: '{{ url("contacts/customers") }}',
                     dataType: 'json',
                     data: { q: term },
                     success: function(data) {
@@ -1146,7 +1146,7 @@
 
         function cdLoadCustomer(cid) {
             $.ajax({
-                url: '/contacts/credit-info/' + cid,
+                url: '{{ url("contacts/credit-info") }}/' + cid,
                 dataType: 'json',
                 success: function(r) {
                     cds.customerId = r.id;
@@ -1227,7 +1227,7 @@
             }
 
             $.ajax({
-                url:    '/payments/pay-contact-due',
+                url:    '{{ url("payments/pay-contact-due") }}',
                 method: 'POST',
                 data:   payload,
                 success: function(r) {
@@ -1287,7 +1287,7 @@
             $('#cd_stk_countdown').text('2:00');
 
             $.ajax({
-                url:    '/mpesa/stk-push',
+                url:    '{{ url("mpesa/stk-push") }}',
                 method: 'POST',
                 data: {
                     _token:    $('meta[name="csrf-token"]').attr('content'),
