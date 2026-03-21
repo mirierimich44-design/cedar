@@ -202,21 +202,17 @@ class ProductController extends Controller
                     'action',
                     function ($row) use ($selling_price_group_count) {
                         $html = '<div class="tw-flex tw-items-center tw-gap-1">';
-                        
-                        // Standalone Opening Stock button
-                        if ($row->enable_stock == 1 && auth()->user()->can('product.opening_stock')) {
-                            $html .= '<a href="#" data-href="'.action([\App\Http\Controllers\OpeningStockController::class, 'add'], ['product_id' => $row->id]).'" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info add-opening-stock" title="'.__('lang_v1.add_edit_opening_stock').'"><i class="fa fa-database"></i> '.__('lang_v1.add_edit_opening_stock').'</a>';
-                        }
 
-                        // Dropdown for other actions
                         $html .= '<div class="btn-group">
-                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        '.__('messages.actions').'
-                                        <span class="caret"></span>
-                                        <span class="sr-only">Toggle Dropdown</span>
+                                    <button type="button" class="btn btn-xs btn-primary dropdown-toggle" style="padding:2px 8px;font-size:11px;border-radius:4px;" data-toggle="dropdown" aria-expanded="false">
+                                        '.__('messages.actions').' <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-left" role="menu">
                                         <li><a href="'.action([\App\Http\Controllers\LabelsController::class, 'show']).'?product_id='.$row->id.'" data-toggle="tooltip" title="'.__('lang_v1.label_help').'"><i class="fa fa-barcode"></i> '.__('barcode.labels').'</a></li>';
+
+                        if ($row->enable_stock == 1 && auth()->user()->can('product.opening_stock')) {
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\OpeningStockController::class, 'add'], ['product_id' => $row->id]).'" class="add-opening-stock"><i class="fa fa-database"></i> '.__('lang_v1.add_edit_opening_stock').'</a></li>';
+                        }
 
                         if (auth()->user()->can('product.view')) {
                             $html .= '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'view'], [$row->id]).'" class="view-product"><i class="fa fa-eye"></i> '.__('messages.view').'</a></li>';
