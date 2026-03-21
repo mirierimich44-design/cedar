@@ -148,4 +148,49 @@ class EtimsReportController extends Controller
             return ['success' => false, 'msg' => $e->getMessage()];
         }
     }
+
+    public function syncAll()
+    {
+        if (!auth()->user()->can('access_etims_report')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $business_id = request()->session()->get('user.business_id');
+            $business = Business::find($business_id);
+
+            if (empty($business->digitax_api_key)) {
+                return response()->json(['success' => false, 'msg' => 'Digitax API Key not configured.']);
+            }
+
+            $pending = Transaction::where('business_id', $business_id)
+                ->where('type', 'sell')
+                ->where('status', 'final')
+                ->whereIn('etims_sync_status', ['pending', 'failed'])
+                ->get();
+
+            if ($pending->isEmpty()) {
+                return response()->json(['success' => true, 'msg' => 'No pending or failed invoices to sync.', 'count' => 0]);
+            }
+
+            $digitaxService = new DigitaxService();
+            $digitaxService->setApiKey($business->digitax_api_key);
+
+            $synced = 0;
+            $failed = 0;
+            foreach ($pending as $transaction) {
+                $result = $digitaxService->createSale($transaction);
+                $result['success'] ? $synced++ : $failed++;
+            }
+
+            return response()->json([
+                'success' => true,
+                'msg'     => "Sync complete: {$synced} synced, {$failed} failed.",
+                'count'   => $synced,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+        }
+    }
 }
