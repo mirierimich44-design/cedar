@@ -699,14 +699,15 @@ td .dropdown-menu {
 }
 
 .dataTables_wrapper .dataTables_length select {
-    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    padding: 0.35rem 0.6rem !important;
     font-size: 0.9rem !important;
     font-weight: 500 !important;
     border: 2px solid var(--gray-300) !important;
     border-radius: var(--radius) !important;
     background: var(--white) !important;
     color: var(--gray-900) !important;
-    min-width: 70px !important;
+    width: auto !important;
+    min-width: 0 !important;
     cursor: pointer !important;
     transition: border-color 0.15s ease !important;
 }
