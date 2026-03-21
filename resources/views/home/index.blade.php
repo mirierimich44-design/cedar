@@ -738,8 +738,8 @@
                                 <i class="fas fa-shopping-cart" style="color:white;font-size:14px;"></i>
                             </span>
                             <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('sale.new_sale') }}</strong>
-                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_new_sale_desc') }}</small>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">New Sale</strong>
+                                <small style="color:#64748b;font-size:11px;">Open the point of sale screen</small>
                             </span>
                         </a>
                         @endif
@@ -750,8 +750,8 @@
                                 <i class="fas fa-truck" style="color:white;font-size:14px;"></i>
                             </span>
                             <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('lang_v1.add_purchase') }}</strong>
-                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_purchase_desc') }}</small>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Purchase</strong>
+                                <small style="color:#64748b;font-size:11px;">Record a new supplier purchase</small>
                             </span>
                         </a>
                         @endif
@@ -762,8 +762,8 @@
                                 <i class="fas fa-user-plus" style="color:white;font-size:14px;"></i>
                             </span>
                             <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('contact.add_customer') }}</strong>
-                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_customer_desc') }}</small>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Customer</strong>
+                                <small style="color:#64748b;font-size:11px;">Create a new customer profile</small>
                             </span>
                         </a>
                         @endif
@@ -774,8 +774,8 @@
                                 <i class="fas fa-box" style="color:white;font-size:14px;"></i>
                             </span>
                             <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('product.add_product') }}</strong>
-                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_add_product_desc') }}</small>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Product</strong>
+                                <small style="color:#64748b;font-size:11px;">Add a product to your catalogue</small>
                             </span>
                         </a>
                         @endif
@@ -786,8 +786,8 @@
                                 <i class="fas fa-chart-line" style="color:white;font-size:14px;"></i>
                             </span>
                             <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">{{ __('report.profit_and_loss') }}</strong>
-                                <small style="color:#64748b;font-size:11px;">{{ __('home.quick_action_profit_loss_desc') }}</small>
+                                <strong style="display:block;color:#1e293b;font-size:13px;">Profit &amp; Loss</strong>
+                                <small style="color:#64748b;font-size:11px;">View profit &amp; loss report</small>
                             </span>
                         </a>
                         @endif
