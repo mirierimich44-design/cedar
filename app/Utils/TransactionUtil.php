@@ -1433,7 +1433,7 @@ class TransactionUtil extends Util
         } else {
             $discount = $transaction->discount_amount;
         }
-        $output['discount'] = ($discount != 0) ? $this->num_f($discount, $show_currency, $business_details) : 0;
+        $output['discount'] = $this->num_f($discount, $show_currency, $business_details);
 
         $output['discount_amount_unformatted'] = $discount;
 
@@ -1466,7 +1466,7 @@ class TransactionUtil extends Util
             $output['tax_label'] .= ' ('.$tax->name.')';
         }
         $output['tax_label'] .= ':';
-        $output['tax'] = ($transaction->tax_amount != 0) ? $this->num_f($transaction->tax_amount, $show_currency, $business_details) : 0;
+        $output['tax'] = $this->num_f($transaction->tax_amount, $show_currency, $business_details);
 
         if ($transaction->tax_amount != 0 && $tax->is_tax_group) {
             $transaction_group_tax_details = $this->groupTaxDetails($tax, $transaction->tax_amount);
