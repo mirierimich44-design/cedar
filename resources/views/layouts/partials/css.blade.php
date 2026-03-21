@@ -88,6 +88,23 @@
     {!! $__system_settings['additional_css'] !!}
 @endif
 
+{{-- SIDEBAR LOCK — must win over everything including system additional_css --}}
+<style>
+.side-bar {
+    background: linear-gradient(180deg,#0f172a 0%,#1e293b 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+}
+.side-bar a,
+.side-bar .sidebar-nav-link,
+.side-bar .sidebar-child-link {
+    color: rgba(255,255,255,0.72) !important;
+}
+.side-bar .sidebar-nav-link.active-item,
+.side-bar a[style*="border-left:3px solid"] {
+    color: #ffffff !important;
+}
+</style>
+
 {{-- GLOBAL TABLE STYLE — loaded last, beats everything --}}
 <style>
 /* ─── Table reset ─────────────────────────────────────────── */
