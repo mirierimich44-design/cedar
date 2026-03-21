@@ -16,6 +16,105 @@
 <link rel="stylesheet" href="{{ asset('css/modern-minimal.css?v='.$asset_v) }}">
 <link rel="stylesheet" href="{{ asset('css/backend-material.css?v='.$asset_v) }}">
 
+<!-- Dynamic Theme Color CSS Variables -->
+@php
+$__tc = session('business.theme_color', 'primary');
+$__themeVars = [
+    'primary' => [
+        'main'   => '#4f46e5', 'hover'  => '#4338ca',
+        'light'  => '#818cf8', 'dark'   => '#3730a3',
+        'subtle' => '#eef2ff', 'border' => '#c7d2fe',
+        'ring'   => '#a5b4fc',
+    ],
+    'purple' => [
+        'main'   => '#9333ea', 'hover'  => '#7c3aed',
+        'light'  => '#c084fc', 'dark'   => '#6d28d9',
+        'subtle' => '#faf5ff', 'border' => '#ddd6fe',
+        'ring'   => '#d8b4fe',
+    ],
+    'green' => [
+        'main'   => '#059669', 'hover'  => '#047857',
+        'light'  => '#34d399', 'dark'   => '#065f46',
+        'subtle' => '#ecfdf5', 'border' => '#a7f3d0',
+        'ring'   => '#6ee7b7',
+    ],
+    'red' => [
+        'main'   => '#dc2626', 'hover'  => '#b91c1c',
+        'light'  => '#f87171', 'dark'   => '#991b1b',
+        'subtle' => '#fef2f2', 'border' => '#fecaca',
+        'ring'   => '#fca5a5',
+    ],
+    'yellow' => [
+        'main'   => '#d97706', 'hover'  => '#b45309',
+        'light'  => '#fbbf24', 'dark'   => '#92400e',
+        'subtle' => '#fffbeb', 'border' => '#fde68a',
+        'ring'   => '#fcd34d',
+    ],
+    'orange' => [
+        'main'   => '#ea580c', 'hover'  => '#c2410c',
+        'light'  => '#fb923c', 'dark'   => '#9a3412',
+        'subtle' => '#fff7ed', 'border' => '#fed7aa',
+        'ring'   => '#fdba74',
+    ],
+    'sky' => [
+        'main'   => '#0284c7', 'hover'  => '#0369a1',
+        'light'  => '#38bdf8', 'dark'   => '#075985',
+        'subtle' => '#f0f9ff', 'border' => '#bae6fd',
+        'ring'   => '#7dd3fc',
+    ],
+];
+$__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
+@endphp
+<style>
+:root {
+    /* pos-material / backend-material tokens */
+    --pos-primary:        {{ $__cv['main'] }};
+    --pos-primary-light:  {{ $__cv['light'] }};
+    --pos-primary-dark:   {{ $__cv['dark'] }};
+    --pos-primary-subtle: {{ $__cv['subtle'] }};
+    /* modern-theme tokens */
+    --primary:            {{ $__cv['main'] }};
+    --primary-hover:      {{ $__cv['hover'] }};
+    --primary-light:      {{ $__cv['subtle'] }};
+    /* modern-minimal tokens */
+    --primary-modern:       {{ $__cv['main'] }};
+    --primary-modern-hover: {{ $__cv['hover'] }};
+    /* shared accent helpers */
+    --theme-main:   {{ $__cv['main'] }};
+    --theme-hover:  {{ $__cv['hover'] }};
+    --theme-light:  {{ $__cv['light'] }};
+    --theme-dark:   {{ $__cv['dark'] }};
+    --theme-subtle: {{ $__cv['subtle'] }};
+    --theme-border: {{ $__cv['border'] }};
+    --theme-ring:   {{ $__cv['ring'] }};
+}
+
+/* ─── Override hardcoded indigo/blue gradient buttons system-wide ─── */
+.tw-from-indigo-600.tw-to-blue-500,
+.tw-from-indigo-500.tw-to-blue-500,
+.tw-from-indigo-600.tw-to-blue-600 {
+    background-image: linear-gradient(to right, var(--theme-dark), var(--theme-main)) !important;
+}
+.hover\:tw-from-indigo-600:hover,
+.hover\:tw-from-indigo-700:hover {
+    background-image: linear-gradient(to right, var(--theme-hover), var(--theme-main)) !important;
+}
+
+/* ─── Override hardcoded blue step-indicator badges ─── */
+.tw-bg-blue-600 {
+    background-color: var(--theme-main) !important;
+}
+.tw-border-blue-400, .tw-border-blue-500 {
+    border-color: var(--theme-main) !important;
+}
+.tw-text-blue-600, .tw-text-blue-700, .tw-text-indigo-600 {
+    color: var(--theme-main) !important;
+}
+.focus\:tw-ring-blue-500:focus {
+    --tw-ring-color: var(--theme-ring) !important;
+}
+</style>
+
 <!-- Mobile Responsive -->
 <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css?v='.$asset_v) }}">
 

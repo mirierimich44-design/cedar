@@ -2,6 +2,19 @@
 @section('title', __('home.home'))
 
 @section('content')
+@php
+$__homeTc = session('business.theme_color', 'primary');
+$__homeColors = [
+    'primary' => ['bg' => '#eef2ff', 'ring' => '#c7d2fe', 'icon_from' => '#4f46e5', 'icon_to' => '#818cf8', 'text' => '#4338ca'],
+    'purple'  => ['bg' => '#faf5ff', 'ring' => '#ddd6fe', 'icon_from' => '#7c3aed', 'icon_to' => '#c084fc', 'text' => '#6d28d9'],
+    'green'   => ['bg' => '#ecfdf5', 'ring' => '#a7f3d0', 'icon_from' => '#059669', 'icon_to' => '#34d399', 'text' => '#047857'],
+    'red'     => ['bg' => '#fef2f2', 'ring' => '#fecaca', 'icon_from' => '#dc2626', 'icon_to' => '#f87171', 'text' => '#b91c1c'],
+    'yellow'  => ['bg' => '#fffbeb', 'ring' => '#fde68a', 'icon_from' => '#d97706', 'icon_to' => '#fbbf24', 'text' => '#b45309'],
+    'orange'  => ['bg' => '#fff7ed', 'ring' => '#fed7aa', 'icon_from' => '#ea580c', 'icon_to' => '#fb923c', 'text' => '#c2410c'],
+    'sky'     => ['bg' => '#f0f9ff', 'ring' => '#bae6fd', 'icon_from' => '#0369a1', 'icon_to' => '#38bdf8', 'text' => '#0369a1'],
+];
+$__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
+@endphp
     <div class="dashboard-fortypos">
     <div class="tw-pb-6 tw-bg-gradient-to-r tw-from-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 tw-to-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-900 xl:tw-pb-0 ">
         <div class="tw-px-5 tw-pt-3">
@@ -83,10 +96,10 @@
                             <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl tw-ring-1 tw-ring-sky-200" style="background:#f0f9ff; overflow:hidden;">
+                                    class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl tw-ring-1" style="background:{{ $__hc['bg'] }};border-color:{{ $__hc['ring'] }};overflow:hidden;">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
-                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,{{ $__hc['icon_from'] }},{{ $__hc['icon_to'] }});border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                                 <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                                     stroke-linecap="round" stroke-linejoin="round">
@@ -99,7 +112,7 @@
                                             </span>
 
                                             <div class="tw-flex-1 tw-min-w-0">
-                                                <p class="tw-text-sm tw-font-medium tw-text-sky-700 tw-truncate tw-whitespace-nowrap">
+                                                <p class="tw-text-sm tw-font-medium tw-truncate tw-whitespace-nowrap" style="color:{{ $__hc['text'] }};">
                                                     {{ __('home.total_sell') }}
                                                 </p>
                                                 <p class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
@@ -218,10 +231,10 @@
                         <div
                             class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             <div
-                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-sky-200" style="background:#f0f9ff; overflow:hidden;">
+                                class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1" style="background:var(--theme-subtle);border-color:var(--theme-border);overflow:hidden;">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <span style="width:44px;height:44px;background:linear-gradient(135deg,var(--theme-dark),var(--theme-light));border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                             <svg aria-hidden="true" style="width:22px;height:22px;color:white;"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
@@ -234,7 +247,7 @@
                                         </span>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p class="tw-text-sm tw-font-medium tw-text-sky-700 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-truncate tw-whitespace-nowrap" style="color:var(--theme-hover);">
                                                 {{ __('home.total_purchase') }}
                                             </p>
                                             <p class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
@@ -349,7 +362,7 @@
                     @if (!empty($all_locations))
                         <div
                             class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                            <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                            <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
                                 <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
@@ -379,7 +392,7 @@
                     @if (!empty($all_locations))
                         <div
                             class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                            <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                            <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
                                 <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
@@ -618,7 +631,7 @@
                 </div>
 
                 <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                    <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <i class="fa fa-shopping-cart" style="color:white;font-size:13px;"></i>
@@ -780,7 +793,7 @@
 
                     <div
                         class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                        <div style="background:linear-gradient(135deg,#0369a1 0%,#38bdf8 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
                             <div style="display:flex;align-items:center;gap:10px;">
                                 <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <svg aria-hidden="true" style="width:16px;height:16px;color:white;"
