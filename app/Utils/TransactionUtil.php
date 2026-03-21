@@ -1538,7 +1538,7 @@ class TransactionUtil extends Util
                 $payment_types = $this->payment_types($transaction->location_id, true);
                 if (! empty($payments)) {
                     foreach ($payments as $value) {
-                        $method = ! empty($payment_types[$value['method']]) ? $payment_types[$value['method']] : '';
+                        $method = ! empty($payment_types[$value['method']]) ? $payment_types[$value['method']] : ucwords(str_replace('_', ' ', $value['method']));
                         if ($value['method'] == 'cash') {
                             $output['payments'][] =
                                 ['method' => $method.($value['is_return'] == 1 ? ' ('.$il->change_return_label.')(-)' : ''),
