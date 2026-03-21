@@ -1603,6 +1603,90 @@
           </div>
         </div>
         <hr>
+        {{-- Cooler Management --}}
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>@lang('role.cooler_management')</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.asset.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.asset.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.asset.create', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.asset.create') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.asset.update', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.asset.update') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.asset.delete', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.asset.delete') }}
+            </label></div></div>
+
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.dealer.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.dealer.create', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.create') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.dealer.update', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.update') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.dealer.delete', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.delete') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.dealer.verify_docs', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.verify_docs') }}
+            </label></div></div>
+
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.agreement.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.agreement.create', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.create') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.agreement.sign', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.sign') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.agreement.terminate', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.terminate') }}
+            </label></div></div>
+
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.retrieval.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.retrieval.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.retrieval.initiate', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.retrieval.initiate') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.retrieval.execute', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.retrieval.execute') }}
+            </label></div></div>
+
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.document.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.document.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.document.download', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.document.download') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.document.delete', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.document.delete') }}
+            </label></div></div>
+
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.compliance.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.compliance.view') }}
+            </label></div></div>
+            <div class="col-md-3"><div class="checkbox"><label>
+              {!! Form::checkbox('permissions[]', 'cooler.report.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.report.view') }}
+            </label></div></div>
+          </div>
+        </div>
+        <hr>
         <div class="row check_group">
         <div class="col-md-1">
           <h4>@lang( 'role.settings' )</h4>
