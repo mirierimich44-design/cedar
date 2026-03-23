@@ -102,6 +102,9 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "optimize-autoloader": true,
+        "platform": {
+            "php": "8.3.0"
+        },
         "allow-plugins": {
             "ocramius/package-versions": true,
             "php-http/discovery": true

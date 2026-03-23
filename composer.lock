@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "941d919a0c5c378e67c00251b2d969ad",
+    "content-hash": "685f3f60eebb902b6855bdcb026a6320",
     "packages": [
         {
             "name": "aloha/twilio",
@@ -4603,12 +4603,12 @@
             "version": "2.66.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/briannesbitt/Carbon.git",
+                "url": "https://github.com/CarbonPHP/carbon.git",
                 "reference": "496712849902241f04902033b0441b269effe001"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/496712849902241f04902033b0441b269effe001",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/496712849902241f04902033b0441b269effe001",
                 "reference": "496712849902241f04902033b0441b269effe001",
                 "shasum": ""
             },
@@ -7176,12 +7176,12 @@
             "version": "8.4.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "url": "https://github.com/MyIntervals/PHP-CSS-Parser.git",
                 "reference": "e41d2140031d533348b2192a83f02d8dd8a71d30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/e41d2140031d533348b2192a83f02d8dd8a71d30",
+                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/e41d2140031d533348b2192a83f02d8dd8a71d30",
                 "reference": "e41d2140031d533348b2192a83f02d8dd8a71d30",
                 "shasum": ""
             },
@@ -10869,12 +10869,12 @@
             "version": "v3.8.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/barryvdh/laravel-debugbar.git",
+                "url": "https://github.com/fruitcake/laravel-debugbar.git",
                 "reference": "eb01216141e62433178c52b0cbdb785b45bae871"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/eb01216141e62433178c52b0cbdb785b45bae871",
+                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/eb01216141e62433178c52b0cbdb785b45bae871",
                 "reference": "eb01216141e62433178c52b0cbdb785b45bae871",
                 "shasum": ""
             },
@@ -13801,5 +13801,8 @@
         "php": "^8.0"
     },
     "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.3.0"
+    },
     "plugin-api-version": "2.6.0"
 }
