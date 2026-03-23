@@ -505,8 +505,6 @@ function getSelectedRows() {
 }
 
 function __is_online() {
-    return true;
-    
     //if localhost always return true
     if ($('#__is_localhost').length > 0) {
         return true;
