@@ -26,12 +26,14 @@ $(document).ready(function() {
                     form.find('.body:eq(' + newIndex + ') label.error').remove();
                     form.find('.body:eq(' + newIndex + ') .error').removeClass('error');
                 }
-                form.validate().settings.ignore = ':disabled,:hidden';
+                // Ignore hidden elements but NOT hidden <select> (select2 hides original selects)
+                form.validate().settings.ignore = ':disabled,:hidden:not(select)';
                 return form.valid();
             },
             onStepChanged: function(event, currentIndex, priorIndex) {
                 // Render reCAPTCHA on last step
-                if (currentIndex === 2 && !recaptchaRendered) { // change 2 to your last step index
+                var totalSteps = form.steps('count');
+                if (currentIndex === totalSteps - 1 && !recaptchaRendered) {
                     if (typeof grecaptcha !== 'undefined') {
                         grecaptcha.render('recaptcha-container', {
                             'sitekey': window.RECAPTCHA_SITE_KEY
@@ -41,7 +43,8 @@ $(document).ready(function() {
                 }
             },
             onFinishing: function(event, currentIndex) {
-                form.validate().settings.ignore = ':disabled';
+                // Ignore hidden elements but NOT hidden <select> (select2 hides original selects)
+                form.validate().settings.ignore = ':disabled,:hidden:not(select)';
                 return form.valid();
             },
             onFinished: function(event, currentIndex) {
