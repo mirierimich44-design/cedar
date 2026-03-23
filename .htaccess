@@ -1,0 +1,27 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    Options -Indexes
+    <IfModule mime_module>
+        AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+    </IfModule>
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    # Don't rewrite existing files (CSS, JS, images, etc.)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    # Don't rewrite existing directories
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    # Send everything else to root index.php
+    RewriteRule ^(.*)$ index.php [L,QSA]
+    # Block dangerous file uploads
+    RewriteRule ^uploads/.*\.(htaccess|htpasswd|ini|phps|fla|psd|log|sh|zip|exe|pl|jsp|asp|htm|sh|cgi|py|php)$ - [NC,F]
+</IfModule>
+#----------------------------------------------------------------cp:ppd
+# Section managed by cPanel: Password Protected Directories     -cp:ppd
+# - Do not edit this section of the htaccess file!              -cp:ppd
+#----------------------------------------------------------------cp:ppd
+#----------------------------------------------------------------cp:ppd
+# End section managed by cPanel: Password Protected Directories -cp:ppd
