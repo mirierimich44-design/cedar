@@ -20,6 +20,18 @@ class CiataMallBusinessSeeder extends Seeder
             return;
         }
 
+        // Clear Spatie permission cache
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Ensure required permissions exist
+        $requiredPermissions = [
+            'sell.view', 'sell.create', 'sell.update', 'sell.delete',
+            'access_all_locations', 'view_cash_register', 'close_cash_register',
+        ];
+        foreach ($requiredPermissions as $perm) {
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+        }
+
         DB::beginTransaction();
 
         try {
