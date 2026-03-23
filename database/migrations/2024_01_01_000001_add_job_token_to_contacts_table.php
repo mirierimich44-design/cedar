@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('contacts', function (Blueprint $table) {
-            $table->string('job_token', 60)->nullable()->after('order_token')->index();
+            $table->string('job_token', 60)->nullable()->index();
         });
     }
 
