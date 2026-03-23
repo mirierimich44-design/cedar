@@ -33,7 +33,7 @@ class CiataMallBusinessSeeder extends Seeder
                 'email'       => 'admin@ciatamall.co.ke',
                 'password'    => Hash::make('ciata01'),
                 'language'    => 'en',
-                'business_id' => 0, // temporary, updated below
+                'business_id' => null, // temporary, updated below
             ]);
 
             // Create the business
