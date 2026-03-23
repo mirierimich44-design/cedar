@@ -43,7 +43,7 @@ class BusinessUtil extends Util
             'business_id' => $business_id,
             'guard_name' => 'web',
         ]);
-        $cashier_role->syncPermissions(['sell.view', 'sell.create', 'sell.update', 'sell.delete', 'access_all_locations', 'view_cash_register', 'close_cash_register']);
+        $cashier_role->syncPermissions(['sell.view', 'sell.create', 'sell.update', 'sell.delete', 'sell.payments', 'access_all_locations', 'view_cash_register', 'close_cash_register']);
 
         $business = Business::findOrFail($business_id);
 

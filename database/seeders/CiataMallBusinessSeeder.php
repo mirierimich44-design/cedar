@@ -25,7 +25,7 @@ class CiataMallBusinessSeeder extends Seeder
 
         // Ensure required permissions exist
         $requiredPermissions = [
-            'sell.view', 'sell.create', 'sell.update', 'sell.delete',
+            'sell.view', 'sell.create', 'sell.update', 'sell.delete', 'sell.payments',
             'access_all_locations', 'view_cash_register', 'close_cash_register',
         ];
         foreach ($requiredPermissions as $perm) {

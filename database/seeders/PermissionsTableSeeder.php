@@ -48,6 +48,7 @@ class PermissionsTableSeeder extends Seeder
             ['name' => 'sell.create'],
             ['name' => 'sell.update'],
             ['name' => 'sell.delete'],
+            ['name' => 'sell.payments'],
 
             ['name' => 'purchase_n_sell_report.view'],
             ['name' => 'contacts_report.view'],

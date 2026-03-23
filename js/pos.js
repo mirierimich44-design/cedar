@@ -902,8 +902,9 @@ $(document).ready(function () {
             // var total_paying = __read_number($('input#total_paying_input'));
             var cnf = true;
 
-            //Ignore if the difference is less than 0.5
-            if ($('input#in_balance_due').val() >= 0.5) {
+            //Ignore if the difference is less than 0.5 OR it is a credit sale
+            var is_credit_sale = $('#is_credit_sale').length && $('#is_credit_sale').val() == '1';
+            if (!is_credit_sale && $('input#in_balance_due').val() >= 0.5) {
                 cnf = confirm(LANG.paid_amount_is_less_than_payable);
                 // if( total_payble > total_paying ){
                 // 	cnf = confirm( LANG.paid_amount_is_less_than_payable );
