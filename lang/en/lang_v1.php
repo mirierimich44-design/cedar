@@ -1132,6 +1132,8 @@ return [
     'view_quote_url' => 'View quote url',
     'close_cash_register' => 'Close cash register',
     'view_cash_register' => 'View cash register',
+    'view_cash_register_product_details' => 'View cash register product sold details',
+    'create_credit_sale' => 'Create credit sale',
     'for_tax_group_only' => 'For tax group only',
     'for_tax_group_only_help' => 'If checked, this tax will not be displayed indivisually in dropdowns, only can be added in tax group',
     'exempt' => 'Exempt',

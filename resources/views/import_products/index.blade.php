@@ -18,9 +18,9 @@
                 <div class="alert alert-danger alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                     @if(!empty($notification['msg']))
-                        {{$notification['msg']}}
+                        {!! $notification['msg'] !!}
                     @elseif(session('notification.msg'))
-                        {{ session('notification.msg') }}
+                        {!! session('notification.msg') !!}
                     @endif
                 </div>
             </div>  
@@ -50,7 +50,7 @@
                 <br><br>
                 <div class="row">
                     <div class="col-sm-4">
-                        <a href="{{ asset('files/import_products_csv_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
+                        <a href="{{ action([\App\Http\Controllers\ImportProductsController::class, 'downloadTemplate']) }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
                     </div>
                 </div>
             @endcomponent

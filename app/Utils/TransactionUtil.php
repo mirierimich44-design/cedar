@@ -6088,7 +6088,11 @@ class TransactionUtil extends Util
         }
         $inputs['paid_on'] = $request->input('paid_on', \Carbon::now()->toDateTimeString());
         if ($format_data) {
-            $inputs['paid_on'] = $this->uf_date($inputs['paid_on'], true);
+            try {
+                $inputs['paid_on'] = $this->uf_date($inputs['paid_on'], true);
+            } catch (\Exception $e) {
+                $inputs['paid_on'] = $request->input('paid_on', \Carbon::now()->toDateTimeString());
+            }
             $inputs['amount'] = $this->num_uf($inputs['amount']);
         }
 

@@ -820,6 +820,14 @@
                   <div class="col-md-12">
                     <div class="checkbox">
                       <label>
+                        {!! Form::checkbox('permissions[]', 'create_credit_sale', in_array('create_credit_sale', $role_permissions), ['class' => 'input-icheck']); !!}
+                        {{ __('lang_v1.create_credit_sale') }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="checkbox">
+                      <label>
                         {!! Form::checkbox('permissions[]', 'disable_credit_sale', in_array('disable_credit_sale', $role_permissions), ['class' => 'input-icheck']); !!}
                         {{ __('lang_v1.disable_credit_sale_button') }}
                       </label>
@@ -1250,6 +1258,14 @@
               <label>
                 {!! Form::checkbox('permissions[]', 'close_cash_register', in_array('close_cash_register', $role_permissions), 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.close_cash_register' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'view_cash_register_product_details', in_array('view_cash_register_product_details', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.view_cash_register_product_details' ) }}
               </label>
             </div>
           </div>

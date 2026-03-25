@@ -16,6 +16,8 @@ use App\VariationValueTemplate;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 
 class ImportProductsController extends Controller
 {
@@ -67,6 +69,44 @@ class ImportProductsController extends Controller
         } else {
             return view('import_products.index');
         }
+    }
+
+    /**
+     * Downloads the product import XLS template
+     */
+    public function downloadTemplate()
+    {
+        if (! auth()->user()->can('product.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $headers = [
+            'Product Name', 'Brand', 'Unit', 'Category', 'Sub-category', 'SKU', 'Barcode Type',
+            'Manage Stock', 'Alert Quantity', 'Expires In', 'Expiry Period Unit', 'Applicable Tax',
+            'Selling Price Tax Type', 'Product Type', 'Variation Name', 'Variation Values',
+            'Variation SKU', 'Purchase Price Inc Tax', 'Purchase Price Exc Tax', 'Profit Margin',
+            'Selling Price', 'Opening Stock', 'Opening Stock Location', 'Expiry Date',
+            'Enable IMEI or SR No', 'Weight', 'Rack', 'Row', 'Position', 'Image',
+            'Product Description', 'Custom Field 1', 'Custom Field 2', 'Custom Field 3',
+            'Custom Field 4', 'Not for selling', 'Product Locations',
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        foreach ($headers as $col => $heading) {
+            $sheet->setCellValueByColumnAndRow($col + 1, 1, $heading);
+        }
+
+        $writer = new Xls($spreadsheet);
+
+        $filename = 'import_products_csv_template.xls';
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel',
+        ]);
     }
 
     /**
@@ -695,7 +735,6 @@ class ImportProductsController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,

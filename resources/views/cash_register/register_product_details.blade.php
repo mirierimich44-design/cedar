@@ -1,3 +1,4 @@
+@can('view_cash_register_product_details')
 <div class="row">
   <div class="col-md-12">
     <hr>
@@ -269,3 +270,4 @@
     </div>
   </div>
 @endif
+@endcan

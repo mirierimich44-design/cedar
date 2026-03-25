@@ -56,7 +56,7 @@
     @endif
 
     {{-- Credit Button --}}
-    @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+    @if (auth()->user()->can('create_credit_sale') && (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin')))
         @if(empty($pos_settings['disable_credit_sale_button']))
         <button type="button" class="pos-action-btn pos-action-credit" id="pos-credit-sale-btn" title="Credit Options">
             <i class="fas fa-handshake"></i>
@@ -1218,6 +1218,11 @@
 
             if ($btn) $btn.prop('disabled', true).prepend('<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>');
 
+            // Use business date format if available, else fallback to current time
+            var paid_on = (typeof moment !== 'undefined' && typeof moment_date_format !== 'undefined') 
+                ? moment().format(moment_date_format + ' ' + (typeof moment_time_format !== 'undefined' ? moment_time_format : 'HH:mm'))
+                : null;
+
             var payload = {
                 _token:           $('meta[name="csrf-token"]').attr('content'),
                 contact_id:       cds.customerId,
@@ -1226,6 +1231,9 @@
                 note:             note || '',
                 due_payment_type: 'sell'
             };
+            if (paid_on) {
+                payload.paid_on = paid_on;
+            }
             if (method === 'custom_pay_1' && ref) {
                 payload.transaction_no_1 = ref;
             }
