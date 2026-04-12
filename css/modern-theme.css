@@ -839,7 +839,11 @@ td .dropdown-menu {
 
 /* Column visibility button - Teal */
 .dt-buttons .buttons-colvis,
-.buttons-colvis {
+.dt-buttons button.buttons-colvis,
+.dt-buttons a.buttons-colvis,
+.buttons-colvis,
+button.buttons-colvis,
+a.buttons-colvis {
     background: #14b8a6 !important;
     color: var(--white) !important;
     padding: 0.6rem 1.25rem !important;
@@ -852,13 +856,24 @@ td .dropdown-menu {
     align-items: center !important;
     gap: 0.375rem !important;
     line-height: 1.5 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .dt-buttons .buttons-colvis:hover,
+.dt-buttons button.buttons-colvis:hover,
+button.buttons-colvis:hover,
 .buttons-colvis:hover {
     background: #0d9488 !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3) !important;
+}
+
+/* Ensure the btn-group wrapper around colvis doesn't shrink it */
+.dt-buttons .btn-group {
+    display: inline-flex !important;
+    vertical-align: middle !important;
 }
 
 /* Pagination styling */
