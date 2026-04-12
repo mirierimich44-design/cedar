@@ -123,7 +123,7 @@ class AdminlteCustomPresenter extends Presenter
     }
 
     /**
-     * Get child menu items.
+     * Get child menu items (supports one level of nested sub-dropdowns).
      */
     public function getChildMenuItems($item)
     {
@@ -131,18 +131,46 @@ class AdminlteCustomPresenter extends Presenter
         $displayStyle = $item->hasActiveOnChild() ? 'block' : 'none';
 
         if (count($item->getChilds()) > 0) {
-            $children .= '<div class="chiled" style="display:' . $displayStyle . ';position:relative;margin-top:2px;margin-bottom:4px;padding-left:32px;">
-            <div style="position:absolute;top:0;bottom:0;left:18px;width:1px;background:rgba(255,255,255,0.1);"></div>
-            <div>';
+            $children .= '<div class="chiled" style="display:' . $displayStyle . ';position:relative;margin-top:2px;margin-bottom:4px;padding-left:32px;">'
+                . '<div style="position:absolute;top:0;bottom:0;left:18px;width:1px;background:rgba(255,255,255,0.1);"></div>'
+                . '<div>';
 
             foreach ($item->getChilds() as $child) {
-                $childStyle = $child->isActive()
-                    ? 'color:' . $this->getThemeAccentColor() . ';font-weight:600;'
-                    : 'color:rgba(255,255,255,0.55);';
+                if ($child->hasChilds()) {
+                    // Nested sub-dropdown
+                    $subActive   = $child->hasActiveOnChild();
+                    $subDisplay  = $subActive ? 'block' : 'none';
+                    $subStyle    = $subActive
+                        ? 'color:' . $this->getThemeAccentColor() . ';font-weight:600;'
+                        : 'color:rgba(255,255,255,0.55);';
+                    $subChevron  = $subActive
+                        ? '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6"/>'
+                        : '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6"/>';
 
-                $children .= '<a href="' . $child->getUrl() . '" title="" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $childStyle . '" ' . $child->getAttributes() . '>' .
-                    $child->getIcon() . ' <span>' . $child->title . '</span>' .
-                    '</a>' . PHP_EOL;
+                    $children .= '<a href="#" class="drop_down sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg" style="' . $subStyle . '">'
+                        . '<span>' . $child->title . '</span>'
+                        . '<svg style="width:12px;height:12px;flex-shrink:0;margin-left:auto;color:#64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $subChevron . '</svg>'
+                        . '</a>';
+
+                    $children .= '<div class="chiled" style="display:' . $subDisplay . ';padding-left:12px;">';
+                    foreach ($child->getChilds() as $grandchild) {
+                        $gcStyle = $grandchild->isActive()
+                            ? 'color:' . $this->getThemeAccentColor() . ';font-weight:600;'
+                            : 'color:rgba(255,255,255,0.45);';
+                        $children .= '<a href="' . $grandchild->getUrl() . '" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-xs tw-truncate tw-transition-all tw-rounded-lg" style="' . $gcStyle . '">'
+                            . '<span>' . $grandchild->title . '</span>'
+                            . '</a>' . PHP_EOL;
+                    }
+                    $children .= '</div>';
+                } else {
+                    // Regular link
+                    $childStyle = $child->isActive()
+                        ? 'color:' . $this->getThemeAccentColor() . ';font-weight:600;'
+                        : 'color:rgba(255,255,255,0.55);';
+                    $children .= '<a href="' . $child->getUrl() . '" title="" class="sidebar-child-link tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-truncate tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $childStyle . '" ' . $child->getAttributes() . '>'
+                        . $child->getIcon() . ' <span>' . $child->title . '</span>'
+                        . '</a>' . PHP_EOL;
+                }
             }
 
             $children .= '</div></div>';
