@@ -69,9 +69,9 @@
                             <td>
                               <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"
                                    href="{{action([\App\Http\Controllers\BackUpController::class, 'download'], [$backup['file_name']])}}"><i
-                                        class="fa fa-cloud-download"></i> @lang('lang_v1.download')</a>
+                                        class="fas fa-cloud-download-alt"></i> @lang('lang_v1.download')</a>
                                 <a class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error link_confirmation" data-button-type="delete"
-                                   href="{{ route('delete_backup', $backup['file_name']) }}"><i class="fa fa-trash-o"></i>
+                                   href="{{ route('delete_backup', $backup['file_name']) }}"><i class="fas fa-trash-alt"></i>
                                     @lang('messages.delete') </a>
                             </td>
                         </tr>

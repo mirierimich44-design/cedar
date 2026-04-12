@@ -36,7 +36,7 @@
                     @endcan
                     @endif
                     <a href="{{ route('cooler.retrievals.letter', $retrieval->id) }}" class="btn btn-sm btn-default" target="_blank">
-                        <i class="fa fa-file-pdf-o"></i> Retrieval Letter
+                        <i class="fas fa-file-pdf"></i> Retrieval Letter
                     </a>
                 </div>
             </div>

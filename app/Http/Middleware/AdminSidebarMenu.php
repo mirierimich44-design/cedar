@@ -751,262 +751,308 @@ class AdminSidebarMenu
                 || auth()->user()->can('trending_product_report.view') || auth()->user()->can('sales_representative.view') || auth()->user()->can('register_report.view')
                 || auth()->user()->can('expense_report.view')) {
                 $menu->dropdown(
-                    __('report.reports'),
+                    __("report.reports"),
                     function ($sub) use ($enabled_modules, $is_admin) {
-                        if (auth()->user()->can('profit_loss_report.view')) {
-                            $sub->url(
-                                route('reports.daily_summary'),
-                                __('Daily Summary'),
-                                ['icon' => 'fa fa-calendar-check-o', 'active' => request()->segment(2) == 'daily-summary']
-                            );
+                        $reports = [];
+
+                        if (auth()->user()->can("profit_loss_report.view")) {
+                            $reports[] = [
+                                "url" => route("reports.daily_summary"),
+                                "label" => __("Daily Summary"),
+                                "icon" => "fa fa-calendar-check-o",
+                                "active" => request()->segment(2) == "daily-summary"
+                            ];
+                            $reports[] = [
+                                "url" => route("reports.daily_reconciliation"),
+                                "label" => __("Daily Reconciliation"),
+                                "icon" => "fa fa-balance-scale",
+                                "active" => request()->segment(2) == "daily-reconciliation"
+                            ];
+                            $reports[] = [
+                                "url" => route("reports.lost_sales"),
+                                "label" => __("Lost Sales"),
+                                "icon" => "fa fa-times-circle",
+                                "active" => request()->segment(2) == "lost-sales"
+                            ];
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getProfitLoss"]),
+                                "label" => __("report.profit_loss"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "profit-loss"
+                            ];
                         }
-                        if (auth()->user()->can('profit_loss_report.view')) {
-                            $sub->url(
-                                route('reports.daily_reconciliation'),
-                                __('Daily Reconciliation'),
-                                ['icon' => 'fa fa-balance-scale', 'active' => request()->segment(2) == 'daily-reconciliation']
-                            );
+                        if (config("constants.show_report_606") == true) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "purchaseReport"]),
+                                "label" => "Report 606 (" . __("lang_v1.purchase") . ")",
+                                "icon" => "",
+                                "active" => request()->segment(2) == "purchase-report"
+                            ];
                         }
-                        if (auth()->user()->can('profit_loss_report.view')) {
-                            $sub->url(
-                                route('reports.lost_sales'),
-                                __('Lost Sales'),
-                                ['icon' => 'fa fa-times-circle', 'active' => request()->segment(2) == 'lost-sales']
-                            );
+                        if (config("constants.show_report_607") == true) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "saleReport"]),
+                                "label" => "Report 607 (" . __("business.sale") . ")",
+                                "icon" => "",
+                                "active" => request()->segment(2) == "sale-report"
+                            ];
                         }
-                        if (auth()->user()->can('profit_loss_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getProfitLoss']),
-                                __('report.profit_loss'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'profit-loss']
-                            );
-                        }
-                        if (config('constants.show_report_606') == true) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'purchaseReport']),
-                                'Report 606 (' . __('lang_v1.purchase') . ')',
-                                ['icon' => '', 'active' => request()->segment(2) == 'purchase-report']
-                            );
-                        }
-                        if (config('constants.show_report_607') == true) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'saleReport']),
-                                'Report 607 (' . __('business.sale') . ')',
-                                ['icon' => '', 'active' => request()->segment(2) == 'sale-report']
-                            );
-                        }
-                        if ((in_array('purchases', $enabled_modules) || in_array('add_sale', $enabled_modules) || in_array('pos_sale', $enabled_modules)) && auth()->user()->can('purchase_n_sell_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getPurchaseSell']),
-                                __('report.purchase_sell_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'purchase-sell']
-                            );
+                        if ((in_array("purchases", $enabled_modules) || in_array("add_sale", $enabled_modules) || in_array("pos_sale", $enabled_modules)) && auth()->user()->can("purchase_n_sell_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getPurchaseSell"]),
+                                "label" => __("report.purchase_sell_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "purchase-sell"
+                            ];
                         }
 
-                        if (auth()->user()->can('tax_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getTaxReport']),
-                                __('report.tax_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'tax-report']
-                            );
+                        if (auth()->user()->can("tax_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getTaxReport"]),
+                                "label" => __("report.tax_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "tax-report"
+                            ];
                         }
-                        if (auth()->user()->can('customer_report.view') || auth()->user()->can('contacts_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getCustomerReport']),
-                                __('report.customer_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'customer-report']
-                            );
+                        if (auth()->user()->can("customer_report.view") || auth()->user()->can("contacts_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getCustomerReport"]),
+                                "label" => __("report.customer_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "customer-report"
+                            ];
                         }
-                        if (auth()->user()->can('supplier_report.view') || auth()->user()->can('contacts_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getSupplierReport']),
-                                __('report.supplier_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'supplier-report']
-                            );
+                        if (auth()->user()->can("supplier_report.view") || auth()->user()->can("contacts_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getSupplierReport"]),
+                                "label" => __("report.supplier_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "supplier-report"
+                            ];
                         }
-                        if (auth()->user()->can('followups.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getFollowupReport']),
-                                __('lang_v1.followup_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'followup-report']
-                            );
+                        if (auth()->user()->can("followups.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getFollowupReport"]),
+                                "label" => __("lang_v1.followup_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "followup-report"
+                            ];
                         }
-                        if (auth()->user()->can('orders.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getOrdersReport']),
-                                __('lang_v1.pos_orders_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'orders-report']
-                            );
+                        if (auth()->user()->can("orders.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getOrdersReport"]),
+                                "label" => __("lang_v1.pos_orders_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "orders-report"
+                            ];
                         }
-                        if (auth()->user()->can('contacts_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getCustomerGroup']),
-                                __('lang_v1.customer_groups_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'customer-group']
-                            );
+                        if (auth()->user()->can("contacts_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getCustomerGroup"]),
+                                "label" => __("lang_v1.customer_groups_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "customer-group"
+                            ];
                         }
-                        if (auth()->user()->can('stock_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getStockReport']),
-                                __('report.stock_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'stock-report']
-                            );
-                            if (session('business.enable_product_expiry') == 1) {
-                                $sub->url(
-                                    action([\App\Http\Controllers\ReportController::class, 'getStockExpiryReport']),
-                                    __('report.stock_expiry_report'),
-                                    ['icon' => '', 'active' => request()->segment(2) == 'stock-expiry']
-                                );
+                        if (auth()->user()->can("stock_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getStockReport"]),
+                                "label" => __("report.stock_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "stock-report"
+                            ];
+                            if (session("business.enable_product_expiry") == 1) {
+                                $reports[] = [
+                                    "url" => action([\App\Http\Controllers\ReportController::class, "getStockExpiryReport"]),
+                                    "label" => __("report.stock_expiry_report"),
+                                    "icon" => "",
+                                    "active" => request()->segment(2) == "stock-expiry"
+                                ];
                             }
-                            if (session('business.enable_lot_number') == 1) {
-                                $sub->url(
-                                    action([\App\Http\Controllers\ReportController::class, 'getLotReport']),
-                                    __('lang_v1.lot_report'),
-                                    ['icon' => '', 'active' => request()->segment(2) == 'lot-report']
-                                );
+                            if (session("business.enable_lot_number") == 1) {
+                                $reports[] = [
+                                    "url" => action([\App\Http\Controllers\ReportController::class, "getLotReport"]),
+                                    "label" => __("lang_v1.lot_report"),
+                                    "icon" => "",
+                                    "active" => request()->segment(2) == "lot-report"
+                                ];
                             }
 
-                            if (in_array('stock_adjustment', $enabled_modules)) {
-                                $sub->url(
-                                    action([\App\Http\Controllers\ReportController::class, 'getStockAdjustmentReport']),
-                                    __('report.stock_adjustment_report'),
-                                    ['icon' => '', 'active' => request()->segment(2) == 'stock-adjustment-report']
-                                );
+                            if (in_array("stock_adjustment", $enabled_modules)) {
+                                $reports[] = [
+                                    "url" => action([\App\Http\Controllers\ReportController::class, "getStockAdjustmentReport"]),
+                                    "label" => __("report.stock_adjustment_report"),
+                                    "icon" => "",
+                                    "active" => request()->segment(2) == "stock-adjustment-report"
+                                ];
                             }
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getLowStockVelocityReport']),
-                                __('report.low_stock_alert'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'low-stock-velocity']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getLowStockVelocityReport"]),
+                                "label" => __("report.low_stock_alert"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "low-stock-velocity"
+                            ];
+
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getDeadStockReport"]),
+                                "label" => __("report.dead_stock"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "dead-stock"
+                            ];
                         }
 
-                        if (auth()->user()->can('trending_product_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getTrendingProducts']),
-                                __('report.trending_products'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'trending-products']
-                            );
+                        if (auth()->user()->can("trending_product_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getTrendingProducts"]),
+                                "label" => __("report.trending_products"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "trending-products"
+                            ];
                         }
 
-                        if (auth()->user()->can('purchase_n_sell_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'itemsReport']),
-                                __('lang_v1.items_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'items-report']
-                            );
+                        if (auth()->user()->can("purchase_n_sell_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "itemsReport"]),
+                                "label" => __("lang_v1.items_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "items-report"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getproductPurchaseReport']),
-                                __('lang_v1.product_purchase_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'product-purchase-report']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getproductPurchaseReport"]),
+                                "label" => __("lang_v1.product_purchase_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "product-purchase-report"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getproductSellReport']),
-                                __('lang_v1.product_sell_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'product-sell-report']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getproductSellReport"]),
+                                "label" => __("lang_v1.product_sell_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "product-sell-report"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getDailyProductProfitReport']),
-                                'Daily Product Profit Report',
-                                ['icon' => '', 'active' => request()->segment(2) == 'daily-product-profit']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getDailyProductProfitReport"]),
+                                "label" => "Daily Product Profit Report",
+                                "icon" => "",
+                                "active" => request()->segment(2) == "daily-product-profit"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'purchasePaymentReport']),
-                                __('lang_v1.purchase_payment_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'purchase-payment-report']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "purchasePaymentReport"]),
+                                "label" => __("lang_v1.purchase_payment_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "purchase-payment-report"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'sellPaymentReport']),
-                                __('lang_v1.sell_payment_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'sell-payment-report']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "sellPaymentReport"]),
+                                "label" => __("lang_v1.sell_payment_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "sell-payment-report"
+                            ];
 
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getPurchasePriceVarianceReport']),
-                                'PPV Report',
-                                ['icon' => '', 'active' => request()->segment(2) == 'purchase-price-variance']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getPurchasePriceVarianceReport"]),
+                                "label" => "PPV Report",
+                                "icon" => "",
+                                "active" => request()->segment(2) == "purchase-price-variance"
+                            ];
                         }
-                        if (in_array('expenses', $enabled_modules) && auth()->user()->can('expense_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getExpenseReport']),
-                                __('report.expense_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'expense-report']
-                            );
+                        if (in_array("expenses", $enabled_modules) && auth()->user()->can("expense_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getExpenseReport"]),
+                                "label" => __("report.expense_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "expense-report"
+                            ];
                         }
-                        if (auth()->user()->can('register_report.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getRegisterReport']),
-                                __('report.register_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'register-report']
-                            );
+                        if (auth()->user()->can("register_report.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getRegisterReport"]),
+                                "label" => __("report.register_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "register-report"
+                            ];
                         }
-                        if (auth()->user()->can('sales_representative.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getSalesRepresentativeReport']),
-                                __('report.sales_representative'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'sales-representative-report']
-                            );
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getSellerDailyReport']),
-                                'Seller Daily Report',
-                                ['icon' => '', 'active' => request()->segment(2) == 'seller-daily-report']
-                            );
+                        if (auth()->user()->can("sales_representative.view")) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getSalesRepresentativeReport"]),
+                                "label" => __("report.sales_representative"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "sales-representative-report"
+                            ];
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getSellerDailyReport"]),
+                                "label" => "Seller Daily Report",
+                                "icon" => "",
+                                "active" => request()->segment(2) == "seller-daily-report"
+                            ];
                         }
-                        if (auth()->user()->can('purchase_n_sell_report.view') && in_array('tables', $enabled_modules)) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getTableReport']),
-                                __('restaurant.table_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'table-report']
-                            );
-                        }
-
-                        if (auth()->user()->can('tax_report.view') && !empty(config('constants.enable_gst_report_india'))) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'gstSalesReport']),
-                                __('lang_v1.gst_sales_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'gst-sales-report']
-                            );
-
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'gstPurchaseReport']),
-                                __('lang_v1.gst_purchase_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'gst-purchase-report']
-                            );
+                        if (auth()->user()->can("purchase_n_sell_report.view") && in_array("tables", $enabled_modules)) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getTableReport"]),
+                                "label" => __("restaurant.table_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "table-report"
+                            ];
                         }
 
-                        if (auth()->user()->can('sales_representative.view') && in_array('service_staff', $enabled_modules)) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'getServiceStaffReport']),
-                                __('restaurant.service_staff_report'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'service-staff-report']
-                            );
+                        if (auth()->user()->can("tax_report.view") && !empty(config("constants.enable_gst_report_india"))) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "gstSalesReport"]),
+                                "label" => __("lang_v1.gst_sales_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "gst-sales-report"
+                            ];
+
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "gstPurchaseReport"]),
+                                "label" => __("lang_v1.gst_purchase_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "gst-purchase-report"
+                            ];
+                        }
+
+                        if (auth()->user()->can("sales_representative.view") && in_array("service_staff", $enabled_modules)) {
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "getServiceStaffReport"]),
+                                "label" => __("restaurant.service_staff_report"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "service-staff-report"
+                            ];
                         }
 
                         if ($is_admin) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ReportController::class, 'activityLog']),
-                                __('lang_v1.activity_log'),
-                                ['icon' => '', 'active' => request()->segment(2) == 'activity-log']
-                            );
+                            $reports[] = [
+                                "url" => action([\App\Http\Controllers\ReportController::class, "activityLog"]),
+                                "label" => __("lang_v1.activity_log"),
+                                "icon" => "",
+                                "active" => request()->segment(2) == "activity-log"
+                            ];
+                        }
+
+                        usort($reports, function ($a, $b) {
+                            return strcasecmp($a["label"], $b["label"]);
+                        });
+
+                        foreach ($reports as $r) {
+                            $sub->url($r["url"], $r["label"], ["icon" => $r["icon"], "active" => $r["active"]]);
                         }
                     },
-                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697"></path>
-                    <path d="M18 14v4h4"></path>
-                    <path d="M18 11v-4a2 2 0 0 0 -2 -2h-2"></path>
-                    <path d="M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
-                    <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-                    <path d="M8 11h4"></path>
-                    <path d="M8 15h3"></path>
-                  </svg>', 'id' => 'tour_step8']
+                    ["icon" => "<svg aria-hidden=\"true\" class=\"tw-size-5 tw-shrink-0\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">
+                    <path stroke=\"none\" d=\"M0 0h24v24H0z\" fill=\"none\"></path>
+                    <path stroke=\"none\" d=\"M0 0h24v24H0z\" fill=\"none\"></path>
+                    <path d=\"M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697\"></path>
+                    <path d=\"M18 14v4h4\"></path>
+                    <path d=\"M18 11v-4a2 2 0 0 0 -2 -2h-2\"></path>
+                    <path d=\"M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z\"></path>
+                    <path d=\"M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0\"></path>
+                    <path d=\"M8 11h4\"></path>
+                    <path d=\"M8 15h3\"></path>
+                  </svg>", "id" => "tour_step8"]
                 )->order(55);
             }
 
@@ -1162,3 +1208,4 @@ class AdminSidebarMenu
         return $next($request);
     }
 }
+

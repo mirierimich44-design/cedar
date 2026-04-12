@@ -59,6 +59,81 @@ class HomeController extends Controller
         $this->productUtil = $productUtil;
     }
 
+    public function getMorningDigest(Request $request)
+    {
+        if (!auth()->user()->can('dashboard.data')) {
+            return response()->json(['error' => 'Unauthorized']);
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+        $yesterday = \Carbon::now()->subDay()->format('Y-m-d');
+        
+        // 1. Yesterday Sales
+        $yesterday_sales = \App\Transaction::where('business_id', $business_id)
+            ->whereDate('transaction_date', $yesterday)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->sum('final_total');
+
+        // 2. Expiry Risk (Next 30 days)
+        $expiry_date_limit = \Carbon::now()->addDays(30)->format('Y-m-d');
+        
+        $expiry_risk = \App\PurchaseLine::join('transactions as t', 'purchase_lines.transaction_id', '=', 't.id')
+            ->join('products as p', 'purchase_lines.product_id', '=', 'p.id')
+            ->where('t.business_id', $business_id)
+            ->where('p.enable_stock', 1)
+            ->whereNotNull('purchase_lines.exp_date')
+            ->whereDate('purchase_lines.exp_date', '<=', $expiry_date_limit)
+            ->whereRaw('purchase_lines.quantity > (COALESCE(purchase_lines.quantity_sold, 0) + COALESCE(purchase_lines.quantity_adjusted, 0) + COALESCE(purchase_lines.quantity_returned, 0))')
+            ->select([
+                DB::raw('SUM(purchase_lines.purchase_price_inc_tax * (purchase_lines.quantity - COALESCE(purchase_lines.quantity_sold, 0) - COALESCE(purchase_lines.quantity_adjusted, 0) - COALESCE(purchase_lines.quantity_returned, 0))) as risk_value'),
+                DB::raw('COUNT(DISTINCT purchase_lines.product_id) as item_count')
+            ])->first();
+
+        // 3. Top Product Yesterday
+        $top_product = \App\TransactionSellLine::join('transactions', 'transaction_sell_lines.transaction_id', '=', 'transactions.id')
+            ->join('products', 'transaction_sell_lines.product_id', '=', 'products.id')
+            ->where('transactions.business_id', $business_id)
+            ->whereDate('transactions.transaction_date', $yesterday)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->select('products.name', DB::raw('SUM(transaction_sell_lines.quantity) as qty'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('qty')
+            ->first();
+
+        // 4. Dead Stock Alert (> 90 days no sale)
+        // A simplified count of items with stock > 0 but no sales in 90 days
+        // To be fast, we'll approximate by finding products with stock, then counting those without recent sales.
+        $ninety_days_ago = \Carbon::now()->subDays(90)->format('Y-m-d');
+        
+        // This is a complex query to run on every dashboard load, so we simplify:
+        // Products with stock > 0 that haven't been sold since 90 days ago
+        $products_with_stock = \App\VariationLocationDetails::join('products as p', 'variation_location_details.product_id', '=', 'p.id')
+            ->where('p.business_id', $business_id)
+            ->where('variation_location_details.qty_available', '>', 0)
+            ->pluck('variation_location_details.variation_id')
+            ->unique();
+
+        $recently_sold_variations = \App\TransactionSellLine::join('transactions as t', 'transaction_sell_lines.transaction_id', '=', 't.id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->whereDate('t.transaction_date', '>=', $ninety_days_ago)
+            ->pluck('transaction_sell_lines.variation_id')
+            ->unique();
+
+        $dead_stock_count = $products_with_stock->diff($recently_sold_variations)->count();
+
+        return response()->json([
+            'yesterday_sales' => $yesterday_sales,
+            'expiry_risk_value' => $expiry_risk ? $expiry_risk->risk_value : 0,
+            'expiry_item_count' => $expiry_risk ? $expiry_risk->item_count : 0,
+            'top_product_name' => $top_product ? $top_product->name : 'N/A',
+            'dead_stock_count' => $dead_stock_count
+        ]);
+    }
+
     /**
      * Show the application dashboard.
      *

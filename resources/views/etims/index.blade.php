@@ -63,7 +63,7 @@
             eTIMS Invoices
             <span class="pull-right">
                 <button id="sync_all_btn" class="tw-dw-btn tw-dw-btn-sm tw-dw-btn-primary tw-text-white">
-                    <i class="fa fa-refresh"></i> Sync All Pending
+                    <i class="fas fa-sync"></i> Sync All Pending
                 </button>
             </span>
         @endslot
@@ -117,7 +117,7 @@
 
         $('#sync_all_btn').on('click', function() {
             var btn = $(this);
-            btn.prop('disabled', true).html('<i class="fa fa-refresh fa-spin"></i> Syncing...');
+            btn.prop('disabled', true).html('<i class="fas fa-sync fa-spin"></i> Syncing...');
 
             $.ajax({
                 method: 'POST',
@@ -131,18 +131,18 @@
                     } else {
                         toastr.error(result.msg);
                     }
-                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Sync All Pending');
+                    btn.prop('disabled', false).html('<i class="fas fa-sync"></i> Sync All Pending');
                 },
                 error: function() {
                     toastr.error('An error occurred. Please try again.');
-                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Sync All Pending');
+                    btn.prop('disabled', false).html('<i class="fas fa-sync"></i> Sync All Pending');
                 }
             });
         });
 
         $(document).on('click', 'button.sync-invoice', function() {
             var btn = $(this);
-            btn.prop('disabled', true).html('<i class="fa fa-refresh fa-spin"></i> Syncing...');
+            btn.prop('disabled', true).html('<i class="fas fa-sync fa-spin"></i> Syncing...');
             
             $.ajax({
                 method: 'GET',
@@ -155,7 +155,7 @@
                     } else {
                         toastr.error(result.msg);
                     }
-                    btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Sync');
+                    btn.prop('disabled', false).html('<i class="fas fa-sync"></i> Sync');
                 },
             });
         });

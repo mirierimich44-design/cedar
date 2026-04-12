@@ -65,7 +65,7 @@
                     {{ __('lang_v1.expense_tax') }} @show_tooltip(__('lang_v1.expense_tax_tooltip'))
                 @endslot
                 <div class="expense_tax">
-                    <i class="fa fa-refresh fa-spin fa-fw"></i>
+                    <i class="fas fa-sync fa-spin fa-fw"></i>
                 </div>
             @endcomponent
         </div>

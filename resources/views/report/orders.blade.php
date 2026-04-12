@@ -150,7 +150,7 @@
                     },
                     {
                         extend: 'pdf',
-                        text: '<i class="fa fa-file-pdf-o" aria-hidden="true"></i> ' + LANG.export_to_pdf,
+                        text: '<i class="fas fa-file-pdf" aria-hidden="true"></i> ' + LANG.export_to_pdf,
                         className: 'btn-sm',
                         exportOptions: {
                             columns: ':visible',

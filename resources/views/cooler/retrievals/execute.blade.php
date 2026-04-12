@@ -135,7 +135,7 @@
             <div class="tw-flex tw-gap-4 tw-items-start">
                 <div>
                     <a href="{{ route('cooler.retrievals.letter', $retrieval->id) }}" class="btn btn-default" target="_blank">
-                        <i class="fa fa-file-pdf-o"></i> Download Retrieval Letter
+                        <i class="fas fa-file-pdf"></i> Download Retrieval Letter
                     </a>
                     <p class="tw-text-xs tw-text-gray-500 tw-mt-1">Print, get signed, then upload below</p>
                 </div>

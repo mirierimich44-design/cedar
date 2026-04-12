@@ -9,7 +9,7 @@
             <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.manage_products')</small>
         </h1>
         <!-- <ol class="breadcrumb">
-                    <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+                    <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
                     <li class="active">Here</li>
                 </ol> -->
     </section>
@@ -226,7 +226,7 @@
                                 @endcan
                                 @can('product.update')
                                     <button type="button" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-info tw-m-2" id="bulk_etims_sync">
-                                        <i class="fa fa-refresh"></i> Sync Selected to eTIMS
+                                        <i class="fas fa-sync"></i> Sync Selected to eTIMS
                                     </button>
                                 @endcan
                                 @include('product.partials.product_list')

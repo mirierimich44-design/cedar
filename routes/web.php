@@ -398,6 +398,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/get-profit/{by?}', [ReportController::class, 'getProfit']);
     Route::get('/reports/items-report', [ReportController::class, 'itemsReport']);
     Route::get('/reports/get-stock-value', [ReportController::class, 'getStockValue']);
+    Route::get('/reports/dead-stock', [ReportController::class, 'getDeadStockReport']);
+    Route::get('/home/morning-digest', [HomeController::class, 'getMorningDigest'])->name('home.morning_digest');
     Route::get('/reports/low-stock-velocity', [ReportController::class, 'getLowStockVelocityReport']);
     Route::get('/reports/customer-credit', [ReportController::class, 'getCustomerCreditReport']);
     Route::get('/reports/daily-summary', [ReportController::class, 'getDailySummaryReport'])->name('reports.daily_summary');
@@ -665,6 +667,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     // Cloud Sync Routes
     Route::get('/sync', [\App\Http\Controllers\SyncController::class, 'index'])->name('sync.index');
     Route::post('/sync/push', [\App\Http\Controllers\SyncController::class, 'pushToCloud'])->name('sync.push');
+    Route::post('/sync/settings', [\App\Http\Controllers\SyncController::class, 'saveSettings'])->name('sync.settings');
 
     // ── Customer Order Token Management (owner/authenticated) ──────────────
     Route::get('/customer-order-links', [CustomerOrderController::class, 'index'])->name('customer_order.links');

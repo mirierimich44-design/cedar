@@ -120,7 +120,7 @@
         </div>
 
         <div class="row">
-            {{-- Payment Methods --}}
+            {{-- Payment Methods & Peak Hours --}}
             <div class="col-md-4">
                 <div class="box box-success">
                     <div class="box-header with-border">
@@ -142,28 +142,61 @@
                         </table>
                     </div>
                 </div>
-            </div>
 
-            {{-- Top Products --}}
-            <div class="col-md-8">
-                <div class="box box-primary">
+                <div class="box box-info">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><i class="fa fa-star"></i> Top 10 Products Sold Today</h3>
+                        <h3 class="box-title"><i class="fa fa-clock-o"></i> Peak Sales Hours</h3>
                     </div>
                     <div class="box-body no-padding">
-                        <table class="table table-condensed table-striped">
+                        <table class="table table-condensed">
                             <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Product</th>
-                                    <th>SKU</th>
-                                    <th class="text-right">Qty Sold</th>
-                                    <th class="text-right">Revenue</th>
-                                </tr>
+                                <tr><th>Hour</th><th class="text-center">Transactions</th><th class="text-right">Revenue</th></tr>
                             </thead>
-                            <tbody id="top_products_body">
+                            <tbody id="peak_hours_body">
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Top Products (Volume vs Margin) --}}
+            <div class="col-md-8">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab_top_volume" data-toggle="tab"><i class="fa fa-star text-primary"></i> Top by Volume</a></li>
+                        <li><a href="#tab_top_margin" data-toggle="tab"><i class="fa fa-trophy text-success"></i> Top by Margin (Profit)</a></li>
+                    </ul>
+                    <div class="tab-content no-padding">
+                        <div class="tab-pane active" id="tab_top_volume">
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th class="text-right">Qty Sold</th>
+                                        <th class="text-right">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top_products_body">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="tab_top_margin">
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th class="text-right">Qty Sold</th>
+                                        <th class="text-right">Gross Margin</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top_profit_products_body">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -420,7 +453,7 @@ $(document).ready(function() {
         $('#payment_methods_body').html(payHtml);
         $('#payment_total').text(fmt(payTotal));
 
-        // Top products
+        // Top products by volume
         var prodHtml = '';
         if (data.top_products && data.top_products.length > 0) {
             data.top_products.forEach(function(p, i) {
@@ -436,6 +469,43 @@ $(document).ready(function() {
             prodHtml = '<tr><td colspan="5" class="text-muted text-center">No sales today</td></tr>';
         }
         $('#top_products_body').html(prodHtml);
+
+        // Top products by profit
+        var profitProdHtml = '';
+        if (data.top_profit_products && data.top_profit_products.length > 0) {
+            data.top_profit_products.forEach(function(p, i) {
+                profitProdHtml += '<tr>' +
+                    '<td>' + (i + 1) + '</td>' +
+                    '<td>' + p.product_name + '</td>' +
+                    '<td><small>' + (p.sku || '-') + '</small></td>' +
+                    '<td class="text-right">' + fmt(p.qty) + '</td>' +
+                    '<td class="text-right text-success"><strong>' + fmt(p.total_margin) + '</strong></td>' +
+                    '</tr>';
+            });
+        } else {
+            profitProdHtml = '<tr><td colspan="5" class="text-muted text-center">No sales today</td></tr>';
+        }
+        $('#top_profit_products_body').html(profitProdHtml);
+
+        // Peak Hours
+        var peakHoursHtml = '';
+        if (data.peak_hours && data.peak_hours.length > 0) {
+            data.peak_hours.forEach(function(h) {
+                var ampm = h.hour >= 12 ? ' PM' : ' AM';
+                var hr12 = h.hour % 12;
+                hr12 = hr12 ? hr12 : 12; // the hour '0' should be '12'
+                var displayHour = hr12 + ':00' + ampm;
+                
+                peakHoursHtml += '<tr>' +
+                    '<td><strong>' + displayHour + '</strong></td>' +
+                    '<td class="text-center"><span class="badge bg-blue">' + h.count + '</span></td>' +
+                    '<td class="text-right">' + fmt(h.total) + '</td>' +
+                    '</tr>';
+            });
+        } else {
+            peakHoursHtml = '<tr><td colspan="3" class="text-muted text-center">No sales data</td></tr>';
+        }
+        $('#peak_hours_body').html(peakHoursHtml);
 
         // Transactions list
         var txHtml = '';
@@ -482,12 +552,12 @@ $(document).ready(function() {
                 lsHtml += '<tr>' +
                     '<td>' + (r.product_name || '-') + ' <small class="text-muted">' + (r.sku || '') + '</small></td>' +
                     '<td class="text-right">' + fmt(r.total_qty) + '</td>' +
-                    '<td class="text-right text-danger">' + fmt(r.potential_revenue) + '</td>' +
+                    '<td class="text-right text-danger"><strong>' + fmt(r.potential_revenue) + '</strong></td>' +
                     '<td class="text-center"><span class="badge bg-red">' + (r.times_requested || 1) + 'x</span></td>' +
                     '</tr>';
             });
         } else {
-            lsHtml = '<tr><td colspan="4" class="text-muted text-center">No lost sales today</td></tr>';
+            lsHtml = '<tr><td colspan="4" class="text-muted text-center">No lost sales recorded</td></tr>';
         }
         $('#lost_sales_body').html(lsHtml);
 

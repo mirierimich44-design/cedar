@@ -79,7 +79,7 @@
                                     data-order-id="{{ $order->id }}"
                                     data-status="{{ $order->status }}"
                                     title="Update Status">
-                                <i class="fa fa-refresh"></i>
+                                <i class="fas fa-sync"></i>
                             </button>
                         </div>
                     </td>

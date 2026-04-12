@@ -80,7 +80,7 @@
                                         </a>
                                     @else
                                         <a href="{{ route('cooler.documents.view', $latest->id) }}" target="_blank">
-                                            <i class="fa fa-file-pdf-o tw-text-4xl tw-text-red-500"></i>
+                                            <i class="fas fa-file-pdf tw-text-4xl tw-text-red-500"></i>
                                         </a>
                                     @endif
                                     <p class="tw-text-xs tw-font-semibold tw-mt-1">{{ $typeLabels[$type] ?? $type }}</p>

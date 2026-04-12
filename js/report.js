@@ -679,6 +679,7 @@ $(document).ready(function() {
             { data: 'lot_number', name: 'lot_number' },
             { data: 'exp_date', name: 'exp_date' },
             { data: 'mfg_date', name: 'mfg_date' },
+            { data: 'recommendation', name: 'recommendation', searchable: false },
             // { data: 'edit', name: 'edit' },
         ],
         fnDrawCallback: function(oSettings) {

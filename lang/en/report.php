@@ -101,4 +101,5 @@ return [
     'daily_avg' => 'Daily Avg',
     'days_until_stockout' => 'Days Until Stockout',
     'status' => 'Status',
+    'dead_stock' => 'Dead Stock Report',
 ];

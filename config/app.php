@@ -226,4 +226,8 @@ return [
         'Menu' => Nwidart\Menus\Facades\Menu::class,
         'Pesapal' => Knox\Pesapal\Facades\Pesapal::class,
     ])->toArray(),
+
+    'cloud_sync_url' => env('CLOUD_SYNC_URL', ''),
+    'cloud_sync_token' => env('CLOUD_SYNC_TOKEN', ''),
 ];
+

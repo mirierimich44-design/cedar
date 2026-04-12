@@ -351,7 +351,7 @@
                     });
                 }
 
-                $('#save_order_btn').html('<i class="fa fa-refresh"></i> Update Order').removeClass('btn-primary').addClass('btn-warning');
+                $('#save_order_btn').html('<i class="fas fa-sync"></i> Update Order').removeClass('btn-primary').addClass('btn-warning');
                 
                 // Switch to new order tab
                 $('#orders_modal a[href="#new_order_tab"]').tab('show');

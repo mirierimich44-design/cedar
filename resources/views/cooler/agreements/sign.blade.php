@@ -74,7 +74,7 @@
     <div class="tw-flex tw-gap-2 tw-mt-4">
         <a href="{{ route('cooler.agreements.show', $agreement->id) }}" class="btn btn-default">← Back to Agreement</a>
         @if($agreement->isFullySigned())
-        <a href="{{ route('cooler.agreements.pdf', $agreement->id) }}" class="btn btn-success" target="_blank"><i class="fa fa-file-pdf-o"></i> Download PDF</a>
+        <a href="{{ route('cooler.agreements.pdf', $agreement->id) }}" class="btn btn-success" target="_blank"><i class="fas fa-file-pdf"></i> Download PDF</a>
         @endif
     </div>
 </section>

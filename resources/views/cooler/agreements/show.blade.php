@@ -28,7 +28,7 @@
                 </div>
                 <div class="box-footer tw-flex tw-gap-2">
                     <a href="{{ route('cooler.agreements.pdf', $agreement->id) }}" class="btn btn-sm btn-default" target="_blank">
-                        <i class="fa fa-file-pdf-o"></i> Download PDF
+                        <i class="fas fa-file-pdf"></i> Download PDF
                     </a>
                     @can('cooler.agreement.sign')
                     @if(!$agreement->isFullySigned())

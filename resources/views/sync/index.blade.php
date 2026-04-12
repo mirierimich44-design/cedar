@@ -104,12 +104,50 @@
             </div>
         </div>
     </div>
+    <div class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-ring-1 tw-ring-gray-200 tw-overflow-hidden tw-mt-8">
+        <div class="tw-p-8">
+            <h2 class="tw-text-xl tw-font-bold tw-text-gray-900 tw-mb-4">Cloud Setup & Settings</h2>
+            <p class="tw-text-gray-600 tw-mb-6">Configure the connection to your live cloud server here. The Token must match exactly on both systems.</p>
+            
+            @if(session('status'))
+                <div class="tw-p-4 tw-mb-6 tw-rounded-lg {{ session('status')['success'] ? 'tw-bg-green-100 tw-text-green-800' : 'tw-bg-red-100 tw-text-red-800' }}">
+                    {{ session('status')['msg'] }}
+                </div>
+            @endif
+
+            <form action="{{ route('sync.settings') }}" method="POST">
+                @csrf
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6 tw-mb-6">
+                    <div>
+                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Cloud Server URL</label>
+                        <input type="url" name="cloud_sync_url" value="{{ $cloud_url ?? '' }}" placeholder="https://reenson.cedarpharmacare.co.ke" class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-primary-500">
+                        <p class="tw-mt-1 tw-text-xs tw-text-gray-500">The full URL of your live cloud hosting.</p>
+                    </div>
+                    <div>
+                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Access Token</label>
+                        <div class="tw-flex tw-gap-2">
+                            <input type="text" id="cloud_sync_token" name="cloud_sync_token" value="{{ $api_token ?? '' }}" placeholder="Generated security token" class="tw-w-full tw-px-4 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-border-primary-500">
+                            <button type="button" id="generate_token" class="tw-px-4 tw-py-2 tw-bg-gray-100 tw-text-gray-700 tw-border tw-border-gray-300 tw-rounded-lg hover:tw-bg-gray-200 tw-whitespace-nowrap">Generate</button>
+                        </div>
+                        <p class="tw-mt-1 tw-text-xs tw-text-gray-500">Click Generate to create a new secure token.</p>
+                    </div>
+                </div>
+                <button type="submit" class="tw-px-6 tw-py-2 tw-bg-gray-900 tw-text-white tw-font-bold tw-rounded-lg hover:tw-bg-gray-800">Save Settings</button>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('javascript')
 <script type="text/javascript">
     $(document).ready(function() {
+        // Token Generator
+        $('#generate_token').click(function() {
+            var token = [...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+            $('#cloud_sync_token').val(token);
+        });
+
         $('#start_sync').click(function() {
             var btn = $(this);
             var btnText = $('#btn_text');

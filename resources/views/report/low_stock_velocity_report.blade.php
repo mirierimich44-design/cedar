@@ -104,6 +104,7 @@
                                 <th>@lang('report.daily_avg')</th>
                                 <th>@lang('report.days_until_stockout')</th>
                                 <th>@lang('report.status')</th>
+                                <th>Recommendation</th>
                             </tr>
                         </thead>
                     </table>
@@ -153,7 +154,8 @@
                 { data: 'sold_90d', name: 'sold_90d', className: 'text-right' },
                 { data: 'daily_avg', name: 'daily_avg', className: 'text-right' },
                 { data: 'days_until_stockout', name: 'days_until_stockout', className: 'text-right' },
-                { data: 'status', name: 'status', className: 'text-center' }
+                { data: 'status', name: 'status', className: 'text-center' },
+                { data: 'recommendation', name: 'recommendation', orderable: false, searchable: false }
             ],
             order: [[10, 'asc']], // Order by days until stockout
             pageLength: 25,

@@ -6,7 +6,7 @@
     <label for="{{ $field }}">{{ $label }}</label>
     <div class="upload-zone tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-4 tw-text-center tw-cursor-pointer hover:tw-border-blue-400 tw-transition-colors"
          onclick="document.getElementById('{{ $field }}').click()">
-        <i class="fa fa-cloud-upload tw-text-2xl tw-text-gray-400"></i>
+        <i class="fas fa-cloud-upload-alt tw-text-2xl tw-text-gray-400"></i>
         <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Drag &amp; drop or click to upload</p>
         <p class="upload-preview tw-text-xs tw-mt-1 tw-text-gray-400">{{ $hint }}</p>
     </div>

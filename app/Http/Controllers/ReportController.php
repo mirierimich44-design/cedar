@@ -1978,12 +1978,14 @@ class ReportController extends Controller
                 't.ref_no',
                 't.id as transaction_id',
                 'purchase_lines.id as purchase_line_id',
-                'purchase_lines.lot_number'
+                'purchase_lines.lot_number',
+                'purchase_lines.purchase_price_inc_tax'
             )
             ->having('stock_left', '>', 0)
             ->groupBy('purchase_lines.variation_id')
             ->groupBy('purchase_lines.exp_date')
-            ->groupBy('purchase_lines.lot_number');
+            ->groupBy('purchase_lines.lot_number')
+            ->groupBy('purchase_lines.purchase_price_inc_tax');
 
             return Datatables::of($report)
                 ->editColumn('product', function ($row) {
@@ -1993,6 +1995,24 @@ class ReportController extends Controller
                     } else {
                         return $row->product.' ('.$row->sku.')';
                     }
+                })
+                ->addColumn('recommendation', function ($row) {
+                    if (empty($row->exp_date)) {
+                        return '--';
+                    }
+                    $carbon_exp = \Carbon::createFromFormat('Y-m-d', $row->exp_date);
+                    $carbon_now = \Carbon::now();
+                    $days_to_expiry = $carbon_now->diffInDays($carbon_exp, false);
+                    
+                    if ($days_to_expiry < 0) {
+                        return '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Expired. Remove from shelf.</span>';
+                    } elseif ($days_to_expiry <= 30) {
+                        $value = $row->stock_left * $row->purchase_price_inc_tax;
+                        return '<span class="text-warning"><i class="fas fa-bullhorn"></i> Apply a 20% Quick-Sale discount to recover approx. ' . number_format($value * 0.8, 2) . '</span>';
+                    } elseif ($days_to_expiry <= 90) {
+                        return '<span class="text-info"><i class="fas fa-tags"></i> Consider a 10% discount to move stock early.</span>';
+                    }
+                    return '<span class="text-success"><i class="fas fa-check-circle"></i> Stock is safe. No action needed.</span>';
                 })
                 ->editColumn('mfg_date', function ($row) {
                     if (! empty($row->mfg_date)) {
@@ -2036,7 +2056,7 @@ class ReportController extends Controller
 
                     return $html;
                 })
-                ->rawColumns(['exp_date', 'ref_no', 'edit', 'stock_left'])
+                ->rawColumns(['exp_date', 'ref_no', 'edit', 'stock_left', 'recommendation'])
                 ->make(true);
         }
 
@@ -4614,6 +4634,136 @@ class ReportController extends Controller
 
         return view('report.gst_purchase_report')->with(compact('suppliers', 'taxes'));
     }
+    public function getDeadStockReport(Request $request)
+    {
+        if (!auth()->user()->can('stock_report.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+
+        if ($request->ajax()) {
+            $query = VariationLocationDetails::join('variations as v', 'variation_location_details.variation_id', '=', 'v.id')
+                ->join('products as p', 'v.product_id', '=', 'p.id')
+                ->join('business_locations as bl', 'variation_location_details.location_id', '=', 'bl.id')
+                ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
+                ->leftJoin('brands as b', 'p.brand_id', '=', 'b.id')
+                ->where('p.business_id', $business_id)
+                ->where('p.is_inactive', 0)
+                ->where('variation_location_details.qty_available', '>', 0)
+                ->select([
+                    'p.id as product_id',
+                    'p.name as product_name',
+                    'p.sku',
+                    'v.id as variation_id',
+                    'v.name as variation_name',
+                    'v.sub_sku',
+                    'v.sell_price_inc_tax',
+                    'v.default_purchase_price',
+                    'variation_location_details.qty_available as current_stock',
+                    'variation_location_details.location_id',
+                    'bl.name as location_name',
+                    'c.name as category_name',
+                    'b.name as brand_name',
+                ]);
+
+            $location_id = $request->get('location_id');
+            if (!empty($location_id)) {
+                $query->where('variation_location_details.location_id', $location_id);
+            }
+
+            $category_id = $request->get('category_id');
+            if (!empty($category_id)) {
+                $query->where('p.category_id', $category_id);
+            }
+
+            $brand_id = $request->get('brand_id');
+            if (!empty($brand_id)) {
+                $query->where('p.brand_id', $brand_id);
+            }
+
+            $permitted_locations = auth()->user()->permitted_locations();
+            if ($permitted_locations != 'all') {
+                $query->whereIn('variation_location_details.location_id', $permitted_locations);
+            }
+
+            $products = $query->get();
+            $risk_level_filter = $request->get('risk_level', 'all');
+
+            $result = [];
+            foreach ($products as $product) {
+                $last_sale = \App\TransactionSellLine::join('transactions as t', 'transaction_sell_lines.transaction_id', '=', 't.id')
+                    ->where('t.business_id', $business_id)
+                    ->where('t.type', 'sell')
+                    ->where('t.status', 'final')
+                    ->where('t.location_id', $product->location_id)
+                    ->where('transaction_sell_lines.variation_id', $product->variation_id)
+                    ->orderBy('t.transaction_date', 'desc')
+                    ->value('t.transaction_date');
+
+                $days_since_sale = $last_sale ? \Carbon::parse($last_sale)->diffInDays(\Carbon::now()) : 999;
+                
+                // Determine Risk Level
+                $risk_level = 'ok';
+                if ($days_since_sale > 90) {
+                    $risk_level = 'dead';
+                } elseif ($days_since_sale > 30) {
+                    $risk_level = 'slow';
+                }
+
+                // Apply filter
+                if ($risk_level_filter != 'all' && $risk_level != $risk_level_filter) {
+                    continue;
+                }
+                
+                // Skip OK items unless filtering for them
+                if ($risk_level_filter == 'all' && $risk_level == 'ok') {
+                    continue;
+                }
+
+                $stock_value = $product->current_stock * $product->default_purchase_price;
+
+                $result[] = [
+                    'product_name' => $product->product_name,
+                    'variation_name' => $product->variation_name,
+                    'sku' => $product->sku ?: $product->sub_sku,
+                    'location_name' => $product->location_name,
+                    'category_name' => $product->category_name ?? '-',
+                    'brand_name' => $product->brand_name ?? '-',
+                    'current_stock' => $product->current_stock,
+                    'stock_value' => $stock_value,
+                    'last_sale_date' => $last_sale ? \Carbon::parse($last_sale)->format('Y-m-d') : 'Never',
+                    'days_since_sale' => $last_sale ? $days_since_sale : 'N/A',
+                    'risk_level' => $risk_level
+                ];
+            }
+
+            return Datatables::of(collect($result))
+                ->editColumn('current_stock', function ($row) {
+                    return '<span class="display_currency" data-currency_symbol="false">' . number_format($row['current_stock'], 2) . '</span>';
+                })
+                ->editColumn('stock_value', function ($row) {
+                    return '<span class="display_currency" data-currency_symbol="true">' . number_format($row['stock_value'], 2) . '</span>';
+                })
+                ->addColumn('recommendation', function ($row) {
+                    if ($row['risk_level'] == 'dead') {
+                        return '<span class="text-danger"><i class="fas fa-skull"></i> Dead Stock. Consider immediate liquidation or writing off.</span>';
+                    } else if ($row['risk_level'] == 'slow') {
+                        return '<span class="text-warning"><i class="fas fa-exclamation-circle"></i> Slow Mover. Bundle with popular items to clear.</span>';
+                    }
+                    return '';
+                })
+                ->rawColumns(['current_stock', 'stock_value', 'recommendation'])
+                ->make(true);
+        }
+
+        $business_locations = BusinessLocation::forDropdown($business_id);
+        $categories = Category::forDropdown($business_id, 'product');
+        $brands = Brands::forDropdown($business_id);
+
+        return view('report.dead_stock')->with(compact('business_locations', 'categories', 'brands'));
+    }
+
     /**
      * Shows low stock velocity report with sales analysis
      *
@@ -4774,7 +4924,16 @@ class ReportController extends Controller
                              ($row['days_until_stockout'] <= 30 ? 'text-warning' : 'text-success');
                     return '<span class="' . $class . '">' . $row['days_until_stockout'] . ' days</span>';
                 })
-                ->rawColumns(['current_stock', 'status', 'days_until_stockout'])
+                ->addColumn('recommendation', function ($row) {
+                    if ($row['daily_avg'] > 0 && $row['days_until_stockout'] !== null && $row['days_until_stockout'] <= 7) {
+                        $restock_qty = ceil($row['daily_avg'] * 30);
+                        return '<span class="text-danger"><i class="fas fa-fire"></i> High Demand. Restock ' . $restock_qty . ' units to cover next 30 days.</span>';
+                    } elseif ($row['alert_quantity'] !== '-' && $row['current_stock'] <= $row['alert_quantity']) {
+                        return '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Below alert level. Restock recommended.</span>';
+                    }
+                    return '<span class="text-success"><i class="fas fa-check-circle"></i> Stock level OK.</span>';
+                })
+                ->rawColumns(['current_stock', 'status', 'days_until_stockout', 'recommendation'])
                 ->with('summary', $summary)
                 ->make(true);
         }
@@ -5160,6 +5319,41 @@ class ReportController extends Controller
             ->limit(10)
             ->get();
 
+        // --- Top 10 profit products ---
+        $topProfitProducts = \App\TransactionSellLine::join('transactions', 'transaction_sell_lines.transaction_id', '=', 'transactions.id')
+            ->join('products', 'transaction_sell_lines.product_id', '=', 'products.id')
+            ->join('variations', 'transaction_sell_lines.variation_id', '=', 'variations.id')
+            ->where('transactions.business_id', $business_id)
+            ->whereBetween('transactions.transaction_date', [$start, $end])
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->when($location_id, fn($q) => $q->where('transactions.location_id', $location_id))
+            ->select(
+                'products.name as product_name',
+                'products.sku',
+                DB::raw('SUM(transaction_sell_lines.quantity) as qty'),
+                DB::raw('SUM((transaction_sell_lines.unit_price_before_discount - variations.default_purchase_price) * transaction_sell_lines.quantity) as total_margin')
+            )
+            ->groupBy('transaction_sell_lines.product_id', 'products.name', 'products.sku')
+            ->orderByDesc('total_margin')
+            ->limit(10)
+            ->get();
+
+        // --- Peak Hours ---
+        $peakHours = \App\Transaction::where('business_id', $business_id)
+            ->whereBetween('transaction_date', [$start, $end])
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->when($location_id, fn($q) => $q->where('location_id', $location_id))
+            ->select(
+                DB::raw('HOUR(transaction_date) as hour'),
+                DB::raw('COUNT(id) as count'),
+                DB::raw('SUM(final_total) as total')
+            )
+            ->groupBy(DB::raw('HOUR(transaction_date)'))
+            ->orderBy('hour')
+            ->get();
+
         // --- Transactions list ---
         $transactions = \App\Transaction::where('transactions.business_id', $business_id)
             ->whereBetween('transactions.transaction_date', [$start, $end])
@@ -5250,6 +5444,8 @@ class ReportController extends Controller
             'expenses'        => $expenses,
             'stock_adj'       => $stockAdj,
             'top_products'    => $topProducts,
+            'top_profit_products' => $topProfitProducts,
+            'peak_hours'      => $peakHours,
             'transactions'    => $transactions,
             'lost_sales'      => $lostSalesSummary,
             'lost_sales_top'  => $lostSalesTop,

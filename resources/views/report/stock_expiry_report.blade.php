@@ -82,6 +82,7 @@
                             <th>@lang('lang_v1.lot_number')</th>
                             <th>@lang('product.exp_date')</th>
                             <th>@lang('product.mfg_date')</th>
+                            <th>Recommendation</th>
                            <!--  <th>@lang('messages.edit')</th> -->
                         </tr>
                     </thead>
@@ -89,7 +90,7 @@
                         <tr class="bg-gray font-17 text-center footer-total">
                             <td colspan="3"><strong>@lang('sale.total'):</strong></td>
                             <td id="footer_total_stock_left"></td>
-                            <td colspan="3"></td>
+                            <td colspan="4"></td>
                         </tr>
                     </tfoot>
                 </table>

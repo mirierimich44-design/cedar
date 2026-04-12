@@ -32,7 +32,7 @@
                                     <td>@format_currency($transaction->final_total)</td>
                                     <td>
                                         <button type="button" class="btn btn-xs btn-primary repeat-order" data-transaction_id="{{ $transaction->id }}">
-                                            <i class="fa fa-refresh"></i> Repeat
+                                            <i class="fas fa-sync"></i> Repeat
                                         </button>
                                     </td>
                                 </tr>
