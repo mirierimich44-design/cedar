@@ -470,26 +470,34 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                     <div class="tw-flex-1" style="min-height: 250px;">
                                         <canvas id="overall_reports_chart"></canvas>
                                     </div>
-                                    <div class="tw-flex tw-flex-col tw-justify-center tw-gap-3 lg:tw-w-1/3">
+                                    <div class="tw-flex tw-flex-col tw-justify-center tw-gap-3 lg:tw-w-2/5">
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm" style="background: #4CAF50;"></span>
-                                            <span class="tw-text-sm tw-text-gray-600">Purchase:</span>
-                                            <span class="tw-font-semibold tw-text-sm" id="pie_purchase">{{ session('currency')['symbol'] }}0</span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #4CAF50;"></span>
+                                            <div>
+                                                <div class="tw-text-xs tw-text-gray-500">Purchase</div>
+                                                <div class="tw-font-semibold tw-text-sm" id="pie_purchase">{{ session('currency')['symbol'] }}0</div>
+                                            </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm" style="background: #2196F3;"></span>
-                                            <span class="tw-text-sm tw-text-gray-600">Sales:</span>
-                                            <span class="tw-font-semibold tw-text-sm" id="pie_sales">{{ session('currency')['symbol'] }}0</span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #2196F3;"></span>
+                                            <div>
+                                                <div class="tw-text-xs tw-text-gray-500">Sales</div>
+                                                <div class="tw-font-semibold tw-text-sm" id="pie_sales">{{ session('currency')['symbol'] }}0</div>
+                                            </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm" style="background: #FF9800;"></span>
-                                            <span class="tw-text-sm tw-text-gray-600">Income:</span>
-                                            <span class="tw-font-semibold tw-text-sm" id="pie_income">{{ session('currency')['symbol'] }}0</span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #FF9800;"></span>
+                                            <div>
+                                                <div class="tw-text-xs tw-text-gray-500">Income</div>
+                                                <div class="tw-font-semibold tw-text-sm" id="pie_income">{{ session('currency')['symbol'] }}0</div>
+                                            </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm" style="background: #f44336;"></span>
-                                            <span class="tw-text-sm tw-text-gray-600">Expense:</span>
-                                            <span class="tw-font-semibold tw-text-sm" id="pie_expense">{{ session('currency')['symbol'] }}0</span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #f44336;"></span>
+                                            <div>
+                                                <div class="tw-text-xs tw-text-gray-500">Expense</div>
+                                                <div class="tw-font-semibold tw-text-sm" id="pie_expense">{{ session('currency')['symbol'] }}0</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
