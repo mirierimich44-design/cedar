@@ -313,6 +313,30 @@ table.table-bordered th {
     border-bottom: 1px solid #f1f5f9 !important;
 }
 
+/* ─── Column Visibility button: match CSV/Excel/Print size ── */
+button.buttons-colvis,
+a.buttons-colvis,
+.dt-buttons .buttons-colvis,
+.dt-buttons button.buttons-colvis {
+    background: #14b8a6 !important;
+    color: #fff !important;
+    padding: 0.6rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+button.buttons-colvis:hover,
+.dt-buttons .buttons-colvis:hover {
+    background: #0d9488 !important;
+}
+
 /* ─── Compact action button for datatables ───────────────── */
 button.product-action-btn,
 .product-action-btn.btn,
