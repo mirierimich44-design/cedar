@@ -150,7 +150,7 @@
             event.preventDefault();
             var $chiled = $(this).next(".chiled");
             var svgElement = $(this).find(".svg");
-            $(".chiled").not($chiled).slideUp();
+            $(".chiled").not($chiled).not($chiled.parents(".chiled")).slideUp();
             $chiled.slideToggle(function() {
                 $(".svg").each(function() {
                     var $currentSvgElement = $(this);
