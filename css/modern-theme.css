@@ -842,12 +842,23 @@ td .dropdown-menu {
 .buttons-colvis {
     background: #14b8a6 !important;
     color: var(--white) !important;
+    padding: 0.6rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius) !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.375rem !important;
+    line-height: 1.5 !important;
 }
 
 .dt-buttons .buttons-colvis:hover,
 .buttons-colvis:hover {
     background: #0d9488 !important;
     transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3) !important;
 }
 
 /* Pagination styling */
