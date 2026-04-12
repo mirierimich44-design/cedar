@@ -467,9 +467,6 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             </div>
                             <div class="tw-mt-5">
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-6">
-                                    <div class="tw-flex-1" style="min-height: 250px;">
-                                        <canvas id="overall_reports_chart"></canvas>
-                                    </div>
                                     <div class="tw-flex tw-flex-col tw-justify-center tw-gap-3 lg:tw-w-2/5">
                                         <div class="tw-flex tw-items-center tw-gap-2">
                                             <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #4CAF50;"></span>
@@ -499,6 +496,9 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                                 <div class="tw-font-semibold tw-text-sm" id="pie_expense">{{ session('currency')['symbol'] }}0</div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="tw-flex-1" style="min-height: 250px;">
+                                        <canvas id="overall_reports_chart"></canvas>
                                     </div>
                                 </div>
                             </div>
