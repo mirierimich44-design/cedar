@@ -383,8 +383,8 @@ class SellPosController extends Controller
 
                 $user_id = $request->session()->get('user.id');
 
-                $discount = ['discount_type' => $input['discount_type'],
-                    'discount_amount' => $input['discount_amount'],
+                $discount = ['discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $input['discount_amount'] ?? 0,
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
@@ -1222,8 +1222,8 @@ class SellPosController extends Controller
                 $user_id = $request->session()->get('user.id');
                 $commsn_agnt_setting = $request->session()->get('business.sales_cmsn_agnt');
 
-                $discount = ['discount_type' => $input['discount_type'],
-                    'discount_amount' => $input['discount_amount'],
+                $discount = ['discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $input['discount_amount'] ?? 0,
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
