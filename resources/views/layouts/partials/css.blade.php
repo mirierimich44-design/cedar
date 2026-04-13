@@ -320,16 +320,15 @@ a.buttons-colvis,
 .dt-buttons button.buttons-colvis {
     background: #14b8a6 !important;
     color: #fff !important;
-    padding: 0.6rem 1.25rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
+    padding: 6px 12px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
     border: none !important;
-    border-radius: 6px !important;
-    line-height: 1.5 !important;
+    border-radius: 4px !important;
+    line-height: 1.42857143 !important;
     height: auto !important;
     min-height: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
+    display: inline-block !important;
     box-sizing: border-box !important;
 }
 button.buttons-colvis:hover,
