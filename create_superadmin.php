@@ -71,11 +71,12 @@ echo "Role '{$role_name}' has " . $all_permissions->count() . " permissions.\n";
 $user->syncRoles([$role_name]);
 echo "Role '{$role_name}' assigned to user '{$username}'.\n";
 
-// 6. Grant superadmin permission directly
-if (!$user->hasDirectPermission('superadmin')) {
-    $superadmin_perm = Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
-    $user->givePermissionTo($superadmin_perm);
-}
+// 6. Grant superadmin permission directly (create if missing, flush cache first)
+app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+$superadmin_perm = Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+$user->givePermissionTo($superadmin_perm);
+echo "Permission 'superadmin' granted.\n";
 
 echo "\n✓ Done!\n";
 echo "  URL:      your-site-url/login\n";
