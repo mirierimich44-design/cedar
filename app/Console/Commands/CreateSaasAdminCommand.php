@@ -36,6 +36,10 @@ class CreateSaasAdminCommand extends Command
 
         $user = User::where('username', $username)->orWhere('email', $email)->first();
 
+        // A SaaS super admin shouldn't normally need a business, but the base LoginController 
+        // checks `$user->business->is_active`. We'll assign it to Business ID 1 (the master business)
+        $business_id = 1;
+
         if (!$user) {
             $user = User::create([
                 'surname' => 'SaaS',
@@ -45,12 +49,17 @@ class CreateSaasAdminCommand extends Command
                 'email' => $email,
                 'password' => Hash::make($password),
                 'language' => 'en',
-                'allow_login' => 1
+                'allow_login' => 1,
+                'status' => 'active',
+                'business_id' => $business_id
             ]);
             $this->info("SaaS Super Admin created successfully.");
         } else {
             $user->password = Hash::make($password);
             $user->email = $email;
+            $user->status = 'active';
+            $user->allow_login = 1;
+            $user->business_id = $business_id;
             $user->save();
             $this->info("SaaS Super Admin updated successfully.");
         }
