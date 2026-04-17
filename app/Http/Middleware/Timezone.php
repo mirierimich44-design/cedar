@@ -20,7 +20,7 @@ class Timezone
 
         if (session()->has('business.time_zone')) {
             $timezone = $request->session()->get('business.time_zone');
-        } else {
+        } elseif (! empty(Auth::user()->business_id) && Auth::user()->business) {
             $timezone = Auth::user()->business->time_zone;
         }
 

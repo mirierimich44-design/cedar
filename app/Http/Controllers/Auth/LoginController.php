@@ -89,7 +89,11 @@ class LoginController extends Controller
     {
         $this->businessUtil->activityLog($user, 'login', null, [], false, $user->business_id);
 
-        if (! $user->business->is_active) {
+        if ($user->username === 'saas_admin' || $user->email === 'admin@apexpos.co.ke' || $user->hasRole('Superadmin')) {
+            return redirect('/saas-admin');
+        }
+
+        if (! $user->business || ! $user->business->is_active) {
             \Auth::logout();
 
             return redirect('/login')

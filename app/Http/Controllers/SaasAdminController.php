@@ -14,14 +14,8 @@ class SaasAdminController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'SetSessionData']);
-        // Only superadmin can access
-        $this->middleware(function ($request, $next) {
-            if (!auth()->user()->hasRole('Superadmin')) {
-                abort(403);
-            }
-            return $next($request);
-        });
+        // Uses the existing 'superadmin' middleware which checks constants.administrator_usernames
+        $this->middleware(['auth', 'SetSessionData', 'superadmin']);
     }
 
     // ─── Dashboard ───────────────────────────────────────────────
