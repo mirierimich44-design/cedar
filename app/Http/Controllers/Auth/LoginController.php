@@ -127,6 +127,11 @@ class LoginController extends Controller
     protected function redirectTo()
     {
         $user = \Auth::user();
+
+        if ($user->username === 'saas_admin' || $user->email === 'admin@apexpos.co.ke') {
+            return '/saas-admin';
+        }
+
         if (! $user->can('dashboard.data') && $user->can('sell.create')) {
             return action([\App\Http\Controllers\SellPosController::class, 'create']);
         }
