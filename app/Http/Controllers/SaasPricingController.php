@@ -78,8 +78,9 @@ class SaasPricingController extends Controller
             'hosting'       => 'required|in:cloud,self_hosted',
         ]);
 
-        // Find or create business by email
-        $business = Business::where('email', $request->email)->first();
+        // Find business by checking the owner user's email
+        $user = \App\User::where('email', $request->email)->first();
+        $business = $user ? \App\Business::find($user->business_id) : null;
 
         if (!$business) {
             // Store enquiry for admin to action
