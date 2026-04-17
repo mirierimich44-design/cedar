@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class CreateSaasAdminCommand extends Command
 {
@@ -13,7 +14,7 @@ class CreateSaasAdminCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'saas:create-admin';
+    protected $signature = 'saas:create-admin {email=admin@apexpos.co.ke} {password=admin123}';
 
     /**
      * The console command description.
@@ -29,10 +30,11 @@ class CreateSaasAdminCommand extends Command
      */
     public function handle()
     {
+        $email = $this->argument('email');
+        $password = $this->argument('password');
         $username = 'saas_admin';
-        $password = 'admin123'; 
 
-        $user = User::where('username', $username)->first();
+        $user = User::where('username', $username)->orWhere('email', $email)->first();
 
         if (!$user) {
             $user = User::create([
@@ -40,21 +42,24 @@ class CreateSaasAdminCommand extends Command
                 'first_name' => 'Super',
                 'last_name' => 'Admin',
                 'username' => $username,
-                'email' => 'admin@apexpos.co.ke',
+                'email' => $email,
                 'password' => Hash::make($password),
                 'language' => 'en',
                 'allow_login' => 1
             ]);
-            $this->info("User created successfully.");
+            $this->info("SaaS Super Admin created successfully.");
         } else {
             $user->password = Hash::make($password);
+            $user->email = $email;
             $user->save();
-            $this->info("User password updated.");
+            $this->info("SaaS Super Admin updated successfully.");
         }
 
         $this->info("Username: $username");
+        $this->info("Email: $email");
         $this->info("Password: $password");
 
         return 0;
     }
 }
+
