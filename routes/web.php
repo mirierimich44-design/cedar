@@ -62,6 +62,8 @@ use App\Http\Controllers\VariationTemplateController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\MpesaController;
 use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\SaasPricingController;
+use App\Http\Controllers\SaasAdminController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\JobTemplateController;
@@ -80,6 +82,46 @@ use Illuminate\Support\Facades\Route;
 */
 
 include_once 'install_r.php';
+
+// ─── SaaS Public Routes ───────────────────────────────────────────────────
+Route::middleware(['setData'])->group(function () {
+    Route::get('/pricing',           [SaasPricingController::class, 'index'])->name('saas.pricing');
+    Route::post('/pricing/calculate',[SaasPricingController::class, 'calculate'])->name('saas.calculate');
+    Route::get('/pricing/checkout',  [SaasPricingController::class, 'checkout'])->name('saas.checkout');
+    Route::post('/pricing/order',    [SaasPricingController::class, 'submitOrder'])->name('saas.order.submit');
+});
+
+// ─── SaaS Customer Portal ─────────────────────────────────────────────────
+Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
+    Route::get('/my-subscription', [SaasPricingController::class, 'portal'])->name('saas.portal');
+});
+
+// ─── SaaS Superadmin Routes ───────────────────────────────────────────────
+Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
+    Route::get('/',                   [SaasAdminController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/features',           [SaasAdminController::class, 'featuresIndex'])->name('features');
+    Route::get('/features/create',    [SaasAdminController::class, 'featuresCreate'])->name('features.create');
+    Route::post('/features',          [SaasAdminController::class, 'featuresStore'])->name('features.store');
+    Route::get('/features/{feature}/edit', [SaasAdminController::class, 'featuresEdit'])->name('features.edit');
+    Route::put('/features/{feature}', [SaasAdminController::class, 'featuresUpdate'])->name('features.update');
+    Route::delete('/features/{feature}', [SaasAdminController::class, 'featuresDestroy'])->name('features.destroy');
+
+    Route::get('/bundles',            [SaasAdminController::class, 'bundlesIndex'])->name('bundles');
+    Route::get('/bundles/create',     [SaasAdminController::class, 'bundlesCreate'])->name('bundles.create');
+    Route::post('/bundles',           [SaasAdminController::class, 'bundlesStore'])->name('bundles.store');
+    Route::get('/bundles/{bundle}/edit', [SaasAdminController::class, 'bundlesEdit'])->name('bundles.edit');
+    Route::put('/bundles/{bundle}',   [SaasAdminController::class, 'bundlesUpdate'])->name('bundles.update');
+    Route::delete('/bundles/{bundle}',[SaasAdminController::class, 'bundlesDestroy'])->name('bundles.destroy');
+
+    Route::get('/subscriptions',      [SaasAdminController::class, 'subscriptionsIndex'])->name('subscriptions');
+    Route::get('/subscriptions/{subscription}', [SaasAdminController::class, 'subscriptionsShow'])->name('subscriptions.show');
+    Route::post('/subscriptions/{subscription}/status', [SaasAdminController::class, 'subscriptionsUpdateStatus'])->name('subscriptions.status');
+    Route::post('/subscriptions/{subscription}/extend', [SaasAdminController::class, 'subscriptionsExtend'])->name('subscriptions.extend');
+
+    Route::get('/invoices',           [SaasAdminController::class, 'invoicesIndex'])->name('invoices');
+    Route::post('/invoices/{invoice}/paid', [SaasAdminController::class, 'invoicesMarkPaid'])->name('invoices.mark_paid');
+});
 
 Route::middleware(['setData'])->group(function () {
     Route::get('/', function () {
