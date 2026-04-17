@@ -106,6 +106,11 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     Route::get('/features/{feature}/edit', [SaasAdminController::class, 'featuresEdit'])->name('features.edit');
     Route::put('/features/{feature}', [SaasAdminController::class, 'featuresUpdate'])->name('features.update');
     Route::delete('/features/{feature}', [SaasAdminController::class, 'featuresDestroy'])->name('features.destroy');
+    Route::post('/features/{feature}/toggle', [SaasAdminController::class, 'featuresToggle'])->name('features.toggle');
+    Route::post('/features/{feature}/price',  [SaasAdminController::class, 'featuresUpdatePrice'])->name('features.price');
+
+    Route::get('/enquiries',          [SaasAdminController::class, 'enquiriesIndex'])->name('enquiries');
+    Route::post('/enquiries/{id}/status', [SaasAdminController::class, 'enquiriesUpdateStatus'])->name('enquiries.status');
 
     Route::get('/bundles',            [SaasAdminController::class, 'bundlesIndex'])->name('bundles');
     Route::get('/bundles/create',     [SaasAdminController::class, 'bundlesCreate'])->name('bundles.create');

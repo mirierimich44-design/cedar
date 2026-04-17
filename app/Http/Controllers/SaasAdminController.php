@@ -9,12 +9,12 @@ use App\SaasInvoice;
 use App\SaasHostedAccount;
 use App\Business;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaasAdminController extends Controller
 {
     public function __construct()
     {
-        // Uses the existing 'superadmin' middleware which checks constants.administrator_usernames
         $this->middleware(['auth', 'SetSessionData', 'superadmin']);
     }
 
@@ -30,6 +30,7 @@ class SaasAdminController extends Controller
             'revenue'     => SaasInvoice::where('status', 'paid')->sum('amount'),
             'features'    => SaasFeature::count(),
             'bundles'     => SaasBundle::count(),
+            'enquiries'   => DB::table('saas_enquiries')->where('status', 'pending')->count(),
         ];
         $recent = SaasSubscription::with('business')->latest()->limit(10)->get();
         return view('saas.admin.dashboard', compact('stats', 'recent'));
@@ -86,6 +87,26 @@ class SaasAdminController extends Controller
     {
         $feature->delete();
         return back()->with('success', 'Feature deleted.');
+    }
+
+    // ─── Feature AJAX: Toggle Active ─────────────────────────────
+    public function featuresToggle(Request $request, SaasFeature $feature)
+    {
+        $feature->update(['is_active' => (bool) $request->is_active]);
+        return response()->json(['success' => true, 'is_active' => $feature->is_active]);
+    }
+
+    // ─── Feature AJAX: Quick Price Update ────────────────────────
+    public function featuresUpdatePrice(Request $request, SaasFeature $feature)
+    {
+        $request->validate([
+            'cycle' => 'required|in:monthly,quarterly,yearly,once',
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        $col = 'price_' . $request->cycle;
+        $feature->update([$col => $request->price]);
+        return response()->json(['success' => true, 'price' => $feature->$col]);
     }
 
     // ─── Bundles ─────────────────────────────────────────────────
@@ -171,8 +192,8 @@ class SaasAdminController extends Controller
     public function invoicesMarkPaid(Request $request, SaasInvoice $invoice)
     {
         $invoice->update([
-            'status'  => 'paid',
-            'paid_at' => now(),
+            'status'            => 'paid',
+            'paid_at'           => now(),
             'payment_method'    => $request->payment_method ?? 'manual',
             'payment_reference' => $request->reference,
         ]);
@@ -183,5 +204,27 @@ class SaasAdminController extends Controller
         }
 
         return back()->with('success', 'Invoice marked as paid and subscription activated.');
+    }
+
+    // ─── Enquiries ───────────────────────────────────────────────
+    public function enquiriesIndex(Request $request)
+    {
+        $query = DB::table('saas_enquiries')
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->orderByDesc('created_at');
+
+        $enquiries = $query->paginate(20);
+        return view('saas.admin.enquiries.index', compact('enquiries'));
+    }
+
+    public function enquiriesUpdateStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:pending,contacted,converted,cancelled']);
+        DB::table('saas_enquiries')->where('id', $id)->update([
+            'status'     => $request->status,
+            'notes'      => $request->notes,
+            'updated_at' => now(),
+        ]);
+        return back()->with('success', 'Enquiry updated.');
     }
 }
