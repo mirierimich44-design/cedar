@@ -66,6 +66,62 @@
                             @endif
                         @endif
                     </div>
+                    {{-- ===== QUICK ACTIONS BAR ===== --}}
+                    <div class="tw-mt-5 tw-mb-2">
+                        <p class="tw-text-xs tw-font-semibold tw-text-white/60 tw-uppercase tw-tracking-wider tw-mb-2">Quick Actions</p>
+                        <div class="tw-flex tw-flex-wrap tw-gap-2">
+                            @can('direct_sell.access')
+                            <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-cash-register" style="font-size:0.75rem;"></i> New Sale
+                            </a>
+                            @endcan
+                            @can('purchase.create')
+                            <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-truck" style="font-size:0.75rem;"></i> New Purchase
+                            </a>
+                            @endcan
+                            @can('customer.create')
+                            <a href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type'=>'customer']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-user-plus" style="font-size:0.75rem;"></i> Add Customer
+                            </a>
+                            @endcan
+                            @can('product.create')
+                            <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-box" style="font-size:0.75rem;"></i> Add Product
+                            </a>
+                            @endcan
+                            @can('expense.access')
+                            <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-receipt" style="font-size:0.75rem;"></i> Add Expense
+                            </a>
+                            @endcan
+                            @can('profit_loss_report.view')
+                            <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getProfitLoss']) }}"
+                               style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.875rem;border-radius:999px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background .15s;backdrop-filter:blur(4px);"
+                               onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+                               onmouseout="this.style.background='rgba(255,255,255,0.18)'">
+                                <i class="fas fa-chart-bar" style="font-size:0.75rem;"></i> P&amp;L Report
+                            </a>
+                            @endcan
+                        </div>
+                    </div>
+                    {{-- ===== END QUICK ACTIONS ===== --}}
+
                     @if (auth()->user()->can('dashboard.data'))
                         <div class="tw-bg-white/10 tw-border tw-border-white/20 tw-rounded-xl tw-p-3 tw-mt-4 tw-flex tw-items-center tw-justify-between tw-text-white tw-backdrop-blur-sm">
                             <div class="tw-flex tw-items-center tw-gap-4">
@@ -914,6 +970,69 @@
                         {!! $widget !!}
                     @endforeach
                 @endif --}}
+
+                {{-- ===== RECENT TRANSACTIONS WIDGET ===== --}}
+                @can('sell.view')
+                <div class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
+                    <div class="tw-p-4 sm:tw-p-5">
+                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                            <div class="tw-flex tw-items-center tw-gap-2.5">
+                                <div class="tw-border-2 tw-border-indigo-200 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10 tw-bg-indigo-50">
+                                    <i class="fas fa-clock tw-text-indigo-500" style="font-size:1rem;"></i>
+                                </div>
+                                <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">Recent Transactions</h3>
+                            </div>
+                            <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
+                               class="tw-text-xs tw-font-semibold tw-text-indigo-600 hover:tw-text-indigo-800 tw-no-underline"
+                               style="text-decoration:none;">
+                                View All &rarr;
+                            </a>
+                        </div>
+
+                        {{-- Summary strip --}}
+                        <div id="recent_tx_summary"
+                             style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1rem;">
+                            <div style="background:#f0fdf4;border-radius:0.75rem;padding:0.75rem 1rem;text-align:center;">
+                                <p style="font-size:0.75rem;color:#6b7280;margin:0 0 0.2rem;">Today's Sales</p>
+                                <p id="rt_today_sales" style="font-size:1.1rem;font-weight:700;color:#16a34a;margin:0;">
+                                    <span class="tw-animate-pulse">—</span>
+                                </p>
+                            </div>
+                            <div style="background:#eff6ff;border-radius:0.75rem;padding:0.75rem 1rem;text-align:center;">
+                                <p style="font-size:0.75rem;color:#6b7280;margin:0 0 0.2rem;">Transactions</p>
+                                <p id="rt_today_count" style="font-size:1.1rem;font-weight:700;color:#2563eb;margin:0;">
+                                    <span class="tw-animate-pulse">—</span>
+                                </p>
+                            </div>
+                            <div style="background:#fdf4ff;border-radius:0.75rem;padding:0.75rem 1rem;text-align:center;">
+                                <p style="font-size:0.75rem;color:#6b7280;margin:0 0 0.2rem;">Avg. Order Value</p>
+                                <p id="rt_avg_order" style="font-size:1.1rem;font-weight:700;color:#9333ea;margin:0;">
+                                    <span class="tw-animate-pulse">—</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Table --}}
+                        <div class="tw-overflow-x-auto">
+                            <table class="table table-bordered table-striped" id="recent_transactions_table" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th>@lang('messages.date')</th>
+                                        <th>@lang('sale.invoice_no')</th>
+                                        <th>@lang('contact.customer')</th>
+                                        <th>@lang('sale.location')</th>
+                                        <th>@lang('sale.payment_status')</th>
+                                        <th>@lang('sale.total_amount')</th>
+                                        <th>@lang('messages.action')</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @endcan
+                {{-- ===== END RECENT TRANSACTIONS ===== --}}
+
             </div>
         </div>
     @endif
@@ -996,6 +1115,53 @@
         $(document).ready(function() {
             // Load overall reports chart
             loadOverallReports();
+
+            // ===== RECENT TRANSACTIONS TABLE =====
+            @can('sell.view')
+            var recent_transactions_table = $('#recent_transactions_table').DataTable({
+                processing: true,
+                serverSide: true,
+                fixedHeader: false,
+                aaSorting: [[0, 'desc']],
+                pageLength: 10,
+                ajax: {
+                    url: '{{ action([\App\Http\Controllers\SellController::class, "index"]) }}',
+                    data: function(d) {
+                        d.per_page = 10;
+                        d.from_dashboard = true;
+                    }
+                },
+                columns: [
+                    { data: 'transaction_date', name: 'transaction_date' },
+                    { data: 'invoice_no',       name: 'invoice_no' },
+                    { data: 'name',             name: 'c.name' },
+                    { data: 'location_name',    name: 'bl.name' },
+                    { data: 'payment_status',   name: 'payment_status', orderable: false },
+                    { data: 'final_total',      name: 'final_total' },
+                    { data: 'action',           name: 'action', orderable: false, searchable: false },
+                ],
+                fnDrawCallback: function(oSettings) {
+                    __currency_convert_recursively($('#recent_transactions_table'));
+
+                    // Populate summary strip from totals already fetched
+                    if (oSettings.json) {
+                        var sym = '{{ session("currency")["symbol"] }}';
+                        var count = oSettings.json.recordsFiltered || 0;
+                        var total = 0;
+                        var rows = oSettings.json.data || [];
+                        rows.forEach(function(r) {
+                            var raw = $(r.final_total).data('orig-value');
+                            if (raw) total += parseFloat(raw);
+                        });
+                        var avg = rows.length > 0 ? (total / rows.length) : 0;
+                        $('#rt_today_count').text(count);
+                        $('#rt_today_sales').text(sym + __number_f(total));
+                        $('#rt_avg_order').text(sym + __number_f(avg));
+                    }
+                }
+            });
+            @endcan
+            // ===== END RECENT TRANSACTIONS ====
 
             $('#overall_reports_year').change(function() {
                 loadOverallReports();

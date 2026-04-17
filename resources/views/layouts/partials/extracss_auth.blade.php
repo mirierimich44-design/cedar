@@ -3,39 +3,12 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
-        /* ================================
-           BACKGROUND OPTIONS
-           ================================ */
-         /* Note: Only uncomment one of the options below. */
-        /* OPTION 1: Background Color/Gradient */
-        /* Uncomment below for color background */
-        
-        html {
+        /* Background is handled by the split-panel layout in auth2.blade.php */
+        html, body {
             height: 100%;
-            background: linear-gradient(to right, #6366f1, #3b82f6);
-        }
-       
-        
-        /* OPTION 2: Background Image */
-        /* Uncomment below for image background */
-        /* html {
-            height: 100%;
-            background-image: url('{{ asset('img/bg-image.jpg') }}');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-        } */
-        
-        /* Common Body Styles (Always Keep This) */
-        body {
-            min-height: 100vh;
-            background: transparent;
             margin: 0;
             padding: 0;
-        }
-
-        h1 {
-            color: #fff;
+            background: #ffffff;
         }
     </style>
 
@@ -102,11 +75,6 @@
         .patt-circ.n-e {
             -webkit-transform: rotate(315deg);
             transform: rotate(315deg);
-        }
-    </style>
-    <style>
-        h1 {
-            color: #fff;
         }
     </style>
     <style>
