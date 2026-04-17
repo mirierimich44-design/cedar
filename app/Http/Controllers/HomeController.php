@@ -196,6 +196,10 @@ class HomeController extends Controller
             return redirect()->action([\Modules\Crm\Http\Controllers\DashboardController::class, 'index']);
         }
 
+        if (empty($user->business_id)) {
+            return redirect('/saas-admin');
+        }
+
         $business_id = request()->session()->get('user.business_id');
 
         $is_admin = $this->businessUtil->is_admin(auth()->user());
