@@ -10,9 +10,33 @@
         /* OPTION 1: Background Color/Gradient */
         /* Uncomment below for color background */
         
-        html {
+        html, body {
             height: 100%;
-            background: linear-gradient(to right, #6366f1, #3b82f6);
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #0f766e 100%);
+        }
+        /* ── Auth page input fix: ensure text is always visible ── */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select,
+        .form-control {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+            border: 1.5px solid #d1d5db !important;
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: #9ca3af !important;
+        }
+        /* Tailwind transparent inputs on login page */
+        input.tw-bg-transparent {
+            background-color: #f9fafb !important;
+            color: #111827 !important;
         }
        
         

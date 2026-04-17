@@ -261,7 +261,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
 
             <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.07);">
                 <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between;">
-                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#1f2937; display:flex; align-items:center; gap:8px;">
+                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#ffffff; display:flex; align-items:center; gap:8px;">
                         <span style="width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="fa fa-coffee" style="color:#fff; font-size:13px;"></i>
                         </span>
@@ -277,10 +277,30 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             <i class="fa fa-spinner fa-spin fa-2x" style="color:#6366f1;"></i>
                             <p style="font-size:13px; color:#6b7280; margin-top:8px;">Brewing your morning digest...</p>
                         </div>
-                        <div id="morning_digest_data" style="display:none; grid-template-columns:repeat(4,1fr); gap:16px;">
+                        <div id="morning_digest_data" style="display:none; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px;">
+                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
+                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Today Sales</p>
+                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_today_sales">0</span></h4>
+                            </div>
                             <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
                                 <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Yesterday Sales</p>
                                 <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_yesterday_sales">0</span></h4>
+                            </div>
+                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
+                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Total Customers</p>
+                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span id="md_total_customers">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">today</span></h4>
+                            </div>
+                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
+                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Cash in Register</p>
+                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_cash_in_register">0</span></h4>
+                            </div>
+                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
+                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Unpaid Invoices</p>
+                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span id="md_unpaid_invoices">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">due</span></h4>
+                            </div>
+                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
+                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Low Stock Alerts</p>
+                                <h4 style="font-size:20px; font-weight:700; color:#ef4444; margin:6px 0 0; font-family:monospace;"><span id="md_low_stock">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">items</span></h4>
                             </div>
                             <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
                                 <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Expiry Risk (&lt;30d)</p>
@@ -290,10 +310,6 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
                                 <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Top Product</p>
                                 <h4 style="font-size:16px; font-weight:700; color:#111827; margin:6px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="md_top_product">N/A</h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Dead Stock (&gt;90d)</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span id="md_dead_stock">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">items</span></h4>
                             </div>
                         </div>
                     </div>
@@ -1503,7 +1519,12 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                         $('#morning_digest_loader').hide();
                         $('#morning_digest_data').css('display', 'grid');
                         
+                        $('#md_today_sales').text(parseFloat(data.today_sales).toFixed(2));
                         $('#md_yesterday_sales').text(parseFloat(data.yesterday_sales).toFixed(2));
+                        $('#md_total_customers').text(data.total_customers_today || 0);
+                        $('#md_cash_in_register').text(parseFloat(data.current_cash_in_register).toFixed(2));
+                        $('#md_unpaid_invoices').text(data.unpaid_invoices_count || 0);
+                        $('#md_low_stock').text(data.low_stock_alerts_count || 0);
                         $('#md_expiry_value').text(parseFloat(data.expiry_risk_value).toFixed(2));
                         $('#md_expiry_count').text('(' + data.expiry_item_count + ' items)');
                         $('#md_top_product').text(data.top_product_name || 'N/A');

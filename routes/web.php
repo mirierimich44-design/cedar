@@ -139,6 +139,34 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/test-email', [BusinessController::class, 'testEmailConfiguration']);
     Route::post('/test-sms', [BusinessController::class, 'testSmsConfiguration']);
     Route::post('/test-whatsapp', [BusinessController::class, 'testWhatsAppConfiguration']);
+
+    // SMS Module
+    Route::get('/sms/send', [\App\Http\Controllers\SmsController::class, 'sendForm'])->name('sms.send');
+    Route::post('/sms/send', [\App\Http\Controllers\SmsController::class, 'send']);
+    Route::get('/sms/history', [\App\Http\Controllers\SmsController::class, 'history'])->name('sms.history');
+    Route::get('/sms/automated', [\App\Http\Controllers\SmsController::class, 'automated'])->name('sms.automated');
+
+    // DDA (Dangerous Drugs Act) Module
+    Route::get('/dda', [\App\Http\Controllers\DdaController::class, 'dashboard'])->name('dda.dashboard');
+    Route::get('/dda/drugs', [\App\Http\Controllers\DdaController::class, 'drugs'])->name('dda.drugs');
+    Route::post('/dda/drugs', [\App\Http\Controllers\DdaController::class, 'storeDrug'])->name('dda.drugs.store');
+    Route::put('/dda/drugs/{id}', [\App\Http\Controllers\DdaController::class, 'updateDrug'])->name('dda.drugs.update');
+    Route::get('/dda/products', [\App\Http\Controllers\DdaController::class, 'products'])->name('dda.products');
+    Route::get('/dda/prescriptions', [\App\Http\Controllers\DdaController::class, 'prescriptions'])->name('dda.prescriptions');
+    Route::get('/dda/prescriptions/{id}/view', [\App\Http\Controllers\DdaController::class, 'viewPrescription'])->name('dda.prescriptions.view');
+    Route::get('/dda/prescriptions/create', [\App\Http\Controllers\DdaController::class, 'createPrescription'])->name('dda.prescriptions.create');
+    Route::post('/dda/prescriptions', [\App\Http\Controllers\DdaController::class, 'storePrescription'])->name('dda.prescriptions.store');
+    Route::get('/dda/dispense', [\App\Http\Controllers\DdaController::class, 'dispenseRegister'])->name('dda.dispense');
+    Route::post('/dda/dispense', [\App\Http\Controllers\DdaController::class, 'storeDispense'])->name('dda.dispense.store');
+    Route::get('/dda/stock', [\App\Http\Controllers\DdaController::class, 'stockBalance'])->name('dda.stock');
+    Route::post('/dda/stock', [\App\Http\Controllers\DdaController::class, 'storeStockLog'])->name('dda.stock.store');
+    Route::post('/dda/prescription/pos-upload', [\App\Http\Controllers\DdaController::class, 'posUploadPrescription'])->name('dda.prescription.pos_upload');
+    Route::get('/dda/sales', [\App\Http\Controllers\DdaController::class, 'sales'])->name('dda.sales');
+    Route::get('/dda/destruction', [\App\Http\Controllers\DdaController::class, 'destruction'])->name('dda.destruction');
+    Route::post('/dda/destruction', [\App\Http\Controllers\DdaController::class, 'storeDestruction'])->name('dda.destruction.store');
+    Route::post('/dda/destruction/{id}/status', [\App\Http\Controllers\DdaController::class, 'updateDisposalStatus'])->name('dda.destruction.status');
+    Route::get('/dda/destruction/{id}/certificate', [\App\Http\Controllers\DdaController::class, 'viewCertificate'])->name('dda.destruction.certificate');
+    Route::get('/dda/expired', [\App\Http\Controllers\DdaController::class, 'expiredDrugs'])->name('dda.expired');
     Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
     Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
     Route::get('/user/profile', [UserController::class, 'getProfile'])->name('user.getProfile');

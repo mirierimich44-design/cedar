@@ -56,14 +56,21 @@ body.backend-material {
 }
 
 .box-header {
-    background: transparent !important;
-    border-bottom: 1.5px solid var(--pos-border) !important;
+    background: linear-gradient(135deg, var(--theme-dark, #1e293b) 0%, var(--theme-main, #4f46e5) 100%) !important;
+    border-bottom: none !important;
     padding: 16px 20px !important;
+}
+
+.box-header *,
+.box-header .box-title,
+.box-header .box-tools a,
+.box-header .box-tools button {
+    color: #ffffff !important;
 }
 
 .box-title {
     font-weight: 700 !important;
-    color: var(--pos-text) !important;
+    color: #ffffff !important;
     font-size: 16px !important;
 }
 

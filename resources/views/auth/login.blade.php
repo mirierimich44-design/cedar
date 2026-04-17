@@ -110,6 +110,19 @@
                 class="tw-p-5 md:tw-p-6 tw-mb-4 tw-rounded-2xl tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-ring-1 tw-ring-gray-200">
                 <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
                     <div class="tw-flex tw-items-center tw-flex-col">
+                        {{-- Pharmacy cross badge --}}
+                        <div style="
+                            width: 52px; height: 52px;
+                            background: linear-gradient(135deg, #065f46, #0f766e);
+                            border-radius: 14px;
+                            display: flex; align-items: center; justify-content: center;
+                            margin-bottom: 12px;
+                            box-shadow: 0 4px 12px rgba(6, 95, 70, 0.35);
+                        ">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="30" height="30">
+                                <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-6 14h-2v-4H7v-2h4V7h2v4h4v2h-4v4z"/>
+                            </svg>
+                        </div>
                         <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold tw-text-[#1e1e1e]">
                             @lang('lang_v1.welcome_back')
                         </h1>
@@ -147,7 +160,7 @@
                                         class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black">@lang('lang_v1.password')</span>
                                     @if (config('app.env') != 'demo')
                                         <a href="{{ route('password.request') }}"
-                                            class="tw-text-xs md:tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-[#467BF5]"
+                                            class="tw-text-xs md:tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-emerald-600 tw-to-teal-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-emerald-700"
                                             tabindex="-1">@lang('lang_v1.forgot_your_password')</a>
                                     @endif
                                 </div>
@@ -194,7 +207,7 @@
                         </div>
                         @endif
                         <button type="submit"
-                            class="tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-h-12 tw-rounded-xl tw-text-sm md:tw-text-base tw-text-white tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-indigo-600 hover:tw-to-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-ring-offset-2 active:tw-from-indigo-700 active:tw-to-blue-700">
+                            class="tw-bg-gradient-to-r tw-from-emerald-600 tw-to-teal-500 tw-h-12 tw-rounded-xl tw-text-sm md:tw-text-base tw-text-white tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-emerald-700 hover:tw-to-teal-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-emerald-500 focus:tw-ring-offset-2 active:tw-from-emerald-800 active:tw-to-teal-700">
                             @lang('lang_v1.login')
                         </button>
                     </form>
@@ -208,7 +221,7 @@
                                 <a href="{{ route('business.getRegister') }}@if (!empty(request()->lang)) {{ '?lang=' . request()->lang }} @endif"
                                     class="tw-text-sm tw-font-medium tw-text-gray-500 hover:tw-text-gray-500 tw-mt-2">{{ __('business.not_yet_registered') }}
                                     <span
-                                        class="tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-[#467BF5] hover:tw-underline">{{ __('business.register_now') }}</span></a>
+                                        class="tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-emerald-600 tw-to-teal-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-emerald-700 hover:tw-underline">{{ __('business.register_now') }}</span></a>
                             @endif
                         @endif
                     </div>

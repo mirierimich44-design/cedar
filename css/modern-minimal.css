@@ -34,7 +34,14 @@ h5,
 h6 {
     font-family: 'Outfit', sans-serif !important;
     font-weight: 600 !important;
-    color: var(--text-modern) !important;
+    color: var(--text-modern);
+}
+
+.box-header h1, .box-header h2, .box-header h3,
+.box-header h4, .box-header h5, .box-header h6,
+.card-header h1, .card-header h2, .card-header h3,
+.card-header h4, .card-header h5, .card-header h6 {
+    color: #ffffff !important;
 }
 
 /* Premium Card / Widget Style */
@@ -52,10 +59,16 @@ h6 {
 
 .box-header,
 .card-header {
-    background: rgba(255, 255, 255, 0.8) !important;
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid #f1f5f9 !important;
+    background: linear-gradient(135deg, var(--theme-dark, #1e293b) 0%, var(--theme-main, #4f46e5) 100%) !important;
+    border-bottom: none !important;
     padding: 1rem 1.25rem !important;
+}
+
+.box-header *,
+.card-header *,
+.box-title,
+.card-title {
+    color: #ffffff !important;
 }
 
 /* Modern Button System */

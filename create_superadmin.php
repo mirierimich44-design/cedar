@@ -60,7 +60,7 @@ if ($user) {
 
 // 4. Ensure Admin role exists for this business and assign it
 $role_name = 'Admin#' . $business_id;
-$role = Role::firstOrCreate(['name' => $role_name, 'guard_name' => 'web']);
+$role = Role::firstOrCreate(['name' => $role_name, 'guard_name' => 'web'], ['business_id' => $business_id]);
 
 // Give role all permissions
 $all_permissions = Permission::all();

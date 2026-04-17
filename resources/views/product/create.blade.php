@@ -193,6 +193,25 @@
             </div>
         </div>
 
+        {{-- DDA (Controlled Substance) Flag --}}
+        <div class="col-sm-4">
+            <div class="form-group">
+                <br>
+                <label>
+                    {!! Form::checkbox('is_dda', 1, !empty($duplicate_product) ? $duplicate_product->is_dda : false, ['class' => 'input-icheck', 'id' => 'is_dda_checkbox']); !!}
+                    <strong>Controlled Substance (DDA)</strong>
+                </label>
+                <p class="help-block"><i>Tick if this product is a Dangerous Drug (DDA)</i></p>
+            </div>
+        </div>
+
+        <div class="col-sm-4 hide" id="dda_drug_div">
+            <div class="form-group">
+                <label>DDA Drug</label>
+                {!! Form::select('dda_drug_id', ['' => '-- Select Drug --'] + \App\DdaDrug::where('is_active', true)->pluck('name', 'id')->toArray(), !empty($duplicate_product) ? $duplicate_product->dda_drug_id : null, ['class' => 'form-control select2', 'id' => 'dda_drug_id']); !!}
+            </div>
+        </div>
+
         <div class="clearfix"></div>
 
         <!-- Rack, Row & position number -->
@@ -377,6 +396,21 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+        // DDA checkbox toggle
+        $('#is_dda_checkbox').on('ifChecked ifUnchecked', function(e) {
+            if (e.type === 'ifChecked') {
+                $('#dda_drug_div').removeClass('hide');
+            } else {
+                $('#dda_drug_div').addClass('hide');
+                $('#dda_drug_id').val('').trigger('change');
+            }
+        });
+        // On page load, show if already checked
+        if ($('#is_dda_checkbox').is(':checked')) {
+            $('#dda_drug_div').removeClass('hide');
+        }
+
         __page_leave_confirmation('#product_add_form');
         onScan.attachTo(document, {
             suffixKeyCodes: [13], // enter-key expected at the end of a scan

@@ -313,27 +313,127 @@ table.table-bordered th {
     border-bottom: 1px solid #f1f5f9 !important;
 }
 
-/* ─── Column Visibility button: match CSV/Excel/Print size ── */
-button.buttons-colvis,
-a.buttons-colvis,
-.dt-buttons .buttons-colvis,
-.dt-buttons button.buttons-colvis {
-    background: #14b8a6 !important;
-    color: #fff !important;
-    padding: 6px 12px !important;
-    font-size: 14px !important;
-    font-weight: 400 !important;
-    border: none !important;
-    border-radius: 4px !important;
-    line-height: 1.42857143 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    display: inline-block !important;
-    box-sizing: border-box !important;
+/* ─── Card Headers & Titles (Pure White) ───────────────── */
+.box-header, .card-header, .box-title, .card-title, 
+[class*="box-header"], [class*="card-header"],
+.box-header *, .card-header *, .box-title, .card-title {
+    color: #ffffff !important;
 }
-button.buttons-colvis:hover,
-.dt-buttons .buttons-colvis:hover {
+
+/* ─── Export Buttons & Column Visibility (Perfect Alignment) ─── */
+.dt-buttons {
+    margin-bottom: 0.75rem !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    align-items: center !important;
+}
+/* Completely neutralize AdminLTE btn-group for export area */
+.dt-buttons .btn-group, .dt-buttons .btn-group-vertical {
+    display: contents !important; /* Makes the wrapper "disappear" so children align directly */
+}
+/* Uniform sizing for ALL button variants */
+.dt-buttons .dt-button,
+.dt-buttons .btn,
+.buttons-colvis,
+.buttons-csv,
+.buttons-excel,
+.buttons-pdf,
+.buttons-print,
+button.buttons-colvis,
+a.buttons-colvis {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    line-height: 1 !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    border: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    text-transform: none !important;
+}
+.dt-buttons .buttons-colvis,
+button.buttons-colvis,
+a.buttons-colvis {
+    background: #14b8a6 !important; /* Teal */
+    color: #ffffff !important;
+}
+.dt-buttons .buttons-colvis:hover,
+button.buttons-colvis:hover {
     background: #0d9488 !important;
+}
+
+/* ─── Pagination: Clean Prev / [1] / Next ────────────────── */
+.dataTables_wrapper .dataTables_paginate {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 15px 0 !important;
+    box-shadow: none !important;
+}
+.dataTables_wrapper .dataTables_paginate .pagination {
+    border: none !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    gap: 4px !important;
+    box-shadow: none !important;
+}
+/* Force hide all standard page numbers */
+.dataTables_wrapper .dataTables_paginate .pagination > li {
+    display: none !important;
+}
+/* Force show only the functional buttons */
+.dataTables_wrapper .dataTables_paginate .pagination > li.previous,
+.dataTables_wrapper .dataTables_paginate .pagination > li.next,
+.dataTables_wrapper .dataTables_paginate .pagination > li.active {
+    display: flex !important;
+}
+/* Pagination Button Styling (Matches CSV button height) */
+.dataTables_wrapper .dataTables_paginate .pagination > li > a,
+.dataTables_wrapper .dataTables_paginate .pagination > li > span {
+    height: 30px !important;
+    min-width: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    border: none !important;
+    background: var(--theme-main, #4f46e5) !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+}
+/* Active (Current Page) - plain label, no box */
+.dataTables_wrapper .dataTables_paginate .pagination > li.active > a,
+.dataTables_wrapper .dataTables_paginate .pagination > li.active > span {
+    background: transparent !important;
+    color: var(--theme-main, #4f46e5) !important;
+    border: none !important;
+    cursor: default !important;
+    pointer-events: none !important;
+}
+/* Hover effect for clickable pages */
+.dataTables_wrapper .dataTables_paginate .pagination > li:not(.active):not(.disabled) > a:hover {
+    background: var(--theme-hover, #4338ca) !important;
+}
+/* Disabled buttons - fully inert */
+.dataTables_wrapper .dataTables_paginate .pagination > li.disabled > a,
+.dataTables_wrapper .dataTables_paginate .pagination > li.disabled > span {
+    opacity: 0.35 !important;
+    background: #94a3b8 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
 }
 
 /* ─── Compact action button for datatables ───────────────── */
@@ -383,6 +483,56 @@ button.product-action-btn,
     cursor: pointer !important;
     appearance: auto !important;
     -webkit-appearance: auto !important;
+}
+
+/* ─── Global input/select/textarea text visibility fix ───── */
+/* Prevents dark-background themed CSS from swallowing typed text */
+input.form-control,
+select.form-control,
+textarea.form-control,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+.select2-selection,
+.select2-container .select2-selection--single,
+.select2-container .select2-selection--multiple,
+.select2-search__field,
+.input-group .form-control {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #d1d5db !important;
+}
+input.form-control::placeholder,
+input[type="text"]::placeholder,
+textarea.form-control::placeholder {
+    color: #9ca3af !important;
+}
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: var(--theme-main, #059669) !important;
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15) !important;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    color: #111827 !important;
+}
+.select2-dropdown {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+.select2-results__option {
+    color: #111827 !important;
+}
+.select2-results__option--highlighted {
+    background-color: var(--theme-subtle, #ecfdf5) !important;
+    color: var(--theme-dark, #065f46) !important;
 }
 
 /* ─── Mobile: prevent dark overlay on sidebar toggle tap ─── */

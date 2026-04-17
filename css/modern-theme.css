@@ -322,24 +322,79 @@ label {
     color: var(--white) !important;
 }
 
-/* Previous/Next */
-.paginate_button.previous,
-.paginate_button.next {
+/* Simplify DataTables pagination to just Prev/Next with 1 box (Bootstrap Integration) */
+.dataTables_paginate .pagination {
+    display: flex !important;
+    gap: 0.25rem !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    margin-top: 1rem !important;
+    padding-left: 0 !important;
+    list-style: none !important;
+}
+
+/* Hide all numbered buttons by default */
+.dataTables_paginate .pagination > li.paginate_button {
+    display: none !important;
+}
+
+/* Only show Previous, Next, and Active (Current) */
+.dataTables_paginate .pagination > li.paginate_button.previous,
+.dataTables_paginate .pagination > li.paginate_button.next,
+.dataTables_paginate .pagination > li.paginate_button.active {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Style the buttons (anchor tags inside list items) */
+.dataTables_paginate .pagination > li.paginate_button.previous > a,
+.dataTables_paginate .pagination > li.paginate_button.next > a {
     background: var(--white) !important;
     color: var(--gray-700) !important;
     border: 1px solid var(--gray-200) !important;
+    font-weight: 500 !important;
+    height: 32px !important;
+    border-radius: var(--radius) !important;
+    font-size: 0.875rem !important;
+    padding: 0 0.875rem !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-.paginate_button.previous:hover,
-.paginate_button.next:hover {
-    background: var(--primary) !important;
-    color: var(--white) !important;
-    border-color: var(--primary) !important;
+.dataTables_paginate .pagination > li.paginate_button.previous:not(.disabled) > a:hover,
+.dataTables_paginate .pagination > li.paginate_button.next:not(.disabled) > a:hover {
+    background: var(--gray-50) !important;
+    color: var(--gray-900) !important;
+    border-color: var(--gray-300) !important;
 }
 
-.paginate_button.disabled {
-    opacity: 0.5 !important;
+.dataTables_paginate .pagination > li.paginate_button.disabled > a {
+    opacity: 0.35 !important;
     cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* Current page number - plain label, no box */
+.dataTables_paginate .pagination > li.paginate_button.active > a {
+    background: transparent !important;
+    color: var(--primary) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    border-radius: var(--radius) !important;
+    font-size: 0.875rem !important;
+    padding: 0 0.5rem !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: default !important;
+    pointer-events: none !important;
 }
 
 /* ========================================
@@ -347,21 +402,61 @@ label {
    ======================================== */
 .dt-buttons {
     margin-bottom: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
 }
 
-.dt-button,
-.buttons-excel,
-.buttons-csv,
-.buttons-pdf,
-.buttons-print,
-.buttons-copy {
-    padding: 0.375rem 0.75rem !important;
+/* Ensure the btn-group wrapper itself doesn't add extra borders/backgrounds (fixing the 'two boxes' issue) */
+.dt-buttons .btn-group {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.dt-buttons .dt-button,
+.dt-buttons .btn:not(.btn-group),
+.dt-buttons .buttons-colvis {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important;
+    padding: 0 0.75rem !important;
     font-size: 0.8125rem !important;
     font-weight: 500 !important;
     border-radius: var(--radius) !important;
-    margin-right: 0.25rem !important;
+    margin-right: 0 !important;
     border: none !important;
-    cursor: pointer;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+}
+
+/* Column Visibility Button */
+.dt-buttons .buttons-colvis,
+.buttons-colvis {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important;
+    padding: 0 0.75rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    border-radius: var(--radius) !important;
+    border: none !important;
+    background: #14b8a6 !important; /* Teal */
+    color: var(--white) !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    margin: 0 !important; /* Fix btn-group spacing */
+}
+
+.dt-buttons .buttons-colvis:hover,
+.buttons-colvis:hover {
+    background: #0d9488 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3) !important;
 }
 
 .buttons-excel {
@@ -839,41 +934,31 @@ td .dropdown-menu {
 
 /* Column visibility button - Teal */
 .dt-buttons .buttons-colvis,
-.dt-buttons button.buttons-colvis,
-.dt-buttons a.buttons-colvis,
-.buttons-colvis,
-button.buttons-colvis,
-a.buttons-colvis {
+.buttons-colvis {
     background: #14b8a6 !important;
     color: var(--white) !important;
-    padding: 0.6rem 1.25rem !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius) !important;
     border: none !important;
     cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.375rem !important;
-    line-height: 1.5 !important;
-    height: auto !important;
-    min-height: 0 !important;
     box-sizing: border-box !important;
 }
 
 .dt-buttons .buttons-colvis:hover,
-.dt-buttons button.buttons-colvis:hover,
-button.buttons-colvis:hover,
 .buttons-colvis:hover {
     background: #0d9488 !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3) !important;
 }
 
-/* Ensure the btn-group wrapper around colvis doesn't shrink it */
+/* Ensure the btn-group wrapper around colvis behaves like a single button */
 .dt-buttons .btn-group {
     display: inline-flex !important;
-    vertical-align: middle !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.dt-buttons .btn-group > .buttons-colvis {
+    margin: 0 !important;
 }
 
 /* Pagination styling */

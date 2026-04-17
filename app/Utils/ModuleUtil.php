@@ -46,6 +46,12 @@ class ModuleUtil extends Util
         if (!is_dir(base_path('Modules/Superadmin'))) {
             return false;
         }
+        // If the module is disabled, treat it as not installed so subscription
+        // checks and SubscriptionController route calls are skipped entirely.
+        $module = \Module::find('Superadmin');
+        if (empty($module) || !$module->isEnabled()) {
+            return false;
+        }
         return $this->isModuleInstalled('Superadmin');
     }
 
@@ -82,10 +88,14 @@ class ModuleUtil extends Util
                 if (class_exists($class)) {
                     $class_object = new $class();
                     if (method_exists($class_object, $function_name)) {
-                        if (! empty($arguments)) {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
-                        } else {
-                            $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                        try {
+                            if (! empty($arguments)) {
+                                $data[$module['name']] = call_user_func([$class_object, $function_name], $arguments);
+                            } else {
+                                $data[$module['name']] = call_user_func([$class_object, $function_name]);
+                            }
+                        } catch (\Exception $e) {
+                            \Log::warning('Module DataController failed: ' . $module['name'] . ' - ' . $e->getMessage());
                         }
                     }
                 }
@@ -504,6 +514,34 @@ class ModuleUtil extends Util
             'subscription' => ['name' => __('lang_v1.enable_subscription')],
             'types_of_service' => ['name' => __('lang_v1.types_of_service'),
                 'tooltip' => __('lang_v1.types_of_service_help_long'),
+            ],
+            'jobs' => [
+                'name' => 'Jobs',
+                'tooltip' => 'Enable the Jobs / Job Cards module for service-based workflows.',
+            ],
+            'cooler' => [
+                'name' => 'Cooler Management',
+                'tooltip' => 'Enable the Cooler Asset tracking and compliance module.',
+            ],
+            'etims' => [
+                'name' => 'eTIMS',
+                'tooltip' => 'Enable Kenya Revenue Authority eTIMS integration for VAT invoicing.',
+            ],
+            'dda' => [
+                'name' => 'DDA Register',
+                'tooltip' => 'Enable the Dangerous Drugs Act controlled-substances register (Kenya PPB compliance).',
+            ],
+            'stocktake' => [
+                'name' => 'Stocktake',
+                'tooltip' => 'Enable periodic inventory counting / stocktake module.',
+            ],
+            'sms' => [
+                'name' => 'SMS',
+                'tooltip' => 'Enable SMS messaging to customers.',
+            ],
+            'whatsapp' => [
+                'name' => 'WhatsApp',
+                'tooltip' => 'Enable WhatsApp messaging to customers.',
             ],
         ];
     }

@@ -10,7 +10,7 @@
 	@endif
 @endforeach
 
-<tr class="product_row" style="vertical-align: middle !important;" data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
+<tr class="product_row" style="vertical-align: middle !important;" data-row_index="{{$row_count}}" data-is_dda="{{!empty($product->is_dda) ? 1 : 0}}" data-dda_drug_id="{{$product->dda_drug_id ?? ''}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
 	@if(!empty($is_serial_no))
 		<td class="serial_no"></td>
 	@endif

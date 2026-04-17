@@ -453,6 +453,33 @@ class Util
         }
     }
 
+    private function sendSmsViaAdvanta($data)
+    {
+        $sms_settings = $data['sms_settings'];
+
+        if (empty($sms_settings['advanta_api_key']) || empty($sms_settings['advanta_partner_id'])) {
+            return false;
+        }
+
+        $client = new Client();
+        $numbers = explode(',', trim($data['mobile_number']));
+
+        foreach ($numbers as $number) {
+            $number = trim($number);
+            $payload = [
+                'apikey'    => $sms_settings['advanta_api_key'],
+                'partnerID' => $sms_settings['advanta_partner_id'],
+                'message'   => $data['sms_body'],
+                'shortcode' => $sms_settings['advanta_shortcode'] ?? 'ADVANTA',
+                'mobile'    => $number,
+            ];
+
+            $client->post('https://quicksms.advantasms.com/api/services/sendsms/', [
+                'form_params' => $payload,
+            ]);
+        }
+    }
+
     /**
      * Sends SMS notification.
      *
@@ -471,6 +498,10 @@ class Util
 
         if ($sms_service == 'twilio') {
             return $this->sendSmsViaTwilio($data);
+        }
+
+        if ($sms_service == 'advanta') {
+            return $this->sendSmsViaAdvanta($data);
         }
 
         $request_data = [

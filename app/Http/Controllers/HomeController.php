@@ -67,6 +67,7 @@ class HomeController extends Controller
 
         $business_id = $request->session()->get('user.business_id');
         $yesterday = \Carbon::now()->subDay()->format('Y-m-d');
+        $today = \Carbon::now()->format('Y-m-d');
         
         // 1. Yesterday Sales
         $yesterday_sales = \App\Transaction::where('business_id', $business_id)
@@ -74,6 +75,44 @@ class HomeController extends Controller
             ->where('type', 'sell')
             ->where('status', 'final')
             ->sum('final_total');
+
+        // 1.b Today Sales
+        $today_sales = \App\Transaction::where('business_id', $business_id)
+            ->whereDate('transaction_date', $today)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->sum('final_total');
+
+        // 1.c Unpaid Invoices Count (Due)
+        $unpaid_invoices_count = \App\Transaction::where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereIn('payment_status', ['due', 'partial'])
+            ->count();
+
+        // 1.d Total Customers Today (Total invoices/foot traffic today)
+        $total_customers_today = \App\Transaction::where('business_id', $business_id)
+            ->whereDate('transaction_date', $today)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->count();
+
+        // 1.e Current Cash in Register (for the logged in user)
+        $user_id = auth()->user()->id;
+        $register_details = \App\CashRegister::leftjoin('cash_register_transactions as ct', 'ct.cash_register_id', '=', 'cash_registers.id')
+            ->where('cash_registers.user_id', $user_id)
+            ->where('cash_registers.status', 'open')
+            ->select(
+                DB::raw("SUM(IF(transaction_type='initial', amount, 0)) as cash_in_hand"),
+                DB::raw("SUM(IF(pay_method='cash', IF(transaction_type='sell', amount, 0), 0)) as total_cash"),
+                DB::raw("SUM(IF(pay_method='cash', IF(transaction_type='expense', amount, 0), 0)) as total_cash_expense"),
+                DB::raw("SUM(IF(transaction_type='refund', IF(pay_method='cash', amount, 0), 0)) as total_cash_refund")
+            )->first();
+            
+        $current_cash_in_register = 0;
+        if ($register_details) {
+            $current_cash_in_register = $register_details->cash_in_hand + $register_details->total_cash - $register_details->total_cash_expense - $register_details->total_cash_refund;
+        }
 
         // 2. Expiry Risk (Next 30 days)
         $expiry_date_limit = \Carbon::now()->addDays(30)->format('Y-m-d');
@@ -103,12 +142,8 @@ class HomeController extends Controller
             ->first();
 
         // 4. Dead Stock Alert (> 90 days no sale)
-        // A simplified count of items with stock > 0 but no sales in 90 days
-        // To be fast, we'll approximate by finding products with stock, then counting those without recent sales.
         $ninety_days_ago = \Carbon::now()->subDays(90)->format('Y-m-d');
         
-        // This is a complex query to run on every dashboard load, so we simplify:
-        // Products with stock > 0 that haven't been sold since 90 days ago
         $products_with_stock = \App\VariationLocationDetails::join('products as p', 'variation_location_details.product_id', '=', 'p.id')
             ->where('p.business_id', $business_id)
             ->where('variation_location_details.qty_available', '>', 0)
@@ -125,12 +160,27 @@ class HomeController extends Controller
 
         $dead_stock_count = $products_with_stock->diff($recently_sold_variations)->count();
 
+        // 5. Low Stock Alerts
+        $low_stock_alerts_count = \App\VariationLocationDetails::join('product_variations', 'variation_location_details.product_variation_id', '=', 'product_variations.id')
+            ->join('products as p', 'variation_location_details.product_id', '=', 'p.id')
+            ->where('p.business_id', $business_id)
+            ->where('p.enable_stock', 1)
+            ->where('p.is_inactive', 0)
+            ->whereNotNull('p.alert_quantity')
+            ->whereRaw('variation_location_details.qty_available <= p.alert_quantity')
+            ->count();
+
         return response()->json([
             'yesterday_sales' => $yesterday_sales,
+            'today_sales' => $today_sales,
+            'unpaid_invoices_count' => $unpaid_invoices_count,
+            'total_customers_today' => $total_customers_today,
+            'current_cash_in_register' => $current_cash_in_register,
             'expiry_risk_value' => $expiry_risk ? $expiry_risk->risk_value : 0,
             'expiry_item_count' => $expiry_risk ? $expiry_risk->item_count : 0,
             'top_product_name' => $top_product ? $top_product->name : 'N/A',
-            'dead_stock_count' => $dead_stock_count
+            'dead_stock_count' => $dead_stock_count,
+            'low_stock_alerts_count' => $low_stock_alerts_count
         ]);
     }
 

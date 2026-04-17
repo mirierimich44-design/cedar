@@ -187,7 +187,31 @@ class MpesaController extends Controller
 
             $phone = $request->phone;
             $amount = $request->amount;
-            $reference = $request->reference ?: 'Payment';
+
+            // Build a unique reference so Safaricom never sees the same
+            // AccountReference twice (duplicate-transaction rejection).
+            // Max 12 chars: use last 6 of invoice ref + 5-char time suffix.
+            $baseRef  = $request->reference ? substr(preg_replace('/[^A-Za-z0-9]/', '', $request->reference), 0, 6) : 'PAY';
+            $reference = $baseRef . substr((string) time(), -5); // e.g. "INV00112345" or "PAY12345"
+
+            // Idempotency guard: if a PENDING push for the same phone + amount
+            // was created in the last 90 seconds, reuse it instead of firing again.
+            $recentPending = MpesaTransaction::where('business_id', $business_id)
+                ->where('phone', (new \App\Utils\MpesaService($business_id))->formatPhoneNumber($phone))
+                ->where('amount', $amount)
+                ->where('status', MpesaTransaction::STATUS_PENDING)
+                ->where('created_at', '>=', now()->subSeconds(90))
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($recentPending && $recentPending->checkout_request_id) {
+                return response()->json([
+                    'success'              => true,
+                    'message'              => 'Payment already in progress — awaiting customer confirmation.',
+                    'checkout_request_id'  => $recentPending->checkout_request_id,
+                    'mpesa_transaction_id' => $recentPending->id,
+                ]);
+            }
 
             // Create pending transaction record
             $mpesaTransaction = MpesaTransaction::create([
@@ -985,11 +1009,13 @@ class MpesaController extends Controller
             ]);
         }
 
-        // Search for unmatched C2B payments with the same amount in the last 15 minutes
+        // Search for unmatched C2B payments with the same amount in the last 10 minutes.
+        // We order by created_at DESC so the NEWEST matching payment is used first —
+        // this prevents a previously completed same-amount payment from being re-matched.
         $payment = MpesaC2bPayment::where('business_id', $business_id)
             ->where('amount', $amount)
             ->whereIn('status', [MpesaC2bPayment::STATUS_RECEIVED, MpesaC2bPayment::STATUS_UNMATCHED])
-            ->where('created_at', '>=', now()->subMinutes(15))
+            ->where('created_at', '>=', now()->subMinutes(10))
             ->orderBy('created_at', 'desc')
             ->first();
 

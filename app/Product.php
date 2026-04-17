@@ -70,6 +70,14 @@ class Product extends Model
     }
 
     /**
+     * Get the DDA drug associated with the product.
+     */
+    public function ddaDrug()
+    {
+        return $this->belongsTo(\App\DdaDrug::class, 'dda_drug_id');
+    }
+
+    /**
      * Get the unit associated with the product.
      */
     public function unit()

@@ -44,6 +44,49 @@
                 @include('sale_pos.partials.pos_form')
                 @include('sale_pos.partials.payment_modal')
 
+                {{-- DDA Prescription Upload Modal --}}
+                <div class="modal fade" id="dda_prescription_modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background:#c0392b; color:#fff;">
+                                <h4 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Controlled Drug — Prescription Required</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <strong>DDA Alert:</strong> This sale contains a controlled substance (Dangerous Drug). A valid prescription must be uploaded before completing the sale.
+                                </div>
+                                <div id="dda_drug_names_list" class="mb-10" style="margin-bottom:10px;"></div>
+                                <form id="dda_prescription_form" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="form-group">
+                                        <label>Patient Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="patient_name" id="dda_patient_name" class="form-control" placeholder="Full name of patient" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prescribing Doctor <span class="text-danger">*</span></label>
+                                        <input type="text" name="prescriber_name" id="dda_prescriber_name" class="form-control" placeholder="Dr. Full Name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Hospital / Clinic</label>
+                                        <input type="text" name="prescriber_hospital" class="form-control" placeholder="Hospital or clinic name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prescription Image <span class="text-danger">*</span></label>
+                                        <input type="file" name="prescription_image" id="dda_prescription_image" class="form-control" accept="image/*" required>
+                                        <p class="help-block">JPG, PNG or GIF. Max 5MB.</p>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" id="dda_cancel_btn">Cancel Sale</button>
+                                <button type="button" class="btn btn-danger" id="dda_upload_and_proceed_btn">
+                                    <i class="fa fa-upload"></i> Upload &amp; Proceed to Payment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 @if (empty($pos_settings['disable_suspend']))
                     @include('sale_pos.partials.suspend_note_modal')
                 @endif
@@ -267,6 +310,100 @@
                     }
                 });
             }
+        });
+
+        // ─── DDA Prescription Enforcement ────────────────────────────────────────
+        var dda_prescription_uploaded = false;
+        var dda_pending_pay_method = null;
+
+        function ddaCheckCart() {
+            var dda_rows = $('.product_row[data-is_dda="1"]');
+            if (dda_rows.length === 0) return false;
+
+            var drug_names = [];
+            dda_rows.each(function () {
+                var name = $(this).find('span[style*="font-weight: 700"]').first().text().trim();
+                if (name) drug_names.push('<li>' + name + '</li>');
+            });
+
+            $('#dda_drug_names_list').html(
+                '<strong>Controlled drugs in cart:</strong><ul>' + drug_names.join('') + '</ul>'
+            );
+            return true;
+        }
+
+        // Intercept ALL finalize/payment buttons using capture phase so we fire
+        // BEFORE pos.js bubble-phase handlers (which are registered first).
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.pos-finalize, .pos-express-finalize');
+            if (!btn) return;
+            // Skip suspend — no DDA check needed
+            if ($(btn).data('pay_method') === 'suspend') return;
+            if (!dda_prescription_uploaded && ddaCheckCart()) {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                e.preventDefault();
+                dda_pending_pay_method = btn.dataset.pay_method || 'cash';
+                $('#dda_prescription_modal').modal('show');
+            }
+        }, true); // true = capture phase
+
+        // Cancel — clear cart flag too
+        $('#dda_cancel_btn').on('click', function () {
+            $('#dda_prescription_modal').modal('hide');
+            dda_pending_pay_method = null;
+        });
+
+        // Upload prescription then proceed to payment
+        $('#dda_upload_and_proceed_btn').on('click', function () {
+            var $btn = $(this);
+
+            if (!$('#dda_patient_name').val() || !$('#dda_prescriber_name').val() || !$('#dda_prescription_image').val()) {
+                toastr.error('Please fill in Patient Name, Doctor Name and upload a prescription image.');
+                return;
+            }
+
+            var formData = new FormData($('#dda_prescription_form')[0]);
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Uploading...');
+
+            $.ajax({
+                url: '{{ route("dda.prescription.pos_upload") }}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        dda_prescription_uploaded = true;
+                        toastr.success('Prescription uploaded for ' + response.patient_name);
+                        $('#dda_prescription_modal').modal('hide');
+
+                        // Trigger the correct payment button
+                        if (dda_pending_pay_method === 'cash') {
+                            $('#cash-finalize').trigger('click');
+                        } else {
+                            $('#pos-finalize').trigger('click');
+                        }
+                        dda_pending_pay_method = null;
+                    } else {
+                        toastr.error(response.msg || 'Upload failed. Please try again.');
+                    }
+                },
+                error: function (xhr) {
+                    var errors = xhr.responseJSON && xhr.responseJSON.errors
+                        ? Object.values(xhr.responseJSON.errors).join(' ')
+                        : 'Upload failed. Please try again.';
+                    toastr.error(errors);
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).html('<i class="fa fa-upload"></i> Upload &amp; Proceed to Payment');
+                }
+            });
+        });
+
+        // Reset prescription flag when cart is cleared (new sale)
+        $(document).on('pos_sale_submitted pos_sale_complete', function () {
+            dda_prescription_uploaded = false;
         });
     </script>
 @endsection

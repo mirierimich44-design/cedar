@@ -105,12 +105,17 @@
             <i class="material-icons">arrow_back</i>
         </a>
 
-        {{-- Recent Transactions --}}
-        @if (!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
-            <button type="button" class="md-icon-btn" data-toggle="modal" data-target="#recent_transactions_modal" id="recent-transactions" title="{{ __('lang_v1.recent_transactions') }}">
-                <i class="material-icons">history</i>
+        {{-- Add Expense --}}
+        @can('expense.access')
+            <button type="button" id="add_expense" class="md-icon-btn" title="Add Expense">
+                <i class="material-icons">receipt_long</i>
             </button>
-        @endif
+        @endcan
+
+        {{-- Recent Transactions --}}
+        <button type="button" class="md-icon-btn" data-toggle="modal" data-target="#recent_transactions_modal" id="header-recent-transactions" title="{{ __('lang_v1.recent_transactions') }}">
+            <i class="material-icons">history</i>
+        </button>
 
         {{-- Register Details --}}
         @can('view_cash_register')

@@ -6,7 +6,7 @@
         <div class="col-xs-3">
             <div class="form-group">
                 {!! Form::label('sms_service', __('lang_v1.sms_service') . ':') !!}
-                {!! Form::select('sms_settings[sms_service]', ['nexmo' => 'Nexmo', 'twilio' => 'Twilio', 'other' => __('lang_v1.other')], $sms_service , ['class' => 'form-control', 'id' => 'sms_service']); !!}
+                {!! Form::select('sms_settings[sms_service]', ['nexmo' => 'Nexmo', 'twilio' => 'Twilio', 'advanta' => 'Advanta SMS', 'other' => __('lang_v1.other')], $sms_service , ['class' => 'form-control', 'id' => 'sms_service']); !!}
             </div>
         </div>
     </div>
@@ -47,6 +47,26 @@
             <div class="form-group">
                 {!! Form::label('twilio_from', __('account.from') . ':') !!}
                 {!! Form::text('sms_settings[twilio_from]', !empty($sms_settings['twilio_from']) ? $sms_settings['twilio_from'] : null, ['class' => 'form-control','placeholder' => __('account.from'), 'id' => 'twilio_from']); !!}
+            </div>
+        </div>
+    </div>
+    <div class="row sms_service_settings @if($sms_service != 'advanta') hide @endif" data-service="advanta">
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('advanta_api_key', 'API Key:') !!}
+                {!! Form::text('sms_settings[advanta_api_key]', !empty($sms_settings['advanta_api_key']) ? $sms_settings['advanta_api_key'] : null, ['class' => 'form-control', 'placeholder' => 'Advanta API Key', 'id' => 'advanta_api_key']); !!}
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('advanta_partner_id', 'Partner ID:') !!}
+                {!! Form::text('sms_settings[advanta_partner_id]', !empty($sms_settings['advanta_partner_id']) ? $sms_settings['advanta_partner_id'] : null, ['class' => 'form-control', 'placeholder' => 'Partner ID', 'id' => 'advanta_partner_id']); !!}
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('advanta_shortcode', 'Shortcode / Sender ID:') !!}
+                {!! Form::text('sms_settings[advanta_shortcode]', !empty($sms_settings['advanta_shortcode']) ? $sms_settings['advanta_shortcode'] : null, ['class' => 'form-control', 'placeholder' => 'e.g. MYBRAND', 'id' => 'advanta_shortcode']); !!}
             </div>
         </div>
     </div>

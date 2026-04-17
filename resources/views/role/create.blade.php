@@ -1568,6 +1568,8 @@
 
         </div>
         </div>
+        {{-- ─── Jobs ─────────────────────────────────────────────────── --}}
+        @if(in_array('jobs', $enabled_modules))
         <hr>
         <div class="row check_group">
           <div class="col-md-1">
@@ -1609,17 +1611,39 @@
                 </label>
               </div>
             </div>
+          </div>
+        </div>
+        @endif
+
+        {{-- ─── eTIMS ────────────────────────────────────────────────── --}}
+        @if(in_array('etims', $enabled_modules))
+        <hr>
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>eTIMS</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
             <div class="col-md-12">
               <div class="checkbox">
                 <label>
-                  {!! Form::checkbox('permissions[]', 'access_etims_report', false, [ 'class' => 'input-icheck']); !!} {{ __( 'role.access_etims_report' ) }}
+                  {!! Form::checkbox('permissions[]', 'access_etims_report', false, ['class' => 'input-icheck']); !!} {{ __('role.access_etims_report') }}
                 </label>
               </div>
             </div>
           </div>
         </div>
+        @endif
+
+        {{-- ─── Cooler Management ────────────────────────────────────── --}}
+        @if(in_array('cooler', $enabled_modules))
         <hr>
-        {{-- Cooler Management --}}
         <div class="row check_group">
           <div class="col-md-1">
             <h4>@lang('role.cooler_management')</h4>
@@ -1644,7 +1668,6 @@
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.asset.delete', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.asset.delete') }}
             </label></div></div>
-
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.dealer.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.view') }}
             </label></div></div>
@@ -1660,7 +1683,6 @@
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.dealer.verify_docs', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.dealer.verify_docs') }}
             </label></div></div>
-
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.agreement.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.view') }}
             </label></div></div>
@@ -1673,7 +1695,6 @@
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.agreement.terminate', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.agreement.terminate') }}
             </label></div></div>
-
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.retrieval.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.retrieval.view') }}
             </label></div></div>
@@ -1683,7 +1704,6 @@
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.retrieval.execute', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.retrieval.execute') }}
             </label></div></div>
-
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.document.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.document.view') }}
             </label></div></div>
@@ -1693,7 +1713,6 @@
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.document.delete', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.document.delete') }}
             </label></div></div>
-
             <div class="col-md-3"><div class="checkbox"><label>
               {!! Form::checkbox('permissions[]', 'cooler.compliance.view', false, ['class' => 'input-icheck']); !!} {{ __('role.cooler.compliance.view') }}
             </label></div></div>
@@ -1702,6 +1721,119 @@
             </label></div></div>
           </div>
         </div>
+        @endif
+
+        {{-- ─── Stocktake ────────────────────────────────────────────── --}}
+        @if(in_array('stocktake', $enabled_modules))
+        <hr>
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>Stocktake</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="col-md-12">
+              <div class="checkbox">
+                <label>
+                  {!! Form::checkbox('permissions[]', 'stocktake.view', false, ['class' => 'input-icheck']); !!} View / Conduct Stocktake
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
+        {{-- ─── DDA Register ─────────────────────────────────────────── --}}
+        @if(in_array('dda', $enabled_modules))
+        <hr>
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>DDA Register</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="col-md-12">
+              <div class="checkbox">
+                <label>
+                  {!! Form::checkbox('permissions[]', 'dda.view', false, ['class' => 'input-icheck']); !!} View DDA Register (dashboard, dispense log, stock, sales)
+                </label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="checkbox">
+                <label>
+                  {!! Form::checkbox('permissions[]', 'dda.manage', false, ['class' => 'input-icheck']); !!} Manage DDA (add/edit drugs, prescriptions, destruction records)
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
+        {{-- ─── SMS ──────────────────────────────────────────────────── --}}
+        @if(in_array('sms', $enabled_modules))
+        <hr>
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>SMS</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="col-md-12">
+              <div class="checkbox">
+                <label>
+                  {!! Form::checkbox('permissions[]', 'send_notifications', false, ['class' => 'input-icheck']); !!} Send SMS &amp; Notifications
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
+        {{-- ─── WhatsApp ─────────────────────────────────────────────── --}}
+        @if(in_array('whatsapp', $enabled_modules))
+        <hr>
+        <div class="row check_group">
+          <div class="col-md-1">
+            <h4>WhatsApp</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck"> {{ __('role.select_all') }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="col-md-12">
+              <div class="checkbox">
+                <label>
+                  {!! Form::checkbox('permissions[]', 'send_notifications', false, ['class' => 'input-icheck']); !!} Send WhatsApp Messages &amp; Notifications
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
         <hr>
         <div class="row check_group">
         <div class="col-md-1">

@@ -52,8 +52,41 @@
     </button>
 </div>
 
+{{-- Styling for search dropdowns (jQuery UI autocomplete + custom) --}}
+<style>
+    /* Fix jQuery UI autocomplete dropdown — card padding & appearance */
+    .ui-autocomplete.ui-menu {
+        padding: 8px 0 !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        max-height: 320px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        margin-top: 3px !important;
+        background: #fff !important;
+    }
+    .ui-autocomplete.ui-menu .ui-menu-item {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        list-style: none !important;
+    }
+    .ui-autocomplete.ui-menu .ui-menu-item .pos-search-item {
+        padding: 9px 20px !important;
+    }
+    .ui-autocomplete.ui-menu::-webkit-scrollbar { width: 5px; }
+    .ui-autocomplete.ui-menu::-webkit-scrollbar-track { background: #f8fafc; border-radius: 10px; }
+    .ui-autocomplete.ui-menu::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+    /* Custom dropdown scrollbar */
+    #pos_search_dropdown::-webkit-scrollbar { width: 5px; }
+    #pos_search_dropdown::-webkit-scrollbar-track { background: #f8fafc; border-radius: 10px; }
+    #pos_search_dropdown::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
+
 {{-- Product Search Bar --}}
-<div class="search-bar">
+<div class="search-bar" style="position:relative;">
     <div class="search-icon">
         <i class="fas fa-search"></i>
     </div>
@@ -63,7 +96,9 @@
         'placeholder' => __('lang_v1.search_product_placeholder'),
         'disabled' => is_null($default_location)? true : false,
         'autofocus' => is_null($default_location)? false : true,
+        'autocomplete' => 'off',
     ]) !!}
+    <div id="pos_search_dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100000;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);max-height:320px;overflow-y:auto;overflow-x:hidden;margin-top:3px;padding:8px 12px;"></div>
 </div>
 
 {{-- Cart Items List --}}
