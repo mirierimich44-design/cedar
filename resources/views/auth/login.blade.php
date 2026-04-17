@@ -27,7 +27,7 @@
             }
         }
     @endphp
-    <div class="row">
+    <div class="row tw-min-h-screen tw-items-center tw-flex tw-flex-wrap">
         <div class="col-md-4">
         @if (config('app.env') == 'demo')
         
@@ -105,7 +105,7 @@
         
     @endif
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 @if(config('app.env') != 'demo') col-md-offset-4 @endif">
             <div
                 class="tw-p-5 md:tw-p-6 tw-mb-4 tw-rounded-2xl tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-ring-1 tw-ring-gray-200">
                 <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
@@ -128,9 +128,9 @@
                                 </div>
 
                                 <input
-                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium"
+                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium tw-w-full"
                                     name="username" required autofocus placeholder="@lang('lang_v1.username')"
-                                    data-last-active-input="" id="username" type="text" name="username"
+                                    data-last-active-input="" id="username" type="text"
                                     value="{{ $username }}" />
                                 @if ($errors->has('username'))
                                     <span class="help-block">
@@ -153,7 +153,7 @@
                                 </div>
 
                                 <input
-                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium"
+                                    class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500 placeholder:tw-font-medium tw-w-full"
                                     id="password" type="password" name="password" value="{{ $password }}" required
                                     placeholder="@lang('lang_v1.password')" />
                                 <button type="button" id="show_hide_icon" class="show_hide_icon"
