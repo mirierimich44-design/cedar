@@ -37,8 +37,12 @@ class CreateSaasAdminCommand extends Command
         $user = User::where('username', $username)->orWhere('email', $email)->first();
 
         // A SaaS super admin shouldn't normally need a business, but the base LoginController 
-        // checks `$user->business->is_active`. We'll assign it to Business ID 1 (the master business)
-        $business_id = 1;
+        // checks `$user->business->is_active`. We'll assign it to the first active business
+        // or temporarily disable foreign key checks if no business exists
+        $first_business = \App\Business::where('is_active', 1)->first();
+        $business_id = $first_business ? $first_business->id : null;
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         if (!$user) {
             $user = User::create([
@@ -63,6 +67,8 @@ class CreateSaasAdminCommand extends Command
             $user->save();
             $this->info("SaaS Super Admin updated successfully.");
         }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->info("Username: $username");
         $this->info("Email: $email");
