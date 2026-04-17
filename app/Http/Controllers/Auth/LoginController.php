@@ -89,15 +89,12 @@ class LoginController extends Controller
     {
         $this->businessUtil->activityLog($user, 'login', null, [], false, $user->business_id);
 
-        if (! $user->business->is_active) {
-            \Auth::logout();
+        // Superadmin has no business — skip all business-related checks
+        if ($user->user_type === 'superadmin') {
+            return;
+        }
 
-            return redirect('/login')
-              ->with(
-                  'status',
-                  ['success' => 0, 'msg' => __('lang_v1.business_inactive')]
-              );
-        } elseif ($user->status != 'active') {
+        if ($user->status != 'active') {
             \Auth::logout();
 
             return redirect('/login')
@@ -113,6 +110,14 @@ class LoginController extends Controller
                     'status',
                     ['success' => 0, 'msg' => __('lang_v1.login_not_allowed')]
                 );
+        } elseif (! empty($user->business_id) && ! $user->business->is_active) {
+            \Auth::logout();
+
+            return redirect('/login')
+              ->with(
+                  'status',
+                  ['success' => 0, 'msg' => __('lang_v1.business_inactive')]
+              );
         } elseif (($user->user_type == 'user_customer') && ! $this->moduleUtil->hasThePermissionInSubscription($user->business_id, 'crm_module')) {
             \Auth::logout();
 
@@ -127,6 +132,12 @@ class LoginController extends Controller
     protected function redirectTo()
     {
         $user = \Auth::user();
+
+        // Superadmin goes to home dashboard
+        if ($user->user_type === 'superadmin') {
+            return '/home';
+        }
+
         if (! $user->can('dashboard.data') && $user->can('sell.create')) {
             return action([\App\Http\Controllers\SellPosController::class, 'create']);
         }
