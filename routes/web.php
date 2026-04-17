@@ -125,7 +125,19 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
 
 Route::middleware(['setData'])->group(function () {
     Route::get('/', function () {
-        return view('welcome');
+        $featuresByCategory = \App\SaasFeature::activeByCategory();
+        $bundles = \App\SaasBundle::with('features')->where('is_active', true)->orderBy('sort_order')->get();
+
+        $categories = [
+            'core'          => ['label' => 'Core (Always Included)', 'icon' => 'fa-star'],
+            'inventory'     => ['label' => 'Inventory & Stock',       'icon' => 'fa-boxes'],
+            'pharmacy'      => ['label' => 'Pharmacy / DDA',          'icon' => 'fa-pills'],
+            'reporting'     => ['label' => 'Reports & Analytics',     'icon' => 'fa-chart-bar'],
+            'communication' => ['label' => 'Communication',           'icon' => 'fa-comment-dots'],
+            'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
+        ];
+
+        return view('welcome', compact('featuresByCategory', 'bundles', 'categories'));
     });
 
     Auth::routes();
