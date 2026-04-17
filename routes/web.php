@@ -132,9 +132,11 @@ Route::middleware(['setData'])->group(function () {
             'core'          => ['label' => 'Core (Always Included)', 'icon' => 'fa-star'],
             'inventory'     => ['label' => 'Inventory & Stock',       'icon' => 'fa-boxes'],
             'pharmacy'      => ['label' => 'Pharmacy / DDA',          'icon' => 'fa-pills'],
+            'compliance'    => ['label' => 'Tax & Compliance',        'icon' => 'fa-file-invoice'],
             'reporting'     => ['label' => 'Reports & Analytics',     'icon' => 'fa-chart-bar'],
             'communication' => ['label' => 'Communication',           'icon' => 'fa-comment-dots'],
             'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
+            'service'       => ['label' => 'Professional Services',   'icon' => 'fa-tools'],
         ];
 
         return view('welcome', compact('featuresByCategory', 'bundles', 'categories'));

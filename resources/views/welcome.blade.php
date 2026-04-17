@@ -431,6 +431,21 @@
                 <h3>SMS Notifications</h3>
                 <p>Automated SMS alerts for prescription reminders, order updates, and promotions.</p>
             </div>
+            <div class="lp-card">
+                <div class="lp-card-icon">🇰🇪</div>
+                <h3>KRA eTIMS Integration</h3>
+                <p>Compliant with KRA requirements. Automatic sync of invoices to the eTIMS platform.</p>
+            </div>
+            <div class="lp-card">
+                <div class="lp-card-icon">🛠️</div>
+                <h3>Professional Setup</h3>
+                <p>We handle the heavy lifting — hardware configuration, staff training, and inventory import.</p>
+            </div>
+            <div class="lp-card">
+                <div class="lp-card-icon">☁️</div>
+                <h3>Cloud or On-Premise</h3>
+                <p>Choose between secure cloud hosting or local installation for offline stability.</p>
+            </div>
         </div>
     </div>
 

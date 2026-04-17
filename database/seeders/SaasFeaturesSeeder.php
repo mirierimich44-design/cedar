@@ -27,6 +27,9 @@ class SaasFeaturesSeeder extends Seeder
             ['key' => 'prescriptions',   'name' => 'Prescription Management',   'category' => 'pharmacy',      'icon' => 'fa-file-medical',   'is_required' => false, 'price_monthly' => 600,  'price_quarterly' => 1620, 'price_yearly' => 6000,  'price_once' => 18000, 'sort_order' => 21],
             ['key' => 'pharmacy_reports','name' => 'Pharmacy Compliance Reports','category' => 'pharmacy',     'icon' => 'fa-shield-alt',     'is_required' => false, 'price_monthly' => 300,  'price_quarterly' => 810,  'price_yearly' => 3000,  'price_once' => 9000,  'sort_order' => 22],
 
+            // COMPLIANCE
+            ['key' => 'etims',           'name' => 'KRA eTIMS Integration',     'category' => 'compliance',    'icon' => 'fa-file-invoice',   'is_required' => false, 'price_monthly' => 500,  'price_quarterly' => 1350, 'price_yearly' => 5000,  'price_once' => 15000, 'sort_order' => 25],
+
             // REPORTING
             ['key' => 'reports_basic',   'name' => 'Sales & Financial Reports', 'category' => 'reporting',     'icon' => 'fa-chart-bar',      'is_required' => false, 'price_monthly' => 300,  'price_quarterly' => 810,  'price_yearly' => 3000,  'price_once' => 9000,  'sort_order' => 30],
             ['key' => 'reports_advanced','name' => 'Advanced Analytics',        'category' => 'reporting',     'icon' => 'fa-chart-line',     'is_required' => false, 'price_monthly' => 400,  'price_quarterly' => 1080, 'price_yearly' => 4000,  'price_once' => 12000, 'sort_order' => 31],
@@ -37,6 +40,9 @@ class SaasFeaturesSeeder extends Seeder
 
             // RESTAURANT
             ['key' => 'restaurant',      'name' => 'Restaurant Module',         'category' => 'restaurant',    'icon' => 'fa-utensils',       'is_required' => false, 'price_monthly' => 500,  'price_quarterly' => 1350, 'price_yearly' => 5000,  'price_once' => 14000, 'sort_order' => 50],
+
+            // SERVICE / SETUP
+            ['key' => 'setup_cost',      'name' => 'One-time Setup & Training', 'category' => 'service',       'icon' => 'fa-tools',          'is_required' => false, 'price_monthly' => 0,    'price_quarterly' => 0,    'price_yearly' => 0,     'price_once' => 5000,  'sort_order' => 60],
         ];
 
         foreach ($features as $f) {
@@ -44,9 +50,9 @@ class SaasFeaturesSeeder extends Seeder
         }
 
         // Seed bundles
-        $basicIds     = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'reports_basic'])->pluck('id');
-        $pharmacyIds  = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'dda_module', 'prescriptions', 'pharmacy_reports', 'sms', 'reports_basic'])->pluck('id');
-        $retailIds    = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'purchases', 'multi_location', 'reports_basic', 'reports_advanced', 'sms'])->pluck('id');
+        $basicIds     = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'reports_basic', 'setup_cost'])->pluck('id');
+        $pharmacyIds  = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'dda_module', 'prescriptions', 'pharmacy_reports', 'sms', 'reports_basic', 'etims', 'setup_cost'])->pluck('id');
+        $retailIds    = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'purchases', 'multi_location', 'reports_basic', 'reports_advanced', 'sms', 'etims', 'setup_cost'])->pluck('id');
 
         $bundles = [
             ['name' => 'Basic Retail',     'slug' => 'basic-retail',    'description' => 'Perfect for small shops and kiosks.',             'color' => '#0369a1', 'is_popular' => false, 'sort_order' => 1, 'features' => $basicIds],
