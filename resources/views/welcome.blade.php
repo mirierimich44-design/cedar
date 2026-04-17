@@ -1,151 +1,175 @@
 @extends('layouts.auth2')
 @section('title', config('app.name', 'Reenson Pharmacy'))
 @inject('request', 'Illuminate\Http\Request')
+
 @section('content')
+<style>
+    html {
+        background: linear-gradient(rgba(0,0,0,0.62), rgba(0,15,30,0.78)),
+                    url('{{ asset("img/home-bg.jpg") }}') center center / cover no-repeat fixed !important;
+    }
+    .landing-top-nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 40px;
+        background: rgba(0,0,0,0.25);
+        backdrop-filter: blur(6px);
+    }
+    .landing-top-nav a { color: white; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    .landing-btn-outline {
+        border: 2px solid white;
+        border-radius: 50px;
+        padding: 8px 24px;
+        color: white !important;
+        font-weight: 700 !important;
+        transition: all 0.2s;
+    }
+    .landing-btn-outline:hover { background: white; color: #0f766e !important; }
+    .landing-btn-primary {
+        background: #0f766e;
+        border-radius: 50px;
+        padding: 14px 40px;
+        color: white !important;
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        transition: all 0.2s;
+    }
+    .landing-btn-primary:hover { background: #0d9488; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.4); color: white !important; text-decoration: none; }
+    .feature-card {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 16px;
+        padding: 28px 22px;
+        text-align: center;
+        transition: all 0.25s;
+        backdrop-filter: blur(4px);
+    }
+    .feature-card:hover {
+        background: rgba(255,255,255,0.18);
+        transform: translateY(-4px);
+        border-color: rgba(255,255,255,0.4);
+    }
+    .feature-card h3 { color: white; font-size: 1.05rem; font-weight: 700; margin: 12px 0 8px; }
+    .feature-card p { color: rgba(255,255,255,0.82); font-size: 0.875rem; line-height: 1.5; margin: 0; }
+    .feature-icon {
+        width: 52px; height: 52px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5rem;
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+    }
+    @media (max-width: 768px) {
+        .features-grid { grid-template-columns: repeat(1, 1fr); }
+        .landing-top-nav { padding: 14px 20px; }
+    }
+    @media (min-width: 769px) and (max-width: 992px) {
+        .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .divider-line {
+        width: 60px; height: 4px;
+        background: #0d9488;
+        border-radius: 2px;
+        margin: 16px auto 0;
+    }
+</style>
 
-<div class="col-md-12 col-sm-12 col-xs-12" style="padding-top: 60px; padding-bottom: 40px;">
-
-    {{-- Hero Section --}}
-    <div class="tw-flex tw-flex-col tw-items-center tw-text-center tw-mb-10 tw-px-4">
-
-        {{-- Pharmacy Cross Icon --}}
-        <div style="
-            width: 80px; height: 80px;
-            background: rgba(255,255,255,0.15);
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px;
-            backdrop-filter: blur(4px);
-        ">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="48" height="48">
-                <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-6 14h-2v-4H7v-2h4V7h2v4h4v2h-4v4z"/>
-            </svg>
-        </div>
-
-        {{-- App Name --}}
-        <h1 style="
-            font-size: 2.8rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin: 0 0 8px;
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        ">
-            {{ config('app.name', 'Reenson Pharmacy') }}
-        </h1>
-
-        {{-- Tagline --}}
-        <p style="
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.85);
-            margin: 0 0 6px;
-            font-weight: 500;
-        ">
-            {{ env('APP_TITLE', 'Kenya PPB Compliant Pharmacy Management System') }}
-        </p>
-
-        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin: 0 0 32px;">
-            Pharmacy &amp; Poisons Act Cap. 244 &bull; Dangerous Drugs Act Compliance
-        </p>
-
-        {{-- CTA Buttons --}}
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-            <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login']) }}"
-               style="
-                   display: inline-flex; align-items: center; gap: 8px;
-                   background: #ffffff;
-                   color: #065f46;
-                   padding: 12px 32px;
-                   border-radius: 50px;
-                   font-weight: 700;
-                   font-size: 1rem;
-                   text-decoration: none;
-                   box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-                   transition: all 0.2s;
-               "
-               onmouseover="this.style.background='#f0fdf4'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.25)'"
-               onmouseout="this.style.background='#ffffff'; this.style.boxShadow='0 4px 14px rgba(0,0,0,0.2)'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-                </svg>
-                Sign In
-            </a>
-        </div>
+{{-- Custom Top Nav --}}
+<div class="landing-top-nav">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <img src="{{ asset('img/logo-small.png') }}" style="width:36px; height:36px; border-radius:8px; background:white; padding:3px; object-fit:contain;">
+        <span style="color:white; font-size:1.1rem; font-weight:800; letter-spacing:0.5px;">{{ config('app.name', 'Reenson Pharmacy') }}</span>
     </div>
-
-    {{-- Feature Cards --}}
-    <div class="row" style="max-width: 960px; margin: 0 auto; padding: 0 16px;">
-
-        @php
-        $features = [
-            [
-                'icon' => '<path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-4"/><path d="M9 3v10l3-3 3 3V3"/>',
-                'title' => 'DDA Register',
-                'desc'  => 'Kenya PPB controlled substances register — dispense logs, batch tracking &amp; destruction records.',
-            ],
-            [
-                'icon' => '<path d="M16.7 8a3 3 0 0 0-2.7-2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1-2.7-2"/><path d="M12 3v3m0 12v3"/>',
-                'title' => 'M-Pesa Payments',
-                'desc'  => 'STK Push &amp; C2B auto-detection. Real-time payment matching at the POS counter.',
-            ],
-            [
-                'icon' => '<path d="M12 3l8 4.5v9l-8 4.5-8-4.5v-9l8-4.5"/><path d="M12 12l8-4.5"/><path d="M12 12v9"/><path d="M12 12L4 7.5"/>',
-                'title' => 'Live Inventory',
-                'desc'  => 'Real-time stock balances, batch &amp; expiry tracking, low-stock alerts and dead-stock reports.',
-            ],
-            [
-                'icon' => '<path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M18 14v4h4"/><circle cx="18" cy="18" r="4"/>',
-                'title' => 'eTIMS &amp; Reports',
-                'desc'  => 'KRA eTIMS integration, profit &amp; loss, daily reconciliation and full financial reporting.',
-            ],
-        ];
-        @endphp
-
-        @foreach($features as $f)
-        <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
-            <div style="
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-                border-radius: 16px;
-                padding: 20px 16px;
-                text-align: center;
-                backdrop-filter: blur(6px);
-                height: 100%;
-                transition: background 0.2s;
-            "
-            onmouseover="this.style.background='rgba(255,255,255,0.18)'"
-            onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-                <div style="
-                    width: 48px; height: 48px;
-                    background: rgba(255,255,255,0.2);
-                    border-radius: 12px;
-                    display: flex; align-items: center; justify-content: center;
-                    margin: 0 auto 12px;
-                ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                         fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        {!! $f['icon'] !!}
-                    </svg>
-                </div>
-                <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 6px;">
-                    {{ $f['title'] }}
-                </div>
-                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.72); line-height: 1.4;">
-                    {!! $f['desc'] !!}
-                </div>
-            </div>
-        </div>
-        @endforeach
+    <div style="display:flex; align-items:center; gap:16px;">
+        <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login']) }}" class="landing-btn-outline">Sign In</a>
     </div>
-
-    {{-- Footer note --}}
-    <div class="tw-text-center" style="margin-top: 28px;">
-        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.45);">
-            &copy; {{ date('Y') }} {{ config('app.name', 'Reenson Pharmacy') }} &bull; Powered by ApexPOS
-        </p>
-    </div>
-
 </div>
 
+{{-- Hero --}}
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 20px 60px; text-align: center;">
+
+    <div style="margin-bottom: 24px;">
+        <img src="{{ asset('img/logo-small.png') }}" style="width:90px; height:90px; border-radius:50%; background:white; padding:10px; object-fit:contain; box-shadow: 0 12px 35px rgba(0,0,0,0.4);">
+    </div>
+
+    <h1 style="font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 900; color: white; margin: 0 0 14px; text-shadow: 0 3px 12px rgba(0,0,0,0.5); line-height: 1.15;">
+        {{ config('app.name', 'Reenson Pharmacy') }}
+    </h1>
+
+    <p style="font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.88); max-width: 560px; margin: 0 auto 14px; text-shadow: 0 1px 6px rgba(0,0,0,0.4); line-height: 1.6;">
+        Integrated Pharmacy &amp; DDA Drug Management System
+    </p>
+
+    <div class="divider-line" style="margin-bottom: 36px;"></div>
+
+    <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login']) }}" class="landing-btn-primary" style="margin-bottom: 70px;">
+        Sign In to Dashboard &rarr;
+    </a>
+
+    {{-- Section Title --}}
+    <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">
+        Everything you need
+    </p>
+
+    {{-- Features Grid --}}
+    <div class="features-grid">
+
+        <div class="feature-card">
+            <div class="feature-icon">💊</div>
+            <h3>DDA Drug Control</h3>
+            <p>Full compliance tracking for Dangerous Drugs Act — prescriptions, dispense logs, stock, and destruction records.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>Prescription Management</h3>
+            <p>Create, track, and dispense prescriptions with a full audit trail for every patient transaction.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📦</div>
+            <h3>Inventory & Stock</h3>
+            <p>Real-time stock tracking with expiry date alerts, low-stock notifications, and batch management.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🛒</div>
+            <h3>Point of Sale</h3>
+            <p>Fast, intuitive POS system optimized for pharmacy counter sales and walk-in customers.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Reports & Analytics</h3>
+            <p>Comprehensive sales, stock, DDA, and financial reports to keep your pharmacy compliant and profitable.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>SMS Notifications</h3>
+            <p>Automated SMS alerts to customers for prescription reminders, order updates, and promotional messages.</p>
+        </div>
+
+    </div>
+
+    {{-- Footer --}}
+    <p style="color: rgba(255,255,255,0.4); font-size: 0.78rem; margin-top: 60px;">
+        &copy; {{ date('Y') }} {{ config('app.name', 'Reenson Pharmacy') }}. All rights reserved.
+    </p>
+</div>
 @endsection
