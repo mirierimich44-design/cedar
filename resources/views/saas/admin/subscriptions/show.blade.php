@@ -29,15 +29,52 @@
             <tr><th>Grace Until</th><td>{{ $subscription->grace_ends_at ? $subscription->grace_ends_at->format('d M Y') : '—' }}</td></tr>
         </table>
 
-        <h4 style="margin-top:20px;">Features</h4>
+        <h4 style="margin-top:20px;">Enabled Features
+            <small class="text-muted">({{ $subscription->features->count() }} active)</small>
+        </h4>
         <ul class="list-group">
-            @foreach($subscription->features as $f)
-            <li class="list-group-item" style="display:flex;justify-content:space-between;">
-                <span><i class="fas fa-check-circle text-success"></i> {{ $f->name }}</span>
-                <span class="text-muted">KES {{ number_format($f->pivot->price_locked, 0) }}</span>
+            @forelse($subscription->features as $f)
+            <li class="list-group-item" style="display:flex;justify-content:space-between;align-items:center;">
+                <span><i class="fas fa-check-circle text-success"></i> <strong>{{ $f->name }}</strong> <small class="text-muted">[{{ $f->category }}]</small></span>
+                <span>
+                    <span class="text-muted" style="margin-right:10px;">KES {{ number_format($f->pivot->price_locked, 0) }}</span>
+                    <form method="POST" action="{{ route('saas.admin.subscriptions.feature.detach', [$subscription, $f]) }}" style="display:inline;" onsubmit="return confirm('Disable {{ $f->name }} for this client?');">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-xs btn-danger"><i class="fas fa-times"></i> Disable</button>
+                    </form>
+                </span>
             </li>
-            @endforeach
+            @empty
+            <li class="list-group-item text-center text-muted">No features enabled yet.</li>
+            @endforelse
         </ul>
+
+        <h4 style="margin-top:20px;">Add a Feature to This Client</h4>
+        @php
+            $enabledIds  = $subscription->features->pluck('id')->toArray();
+            $available   = \App\SaasFeature::where('is_active', true)
+                            ->whereNotIn('id', $enabledIds)
+                            ->orderBy('category')->orderBy('name')->get();
+        @endphp
+        @if($available->count())
+        <form method="POST" action="{{ route('saas.admin.subscriptions.feature.attach', $subscription) }}" style="display:flex;gap:8px;">
+            @csrf
+            <select name="feature_id" class="form-control" required>
+                <option value="">— Choose a feature to enable —</option>
+                @foreach($available->groupBy('category') as $cat => $items)
+                    <optgroup label="{{ ucfirst($cat) }}">
+                        @foreach($items as $f)
+                            <option value="{{ $f->id }}">{{ $f->name }} (KES {{ number_format($f->priceFor($subscription->billing_cycle ?? 'monthly'), 0) }}/{{ $subscription->billing_cycle }})</option>
+                        @endforeach
+                    </optgroup>
+                @endforeach
+            </select>
+            <button class="btn btn-success" style="white-space:nowrap;"><i class="fas fa-plus"></i> Enable</button>
+        </form>
+        <p class="help-block" style="margin-top:6px;">Price auto-locks at the current rate for the client's billing cycle.</p>
+        @else
+        <p class="text-muted">All active features are already enabled for this client.</p>
+        @endif
         @endcomponent
     </div>
 

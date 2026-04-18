@@ -43,7 +43,7 @@ h1 { font-size: 1.55rem; font-weight: 800; margin-bottom: 10px; }
 
     <div class="steps">
         <div class="step"><span class="n">1</span><span>On your phone, open <strong>M-PESA</strong> → Lipa na M-Pesa → Paybill.</span></div>
-        <div class="step"><span class="n">2</span><span>Business No: <strong>{{ config('saas.mpesa_paybill', '4117852') }}</strong></span></div>
+        <div class="step"><span class="n">2</span><span>Business No: <strong>{{ \App\SaasSetting::mpesaPaybill() }}</strong></span></div>
         <div class="step"><span class="n">3</span><span>Account No: <strong>{{ $invoice->invoice_no }}</strong></span></div>
         <div class="step"><span class="n">4</span><span>Amount: <strong>KES {{ number_format($invoice->amount, 0) }}</strong> → Enter PIN → Send.</span></div>
     </div>

@@ -2,9 +2,49 @@
 @section('title', 'SaaS Dashboard')
 @section('content')
 <section class="content-header">
-    <h1 class="tw-text-2xl tw-font-bold">SaaS Dashboard</h1>
+    <h1 class="tw-text-2xl tw-font-bold">SaaS Dashboard
+        <a href="{{ route('saas.admin.settings') }}" class="btn btn-warning btn-sm pull-right">
+            <i class="fas fa-sliders-h"></i> Control Panel
+        </a>
+    </h1>
 </section>
 <section class="content">
+
+{{-- Live state banner --}}
+@php
+    $trialEnabled = \App\SaasSetting::trialEnabled();
+    $trialDays    = \App\SaasSetting::trialDays();
+    $campActive   = \App\SaasSetting::campaignActive();
+    $campDisc     = \App\SaasSetting::campaignDiscount();
+    $mpesaMode    = \App\SaasSetting::get('mpesa_mode', 'manual');
+@endphp
+<div class="alert" style="background:#f8fafc;border:1px solid #e2e8f0;display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
+    <div>
+        <strong>Trial:</strong>
+        @if($trialEnabled && $trialDays > 0)
+            <span class="label label-success">{{ $trialDays }} days</span>
+        @else
+            <span class="label label-default">Disabled</span>
+        @endif
+    </div>
+    <div>
+        <strong>Campaign:</strong>
+        @if($campActive)
+            <span class="label label-warning">{{ $campDisc }}% OFF live</span>
+        @else
+            <span class="label label-default">Off</span>
+        @endif
+    </div>
+    <div>
+        <strong>M-Pesa:</strong>
+        <span class="label label-{{ $mpesaMode === 'stk' ? 'primary' : 'info' }}">
+            {{ $mpesaMode === 'stk' ? 'STK Push (auto)' : 'Manual Paybill' }}
+        </span>
+    </div>
+    <div style="margin-left:auto;">
+        <a href="{{ route('saas.admin.settings') }}" class="btn btn-xs btn-warning"><i class="fas fa-edit"></i> Change</a>
+    </div>
+</div>
 
 <div class="row" style="margin-bottom:24px;">
     <div class="col-md-3 col-sm-6"><div class="info-box bg-teal"><span class="info-box-icon"><i class="fas fa-check-circle"></i></span><div class="info-box-content"><span class="info-box-text">Active</span><span class="info-box-number">{{ $stats['active'] }}</span></div></div></div>
@@ -51,7 +91,11 @@
     <div class="col-md-4">
         @component('components.widget', ['header' => 'Quick Links'])
         <div class="list-group">
-            <a href="{{ route('saas.admin.features') }}" class="list-group-item"><i class="fas fa-puzzle-piece"></i> Manage Features</a>
+            <a href="{{ route('saas.admin.settings') }}" class="list-group-item" style="background:#fff7e6;border-left:4px solid #f59e0b;">
+                <i class="fas fa-sliders-h"></i> <strong>Control Panel</strong>
+                <small class="text-muted" style="display:block;margin-left:20px;">Trial length, campaigns, M-Pesa</small>
+            </a>
+            <a href="{{ route('saas.admin.features') }}" class="list-group-item"><i class="fas fa-puzzle-piece"></i> Manage Features &amp; Pricing</a>
             <a href="{{ route('saas.admin.bundles') }}"  class="list-group-item"><i class="fas fa-layer-group"></i> Manage Bundles</a>
             <a href="{{ route('saas.admin.subscriptions') }}" class="list-group-item"><i class="fas fa-credit-card"></i> All Subscriptions</a>
             <a href="{{ route('saas.admin.invoices') }}"  class="list-group-item"><i class="fas fa-file-invoice"></i> Invoices</a>

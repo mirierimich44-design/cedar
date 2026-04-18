@@ -128,6 +128,14 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
 
     Route::get('/invoices',           [SaasAdminController::class, 'invoicesIndex'])->name('invoices');
     Route::post('/invoices/{invoice}/paid', [SaasAdminController::class, 'invoicesMarkPaid'])->name('invoices.mark_paid');
+
+    // Per-client feature enable/disable
+    Route::post('/subscriptions/{subscription}/feature/attach', [SaasAdminController::class, 'subscriptionFeatureAttach'])->name('subscriptions.feature.attach');
+    Route::delete('/subscriptions/{subscription}/feature/{feature}', [SaasAdminController::class, 'subscriptionFeatureDetach'])->name('subscriptions.feature.detach');
+
+    // Global SaaS settings (trial, campaign, payment)
+    Route::get('/settings',  [SaasAdminController::class, 'settingsIndex'])->name('settings');
+    Route::put('/settings',  [SaasAdminController::class, 'settingsUpdate'])->name('settings.update');
 });
 
 Route::middleware(['setData'])->group(function () {

@@ -7,6 +7,7 @@ use App\SaasBundle;
 use App\SaasSubscription;
 use App\SaasInvoice;
 use App\SaasHostedAccount;
+use App\SaasSetting;
 use App\Business;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -226,5 +227,68 @@ class SaasAdminController extends Controller
             'updated_at' => now(),
         ]);
         return back()->with('success', 'Enquiry updated.');
+    }
+
+    // ─── Settings (Global SaaS control panel) ────────────────────
+    public function settingsIndex()
+    {
+        $settings = SaasSetting::orderBy('group')->orderBy('id')->get()->groupBy('group');
+        return view('saas.admin.settings', compact('settings'));
+    }
+
+    public function settingsUpdate(Request $request)
+    {
+        $data = $request->except(['_token', '_method']);
+        foreach ($data as $key => $value) {
+            $row = SaasSetting::where('key', $key)->first();
+            if (!$row) continue;
+
+            if ($row->type === 'bool') {
+                // Checkboxes post only when checked; normalise
+                $value = $request->has($key) && $value !== '0' ? '1' : '0';
+            }
+            $row->value = (string) $value;
+            $row->save();
+        }
+
+        // Ensure unchecked checkboxes are saved as 0
+        foreach (SaasSetting::where('type', 'bool')->get() as $bool) {
+            if (!$request->has($bool->key)) {
+                $bool->value = '0';
+                $bool->save();
+            }
+        }
+
+        SaasSetting::flushCache();
+        return back()->with('success', 'Settings saved. Changes apply immediately.');
+    }
+
+    // ─── Per-client feature toggle (attach/detach on subscription) ───
+    public function subscriptionFeatureAttach(Request $request, SaasSubscription $subscription)
+    {
+        $request->validate(['feature_id' => 'required|exists:saas_features,id']);
+        $feature = SaasFeature::findOrFail($request->feature_id);
+
+        if ($subscription->features()->where('feature_id', $feature->id)->exists()) {
+            return back()->with('error', 'Feature already enabled for this client.');
+        }
+
+        $price = $feature->priceFor($subscription->billing_cycle ?? 'monthly');
+        $subscription->features()->attach($feature->id, ['price_locked' => $price]);
+
+        // Recompute subscription total
+        $subscription->total_amount = $subscription->features()->sum('price_locked');
+        $subscription->save();
+
+        return back()->with('success', "Enabled: {$feature->name}");
+    }
+
+    public function subscriptionFeatureDetach(SaasSubscription $subscription, SaasFeature $feature)
+    {
+        $subscription->features()->detach($feature->id);
+        $subscription->total_amount = $subscription->features()->sum('price_locked');
+        $subscription->save();
+
+        return back()->with('success', "Disabled: {$feature->name}");
     }
 }

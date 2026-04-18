@@ -6,6 +6,7 @@ use App\SaasFeature;
 use App\SaasBundle;
 use App\SaasSubscription;
 use App\SaasInvoice;
+use App\SaasSetting;
 use App\Business;
 use App\User;
 use App\Utils\BusinessUtil;
@@ -107,6 +108,21 @@ class SaasPricingController extends Controller
         }
         $total = $features->sum(fn($f) => $f->priceFor($request->cycle));
 
+        // Apply campaign discount (admin-controlled)
+        if (SaasSetting::campaignActive() && SaasSetting::campaignDiscount() > 0) {
+            $total = round($total * (1 - SaasSetting::campaignDiscount() / 100), 2);
+        }
+
+        // Enforce trial-on/off + dynamic trial length from settings
+        $trialEnabled = SaasSetting::trialEnabled();
+        $trialDays    = SaasSetting::trialDays();
+        $graceDays    = SaasSetting::trialGraceDays();
+
+        $action = $request->action;
+        if ($action === 'trial' && (!$trialEnabled || $trialDays <= 0)) {
+            return back()->withInput()->with('error', 'Free trial is not currently available. Please choose Activate Now.');
+        }
+
         DB::beginTransaction();
         try {
             // Derive a unique username from email
@@ -173,8 +189,8 @@ class SaasPricingController extends Controller
                     'total_amount'  => $total,
                     'status'        => 'trial',
                     'starts_at'     => now(),
-                    'ends_at'       => now()->addDays(3),
-                    'grace_ends_at' => now()->addDays(3),
+                    'ends_at'       => now()->addDays($trialDays),
+                    'grace_ends_at' => now()->addDays($trialDays + $graceDays),
                 ]);
             } else {
                 // pay_now — pending until STK callback confirms payment
@@ -200,7 +216,7 @@ class SaasPricingController extends Controller
                 'currency'        => 'KES',
                 'status'          => 'unpaid',
                 'type'            => 'subscription',
-                'due_at'          => $request->action === 'trial' ? now()->addDays(3) : now()->addHours(1),
+                'due_at'          => $request->action === 'trial' ? now()->addDays($trialDays) : now()->addHours(1),
             ]);
 
             DB::commit();
@@ -212,7 +228,7 @@ class SaasPricingController extends Controller
             if ($request->action === 'trial') {
                 return redirect('/home')->with('status', [
                     'success' => 1,
-                    'msg'     => 'Welcome to ' . config('app.name') . '! Your 3-day free trial is active. Activate anytime from the menu.',
+                    'msg'     => 'Welcome to ' . config('app.name') . "! Your {$trialDays}-day free trial is active. Activate anytime from the menu.",
                 ]);
             }
 
