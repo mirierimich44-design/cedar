@@ -94,6 +94,8 @@ Route::middleware(['setData'])->group(function () {
 // ─── SaaS Customer Portal ─────────────────────────────────────────────────
 Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
     Route::get('/my-subscription', [SaasPricingController::class, 'portal'])->name('saas.portal');
+    Route::get('/pricing/mpesa-pending/{invoice}', [SaasPricingController::class, 'mpesaPending'])->name('saas.mpesa.pending');
+    Route::get('/pricing/mpesa-status/{invoice}',  [SaasPricingController::class, 'mpesaStatus'])->name('saas.mpesa.status');
 });
 
 // ─── SaaS Superadmin Routes ───────────────────────────────────────────────
