@@ -1,659 +1,825 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Build Your Plan — {{ config('app.name') }}</title>
+@extends('layouts.auth2')
+@section('title', 'Build Your Plan · ' . config('app.name', 'Apex POS'))
+@inject('request', 'Illuminate\Http\Request')
+
+@section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh}
+html, body { background:#0a1628 !important; margin:0; padding:0; }
+.right-col, .container-fluid, .row.eq-height-row { padding:0 !important; margin:0 !important; }
 
-/* NAV */
-.pnav{background:#0f172a;padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.pnav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.pnav-brand img{width:32px;height:32px;border-radius:8px;background:white;padding:3px;object-fit:contain}
-.pnav-brand span{color:white;font-size:1rem;font-weight:800}
-.pnav-links{display:flex;align-items:center;gap:20px}
-.pnav-links a{color:rgba(255,255,255,0.7);font-size:0.9rem;text-decoration:none}
-.pnav-links a:hover{color:white}
-.pnav-login{background:#0d9488;color:white !important;padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.875rem}
+.wz {
+    position:fixed; inset:0; z-index:9990; overflow-y:auto;
+    background:
+        radial-gradient(ellipse at top, rgba(13,148,136,0.15), transparent 55%),
+        linear-gradient(rgba(5,15,35,0.96), rgba(5,20,45,0.98));
+    background-color:#0a1628;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:white;
+}
 
-/* PROGRESS BAR */
-.progress-wrap{background:white;border-bottom:1px solid #e2e8f0;padding:24px 16px}
-.progress-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;position:relative}
-.progress-line{position:absolute;top:22px;left:40px;right:40px;height:3px;background:#e2e8f0;z-index:0}
-.progress-line-fill{height:100%;background:linear-gradient(90deg,#0d9488,#0369a1);width:0;transition:width 0.4s}
-.progress-step{position:relative;z-index:1;text-align:center;flex:1}
-.progress-circle{width:44px;height:44px;border-radius:50%;background:#e2e8f0;color:#64748b;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:3px solid white;transition:all 0.3s;font-size:0.95rem}
-.progress-step.active .progress-circle{background:#0d9488;color:white;transform:scale(1.08);box-shadow:0 0 0 4px rgba(13,148,136,0.15)}
-.progress-step.done .progress-circle{background:#0d9488;color:white}
-.progress-label{font-size:0.78rem;font-weight:600;color:#64748b}
-.progress-step.active .progress-label{color:#0d9488}
-.progress-step.done .progress-label{color:#0f172a}
+/* ── TOP BAR ───────────────────────────────────────── */
+.wz-top { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:14px 32px; background:rgba(5,15,35,0.85); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,0.08); }
+.wz-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.wz-brand img { width:32px; height:32px; border-radius:8px; background:white; padding:3px; object-fit:contain; }
+.wz-brand span { color:white; font-weight:800; font-size:1rem; }
+.wz-top-right { display:flex; gap:18px; align-items:center; font-size:.85rem; }
+.wz-top-right a { color:rgba(255,255,255,0.65); text-decoration:none; }
+.wz-top-right a:hover { color:white; }
+.wz-help { color:#5eead4 !important; font-weight:600; }
 
-/* WIZARD */
-.wizard{max-width:1080px;margin:36px auto;padding:0 20px}
-.step-panel{display:none;animation:fadeIn 0.35s ease}
-.step-panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.step-title{font-size:clamp(1.5rem,3vw,2rem);font-weight:800;color:#0f172a;margin-bottom:8px;text-align:center}
-.step-subtitle{color:#64748b;text-align:center;margin-bottom:32px;font-size:1rem}
+/* ── PROGRESS BAR ──────────────────────────────────── */
+.wz-progress { background:rgba(0,0,0,0.25); padding:20px 32px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.wz-pb-bar { position:relative; max-width:720px; margin:0 auto 10px; height:6px; background:rgba(255,255,255,0.08); border-radius:50px; }
+.wz-pb-fill { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#5eead4,#0d9488); border-radius:50px; width:25%; transition:width .35s cubic-bezier(.4,0,.2,1); }
+.wz-pb-steps { display:flex; justify-content:space-between; max-width:720px; margin:0 auto; padding:14px 0 18px; }
+.wz-pb-step { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; font-size:.78rem; color:rgba(255,255,255,0.5); font-weight:600; text-align:center; }
+.wz-pb-dot { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.82rem; transition:.3s; }
+.wz-pb-step.done .wz-pb-dot { background:#0d9488; border-color:#0d9488; color:white; }
+.wz-pb-step.done { color:#5eead4; }
+.wz-pb-step.active .wz-pb-dot { background:#0d9488; border-color:#5eead4; color:white; box-shadow:0 0 0 4px rgba(94,234,212,0.2); }
+.wz-pb-step.active { color:white; }
 
-/* STEP 1 */
-.btype-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:24px}
-.btype-card{background:white;border:2px solid #e2e8f0;border-radius:16px;padding:26px 20px;cursor:pointer;transition:all 0.2s;text-align:center}
-.btype-card:hover{border-color:#0d9488;transform:translateY(-3px);box-shadow:0 10px 25px rgba(0,0,0,0.08)}
-.btype-card.selected{border-color:#0d9488;background:#f0fdfa;box-shadow:0 8px 20px rgba(13,148,136,0.15)}
-.btype-icon{width:64px;height:64px;margin:0 auto 14px;background:#f0fdfa;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;color:#0d9488}
-.btype-card.selected .btype-icon{background:#0d9488;color:white}
-.btype-name{font-size:1rem;font-weight:700;color:#0f172a;margin-bottom:6px}
-.btype-desc{font-size:0.82rem;color:#64748b;line-height:1.4}
+/* ── CONTENT FRAME ─────────────────────────────────── */
+.wz-frame { max-width:1180px; margin:0 auto; padding:36px 24px 120px; }
+.panel { display:none; animation:slideIn .35s ease; }
+.panel.active { display:block; }
+@keyframes slideIn { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
 
-/* STEP 2 */
-.feat-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
-@media(max-width:900px){.feat-layout{grid-template-columns:1fr}}
-.bundles-row{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap}
-.bundle-chip{border:2px solid #e2e8f0;border-radius:12px;padding:12px 16px;cursor:pointer;transition:all 0.18s;background:white;text-align:left;flex:1;min-width:150px}
-.bundle-chip:hover{border-color:#0d9488}
-.bundle-chip.selected{border-color:#0d9488;background:#f0fdfa}
-.bundle-chip .bc-name{font-size:0.9rem;font-weight:700;color:#0f172a;margin-bottom:3px}
-.bundle-chip .bc-desc{font-size:0.74rem;color:#64748b;line-height:1.4}
-.bundle-popular{display:inline-block;font-size:0.62rem;font-weight:700;background:#0d9488;color:white;padding:2px 6px;border-radius:50px;margin-bottom:4px}
-.section-label{font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;margin-bottom:12px;margin-top:4px}
-.feat-group{background:white;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:14px;overflow:hidden;transition:opacity 0.25s}
-.feat-group-header{padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;font-weight:700;color:#0f172a;font-size:0.92rem}
-.feat-group-header i{color:#0d9488;width:18px;text-align:center}
-.feat-row{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid #f1f5f9;gap:12px;transition:background 0.15s}
-.feat-row:last-child{border:none}
-.feat-row:hover{background:#f8fafc}
-.feat-check{width:22px;height:22px;min-width:22px;border-radius:6px;border:2px solid #cbd5e1;cursor:pointer;display:flex;align-items:center;justify-content:center;background:white;transition:all 0.15s}
-.feat-check.checked{background:#0d9488;border-color:#0d9488}
-.feat-check.required{background:#0d9488;border-color:#0d9488;cursor:not-allowed}
-.feat-check svg{display:none}
-.feat-check.checked svg,.feat-check.required svg{display:block}
-.feat-info{flex:1}
-.feat-name{font-size:0.9rem;font-weight:600;color:#0f172a}
-.feat-desc{font-size:0.76rem;color:#64748b;margin-top:2px}
-.feat-req-badge{font-size:0.62rem;font-weight:700;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:50px;margin-left:6px}
-.feat-recommended{font-size:0.62rem;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:50px;margin-left:6px}
-.feat-price{font-size:0.9rem;font-weight:700;color:#0f172a;white-space:nowrap;min-width:80px;text-align:right}
-.feat-price.free{color:#10b981}
+.panel-head { text-align:center; margin-bottom:32px; }
+.panel-eyebrow { color:#5eead4; font-size:.78rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+.panel-head h2 { font-size:clamp(1.6rem, 3.2vw, 2.3rem); font-weight:900; color:white; margin:0 0 10px; letter-spacing:-.02em; }
+.panel-head p { color:rgba(255,255,255,0.65); font-size:1rem; max-width:560px; margin:0 auto; line-height:1.6; }
 
-/* STEP 3 */
-.cycle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:820px;margin:0 auto 24px}
-.cycle-card{background:white;border:2px solid #e2e8f0;border-radius:14px;padding:24px 18px;cursor:pointer;transition:all 0.2s;text-align:center;position:relative}
-.cycle-card:hover{border-color:#0d9488}
-.cycle-card.selected{border-color:#0d9488;background:#f0fdfa}
-.cycle-label{font-size:1.05rem;font-weight:700;color:#0f172a;margin-bottom:6px}
-.cycle-sublabel{font-size:0.82rem;color:#64748b;margin-bottom:10px}
-.cycle-savings{display:inline-block;font-size:0.7rem;font-weight:700;background:#10b981;color:white;padding:3px 10px;border-radius:50px}
-.hosting-section{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:22px;max-width:820px;margin:0 auto}
-.hosting-section h4{font-size:1rem;font-weight:700;color:#0f172a;margin-bottom:14px}
-.hosting-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:600px){.hosting-opts{grid-template-columns:1fr}}
-.hosting-opt{border:2px solid #e2e8f0;border-radius:12px;padding:18px 16px;cursor:pointer;transition:all 0.15s;text-align:left}
-.hosting-opt:hover{border-color:#0d9488}
-.hosting-opt.selected{border-color:#0d9488;background:#f0fdfa}
-.hosting-opt .ho-title{font-size:0.95rem;font-weight:700;color:#0f172a;margin-bottom:4px}
-.hosting-opt .ho-sub{font-size:0.78rem;color:#64748b}
+/* ── STEP 1 — GOALS ────────────────────────────────── */
+.goals-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:880px; margin:0 auto; }
+@media(max-width:780px){ .goals-grid{ grid-template-columns:repeat(2,1fr);} }
+@media(max-width:480px){ .goals-grid{ grid-template-columns:1fr;} }
+.goal { background:rgba(15,23,42,0.7); border:2px solid rgba(255,255,255,0.1); border-radius:18px; padding:26px 22px; cursor:pointer; transition:.2s; text-align:center; position:relative; min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.goal:hover { border-color:rgba(13,148,136,0.5); transform:translateY(-3px); background:rgba(15,23,42,0.95); }
+.goal.selected { border-color:#0d9488; background:rgba(13,148,136,0.15); box-shadow:0 0 0 1px #0d9488; }
+.goal.selected::after { content:'✓'; position:absolute; top:12px; right:12px; width:24px; height:24px; background:#0d9488; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.85rem; }
+.goal-icon { font-size:2.4rem; margin-bottom:12px; }
+.goal h4 { color:white; font-size:1.02rem; font-weight:800; margin:0 0 6px; }
+.goal p { color:rgba(255,255,255,0.6); font-size:.82rem; line-height:1.5; margin:0; }
+.goal-hint { text-align:center; margin-top:24px; color:rgba(255,255,255,0.5); font-size:.85rem; }
+.goal-hint b { color:#5eead4; }
 
-/* STEP 4 */
-.review-wrap{max-width:780px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:700px){.review-wrap{grid-template-columns:1fr}}
-.review-card{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:22px}
-.review-card h4{font-size:0.95rem;font-weight:700;color:#0f172a;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.review-card h4 i{color:#0d9488}
-.review-row{display:flex;justify-content:space-between;padding:8px 0;font-size:0.86rem;border-bottom:1px solid #f1f5f9}
-.review-row:last-child{border:none}
-.review-total-box{background:linear-gradient(135deg,#0f766e,#0369a1);color:white;border-radius:14px;padding:24px;text-align:center;margin:20px auto 0;max-width:780px}
-.review-total-label{font-size:0.85rem;opacity:0.85;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
-.review-total-amount{font-size:2.4rem;font-weight:900;margin-bottom:4px}
-.review-cycle-note{font-size:0.85rem;opacity:0.85}
+/* ── STEP 2 — FEATURES ─────────────────────────────── */
+.feat-layout { display:grid; grid-template-columns:1fr 340px; gap:28px; align-items:start; }
+@media(max-width:900px){ .feat-layout{ grid-template-columns:1fr;} }
 
-/* SUMMARY */
-.summary-card{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:22px;position:sticky;top:88px}
-.summary-card h3{font-size:0.98rem;font-weight:800;color:#0f172a;margin-bottom:14px}
-.summary-items{min-height:50px;margin-bottom:14px;max-height:260px;overflow-y:auto}
-.summary-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:0.82rem}
-.summary-item:last-child{border:none}
-.summary-empty{color:#94a3b8;font-size:0.82rem;font-style:italic}
-.summary-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:2px solid #e2e8f0;margin-top:6px}
-.summary-total-label{font-weight:700;color:#0f172a;font-size:0.9rem}
-.summary-total-amount{font-size:1.5rem;font-weight:900;color:#0d9488}
+.reco-banner { background:linear-gradient(90deg, rgba(13,148,136,0.2), rgba(13,148,136,0.05)); border:1px solid rgba(13,148,136,0.35); border-radius:14px; padding:14px 18px; margin-bottom:20px; color:#5eead4; font-size:.88rem; display:flex; align-items:center; gap:10px; }
+.reco-banner i { font-size:1.1rem; }
+.reco-banner a { color:#5eead4; text-decoration:underline; cursor:pointer; margin-left:auto; font-weight:600; font-size:.82rem; }
 
-/* NAV BUTTONS */
-.wizard-nav{max-width:1080px;margin:32px auto 48px;padding:0 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.btn-wiz{padding:14px 32px;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
-.btn-back{background:white;color:#64748b;border:1.5px solid #cbd5e1}
-.btn-back:hover{background:#f1f5f9}
-.btn-next{background:linear-gradient(135deg,#0f766e,#0369a1);color:white;margin-left:auto}
-.btn-next:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,118,110,0.35)}
-.btn-next:disabled{opacity:0.5;cursor:not-allowed}
+.cat-accordion { background:rgba(15,23,42,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:16px; margin-bottom:14px; overflow:hidden; transition:border-color .2s; }
+.cat-accordion.has-selected { border-color:rgba(13,148,136,0.4); }
+.cat-head { display:flex; align-items:center; gap:14px; padding:16px 20px; cursor:pointer; user-select:none; transition:background .2s; }
+.cat-head:hover { background:rgba(255,255,255,0.04); }
+.cat-icon { width:38px; height:38px; border-radius:10px; background:rgba(13,148,136,0.18); color:#5eead4; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.cat-title { flex:1; }
+.cat-title b { display:block; color:white; font-size:.98rem; font-weight:700; }
+.cat-title small { color:rgba(255,255,255,0.5); font-size:.78rem; }
+.cat-badge { background:rgba(13,148,136,0.2); color:#5eead4; font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:50px; text-transform:uppercase; letter-spacing:.5px; margin-right:8px; }
+.cat-count { color:rgba(255,255,255,0.5); font-size:.82rem; font-weight:600; margin-right:10px; }
+.cat-chevron { color:rgba(255,255,255,0.4); transition:transform .2s; }
+.cat-accordion.open .cat-chevron { transform:rotate(180deg); }
+.cat-body { display:none; border-top:1px solid rgba(255,255,255,0.06); }
+.cat-accordion.open .cat-body { display:block; }
 
-/* FOOTER */
-.pfooter{text-align:center;padding:30px 20px;color:#94a3b8;font-size:0.82rem;background:#f8fafc;border-top:1px solid #e2e8f0;margin-top:40px}
-.pfooter a{color:#0d9488;text-decoration:none}
+.frow { display:flex; align-items:center; padding:14px 20px; gap:14px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer; transition:background .15s; }
+.frow:last-child { border-bottom:none; }
+.frow:hover { background:rgba(255,255,255,0.03); }
+.frow.reco { background:linear-gradient(90deg, rgba(13,148,136,0.08), transparent 40%); }
+.fcheck { width:24px; height:24px; border-radius:7px; border:2px solid rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; background:transparent; transition:.15s; flex-shrink:0; }
+.fcheck.checked { background:#0d9488; border-color:#0d9488; }
+.fcheck.required { background:#0d9488; border-color:#0d9488; opacity:.85; cursor:not-allowed; }
+.fcheck svg { display:none; stroke:white; }
+.fcheck.checked svg, .fcheck.required svg { display:block; }
+.finfo { flex:1; min-width:0; }
+.fname { color:white; font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.fname .reco-tag { background:rgba(16,185,129,0.2); color:#34d399; font-size:.65rem; padding:2px 7px; border-radius:50px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+.fname .inc-tag { color:#5eead4; font-size:.75rem; font-weight:500; }
+.fdesc { color:rgba(255,255,255,0.5); font-size:.8rem; margin-top:3px; line-height:1.45; }
+.fprice { color:white; font-weight:700; font-size:.92rem; min-width:95px; text-align:right; flex-shrink:0; }
+.fprice.free { color:#34d399; }
 
-.flash{padding:12px 18px;border-radius:10px;margin:14px auto;max-width:700px;font-size:0.9rem;font-weight:500;text-align:center}
-.flash.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
-.flash.error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+/* ── SIDEBAR / SUMMARY ─────────────────────────────── */
+.sum-card { background:rgba(15,23,42,0.85); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:24px; position:sticky; top:170px; backdrop-filter:blur(10px); }
+@media(max-width:900px){ .sum-card{ position:static; margin-top:20px;} }
+.sum-card h3 { color:white; font-weight:800; font-size:1.1rem; margin:0 0 18px; display:flex; align-items:center; gap:8px; }
+.sum-card h3 i { color:#5eead4; }
+.sum-empty { text-align:center; padding:24px 10px; color:rgba(255,255,255,0.4); font-size:.85rem; font-style:italic; line-height:1.6; }
+.sum-empty strong { display:block; color:rgba(255,255,255,0.7); font-style:normal; font-weight:700; margin-bottom:6px; font-size:.95rem; }
+.sum-list { max-height:260px; overflow-y:auto; margin:0 -4px 14px; padding:0 4px; }
+.sum-list::-webkit-scrollbar { width:4px; }
+.sum-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.sum-item { display:flex; justify-content:space-between; gap:12px; padding:7px 0; font-size:.85rem; color:rgba(255,255,255,0.85); border-bottom:1px solid rgba(255,255,255,0.05); }
+.sum-item:last-child { border:none; }
+.sum-item b { color:white; font-weight:700; white-space:nowrap; }
+.sum-divider { border:none; border-top:1px dashed rgba(255,255,255,0.12); margin:14px 0; }
+.sum-total { display:flex; justify-content:space-between; align-items:baseline; }
+.sum-total-label { color:rgba(255,255,255,0.7); font-size:.9rem; font-weight:600; }
+.sum-total-amount { font-size:1.8rem; font-weight:900; color:#5eead4; line-height:1; }
+.sum-cycle-note { text-align:right; color:rgba(255,255,255,0.5); font-size:.78rem; margin-top:3px; }
+.sum-savings { background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); color:#34d399; padding:10px 12px; border-radius:10px; font-size:.8rem; margin-top:14px; display:none; font-weight:600; }
+.sum-savings.show { display:block; }
+.sum-trust { margin-top:18px; display:flex; flex-direction:column; gap:7px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08); }
+.sum-trust div { font-size:.78rem; color:rgba(255,255,255,0.6); display:flex; align-items:center; gap:8px; }
+.sum-trust i { color:#34d399; width:14px; }
+
+/* ── STEP 3 — BILLING/HOSTING ──────────────────────── */
+.billing-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; max-width:920px; margin:0 auto 32px; }
+@media(max-width:780px){ .billing-grid{ grid-template-columns:repeat(2,1fr);} }
+.bcard { background:rgba(15,23,42,0.7); border:2px solid rgba(255,255,255,0.1); border-radius:16px; padding:22px 18px; cursor:pointer; transition:.2s; text-align:center; position:relative; min-height:170px; display:flex; flex-direction:column; justify-content:center; }
+.bcard:hover { border-color:rgba(13,148,136,0.4); transform:translateY(-2px); }
+.bcard.selected { border-color:#0d9488; background:rgba(13,148,136,0.15); box-shadow:0 0 0 1px #0d9488; }
+.bcard.recommended::before { content:'MOST POPULAR'; position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:#0d9488; color:white; font-size:.65rem; font-weight:800; letter-spacing:.8px; padding:4px 10px; border-radius:50px; white-space:nowrap; }
+.bcard .cycle-label { color:white; font-weight:800; font-size:1.1rem; margin-bottom:8px; }
+.bcard .cycle-save { color:#34d399; font-size:.78rem; font-weight:700; margin-bottom:10px; min-height:18px; }
+.bcard .cycle-desc { color:rgba(255,255,255,0.55); font-size:.78rem; line-height:1.5; }
+
+.hosting-block { max-width:920px; margin:0 auto; }
+.hosting-head { color:white; font-weight:800; font-size:1.05rem; margin-bottom:16px; text-align:center; }
+.hosting-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:600px){ .hosting-grid{ grid-template-columns:1fr;} }
+.hcard { background:rgba(15,23,42,0.7); border:2px solid rgba(255,255,255,0.1); border-radius:16px; padding:22px; cursor:pointer; transition:.2s; display:flex; gap:14px; align-items:flex-start; }
+.hcard:hover { border-color:rgba(13,148,136,0.4); }
+.hcard.selected { border-color:#0d9488; background:rgba(13,148,136,0.12); box-shadow:0 0 0 1px #0d9488; }
+.hcard-icon { font-size:2rem; }
+.hcard h4 { color:white; margin:0 0 6px; font-size:1rem; font-weight:800; }
+.hcard p { color:rgba(255,255,255,0.6); font-size:.82rem; line-height:1.5; margin:0 0 8px; }
+.hcard ul { margin:0; padding-left:18px; font-size:.78rem; color:rgba(255,255,255,0.55); }
+.hcard ul li { margin-bottom:3px; }
+
+/* ── STEP 4 — REVIEW ───────────────────────────────── */
+.review-grid { display:grid; grid-template-columns:1fr 360px; gap:28px; align-items:start; max-width:1100px; margin:0 auto; }
+@media(max-width:900px){ .review-grid{ grid-template-columns:1fr;} }
+.review-block { background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:24px; margin-bottom:16px; }
+.review-block h3 { color:white; font-weight:800; font-size:1rem; margin:0 0 14px; display:flex; justify-content:space-between; align-items:center; }
+.review-block h3 a { color:#5eead4; font-size:.8rem; font-weight:600; text-decoration:none; cursor:pointer; }
+.review-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:.88rem; color:rgba(255,255,255,0.85); }
+.review-item:last-child { border:none; }
+.review-item b { color:white; }
+.review-kv { display:flex; gap:18px; flex-wrap:wrap; }
+.review-kv > div { flex:1; min-width:140px; }
+.review-kv small { display:block; color:rgba(255,255,255,0.5); font-size:.72rem; text-transform:uppercase; letter-spacing:.8px; margin-bottom:4px; font-weight:600; }
+.review-kv b { color:white; font-size:.95rem; }
+
+.faq-wrap summary { padding:14px 0; color:white; cursor:pointer; list-style:none; display:flex; justify-content:space-between; font-size:.88rem; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.06); }
+.faq-wrap summary::-webkit-details-marker { display:none; }
+.faq-wrap summary::after { content:'+'; color:#5eead4; font-size:1.2rem; font-weight:300; }
+.faq-wrap details[open] summary::after { content:'−'; }
+.faq-wrap details p { color:rgba(255,255,255,0.65); font-size:.85rem; line-height:1.65; padding:12px 0 4px; margin:0; }
+
+/* ── NAV BUTTONS ───────────────────────────────────── */
+.wz-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(5,15,35,0.95); backdrop-filter:blur(14px); border-top:1px solid rgba(255,255,255,0.08); padding:14px 32px; display:flex; justify-content:space-between; align-items:center; gap:12px; z-index:50; }
+.wz-nav-inner { max-width:1180px; margin:0 auto; width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.wz-nav-hint { color:rgba(255,255,255,0.55); font-size:.82rem; }
+.wz-nav-hint b { color:#5eead4; }
+.btn-nav { padding:14px 28px; border-radius:50px; border:none; font-weight:800; font-size:.92rem; cursor:pointer; transition:.2s; min-height:48px; display:inline-flex; align-items:center; gap:8px; }
+.btn-next { background:#0d9488; color:white; box-shadow:0 6px 18px rgba(13,148,136,0.4); }
+.btn-next:hover:not(:disabled) { background:#0f766e; transform:translateY(-1px); }
+.btn-next:disabled { opacity:.35; cursor:not-allowed; }
+.btn-back { background:transparent; color:rgba(255,255,255,0.7); border:1.5px solid rgba(255,255,255,0.2); }
+.btn-back:hover { background:rgba(255,255,255,0.06); color:white; }
+.btn-nav.hidden { visibility:hidden; }
+
+/* ── FLASH ─────────────────────────────────────────── */
+.flash { max-width:900px; margin:20px auto 0; padding:14px 20px; border-radius:12px; font-weight:600; }
+.flash.success { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; }
+.flash.error { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; }
 </style>
-</head>
-<body>
 
-<nav class="pnav">
-    <a href="{{ url('/') }}" class="pnav-brand">
-        <img src="{{ asset('img/logo-small.png') }}" alt="logo">
-        <span>{{ config('app.name') }}</span>
-    </a>
-    <div class="pnav-links">
-        <a href="{{ url('/') }}">Home</a>
-        <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login']) }}" class="pnav-login">Sign In</a>
-    </div>
-</nav>
+<div class="wz">
 
-<div class="progress-wrap">
-    <div class="progress-inner">
-        <div class="progress-line"><div class="progress-line-fill" id="progFill"></div></div>
-        <div class="progress-step active" data-step="1"><div class="progress-circle">1</div><div class="progress-label">Business</div></div>
-        <div class="progress-step"        data-step="2"><div class="progress-circle">2</div><div class="progress-label">Features</div></div>
-        <div class="progress-step"        data-step="3"><div class="progress-circle">3</div><div class="progress-label">Billing</div></div>
-        <div class="progress-step"        data-step="4"><div class="progress-circle">4</div><div class="progress-label">Review</div></div>
-    </div>
-</div>
+    {{-- TOP BAR --}}
+    <nav class="wz-top">
+        <a href="{{ url('/') }}" class="wz-brand">
+            <img src="{{ asset('img/logo-small.png') }}" alt="logo">
+            <span>{{ config('app.name', 'Apex POS') }}</span>
+        </a>
+        <div class="wz-top-right">
+            <a href="{{ url('/') }}"><i class="fas fa-arrow-left"></i> Home</a>
+            <a href="mailto:hello@apexpos.co.ke" class="wz-help"><i class="fas fa-comment-dots"></i> Need help?</a>
+        </div>
+    </nav>
 
-@if(session('success'))<div class="flash success">{{ session('success') }}</div>@endif
-@if(session('error'))<div class="flash error">{{ session('error') }}</div>@endif
-
-<div class="wizard">
-
-    {{-- ─── STEP 1: BUSINESS TYPE ─────────────────────────────── --}}
-    <div class="step-panel active" id="step-1">
-        <h2 class="step-title">What kind of business do you run?</h2>
-        <p class="step-subtitle">We'll suggest the features that fit you best. You can change anything on the next step.</p>
-
-        <div class="btype-grid">
-            <div class="btype-card" data-btype="pharmacy"   data-categories="core,inventory,pharmacy,reporting">
-                <div class="btype-icon"><i class="fas fa-pills"></i></div>
-                <div class="btype-name">Pharmacy</div>
-                <div class="btype-desc">Chemists, drugstores, DDA dispensers</div>
-            </div>
-            <div class="btype-card" data-btype="retail"     data-categories="core,inventory,reporting,communication">
-                <div class="btype-icon"><i class="fas fa-store"></i></div>
-                <div class="btype-name">Retail / Shop</div>
-                <div class="btype-desc">Supermarkets, boutiques, general merchandise</div>
-            </div>
-            <div class="btype-card" data-btype="restaurant" data-categories="core,inventory,restaurant,reporting">
-                <div class="btype-icon"><i class="fas fa-utensils"></i></div>
-                <div class="btype-name">Restaurant / Café</div>
-                <div class="btype-desc">Eateries, hotels, bars with kitchen</div>
-            </div>
-            <div class="btype-card" data-btype="clinic"     data-categories="core,pharmacy,reporting,communication">
-                <div class="btype-icon"><i class="fas fa-stethoscope"></i></div>
-                <div class="btype-name">Clinic / Hospital</div>
-                <div class="btype-desc">Medical practices, diagnostic labs</div>
-            </div>
-            <div class="btype-card" data-btype="service"    data-categories="core,reporting,communication">
-                <div class="btype-icon"><i class="fas fa-briefcase"></i></div>
-                <div class="btype-name">Service Business</div>
-                <div class="btype-desc">Consulting, agencies, professional services</div>
-            </div>
-            <div class="btype-card" data-btype="other"      data-categories="core,inventory,pharmacy,reporting,communication,restaurant">
-                <div class="btype-icon"><i class="fas fa-th"></i></div>
-                <div class="btype-name">Something Else</div>
-                <div class="btype-desc">Show me all available features</div>
-            </div>
+    {{-- PROGRESS BAR --}}
+    <div class="wz-progress">
+        <div class="wz-pb-bar"><div class="wz-pb-fill" id="pb-fill"></div></div>
+        <div class="wz-pb-steps">
+            <div class="wz-pb-step active" data-step="1"><div class="wz-pb-dot">1</div><span>Your goals</span></div>
+            <div class="wz-pb-step" data-step="2"><div class="wz-pb-dot">2</div><span>Pick features</span></div>
+            <div class="wz-pb-step" data-step="3"><div class="wz-pb-dot">3</div><span>Billing</span></div>
+            <div class="wz-pb-step" data-step="4"><div class="wz-pb-dot">4</div><span>Review</span></div>
         </div>
     </div>
 
-    {{-- ─── STEP 2: FEATURES ──────────────────────────────────── --}}
-    <div class="step-panel" id="step-2">
-        <h2 class="step-title">Pick your features</h2>
-        <p class="step-subtitle">We've pre-selected what most <span id="btype-label" style="color:#0d9488;font-weight:700;">businesses</span> start with. Add or remove any.</p>
+    @if(session('success'))<div class="flash success">{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="flash error">{{ session('error') }}</div>@endif
+
+    <div class="wz-frame">
+
+    {{-- ═════ STEP 1: GOALS ═════ --}}
+    <div class="panel active" data-panel="1">
+        <div class="panel-head">
+            <div class="panel-eyebrow">Step 1 of 4 · 30 seconds</div>
+            <h2>What do you want your system to do?</h2>
+            <p>Pick up to 3 goals. We'll recommend the right features — you can still add or remove anything later.</p>
+        </div>
+
+        <div class="goals-grid">
+            <div class="goal" data-goal="sales" data-cats="core,sales">
+                <div class="goal-icon">💰</div>
+                <h4>Sell &amp; get paid</h4>
+                <p>POS, invoices, M-Pesa, card payments.</p>
+            </div>
+            <div class="goal" data-goal="stock" data-cats="inventory">
+                <div class="goal-icon">📦</div>
+                <h4>Track stock</h4>
+                <p>Inventory, suppliers, transfers, barcodes.</p>
+            </div>
+            <div class="goal" data-goal="pharmacy" data-cats="pharmacy">
+                <div class="goal-icon">💊</div>
+                <h4>Run a pharmacy</h4>
+                <p>DDA, prescriptions, patient records.</p>
+            </div>
+            <div class="goal" data-goal="restaurant" data-cats="restaurant">
+                <div class="goal-icon">🍽️</div>
+                <h4>Run a restaurant</h4>
+                <p>Tables, KOT, split bills, menus.</p>
+            </div>
+            <div class="goal" data-goal="comms" data-cats="communication">
+                <div class="goal-icon">📨</div>
+                <h4>Reach customers</h4>
+                <p>SMS, WhatsApp receipts, email invoices.</p>
+            </div>
+            <div class="goal" data-goal="reports" data-cats="reporting">
+                <div class="goal-icon">📈</div>
+                <h4>See clear reports</h4>
+                <p>Dashboards, P&amp;L, sales analytics.</p>
+            </div>
+        </div>
+        <p class="goal-hint">Selected <b id="goal-count">0</b> of 3 · <span id="goal-skip" style="cursor:pointer;text-decoration:underline;">Skip and browse all features →</span></p>
+    </div>
+
+    {{-- ═════ STEP 2: FEATURES ═════ --}}
+    <div class="panel" data-panel="2">
+        <div class="panel-head">
+            <div class="panel-eyebrow">Step 2 of 4</div>
+            <h2>Pick the features you need.</h2>
+            <p>Add any module. Your total updates in real time on the right.</p>
+        </div>
 
         <div class="feat-layout">
             <div>
-                @if($bundles->count())
-                <div class="section-label">Quick-Start Bundles</div>
-                <div class="bundles-row">
-                    @foreach($bundles as $bundle)
-                    <button type="button" class="bundle-chip" data-bundle-id="{{ $bundle->id }}"
-                            data-feature-ids="{{ $bundle->features->pluck('id')->join(',') }}">
-                        @if($bundle->is_popular)<span class="bundle-popular">POPULAR</span>@endif
-                        <div class="bc-name">{{ $bundle->name }}</div>
-                        <div class="bc-desc">{{ $bundle->description }}</div>
-                    </button>
-                    @endforeach
+                <div class="reco-banner" id="reco-banner" style="display:none;">
+                    <i class="fas fa-magic"></i>
+                    <span><b>Based on your goals</b>, we've highlighted recommended features.</span>
+                    <a id="apply-reco">Auto-select all →</a>
                 </div>
-                @endif
-
-                <div class="section-label">Individual Features</div>
 
                 @foreach($categories as $catKey => $catMeta)
-                @if($featuresByCategory->has($catKey))
-                <div class="feat-group" data-category="{{ $catKey }}">
-                    <div class="feat-group-header">
-                        <i class="fas {{ $catMeta['icon'] }}"></i>
-                        {{ $catMeta['label'] }}
-                    </div>
-                    @foreach($featuresByCategory[$catKey] as $feature)
-                    <div class="feat-row" data-feature-id="{{ $feature->id }}" data-category="{{ $catKey }}">
-                        <div class="feat-check {{ $feature->is_required ? 'checked required' : '' }}"
-                             id="check-{{ $feature->id }}"
-                             onclick="{{ $feature->is_required ? '' : 'toggleFeature(' . $feature->id . ')' }}">
-                            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                                <path d="M2 6.5L5 9.5L11 3.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <div class="feat-info">
-                            <div class="feat-name">
-                                <span class="feat-name-text">{{ $feature->name }}</span>
-                                @if($feature->is_required)<span class="feat-req-badge">Included</span>@endif
-                                <span class="feat-recommended" style="display:none;" id="rec-{{ $feature->id }}">Recommended</span>
+                    @if($featuresByCategory->has($catKey))
+                    @php
+                        $isCore = $catKey === 'core';
+                        $items = $featuresByCategory[$catKey];
+                    @endphp
+                    <div class="cat-accordion {{ $isCore ? 'open' : '' }}" data-cat="{{ $catKey }}">
+                        <div class="cat-head" onclick="toggleCat(this)">
+                            <div class="cat-icon"><i class="fas {{ $catMeta['icon'] }}"></i></div>
+                            <div class="cat-title">
+                                <b>{{ $catMeta['label'] }}</b>
+                                <small>{{ $items->count() }} module{{ $items->count() === 1 ? '' : 's' }}</small>
                             </div>
-                            @if($feature->description)
-                            <div class="feat-desc">{{ $feature->description }}</div>
-                            @endif
+                            <span class="cat-badge" style="display:none;" data-reco-badge>Recommended</span>
+                            <span class="cat-count" data-cat-count="{{ $catKey }}">0 selected</span>
+                            <i class="fas fa-chevron-down cat-chevron"></i>
                         </div>
-                        <div class="feat-price {{ $feature->price_monthly == 0 ? 'free' : '' }}"
-                             id="price-{{ $feature->id }}"
-                             data-monthly="{{ $feature->price_monthly }}"
-                             data-quarterly="{{ $feature->price_quarterly }}"
-                             data-yearly="{{ $feature->price_yearly }}"
-                             data-once="{{ $feature->price_once }}">
-                            {{ $feature->price_monthly == 0 ? 'Free' : 'KES ' . number_format($feature->price_monthly, 0) }}
+                        <div class="cat-body">
+                            @foreach($items as $feature)
+                            <div class="frow" data-feature-id="{{ $feature->id }}" data-cat-key="{{ $catKey }}"
+                                 onclick="{{ $feature->is_required ? '' : 'toggleFeature(' . $feature->id . ')' }}">
+                                <div class="fcheck {{ $feature->is_required ? 'checked required' : '' }}" id="check-{{ $feature->id }}">
+                                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                        <path d="M2 6.5L5 9.5L11 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="finfo">
+                                    <div class="fname">
+                                        <span>{{ $feature->name }}</span>
+                                        @if($feature->is_required)<span class="inc-tag">· Included</span>@endif
+                                        <span class="reco-tag" style="display:none;" data-reco-tag>Recommended</span>
+                                    </div>
+                                    @if($feature->description)<div class="fdesc">{{ $feature->description }}</div>@endif
+                                </div>
+                                <div class="fprice {{ $feature->price_monthly == 0 ? 'free' : '' }}"
+                                     id="price-{{ $feature->id }}"
+                                     data-monthly="{{ $feature->price_monthly }}"
+                                     data-quarterly="{{ $feature->price_quarterly }}"
+                                     data-yearly="{{ $feature->price_yearly }}"
+                                     data-once="{{ $feature->price_once }}">
+                                    {{ $feature->price_monthly == 0 ? 'Free' : 'KES ' . number_format($feature->price_monthly, 0) }}
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
-                    @endforeach
-                </div>
-                @endif
+                    @endif
                 @endforeach
             </div>
 
-            <div>
-                <div class="summary-card">
-                    <h3>Your Selection</h3>
-                    <div class="summary-items" id="summary-items">
-                        <div class="summary-empty" id="summary-empty">No features selected yet.</div>
+            {{-- SIDEBAR --}}
+            <aside>
+                <div class="sum-card">
+                    <h3><i class="fas fa-shopping-basket"></i> Your Plan</h3>
+                    <div id="sum-list" class="sum-list">
+                        <div class="sum-empty" id="sum-empty">
+                            <strong>Let's build your plan.</strong>
+                            Tick any feature on the left and see your price appear here.
+                        </div>
                     </div>
-                    <div class="summary-total">
-                        <span class="summary-total-label">Subtotal</span>
-                        <span class="summary-total-amount" id="summary-total">KES 0</span>
+                    <hr class="sum-divider" id="sum-divider" style="display:none;">
+                    <div class="sum-total">
+                        <span class="sum-total-label">Total</span>
+                        <div style="text-align:right;">
+                            <div class="sum-total-amount" id="sum-total">KES 0</div>
+                            <div class="sum-cycle-note" id="sum-cycle-note">per month</div>
+                        </div>
                     </div>
-                    <div style="font-size:0.74rem;color:#94a3b8;margin-top:6px;text-align:right;" id="summary-cycle-note">per month</div>
+                    <div class="sum-savings" id="sum-savings"></div>
+                    <div class="sum-trust">
+                        <div><i class="fas fa-check"></i> No commitment. Change anytime.</div>
+                        <div><i class="fas fa-check"></i> Demo before you pay.</div>
+                        <div><i class="fas fa-check"></i> Local Kenyan support.</div>
+                    </div>
                 </div>
-            </div>
+            </aside>
         </div>
     </div>
 
-    {{-- ─── STEP 3: BILLING + HOSTING ─────────────────────────── --}}
-    <div class="step-panel" id="step-3">
-        <h2 class="step-title">Choose how you'd like to pay</h2>
-        <p class="step-subtitle">Longer commitments save you money. You can switch later.</p>
+    {{-- ═════ STEP 3: BILLING + HOSTING ═════ --}}
+    <div class="panel" data-panel="3">
+        <div class="panel-head">
+            <div class="panel-eyebrow">Step 3 of 4</div>
+            <h2>How would you like to pay?</h2>
+            <p>Longer cycles = bigger savings. Pick Cloud for zero-maintenance, or On-Premise to own it.</p>
+        </div>
 
-        <div class="cycle-grid">
-            <div class="cycle-card selected" data-cycle="monthly">
+        <div class="billing-grid">
+            <div class="bcard" data-cycle="monthly" onclick="selectCycle('monthly')">
                 <div class="cycle-label">Monthly</div>
-                <div class="cycle-sublabel">Most flexible</div>
-                <div style="color:#64748b;font-size:0.78rem;">Billed every month</div>
+                <div class="cycle-save">&nbsp;</div>
+                <div class="cycle-desc">Pay month to month.</div>
             </div>
-            <div class="cycle-card" data-cycle="quarterly">
+            <div class="bcard" data-cycle="quarterly" onclick="selectCycle('quarterly')">
                 <div class="cycle-label">Quarterly</div>
-                <div class="cycle-sublabel">Every 3 months</div>
-                <div class="cycle-savings">Save 10%</div>
+                <div class="cycle-save">Save 10%</div>
+                <div class="cycle-desc">Billed every 3 months.</div>
             </div>
-            <div class="cycle-card" data-cycle="yearly">
+            <div class="bcard recommended" data-cycle="yearly" onclick="selectCycle('yearly')">
                 <div class="cycle-label">Yearly</div>
-                <div class="cycle-sublabel">Best value</div>
-                <div class="cycle-savings">Save 20%</div>
+                <div class="cycle-save">Save 20%</div>
+                <div class="cycle-desc">Best value. Billed yearly.</div>
             </div>
-            <div class="cycle-card" data-cycle="once">
+            <div class="bcard" data-cycle="once" onclick="selectCycle('once')">
                 <div class="cycle-label">One-Off</div>
-                <div class="cycle-sublabel">Lifetime license</div>
-                <div style="color:#64748b;font-size:0.78rem;">Self-hosted only</div>
+                <div class="cycle-save">Self-hosted only</div>
+                <div class="cycle-desc">Buy once, own forever.</div>
             </div>
         </div>
 
-        <div class="hosting-section">
-            <h4><i class="fas fa-server" style="color:#0d9488;margin-right:6px;"></i> Where do you want it hosted?</h4>
-            <div class="hosting-opts">
-                <div class="hosting-opt selected" data-hosting="cloud">
-                    <div class="ho-title">☁️ Cloud Hosted <span style="font-size:0.68rem;background:#0d9488;color:white;padding:2px 7px;border-radius:50px;margin-left:4px;">RECOMMENDED</span></div>
-                    <div class="ho-sub">We host and manage everything. Backups, updates, 24/7 uptime.</div>
+        <div class="hosting-block">
+            <div class="hosting-head">Where do you want it hosted?</div>
+            <div class="hosting-grid">
+                <div class="hcard selected" data-hosting="cloud" onclick="selectHosting('cloud')">
+                    <div class="hcard-icon">☁️</div>
+                    <div>
+                        <h4>Cloud (Managed)</h4>
+                        <p>We host, secure, back up and update. Access from anywhere.</p>
+                        <ul>
+                            <li>No server to buy or maintain</li>
+                            <li>Daily encrypted backups</li>
+                            <li>24/7 uptime monitoring</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="hosting-opt" data-hosting="self_hosted">
-                    <div class="ho-title">🖥️ Self-Hosted</div>
-                    <div class="ho-sub">Install on your own server. One-off license + yearly support fee.</div>
+                <div class="hcard" data-hosting="self_hosted" onclick="selectHosting('self_hosted')">
+                    <div class="hcard-icon">🖥️</div>
+                    <div>
+                        <h4>On-Premise</h4>
+                        <p>We install on your own server or computer. You own the data completely.</p>
+                        <ul>
+                            <li>Works offline</li>
+                            <li>One-off payment option</li>
+                            <li>Full data ownership</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ─── STEP 4: REVIEW ────────────────────────────────────── --}}
-    <div class="step-panel" id="step-4">
-        <h2 class="step-title">Review your plan</h2>
-        <p class="step-subtitle">Looks good? Continue to create your account and complete setup.</p>
-
-        <div class="review-wrap">
-            <div class="review-card">
-                <h4><i class="fas fa-list-check"></i> Selected Features</h4>
-                <div id="review-features"></div>
-            </div>
-            <div class="review-card">
-                <h4><i class="fas fa-receipt"></i> Plan Details</h4>
-                <div class="review-row"><span>Business Type</span><strong id="review-btype">—</strong></div>
-                <div class="review-row"><span>Billing Cycle</span><strong id="review-cycle" style="text-transform:capitalize;">—</strong></div>
-                <div class="review-row"><span>Hosting</span><strong id="review-hosting">—</strong></div>
-                <div class="review-row"><span>Features</span><strong id="review-count">0</strong></div>
-            </div>
+    {{-- ═════ STEP 4: REVIEW ═════ --}}
+    <div class="panel" data-panel="4">
+        <div class="panel-head">
+            <div class="panel-eyebrow">Final step</div>
+            <h2>Looks good. Ready to go?</h2>
+            <p>Here's exactly what you'll get and what you'll pay. Change anything by clicking Edit.</p>
         </div>
 
-        <div class="review-total-box">
-            <div class="review-total-label">Total</div>
-            <div class="review-total-amount" id="review-total">KES 0</div>
-            <div class="review-cycle-note" id="review-total-note">per month</div>
+        <div class="review-grid">
+            <div>
+                <div class="review-block">
+                    <h3>Plan details <a onclick="goStep(3)">Edit</a></h3>
+                    <div class="review-kv">
+                        <div><small>Billing cycle</small><b id="rv-cycle">—</b></div>
+                        <div><small>Hosting</small><b id="rv-hosting">—</b></div>
+                        <div><small>Activation</small><b>Within 24 hours</b></div>
+                    </div>
+                </div>
+
+                <div class="review-block">
+                    <h3>Features included <a onclick="goStep(2)">Edit</a></h3>
+                    <div id="rv-features"></div>
+                </div>
+
+                <div class="review-block faq-wrap">
+                    <h3>Common questions</h3>
+                    <details><summary>What happens after I click Continue?</summary><p>You'll go to checkout where you give your business details. We then confirm payment via M-Pesa, card or bank transfer. Your account is activated within 24 hours with a live demo on your own data before you're billed.</p></details>
+                    <details><summary>Can I change features later?</summary><p>Yes — log into your customer portal and toggle any feature. Your next invoice will reflect the new total automatically.</p></details>
+                    <details><summary>Is my data safe?</summary><p>Cloud is on encrypted Kenyan-region servers with daily backups. On-premise keeps data entirely on your own machine. Either way, nobody outside your team can see it.</p></details>
+                    <details><summary>Do you help with setup and training?</summary><p>Every plan includes onboarding. We import your existing products, customers and opening stock, set up receipt printers, and train your team in person or online.</p></details>
+                </div>
+            </div>
+
+            <aside>
+                <div class="sum-card">
+                    <h3><i class="fas fa-receipt"></i> Your Total</h3>
+                    <div id="rv-list" class="sum-list"></div>
+                    <hr class="sum-divider">
+                    <div class="sum-total">
+                        <span class="sum-total-label">Total</span>
+                        <div style="text-align:right;">
+                            <div class="sum-total-amount" id="rv-total">KES 0</div>
+                            <div class="sum-cycle-note" id="rv-cycle-note">per month</div>
+                        </div>
+                    </div>
+                    <div class="sum-savings" id="rv-savings" style="display:none;"></div>
+                    <button class="btn-nav btn-next" id="final-cta" style="width:100%; margin-top:18px; justify-content:center;" onclick="goToCheckout()">
+                        Continue to Checkout <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <div class="sum-trust">
+                        <div><i class="fas fa-shield-alt"></i> Secure — demo before payment</div>
+                        <div><i class="fas fa-undo"></i> Cancel anytime, no penalty</div>
+                        <div><i class="fas fa-headset"></i> Kenyan support, fast response</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    </div>{{-- /frame --}}
+
+    {{-- BOTTOM NAV --}}
+    <div class="wz-nav">
+        <div class="wz-nav-inner">
+            <button class="btn-nav btn-back hidden" id="btn-back" onclick="prevStep()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div class="wz-nav-hint" id="nav-hint">Pick up to 3 goals to continue</div>
+            <button class="btn-nav btn-next" id="btn-next" onclick="nextStep()">
+                Continue <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
     </div>
 
 </div>
-
-<div class="wizard-nav">
-    <button class="btn-wiz btn-back" id="btn-back" onclick="goBack()" style="visibility:hidden;">
-        <i class="fas fa-arrow-left"></i> Back
-    </button>
-    <button class="btn-wiz btn-next" id="btn-next" onclick="goNext()" disabled>
-        Continue <i class="fas fa-arrow-right"></i>
-    </button>
-</div>
-
-<footer class="pfooter">
-    &copy; {{ date('Y') }} {{ config('app.name') }}.
-    Questions? <a href="mailto:{{ config('mail.from.address', 'info@apexpos.co.ke') }}">Contact us</a>
-</footer>
 
 <script>
-/* ═══════════════════ STATE ═══════════════════ */
+/* ─────────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────────── */
 let currentStep      = 1;
-let selectedBtype    = null;
-let selectedCats     = [];
+let selectedGoals    = new Set();
+let recommendedCats  = new Set();
+let recommendedFeats = new Set();
 let selectedFeatures = {};
-let currentCycle     = 'monthly';
+let currentCycle     = 'yearly';
 let currentHosting   = 'cloud';
 
-const btypeLabels = {
-    pharmacy:'pharmacies',retail:'retailers',restaurant:'restaurants',
-    clinic:'clinics',service:'service businesses',other:'businesses'
-};
-
-/* Pre-select required features */
+// Preload required features
 @foreach($featuresByCategory->flatten() as $feature)
 @if($feature->is_required)
 selectedFeatures[{{ $feature->id }}] = {
     name: "{{ addslashes($feature->name) }}",
+    cat: "{{ $feature->category }}",
     monthly: {{ $feature->price_monthly }},
     quarterly: {{ $feature->price_quarterly }},
     yearly: {{ $feature->price_yearly }},
     once: {{ $feature->price_once }},
-    required: true,
-    category: "{{ $feature->category }}"
+    required: true
 };
 @endif
 @endforeach
 
-/* ═══════════════════ NAVIGATION ═══════════════════ */
-function showStep(n) {
-    document.querySelectorAll('.step-panel').forEach(el => el.classList.remove('active'));
-    document.getElementById('step-' + n).classList.add('active');
-    document.querySelectorAll('.progress-step').forEach(el => {
-        const s = parseInt(el.dataset.step);
-        el.classList.remove('active','done');
-        if (s < n) el.classList.add('done');
-        if (s === n) el.classList.add('active');
-    });
-    document.getElementById('progFill').style.width = ((n - 1) / 3 * 100) + '%';
-    document.getElementById('btn-back').style.visibility = n === 1 ? 'hidden' : 'visible';
-
-    const btnNext = document.getElementById('btn-next');
-    btnNext.innerHTML = (n === 4)
-        ? 'Create Account &amp; Continue <i class="fas fa-arrow-right"></i>'
-        : 'Continue <i class="fas fa-arrow-right"></i>';
-
+/* ─────────────────────────────────────────────────────
+   STEP NAVIGATION
+───────────────────────────────────────────────────── */
+function goStep(n) {
+    if (n < 1 || n > 4) return;
     currentStep = n;
-    updateNextButton();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-panel="${n}"]`).classList.add('active');
+    document.querySelectorAll('.wz-pb-step').forEach(s => {
+        const step = parseInt(s.dataset.step);
+        s.classList.remove('active','done');
+        if (step === n) s.classList.add('active');
+        else if (step < n) s.classList.add('done');
+    });
+    document.getElementById('pb-fill').style.width = (n*25) + '%';
+    document.getElementById('btn-back').classList.toggle('hidden', n === 1);
+    const btnNext = document.getElementById('btn-next');
+    btnNext.style.display = n === 4 ? 'none' : 'inline-flex';
+    if (n === 4) buildReview();
+    window.scrollTo({ top:0, behavior:'smooth' });
+    updateNavState();
+}
+function nextStep(){ if (canAdvance()) goStep(currentStep+1); }
+function prevStep(){ goStep(currentStep-1); }
+
+function canAdvance() {
+    if (currentStep === 1) return true;
+    if (currentStep === 2) return Object.keys(selectedFeatures).length > 0;
+    if (currentStep === 3) return !!currentCycle && !!currentHosting;
+    return true;
 }
 
-function goNext() {
-    if (currentStep === 1) {
-        if (!selectedBtype) return;
-        applyBusinessTypePreset();
-        showStep(2);
-    } else if (currentStep === 2) {
-        if (Object.keys(selectedFeatures).length === 0) return;
-        showStep(3);
-    } else if (currentStep === 3) {
-        showStep(4);
-        renderReview();
-    } else if (currentStep === 4) {
-        goToCheckout();
+function updateNavState() {
+    const next = document.getElementById('btn-next');
+    const hint = document.getElementById('nav-hint');
+    const featCount = Object.keys(selectedFeatures).length;
+    next.disabled = !canAdvance();
+    if (currentStep === 1) hint.innerHTML = selectedGoals.size ? `<b>${selectedGoals.size}</b> goal${selectedGoals.size===1?'':'s'} picked · pick more or continue` : 'Pick up to 3 goals, or skip to all features';
+    else if (currentStep === 2) hint.innerHTML = featCount ? `<b>${featCount}</b> feature${featCount===1?'':'s'} selected` : 'Pick at least one feature to continue';
+    else if (currentStep === 3) hint.innerHTML = `${currentCycle.charAt(0).toUpperCase()+currentCycle.slice(1)} billing · ${currentHosting === 'cloud' ? 'Cloud' : 'On-Premise'}`;
+    else hint.innerHTML = 'Review your plan on the right';
+}
+
+/* ─────────────────────────────────────────────────────
+   STEP 1 — GOALS
+───────────────────────────────────────────────────── */
+document.querySelectorAll('.goal').forEach(g => {
+    g.addEventListener('click', () => {
+        const key = g.dataset.goal;
+        if (selectedGoals.has(key)) {
+            selectedGoals.delete(key);
+            g.classList.remove('selected');
+        } else {
+            if (selectedGoals.size >= 3) return;
+            selectedGoals.add(key);
+            g.classList.add('selected');
+        }
+        document.getElementById('goal-count').textContent = selectedGoals.size;
+        recomputeRecommendations();
+        updateNavState();
+    });
+});
+document.getElementById('goal-skip').addEventListener('click', () => { goStep(2); });
+
+function recomputeRecommendations() {
+    recommendedCats = new Set();
+    recommendedFeats = new Set();
+    document.querySelectorAll('.goal.selected').forEach(g => {
+        (g.dataset.cats || '').split(',').forEach(c => c && recommendedCats.add(c));
+    });
+    recommendedCats.forEach(cat => {
+        document.querySelectorAll(`.frow[data-cat-key="${cat}"]`).forEach(row => {
+            recommendedFeats.add(parseInt(row.dataset.featureId));
+        });
+    });
+    applyRecommendationUI();
+}
+function applyRecommendationUI() {
+    document.querySelectorAll('[data-reco-tag]').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('[data-reco-badge]').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.frow').forEach(r => r.classList.remove('reco'));
+
+    if (recommendedCats.size === 0) {
+        document.getElementById('reco-banner').style.display = 'none';
+        return;
     }
-}
+    document.getElementById('reco-banner').style.display = 'flex';
 
-function goBack() {
-    if (currentStep > 1) showStep(currentStep - 1);
+    recommendedCats.forEach(cat => {
+        const panel = document.querySelector(`.cat-accordion[data-cat="${cat}"]`);
+        if (panel) {
+            panel.classList.add('open');
+            const badge = panel.querySelector('[data-reco-badge]');
+            if (badge) badge.style.display = 'inline-block';
+        }
+    });
+    recommendedFeats.forEach(id => {
+        const row = document.querySelector(`.frow[data-feature-id="${id}"]`);
+        if (row) {
+            row.classList.add('reco');
+            const tag = row.querySelector('[data-reco-tag]');
+            if (tag) tag.style.display = 'inline-block';
+        }
+    });
 }
-
-function updateNextButton() {
-    const btn = document.getElementById('btn-next');
-    if (currentStep === 1)      btn.disabled = !selectedBtype;
-    else if (currentStep === 2) btn.disabled = Object.keys(selectedFeatures).length === 0;
-    else                         btn.disabled = false;
-}
-
-/* ═══════════════════ STEP 1 ═══════════════════ */
-document.querySelectorAll('.btype-card').forEach(card => {
-    card.addEventListener('click', () => {
-        document.querySelectorAll('.btype-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedBtype = card.dataset.btype;
-        selectedCats  = card.dataset.categories.split(',');
-        updateNextButton();
+document.getElementById('apply-reco').addEventListener('click', () => {
+    recommendedFeats.forEach(id => {
+        if (!selectedFeatures[id]) toggleFeature(id, true);
     });
 });
 
-function applyBusinessTypePreset() {
-    document.getElementById('btype-label').textContent = btypeLabels[selectedBtype] || 'businesses';
-
-    document.querySelectorAll('.feat-group').forEach(g => {
-        const cat = g.dataset.category;
-        g.style.opacity = (selectedBtype === 'other' || selectedCats.includes(cat)) ? '1' : '0.55';
-    });
-
-    document.querySelectorAll('.feat-row').forEach(row => {
-        const cat = row.dataset.category;
-        const fid = row.dataset.featureId;
-        const rec = document.getElementById('rec-' + fid);
-        if (rec && selectedCats.includes(cat) && cat !== 'core' && selectedBtype !== 'other') {
-            rec.style.display = 'inline-block';
-        } else if (rec) {
-            rec.style.display = 'none';
-        }
-    });
-
-    updateSummary();
+/* ─────────────────────────────────────────────────────
+   STEP 2 — FEATURES
+───────────────────────────────────────────────────── */
+function toggleCat(headEl) {
+    headEl.parentElement.classList.toggle('open');
 }
-
-/* ═══════════════════ STEP 2 ═══════════════════ */
-function toggleFeature(id) {
-    const row     = document.querySelector(`[data-feature-id="${id}"]`);
-    const check   = document.getElementById(`check-${id}`);
+function toggleFeature(id, forceOn) {
+    const row = document.querySelector(`[data-feature-id="${id}"]`);
+    if (!row) return;
+    const check = document.getElementById(`check-${id}`);
     const priceEl = document.getElementById(`price-${id}`);
-    const name    = row.querySelector('.feat-name-text').textContent.trim();
+    const name = row.querySelector('.fname span').textContent.trim();
+    const cat = row.dataset.catKey;
 
-    if (selectedFeatures[id]) {
+    if (selectedFeatures[id] && !forceOn) {
+        if (selectedFeatures[id].required) return;
         delete selectedFeatures[id];
         check.classList.remove('checked');
     } else {
         selectedFeatures[id] = {
-            name,
+            name, cat,
             monthly:   parseFloat(priceEl.dataset.monthly),
             quarterly: parseFloat(priceEl.dataset.quarterly),
             yearly:    parseFloat(priceEl.dataset.yearly),
             once:      parseFloat(priceEl.dataset.once),
-            required:  false,
-            category:  row.dataset.category
+            required: false
         };
         check.classList.add('checked');
     }
+    updateCatCounters();
     updateSummary();
-    updateNextButton();
+    updateNavState();
+}
+function updateCatCounters() {
+    document.querySelectorAll('.cat-accordion').forEach(acc => {
+        const cat = acc.dataset.cat;
+        let count = 0;
+        acc.querySelectorAll('.frow').forEach(r => {
+            if (selectedFeatures[r.dataset.featureId]) count++;
+        });
+        const el = acc.querySelector(`[data-cat-count="${cat}"]`);
+        if (el) el.textContent = count === 0 ? '0 selected' : `${count} selected`;
+        acc.classList.toggle('has-selected', count > 0);
+    });
 }
 
-document.querySelectorAll('.bundle-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.bundle-chip').forEach(c => c.classList.remove('selected'));
-        chip.classList.add('selected');
+/* ─────────────────────────────────────────────────────
+   STEP 3 — CYCLE + HOSTING
+───────────────────────────────────────────────────── */
+function selectCycle(cycle) {
+    currentCycle = cycle;
+    document.querySelectorAll('.bcard').forEach(b => b.classList.remove('selected'));
+    document.querySelector(`.bcard[data-cycle="${cycle}"]`).classList.add('selected');
 
-        const ids = chip.dataset.featureIds.split(',').map(Number).filter(Boolean);
-
-        Object.keys(selectedFeatures).forEach(id => {
-            if (!selectedFeatures[id].required) {
-                delete selectedFeatures[id];
-                const c = document.getElementById(`check-${id}`);
-                if (c) c.classList.remove('checked');
-            }
-        });
-
-        ids.forEach(id => {
-            const priceEl = document.getElementById(`price-${id}`);
-            const row = document.querySelector(`[data-feature-id="${id}"]`);
-            if (!row || !priceEl) return;
-            const name = row.querySelector('.feat-name-text').textContent.trim();
-            selectedFeatures[id] = {
-                name,
-                monthly:   parseFloat(priceEl.dataset.monthly || 0),
-                quarterly: parseFloat(priceEl.dataset.quarterly || 0),
-                yearly:    parseFloat(priceEl.dataset.yearly || 0),
-                once:      parseFloat(priceEl.dataset.once || 0),
-                required:  false,
-                category:  row.dataset.category
-            };
-            const c = document.getElementById(`check-${id}`);
-            if (c) c.classList.add('checked');
-        });
-
-        updateSummary();
-        updateNextButton();
-    });
-});
-
-function updateSummary() {
-    const itemsEl = document.getElementById('summary-items');
-    const emptyEl = document.getElementById('summary-empty');
-    const totalEl = document.getElementById('summary-total');
-    const noteEl  = document.getElementById('summary-cycle-note');
-
-    const ids = Object.keys(selectedFeatures);
-    let total = 0;
-
-    itemsEl.querySelectorAll('.summary-item').forEach(e => e.remove());
-
-    if (ids.length === 0) {
-        emptyEl.style.display = 'block';
-        totalEl.textContent = 'KES 0';
-        return;
+    if (cycle === 'once') {
+        currentHosting = 'self_hosted';
+        document.querySelectorAll('.hcard').forEach(h => h.classList.remove('selected'));
+        document.querySelector('.hcard[data-hosting="self_hosted"]').classList.add('selected');
     }
 
-    emptyEl.style.display = 'none';
-
-    ids.forEach(id => {
-        const f     = selectedFeatures[id];
-        const price = f[currentCycle] ?? f.monthly;
-        total += price;
-        const div = document.createElement('div');
-        div.className = 'summary-item';
-        div.innerHTML = `<span>${f.name}</span><span style="font-weight:600;">${price === 0 ? 'Free' : 'KES ' + price.toLocaleString()}</span>`;
-        itemsEl.appendChild(div);
+    document.querySelectorAll('.fprice').forEach(el => {
+        const price = parseFloat(el.dataset[cycle] || el.dataset.monthly);
+        el.textContent = price === 0 ? 'Free' : 'KES ' + price.toLocaleString();
+        el.classList.toggle('free', price === 0);
     });
-
-    totalEl.textContent = 'KES ' + total.toLocaleString();
-    const notes = { monthly:'per month', quarterly:'per quarter', yearly:'per year', once:'one-off payment' };
-    noteEl.textContent = notes[currentCycle] || '';
+    updateSummary();
+    updateNavState();
 }
-
-/* ═══════════════════ STEP 3 ═══════════════════ */
-document.querySelectorAll('.cycle-card').forEach(card => {
-    card.addEventListener('click', () => {
-        document.querySelectorAll('.cycle-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        currentCycle = card.dataset.cycle;
-
-        document.querySelectorAll('.feat-price').forEach(el => {
-            const price = parseFloat(el.dataset[currentCycle] ?? el.dataset.monthly);
-            el.textContent = price === 0 ? 'Free' : 'KES ' + price.toLocaleString();
-            el.className = 'feat-price' + (price === 0 ? ' free' : '');
-        });
-
-        updateSummary();
-
-        if (currentCycle === 'once') selectHostingInternal('self_hosted');
-    });
-});
-
-document.querySelectorAll('.hosting-opt').forEach(opt => {
-    opt.addEventListener('click', () => selectHostingInternal(opt.dataset.hosting));
-});
-
-function selectHostingInternal(type) {
+function selectHosting(type) {
+    if (type === 'cloud' && currentCycle === 'once') selectCycle('monthly');
     currentHosting = type;
-    document.querySelectorAll('.hosting-opt').forEach(o => o.classList.remove('selected'));
-    const match = document.querySelector(`.hosting-opt[data-hosting="${type}"]`);
-    if (match) match.classList.add('selected');
+    document.querySelectorAll('.hcard').forEach(h => h.classList.remove('selected'));
+    document.querySelector(`.hcard[data-hosting="${type}"]`).classList.add('selected');
+    updateNavState();
 }
 
-/* ═══════════════════ STEP 4 ═══════════════════ */
-function renderReview() {
-    const revFeats = document.getElementById('review-features');
-    revFeats.innerHTML = '';
+/* ─────────────────────────────────────────────────────
+   SUMMARY / PRICE
+───────────────────────────────────────────────────── */
+const CYCLE_NOTE = { monthly:'per month', quarterly:'per quarter', yearly:'per year', once:'one-off payment' };
 
+function computeTotal() {
     let total = 0;
-    Object.keys(selectedFeatures).forEach(id => {
-        const f = selectedFeatures[id];
-        const price = f[currentCycle] ?? f.monthly;
-        total += price;
-        const div = document.createElement('div');
-        div.className = 'review-row';
-        div.innerHTML = `<span>${f.name}</span><strong>${price === 0 ? 'Free' : 'KES ' + price.toLocaleString()}</strong>`;
-        revFeats.appendChild(div);
+    Object.values(selectedFeatures).forEach(f => { total += (f[currentCycle] ?? f.monthly) || 0; });
+    return total;
+}
+function computeMonthlyBaseline() {
+    let t = 0;
+    Object.values(selectedFeatures).forEach(f => { t += f.monthly || 0; });
+    return t;
+}
+function updateSummary() {
+    const list = document.getElementById('sum-list');
+    const empty = document.getElementById('sum-empty');
+    const div = document.getElementById('sum-divider');
+    const total = computeTotal();
+    const ids = Object.keys(selectedFeatures);
+
+    list.querySelectorAll('.sum-item').forEach(e => e.remove());
+
+    if (ids.length === 0) {
+        empty.style.display = 'block';
+        div.style.display = 'none';
+    } else {
+        empty.style.display = 'none';
+        div.style.display = 'block';
+        ids.forEach(id => {
+            const f = selectedFeatures[id];
+            const p = (f[currentCycle] ?? f.monthly) || 0;
+            const row = document.createElement('div');
+            row.className = 'sum-item';
+            row.innerHTML = `<span>${f.name}</span><b>${p === 0 ? 'Free' : 'KES ' + p.toLocaleString()}</b>`;
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('sum-total').textContent = 'KES ' + total.toLocaleString();
+    document.getElementById('sum-cycle-note').textContent = CYCLE_NOTE[currentCycle] || '';
+
+    const sav = document.getElementById('sum-savings');
+    if (currentCycle === 'quarterly' || currentCycle === 'yearly') {
+        const monthly = computeMonthlyBaseline();
+        const months = currentCycle === 'quarterly' ? 3 : 12;
+        const saved = (monthly * months) - total;
+        if (saved > 0) {
+            sav.textContent = `💰 You save KES ${saved.toLocaleString()} vs paying monthly`;
+            sav.classList.add('show');
+        } else sav.classList.remove('show');
+    } else sav.classList.remove('show');
+}
+
+/* ─────────────────────────────────────────────────────
+   STEP 4 — REVIEW
+───────────────────────────────────────────────────── */
+function buildReview() {
+    document.getElementById('rv-cycle').textContent =
+        currentCycle.charAt(0).toUpperCase() + currentCycle.slice(1) +
+        (currentCycle === 'quarterly' ? ' (Save 10%)' : currentCycle === 'yearly' ? ' (Save 20%)' : '');
+    document.getElementById('rv-hosting').textContent = currentHosting === 'cloud' ? '☁️ Cloud (Managed)' : '🖥️ On-Premise';
+
+    const list = document.getElementById('rv-list');
+    list.innerHTML = '';
+    Object.values(selectedFeatures).forEach(f => {
+        const p = (f[currentCycle] ?? f.monthly) || 0;
+        const row = document.createElement('div');
+        row.className = 'sum-item';
+        row.innerHTML = `<span>${f.name}</span><b>${p === 0 ? 'Free' : 'KES ' + p.toLocaleString()}</b>`;
+        list.appendChild(row);
     });
 
-    document.getElementById('review-btype').textContent =
-        (selectedBtype || '').charAt(0).toUpperCase() + (selectedBtype || '').slice(1);
-    document.getElementById('review-cycle').textContent   = currentCycle;
-    document.getElementById('review-hosting').textContent = currentHosting === 'cloud' ? '☁️ Cloud' : '🖥️ Self-Hosted';
-    document.getElementById('review-count').textContent   = Object.keys(selectedFeatures).length;
-    document.getElementById('review-total').textContent   = 'KES ' + total.toLocaleString();
+    const fc = document.getElementById('rv-features');
+    fc.innerHTML = '';
+    Object.values(selectedFeatures).forEach(f => {
+        const p = (f[currentCycle] ?? f.monthly) || 0;
+        const row = document.createElement('div');
+        row.className = 'review-item';
+        row.innerHTML = `<span>✓ ${f.name}</span><b>${p === 0 ? 'Free' : 'KES ' + p.toLocaleString()}</b>`;
+        fc.appendChild(row);
+    });
 
-    const notes = { monthly:'per month', quarterly:'per quarter', yearly:'per year', once:'one-off payment' };
-    document.getElementById('review-total-note').textContent = notes[currentCycle] || '';
+    const total = computeTotal();
+    document.getElementById('rv-total').textContent = 'KES ' + total.toLocaleString();
+    document.getElementById('rv-cycle-note').textContent = CYCLE_NOTE[currentCycle] || '';
+
+    const sav = document.getElementById('rv-savings');
+    if (currentCycle === 'quarterly' || currentCycle === 'yearly') {
+        const monthly = computeMonthlyBaseline();
+        const months = currentCycle === 'quarterly' ? 3 : 12;
+        const saved = (monthly * months) - total;
+        if (saved > 0) {
+            sav.textContent = `💰 You save KES ${saved.toLocaleString()} vs monthly`;
+            sav.style.display = 'block';
+        } else sav.style.display = 'none';
+    } else sav.style.display = 'none';
 }
 
 function goToCheckout() {
     const ids = Object.keys(selectedFeatures).join(',');
-    if (!ids) return;
-    const params = new URLSearchParams({
-        feature_ids: ids,
-        cycle:       currentCycle,
-        hosting:     currentHosting,
-        btype:       selectedBtype || ''
-    });
-    window.location = `{{ route('saas.checkout') }}?${params.toString()}`;
+    window.location = `{{ route('saas.checkout') }}?feature_ids=${ids}&cycle=${currentCycle}&hosting=${currentHosting}`;
 }
 
-/* INIT */
+/* ── INIT ── */
+selectCycle('yearly');
+updateCatCounters();
 updateSummary();
-updateNextButton();
+updateNavState();
 </script>
-</body>
-</html>
+@endsection
