@@ -904,30 +904,53 @@ class AdminSidebarMenu
             $menu->dropdown(
                 'Hospital',
                 function ($sub) {
+                    $seg1 = request()->segment(1) == 'hospital';
+                    $seg2 = request()->segment(2);
+                    $loc  = request()->get('location');
+
                     $links = [
-                        ['hospital.flow',               '⚡ Patient Flow',     'flow'],
-                        ['hospital.patients.index',     'Patients',            'patients'],
-                        ['hospital.queue.index',        'Outpatient Queue',    'queue'],
-                        ['hospital.index',              'Appointments',        null],
-                        ['hospital.lab.index',          'Laboratory',          'lab'],
-                        ['hospital.inpatient.index',    'Inpatient (IPD)',     'inpatient'],
-                        ['hospital.billing.index',      'Billing',             'billing'],
-                        ['hospital.reports.moh705Index','MoH Reports',         'reports'],
-                        ['hospital.assets.index',       'Hospital Assets',     'assets'],
-                        ['hospital.maternity.index',    'Maternity & ANC',     'maternity'],
-                        ['hospital.radiography.index',  'Radiography (X-Ray)', 'radiography'],
-                        ['hospital.theatre.index',      'Theatre (Surgery)',   'theatre'],
-                        ['hospital.physio.index',       'Physiotherapy',       'physio'],
-                        ['hospital.mortuary.index',     'Mortuary',            'mortuary'],
-                        ['hospital.pharmacy.index',     'Pharmacy Dispensing', 'pharmacy'],
+                        // ── Overview ────────────────────────────────────────
+                        ['hospital.flow',               '⚡ Patient Flow Board', 'flow',          null],
+                        ['hospital.patients.index',     '👤 Patients',           'patients',      null],
+                        ['hospital.index',              '📅 Appointments',       null,            null],
+
+                        // ── Outpatient Journey ──────────────────────────────
+                        ['hospital.queue.index',        '📋 All Queues',         'queue',         null],
+                        // Stage-filtered queue links (pass ?location= param)
+                        ['hospital.queue.index',        '🌡️  Triage',             'queue',         'triage'],
+                        ['hospital.queue.index',        '🩺 Consultation',        'queue',         'consultation'],
+                        ['hospital.queue.index',        '🔬 Laboratory',          'queue',         'laboratory'],
+                        ['hospital.queue.index',        '💊 Pharmacy Dispensing', 'queue',         'pharmacy'],
+                        ['hospital.queue.index',        '💰 Billing',             'queue',         'billing'],
+
+                        // ── Departments ─────────────────────────────────────
+                        ['hospital.lab.index',          '🔬 Lab Management',     'lab',           null],
+                        ['hospital.pharmacy.index',     '💊 Pharmacy',           'pharmacy',      null],
+                        ['hospital.billing.index',      '💰 Billing',            'billing',       null],
+                        ['hospital.radiography.index',  '📷 Radiology (X-Ray)',  'radiography',   null],
+                        ['hospital.theatre.index',      '🏥 Theatre (Surgery)',  'theatre',       null],
+                        ['hospital.physio.index',       '🦴 Physiotherapy',      'physio',        null],
+                        ['hospital.maternity.index',    '🤰 Maternity & ANC',    'maternity',     null],
+                        ['hospital.mortuary.index',     '⚰️  Mortuary',           'mortuary',      null],
+
+                        // ── Inpatient ───────────────────────────────────────
+                        ['hospital.inpatient.index',    '🛏️  Inpatient (IPD)',    'inpatient',     null],
+
+                        // ── Reports & Assets ────────────────────────────────
+                        ['hospital.reports.moh705Index','📊 MoH Reports',        'reports',       null],
+                        ['hospital.assets.index',       '🔧 Hospital Assets',    'assets',        null],
                     ];
-                    foreach ($links as [$name, $label, $seg2]) {
+
+                    foreach ($links as [$name, $label, $seg2check, $locParam]) {
                         try {
-                            $url = route($name);
-                            $active = request()->segment(1) == 'hospital' && request()->segment(2) == $seg2;
+                            $params = $locParam ? ['location' => $locParam] : [];
+                            $url    = route($name, $params);
+                            $active = $seg1
+                                && request()->segment(2) == $seg2check
+                                && ($locParam ? $loc == $locParam : true);
                             $sub->url($url, $label, ['icon' => '', 'active' => $active]);
                         } catch (\Exception $e) {
-                            // Route not cached yet — skip rather than crash the whole dropdown
+                            // Route not in cache yet — skip silently
                         }
                     }
                 },

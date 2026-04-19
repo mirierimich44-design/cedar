@@ -13,14 +13,28 @@ class HospitalQueueController extends Controller
     public function index()
     {
         $business_id = request()->session()->get('user.business_id');
-        
-        $queues = HospitalQueue::where('business_id', $business_id)
+        $location    = request()->get('location'); // e.g. ?location=triage
+
+        $query = HospitalQueue::where('business_id', $business_id)
             ->where('status', '!=', 'completed')
             ->with(['patient', 'assigned_user'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('created_at', 'asc');
 
-        return view('hospital.queue.index', compact('queues'));
+        if ($location) {
+            $query->where('current_location', $location);
+        }
+
+        $queues           = $query->get();
+        $active_location  = $location;
+
+        // Counts per stage for the tab badges
+        $stage_counts = HospitalQueue::where('business_id', $business_id)
+            ->where('status', '!=', 'completed')
+            ->selectRaw('current_location, COUNT(*) as cnt')
+            ->groupBy('current_location')
+            ->pluck('cnt', 'current_location');
+
+        return view('hospital.queue.index', compact('queues', 'active_location', 'stage_counts'));
     }
 
     // Public Display View (for TV screens in waiting rooms)
