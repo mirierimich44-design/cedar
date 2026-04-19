@@ -144,7 +144,12 @@ class BIDashboardController extends Controller
                 'payment_split' => DB::table('transaction_payments')->join('transactions', 'transactions.id', '=', 'transaction_payments.transaction_id')->where('transactions.business_id', $business_id)->select('method', DB::raw('SUM(amount) as total'))->groupBy('method')->get(),
             ],
             'inventory' => [
-                'stock_value' => DB::table('variation_location_details')->join('products', 'products.id', '=', 'variation_location_details.product_id')->where('products.business_id', $business_id)->select(DB::raw('SUM(qty_available * default_sell_price) as total_value'))->first(),
+                'stock_value' => DB::table('variation_location_details')
+                    ->join('products', 'products.id', '=', 'variation_location_details.product_id')
+                    ->join('variations', 'variations.product_id', '=', 'products.id')
+                    ->where('products.business_id', $business_id)
+                    ->select(DB::raw('SUM(variation_location_details.qty_available * variations.default_sell_price) as total_value'))
+                    ->first(),
                 'low_stock' => DB::table('products')->where('business_id', $business_id)->whereRaw('alert_quantity > 0')->limit(5)->get()
             ]
         ];
