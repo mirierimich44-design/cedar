@@ -375,10 +375,24 @@
                         <div class="insight-item">
                             <span class="label badge-${tag}">${tag}</span>
                             <p style="margin-top:5px;">${cleanText}</p>
+                            <button class="btn btn-xs btn-default" onclick="generateCampaign('${cleanText.replace(/'/g, "\\'")}')">
+                                <i class="fa fa-whatsapp"></i> Draft Campaign
+                            </button>
                         </div>
                     `);
                 });
             } catch (e) { container.html('<p class="text-red">Error loading insights.</p>'); }
+        }
+
+        async function generateCampaign(insight) {
+            alert('Drafting campaign for: ' + insight.substring(0, 30) + '...');
+            try {
+                const res = await $.post('/bi-api/generate-campaign', {
+                    insight: insight,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                });
+                alert('Campaign Message:\n\n' + res.message);
+            } catch (e) { alert('Failed to generate campaign.'); }
         }
 
         async function fetchDeepIntelligence() {

@@ -119,6 +119,13 @@ class BIDashboardController extends Controller
         return response()->json($this->getDetailedContext(request()->session()->get('user.business_id')));
     }
 
+    public function generateCampaign(Request $request)
+    {
+        $prompt = "Write a professional, concise WhatsApp message for a customer based on this business insight: '{$request->insight}'. 
+        Keep it friendly, Kenyan-market appropriate, and actionable. Add a placeholder [Customer Name].";
+        return response()->json(['message' => $this->callGemini($prompt)]);
+    }
+
     public function saveSettings(Request $request)
     {
         $business = \App\Business::findOrFail($request->session()->get('user.business_id'));
