@@ -282,11 +282,11 @@ html, body, .right-col, .container-fluid, .row, .row.eq-height-row, .main-wrappe
             <div class="choice" data-biz="restaurant"  data-cats="core,inventory,restaurant,reporting">
                 <div class="ci">🍽️</div><h4>Restaurant / Cafe</h4><p>Tables, kitchen, menus, bar.</p>
             </div>
-            <div class="choice" data-biz="clinic"      data-cats="core,reporting,communication">
-                <div class="ci">🏥</div><h4>Clinic / Service</h4><p>Appointments, patient records, invoicing.</p>
+            <div class="choice" data-biz="hospital"    data-cats="core,inventory,reporting,communication">
+                <div class="ci">🏥</div><h4>Hospital / Clinic</h4><p>Full HMS: labs, imaging, theatre, pharmacy, inpatient, EHR.</p>
             </div>
-            <div class="choice" data-biz="distribution" data-cats="core,inventory,reporting">
-                <div class="ci">🚚</div><h4>Distribution / Wholesale</h4><p>Multi-branch stock, supplier chain.</p>
+            <div class="choice" data-biz="logistics"   data-cats="core,inventory,reporting">
+                <div class="ci">🚚</div><h4>Logistics / Courier</h4><p>Parcels, waybills, route management, M-Pesa payments.</p>
             </div>
             <div class="choice" data-biz="other"       data-cats="core,inventory,reporting,communication">
                 <div class="ci">🧩</div><h4>Something else</h4><p>Build a custom mix of any modules.</p>
@@ -474,7 +474,7 @@ let currentStep=1, selectedBiz=null, recommendedCats=new Set(), selectedFeatures
 
 const BIZ_LABEL = {
     retail:'🏪 Retail / Shop', pharmacy:'💊 Pharmacy', restaurant:'🍽️ Restaurant / Cafe',
-    clinic:'🏥 Clinic / Service', distribution:'🚚 Distribution', other:'🧩 Custom'
+    hospital:'🏥 Hospital / Clinic', logistics:'🚚 Logistics / Courier', other:'🧩 Custom'
 };
 
 // Preload required features

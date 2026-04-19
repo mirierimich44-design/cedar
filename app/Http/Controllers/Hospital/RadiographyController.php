@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Hospital\RadiographyTest;
 use App\Hospital\RadiographyRequest;
 use App\Contact;
+use App\Events\RadiographyCompleted;
 use Illuminate\Http\Request;
 use DB;
 
@@ -72,6 +73,9 @@ class RadiographyController extends Controller
             'status' => 'completed',
             'radiologist_id' => auth()->user()->id
         ]);
+
+        // Fire billing event — HospitalBillingListener will auto-create charge
+        event(new RadiographyCompleted($radiography_request->fresh()));
 
         return redirect()->action([RadiographyController::class, 'index'])
             ->with('status', ['success' => 1, 'msg' => 'Imaging findings updated']);

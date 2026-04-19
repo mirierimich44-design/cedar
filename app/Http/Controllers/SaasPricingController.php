@@ -163,12 +163,14 @@ class SaasPricingController extends Controller
             $enabled_modules = ['purchases', 'add_sale', 'pos_sale', 'stock_transfers', 'stock_adjustment', 'expenses'];
             
             // Preset module mapping based on business type
-            if ($request->biz_type === 'hospital' || $request->biz_type === 'clinic') {
+            if (in_array($request->biz_type, ['hospital', 'clinic'])) {
                 $enabled_modules[] = 'hospital_module';
             } elseif ($request->biz_type === 'pharmacy') {
                 $enabled_modules[] = 'dda_module';
             } elseif ($request->biz_type === 'restaurant') {
                 $enabled_modules[] = 'restaurant_module';
+            } elseif (in_array($request->biz_type, ['logistics', 'distribution'])) {
+                $enabled_modules[] = 'parcel_module';
             }
 
             $business = $this->businessUtil->createNewBusiness([
@@ -185,6 +187,18 @@ class SaasPricingController extends Controller
             // 3. Link user ↔ business
             $user->business_id = $business->id;
             $user->save();
+
+            // 3b. Persist canonical business_type for AI persona + vertical logic
+            // Normalize wizard keys to the canonical types the BI system recognises
+            $canonicalType = match($request->biz_type) {
+                'hospital', 'clinic' => 'hospital',
+                'pharmacy'           => 'pharmacy',
+                'restaurant'         => 'restaurant',
+                'distribution'       => 'logistics',
+                default              => 'retail',
+            };
+            $business->business_type = $canonicalType;
+            $business->save();
 
             // 4. Default roles, walk-in customer, invoice scheme/layout
             $this->businessUtil->newBusinessDefaultResources($business->id, $user->id);
