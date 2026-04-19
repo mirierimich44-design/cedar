@@ -14,8 +14,11 @@ class PermissionsTableSeeder extends Seeder
      */
     public function run()
     {
-        if (\DB::table('permissions')->count() > 0) {
-            return; // already seeded
+        // Use sell.view as the canonical core-permission marker. If it exists,
+        // we've already seeded; otherwise proceed even if other permissions
+        // (e.g. dynamic location.N rows) are already present.
+        if (\DB::table('permissions')->where('name', 'sell.view')->exists()) {
+            return;
         }
 
         $data = [
@@ -88,13 +91,18 @@ class PermissionsTableSeeder extends Seeder
             ['name' => 'dashboard.data'],
         ];
 
+        // Idempotent: skip any row that already exists to avoid unique violations
+        $existing = \DB::table('permissions')->pluck('name')->toArray();
         $insert_data = [];
         $time_stamp = \Carbon::now()->toDateTimeString();
         foreach ($data as $d) {
+            if (in_array($d['name'], $existing)) continue;
             $d['guard_name'] = 'web';
             $d['created_at'] = $time_stamp;
             $insert_data[] = $d;
         }
-        Permission::insert($insert_data);
+        if (!empty($insert_data)) {
+            Permission::insert($insert_data);
+        }
     }
 }
