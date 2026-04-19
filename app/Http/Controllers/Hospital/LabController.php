@@ -52,18 +52,18 @@ class LabController extends Controller
     public function storeResult(Request $request)
     {
         $lab_request = LabRequest::findOrFail($request->request_id);
+
         $lab_request->update([
-            $lab_request->update([
-                'radiologist_findings' => $request->radiologist_findings, // Assuming this is LabController... wait.
-                'conclusion' => $request->conclusion,
-                'status' => 'completed',
-                'lab_tech_id' => auth()->user()->id
-            ]);
+            'result_notes'  => $request->result_notes,
+            'result_data'   => $request->result_data ? json_encode($request->result_data) : null,
+            'status'        => 'completed',
+            'lab_tech_id'   => auth()->user()->id,
+        ]);
 
-            event(new \App\Events\LabTestCompleted($lab_request));
+        // Fire billing event — HospitalBillingListener auto-creates the charge
+        event(new \App\Events\LabTestCompleted($lab_request->fresh()));
 
-            return redirect()->action([LabController::class, 'index'])
-                ->with('status', ['success' => 1, 'msg' => 'Test results updated']);
-            }
-            }
-
+        return redirect()->action([LabController::class, 'index'])
+            ->with('status', ['success' => 1, 'msg' => 'Test results updated']);
+    }
+}
