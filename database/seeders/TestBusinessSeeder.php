@@ -35,6 +35,13 @@ class TestBusinessSeeder extends Seeder
         $businessUtil = new BusinessUtil;
         $moduleUtil   = new ModuleUtil;
 
+        // Resolve KES currency id dynamically (varies between installs)
+        $kesId = DB::table('currencies')->where('code', 'KES')->value('id');
+        if (!$kesId) {
+            $kesId = DB::table('currencies')->value('id'); // fallback to first available
+            $this->command->warn("KES currency not found — using currency id {$kesId} as fallback.");
+        }
+
         DB::beginTransaction();
         try {
             // 1. Owner user
@@ -51,7 +58,7 @@ class TestBusinessSeeder extends Seeder
             // 2. Business (KE defaults)
             $business = $businessUtil->createNewBusiness([
                 'name'              => 'Apex Test Clinic',
-                'currency_id'       => 133, // KES
+                'currency_id'       => $kesId,
                 'start_date'        => now()->toDateString(),
                 'time_zone'         => 'Africa/Nairobi',
                 'fy_start_month'    => 1,

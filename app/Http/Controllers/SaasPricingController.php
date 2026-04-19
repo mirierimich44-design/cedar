@@ -135,24 +135,23 @@ class SaasPricingController extends Controller
                 $i++;
             }
 
-            // 1. Create owner user
-            $user = User::create([
-                'surname'     => '',
-                'first_name'  => $request->first_name,
-                'last_name'   => $request->last_name ?? '',
-                'username'    => $username,
-                'email'       => $request->email,
-                'password'    => Hash::make($request->password),
-                'language'    => 'en',
-                'user_type'   => 'user',
-                'status'      => 'active',
-                'business_id' => null, // set below
+            // 1. Create owner user via User::create_user (handles hashing + defaults)
+            $user = User::create_user([
+                'surname'    => '',
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name ?? '',
+                'username'   => $username,
+                'email'      => $request->email,
+                'password'   => $request->password,
+                'language'   => 'en',
             ]);
 
             // 2. Create business with Kenyan defaults
+            $kesId = DB::table('currencies')->where('code', 'KES')->value('id')
+                  ?? DB::table('currencies')->value('id');
             $business = $this->businessUtil->createNewBusiness([
                 'name'              => $request->business_name,
-                'currency_id'       => 133, // KES
+                'currency_id'       => $kesId,
                 'start_date'        => now()->toDateString(),
                 'time_zone'         => 'Africa/Nairobi',
                 'fy_start_month'    => 1,
@@ -179,6 +178,15 @@ class SaasPricingController extends Controller
                 'mobile'   => $request->phone,
             ]);
             Permission::firstOrCreate(['name' => 'location.' . $location->id]);
+
+            // 5b. Fire module hooks (Superadmin, Essentials, etc.) — matches BusinessController::postRegister
+            if (config('app.env') != 'demo') {
+                try {
+                    $this->moduleUtil->getModuleData('after_business_created', ['business' => $business]);
+                } catch (\Throwable $e) {
+                    \Log::warning('after_business_created hook failed: ' . $e->getMessage());
+                }
+            }
 
             // 6. Create subscription based on chosen action
             if ($request->action === 'trial') {
