@@ -44,7 +44,15 @@ class SaasPricingController extends Controller
             'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
         ];
 
-        return view('saas.pricing', compact('featuresByCategory', 'bundles', 'categories'));
+        $business_types = [
+            'hospital'   => ['label' => 'Hospital / Clinic', 'icon' => 'fa-hospital-alt', 'desc' => 'Medical record, wards, and labs.'],
+            'pharmacy'   => ['label' => 'Pharmacy',          'icon' => 'fa-pills',        'desc' => 'DDA register and prescriptions.'],
+            'restaurant' => ['label' => 'Restaurant / Cafe', 'icon' => 'fa-utensils',     'desc' => 'Table management and kitchen orders.'],
+            'retail'     => ['label' => 'Retail / Shop',     'icon' => 'fa-shopping-bag', 'desc' => 'General POS and inventory.'],
+            'mixed'      => ['label' => 'Mixed Business',    'icon' => 'fa-random',       'desc' => 'A bit of everything.'],
+        ];
+
+        return view('saas.pricing', compact('featuresByCategory', 'bundles', 'categories', 'business_types'));
     }
 
     // Calculate price via AJAX
@@ -72,6 +80,7 @@ class SaasPricingController extends Controller
     {
         $featureIds = $request->feature_ids ? explode(',', $request->feature_ids) : [];
         $cycle      = $request->cycle ?? 'monthly';
+        $biz_type   = $request->biz ?? 'retail';
 
         if (empty($featureIds)) {
             return redirect()->route('saas.pricing')->with('error', 'Please select at least one feature.');
@@ -81,7 +90,7 @@ class SaasPricingController extends Controller
         $total    = $features->sum(fn($f) => $f->priceFor($cycle));
         $hosting  = $request->hosting ?? 'cloud';
 
-        return view('saas.checkout', compact('features', 'featureIds', 'cycle', 'total', 'hosting'));
+        return view('saas.checkout', compact('features', 'featureIds', 'cycle', 'total', 'hosting', 'biz_type'));
     }
 
     // Submit order — creates user + business + subscription, logs in, routes to trial or M-Pesa
@@ -150,6 +159,18 @@ class SaasPricingController extends Controller
             // 2. Create business with Kenyan defaults
             $kesId = DB::table('currencies')->where('code', 'KES')->value('id')
                   ?? DB::table('currencies')->value('id');
+            
+            $enabled_modules = ['purchases', 'add_sale', 'pos_sale', 'stock_transfers', 'stock_adjustment', 'expenses'];
+            
+            // Preset module mapping based on business type
+            if ($request->biz_type === 'hospital' || $request->biz_type === 'clinic') {
+                $enabled_modules[] = 'hospital_module';
+            } elseif ($request->biz_type === 'pharmacy') {
+                $enabled_modules[] = 'dda_module';
+            } elseif ($request->biz_type === 'restaurant') {
+                $enabled_modules[] = 'restaurant_module';
+            }
+
             $business = $this->businessUtil->createNewBusiness([
                 'name'              => $request->business_name,
                 'currency_id'       => $kesId,
@@ -158,7 +179,7 @@ class SaasPricingController extends Controller
                 'fy_start_month'    => 1,
                 'accounting_method' => 'fifo',
                 'owner_id'          => $user->id,
-                'enabled_modules'   => ['purchases', 'add_sale', 'pos_sale', 'stock_transfers', 'stock_adjustment', 'expenses'],
+                'enabled_modules'   => $enabled_modules,
             ]);
 
             // 3. Link user ↔ business

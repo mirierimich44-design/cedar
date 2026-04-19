@@ -15,6 +15,7 @@ class SaasFeature extends Model
         'price_quarterly' => 'float',
         'price_yearly'    => 'float',
         'price_once'      => 'float',
+        'applicable_to'   => 'array',
     ];
 
     public function bundles()
