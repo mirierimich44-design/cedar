@@ -84,7 +84,9 @@ class TestBusinessSeeder extends Seeder
                 'landmark' => 'Nairobi CBD',
                 'mobile'   => '+254700000000',
             ]);
-            Permission::firstOrCreate(['name' => 'location.' . $location->id]);
+            $locPerm = Permission::firstOrCreate(['name' => 'location.' . $location->id]);
+            $user->givePermissionTo($locPerm);
+            $user->givePermissionTo(Permission::firstOrCreate(['name' => 'access_all_locations']));
 
             // 6. Fire module hooks
             try {
