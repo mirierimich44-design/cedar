@@ -745,6 +745,28 @@ class AdminSidebarMenu
                 )->order(22);
             }
 
+            // Pesapal menu (card/mobile money gateway)
+            if ($is_admin || auth()->user()->can('pesapal.manage_settings') || auth()->user()->can('pesapal.view_transactions')) {
+                $menu->dropdown(
+                    'Pesapal',
+                    function ($sub) use ($is_admin) {
+                        if ($is_admin || auth()->user()->can('pesapal.manage_settings')) {
+                            $sub->url(route('pesapal.settings'), 'Settings',
+                                ['icon' => '', 'active' => request()->segment(1) == 'pesapal' && request()->segment(2) == 'settings']);
+                        }
+                        if ($is_admin || auth()->user()->can('pesapal.view_transactions')) {
+                            $sub->url(route('pesapal.transactions'), 'Transactions',
+                                ['icon' => '', 'active' => request()->segment(1) == 'pesapal' && request()->segment(2) == 'transactions']);
+                        }
+                    },
+                    ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <rect x="3" y="5" width="18" height="14" rx="3"/>
+                    <path d="M3 10h18"/><path d="M7 15h2"/>
+                  </svg>', 'active' => request()->segment(1) == 'pesapal']
+                )->order(23);
+            }
+
             //Reports dropdown
             if (auth()->user()->can('purchase_n_sell_report.view') || auth()->user()->can('contacts_report.view')
                 || auth()->user()->can('stock_report.view') || auth()->user()->can('tax_report.view')

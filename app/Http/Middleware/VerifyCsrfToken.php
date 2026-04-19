@@ -20,5 +20,7 @@ class VerifyCsrfToken extends BaseVerifier
         '/webhook/*',
         'mobile-money/webhook/*',
         'saas/mpesa/callback/*',
+        'pesapal/ipn',
+        'pesapal/callback',
     ];
 }
