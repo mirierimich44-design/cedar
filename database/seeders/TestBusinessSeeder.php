@@ -93,8 +93,8 @@ class TestBusinessSeeder extends Seeder
                 // non-fatal
             }
 
-            // 7. Active 30-day subscription with the first 3 available features
-            $features = SaasFeature::where('is_active', true)->orderBy('sort_order')->limit(3)->get();
+            // 7. Active 30-day subscription with ALL features (test account gets everything)
+            $features = SaasFeature::where('is_active', true)->orderBy('sort_order')->get();
             $total    = $features->sum(fn($f) => $f->priceFor('monthly'));
 
             $sub = SaasSubscription::create([
