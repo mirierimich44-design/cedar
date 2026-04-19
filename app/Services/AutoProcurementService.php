@@ -2,46 +2,60 @@
 
 namespace App\Services;
 
-use App\Product;
-use App\ProductVariation;
-use App\PurchaseOrder;
-use App\PurchaseOrderLine;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AutoProcurementService
 {
     /**
-     * Run reorder checks and generate POs.
+     * Scan for low-stock products and return a reorder report.
+     * Does NOT create transactions — returns structured data for the BI dashboard.
      */
-    public function run()
+    public function run(): array
     {
-        $lowStockProducts = Product::whereRaw('qty_available <= alert_quantity')->get();
+        $business_id = request()->session()->get('user.business_id');
 
-        foreach ($lowStockProducts as $product) {
-            // Formula: (Demand * LeadTime) + SafetyStock
-            // For MVP: Target = (AlertQty * 2) - CurrentStock
-            $reorderQty = ($product->alert_quantity * 2) - $product->qty_available;
-            
-            if ($reorderQty > 0) {
-                $this->createDraftPO($product, $reorderQty);
-            }
+        $low_stock = DB::table('products')
+            ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
+            ->where('products.business_id', $business_id)
+            ->where('products.alert_quantity', '>', 0)
+            ->whereRaw('vld.qty_available <= products.alert_quantity')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.alert_quantity',
+                'products.purchase_price',
+                DB::raw('SUM(vld.qty_available) as qty_available'),
+                DB::raw('MAX(products.alert_quantity * 2) as reorder_qty')
+            )
+            ->groupBy('products.id', 'products.name', 'products.alert_quantity', 'products.purchase_price')
+            ->orderBy('qty_available')
+            ->get();
+
+        $items = [];
+        $total_value = 0;
+
+        foreach ($low_stock as $p) {
+            $reorder_qty = max(1, ($p->alert_quantity * 2) - $p->qty_available);
+            $line_value  = $reorder_qty * ($p->purchase_price ?? 0);
+            $total_value += $line_value;
+
+            $items[] = [
+                'product_id'  => $p->id,
+                'name'        => $p->name,
+                'in_stock'    => (float)$p->qty_available,
+                'alert_at'    => (float)$p->alert_quantity,
+                'reorder_qty' => $reorder_qty,
+                'unit_cost'   => (float)($p->purchase_price ?? 0),
+                'line_value'  => round($line_value, 2),
+            ];
         }
-    }
 
-    private function createDraftPO($product, $qty)
-    {
-        $po = PurchaseOrder::create([
-            'business_id' => $product->business_id,
-            'ref_no' => 'AUTO-' . time(),
-            'status' => 'draft',
-            'created_by' => 1 // Should be a system user
-        ]);
-
-        PurchaseOrderLine::create([
-            'purchase_order_id' => $po->id,
-            'product_id' => $product->id,
-            'quantity' => $qty,
-            'pp_without_discount' => $product->purchase_price
-        ]);
+        return [
+            'count'       => count($items),
+            'total_value' => round($total_value, 2),
+            'items'       => $items,
+            'scanned_at'  => Carbon::now()->format('d M Y H:i'),
+        ];
     }
 }

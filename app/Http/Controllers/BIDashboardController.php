@@ -116,7 +116,58 @@ class BIDashboardController extends Controller
 
     public function getDeepIntelligence()
     {
-        return response()->json($this->getDetailedContext(request()->session()->get('user.business_id')));
+        $business_id = request()->session()->get('user.business_id');
+
+        // Revenue leakage: unbilled hospital services
+        $unbilled_labs    = DB::table('hospital_lab_requests')->where('business_id', $business_id)->whereNull('transaction_id')->count();
+        $unbilled_imaging = DB::table('hospital_radiography_requests')->where('business_id', $business_id)->whereNull('transaction_id')->count();
+        $avg_lab_price    = DB::table('hospital_lab_tests')->where('business_id', $business_id)->avg('price') ?? 500;
+        $estimated_loss   = round(($unbilled_labs + $unbilled_imaging) * $avg_lab_price, 2);
+
+        // Hospital efficiency
+        $bed_data = DB::table('hospital_beds')
+            ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
+            ->where('hospital_wards.business_id', $business_id)
+            ->select(DB::raw('SUM(CASE WHEN is_available=0 THEN 1 ELSE 0 END) as occupied'), DB::raw('COUNT(*) as total'))
+            ->first();
+        $occupancy = ($bed_data && $bed_data->total > 0)
+            ? round($bed_data->occupied / $bed_data->total * 100, 1)
+            : 0;
+        $avg_consultation = DB::table('hospital_consultations')
+            ->where('business_id', $business_id)
+            ->whereNotNull('ended_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, ended_at)) as avg_mins')
+            ->value('avg_mins');
+
+        // Logistics risk by route
+        $route_risk = DB::table('parcels')
+            ->where('parcels.business_id', $business_id)
+            ->leftJoin('parcel_stations as s1', 's1.id', '=', 'parcels.origin_station_id')
+            ->leftJoin('parcel_stations as s2', 's2.id', '=', 'parcels.destination_station_id')
+            ->select(
+                DB::raw('CONCAT(COALESCE(s1.name,"?"), " → ", COALESCE(s2.name,"?")) as route'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(CASE WHEN status="failed" THEN 1 ELSE 0 END) as failures')
+            )
+            ->groupBy('route')
+            ->orderBy('total', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'revenue_leakage' => [
+                'estimated_loss'  => $estimated_loss,
+                'unbilled_labs'   => $unbilled_labs,
+                'unbilled_imaging'=> $unbilled_imaging,
+            ],
+            'hospital_efficiency' => [
+                'bed_occupancy_percent'   => $occupancy,
+                'avg_consultation_mins'   => round($avg_consultation ?? 0, 1),
+            ],
+            'logistics_risk' => [
+                'route_risk' => $route_risk,
+            ],
+        ]);
     }
 
     /**
@@ -125,9 +176,17 @@ class BIDashboardController extends Controller
     public function runAutoProcurement()
     {
         try {
-            $service = new \App\Services\AutoProcurementService();
-            $service->run();
-            return response()->json(['success' => true, 'msg' => 'Auto-procurement scan completed. Draft POs created where needed.']);
+            $result = (new \App\Services\AutoProcurementService())->run();
+
+            if ($result['count'] === 0) {
+                return response()->json(['success' => true, 'msg' => 'All stock levels are healthy. No reorders needed.', 'items' => []]);
+            }
+
+            $msg = "Found <strong>{$result['count']}</strong> products needing reorder. "
+                 . "Estimated restock cost: <strong>KES " . number_format($result['total_value'], 2) . "</strong>. "
+                 . "Scanned at {$result['scanned_at']}.";
+
+            return response()->json(['success' => true, 'msg' => $msg, 'items' => $result['items']]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'msg' => 'Error: ' . $e->getMessage()]);
         }
@@ -147,7 +206,14 @@ class BIDashboardController extends Controller
         $settings['gemini_api_key'] = $request->gemini_api_key;
         $business->common_settings = $settings;
         $business->save();
-        return redirect()->back()->with('status', ['success' => 1, 'msg' => 'AI Configuration Updated']);
+
+        // Refresh the business object in session so form shows saved key immediately
+        $request->session()->put('business', $business->fresh());
+
+        // Bust the AI insight cache so new key takes effect instantly
+        \Cache::forget("bi_insights_{$business->id}_{$business->business_type}");
+
+        return redirect()->back()->with('status', ['success' => 1, 'msg' => 'AI Configuration Updated. AI insights will reload with your new key.']);
     }
 
     private function getDetailedContext($business_id)

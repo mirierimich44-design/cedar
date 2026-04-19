@@ -7,12 +7,51 @@
 </section>
 
 <section class="content">
+
+    {{-- Add Patient to Queue Modal --}}
+    <div class="modal fade" id="addToQueueModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"><i class="fa fa-plus"></i> Add Patient to Queue</h4>
+                </div>
+                <form method="POST" action="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'addToQueue']) }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Patient <span class="text-red">*</span></label>
+                            <select name="patient_id" class="form-control select2" required style="width:100%;">
+                                <option value="">-- Search patient --</option>
+                                @foreach(\App\Contact::where('business_id', request()->session()->get('user.business_id'))->where('type','customer')->orderBy('name')->get() as $patient)
+                                    <option value="{{ $patient->id }}">{{ $patient->name }} {{ $patient->mobile ? '('.$patient->mobile.')' : '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Appointment ID <small class="text-muted">(optional)</small></label>
+                            <input type="number" name="appointment_id" class="form-control" placeholder="Leave blank if walk-in">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Add to Queue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="box box-primary">
         <div class="box-header">
             <h3 class="box-title">Live Hospital Queue</h3>
             <div class="box-tools">
+                <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addToQueueModal">
+                    <i class="fa fa-plus"></i> Add Patient to Queue
+                </button>
+                &nbsp;
                 <a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'liveDisplay']) }}" target="_blank" class="btn btn-info btn-sm">
-                    <i class="fa fa-television"></i> Open Waiting Room Display
+                    <i class="fa fa-television"></i> Waiting Room Display
                 </a>
             </div>
         </div>
@@ -29,6 +68,11 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @if($queues->isEmpty())
+                        <tr><td colspan="6" class="text-center text-muted" style="padding:30px;">
+                            <i class="fa fa-users fa-2x"></i><br>No patients in queue. Click <strong>Add Patient to Queue</strong> above to get started.
+                        </td></tr>
+                    @endif
                     @foreach($queues as $q)
                         <tr>
                             <td><span class="label label-primary" style="font-size: 14px;">{{ $q->token_number }}</span></td>

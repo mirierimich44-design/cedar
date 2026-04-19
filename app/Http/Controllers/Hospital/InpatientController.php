@@ -23,7 +23,7 @@ class InpatientController extends Controller
             ->orderBy('admitted_at', 'desc')
             ->get();
             
-        return view('hospital.inpatient.index', compact('admissions'));
+        return view('hospital.ipd.index', compact('admissions'));
     }
 
     public function showAdmission($id)

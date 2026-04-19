@@ -28,6 +28,13 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
         Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
         Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
+        // ── Parcel Detail ─────────────────────────────────────────────
+        Route::get('/{id}', [ParcelController::class, 'show'])->name('show');
+
+        // ── Stations ──────────────────────────────────────────────────
+        Route::get('/stations', [ParcelController::class, 'stationIndex'])->name('stations.index');
+        Route::post('/stations', [ParcelController::class, 'storeStation'])->name('stations.store');
+
         // ── Dispatch / Status Updates ─────────────────────────────────
         Route::post('/dispatch/update-status', [DispatchController::class, 'updateStatus'])->name('dispatch.update_status');
         Route::post('/dispatch/bulk-update-status', [DispatchController::class, 'bulkUpdateStatus'])->name('dispatch.bulk_update_status');

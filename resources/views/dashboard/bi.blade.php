@@ -473,14 +473,28 @@
         }
 
         async function runAutoProcure() {
-            if(!confirm('This will generate draft Purchase Orders. Continue?')) return;
-            $('#audit-log').html('<i class="fa fa-spin fa-spinner"></i> Scanning...');
+            $('#audit-log').html('<i class="fa fa-spin fa-spinner"></i> Scanning stock levels...');
             try {
                 const res = await $.post('/bi-api/run-procurement', {
                     _token: $('meta[name="csrf-token"]').attr('content')
                 });
-                $('#audit-log').html(`<div class="alert alert-success">${res.msg}</div>`);
-            } catch (e) { $('#audit-log').html('<div class="alert alert-danger">Procurement scan failed.</div>'); }
+                let html = `<div class="alert alert-${res.success ? 'success' : 'danger'}">${res.msg}</div>`;
+                if (res.items && res.items.length > 0) {
+                    html += `<table class="table table-condensed table-bordered" style="margin-top:10px;">
+                        <thead><tr><th>Product</th><th>In Stock</th><th>Alert At</th><th>Reorder Qty</th><th>Est. Cost</th></tr></thead><tbody>`;
+                    res.items.forEach(i => {
+                        html += `<tr>
+                            <td>${i.name}</td>
+                            <td class="text-red">${i.in_stock}</td>
+                            <td>${i.alert_at}</td>
+                            <td><strong>${i.reorder_qty}</strong></td>
+                            <td>KES ${i.line_value.toLocaleString()}</td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table>`;
+                }
+                $('#audit-log').html(html);
+            } catch (e) { $('#audit-log').html('<div class="alert alert-danger">Procurement scan failed. Check server logs.</div>'); }
         }
 
         async function fetchDeepIntelligence() {
