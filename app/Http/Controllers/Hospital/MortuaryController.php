@@ -54,7 +54,7 @@ class MortuaryController extends Controller
             'released_at' => now()
         ]);
 
-        return redirect()->action([MortuaryController.class, 'index'])
+        return redirect()->action([MortuaryController::class, 'index'])
             ->with('status', ['success' => 1, 'msg' => 'Body released']);
     }
 }
