@@ -39,6 +39,9 @@ class Kernel extends ConsoleKernel
 
             // Internal WhatsApp Follow-up Reminders - runs every minute to check business schedules
             $schedule->command('pos:sendFollowupReminders')->everyMinute();
+
+            // Apex AI Anomalies
+            $schedule->command('bi:detect-anomalies')->hourly();
         }
 
         if ($env === 'demo') {
