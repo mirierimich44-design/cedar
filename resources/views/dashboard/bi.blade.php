@@ -289,7 +289,7 @@
     <!-- Tab Nav -->
     <nav class="tabs">
         <div class="tab active" data-target="overview">OVERVIEW</div>
-        <div class="tab" data-target="logistics">LOGISTICS</div>
+        <div class="tab" data-target="audit">AUDIT & RISK</div>
         <div class="tab" data-target="ai-lab">AI INTELLIGENCE</div>
     </nav>
 
@@ -397,11 +397,35 @@
         </div>
     </div>
 
-    <!-- Logistics Section -->
-    <div id="section-logistics" class="tab-content-item" style="display: none;">
-        <div class="card">
-            <h2>Detailed Logistics Analytics Coming Soon...</h2>
-            <p style="color: var(--muted)">This section will integrate with the Parcel module tracking data.</p>
+    <!-- Audit & Risk Section -->
+    <div id="section-audit" class="tab-content-item" style="display: none;">
+        <div class="ai-grid">
+            <!-- Revenue Leakage -->
+            <div class="card card-kpi kpi-stock">
+                <div class="kpi-label">Revenue Leakage Audit (Unbilled)</div>
+                <div id="leakage-content">
+                    <div class="kpi-value" style="color: var(--accent-red)">Calculating...</div>
+                    <p style="color: var(--muted)">Estimating unbilled medical orders</p>
+                </div>
+            </div>
+
+            <!-- Hospital Performance -->
+            <div class="card card-kpi kpi-customers">
+                <div class="kpi-label">Hospital Load & Efficiency</div>
+                <div id="hospital-efficiency-content">
+                    <div class="kpi-value" style="color: var(--accent-amber)">Loading...</div>
+                    <p style="color: var(--muted)">Bed occupancy and consultation speed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card ai-section">
+            <div class="chart-header">
+                <div class="chart-title">Logistics Risk Profile (Recent Failures)</div>
+            </div>
+            <div id="logistics-risk-content">
+                <div class="skeleton" style="height: 100px; border-radius: 8px;"></div>
+            </div>
         </div>
     </div>
 
@@ -656,12 +680,57 @@
     document.getElementById('refresh-ai').addEventListener('click', () => {
         fetchInsights(true);
         fetchPredictions();
+        fetchDeepIntelligence();
     });
+
+    async function fetchDeepIntelligence() {
+        const leakage = document.getElementById('leakage-content');
+        const efficiency = document.getElementById('hospital-efficiency-content');
+        const risk = document.getElementById('logistics-risk-content');
+
+        try {
+            const res = await fetch('/api/bi/deep-intelligence');
+            const data = await res.json();
+
+            // Leakage
+            leakage.innerHTML = `
+                <div class="kpi-value" style="color: var(--accent-red)">KES ${data.revenue_leakage.estimated_loss.toLocaleString()}</div>
+                <p style="color: var(--muted)">${data.revenue_leakage.unbilled_labs} unbilled labs, ${data.revenue_leakage.unbilled_imaging} imaging orders found.</p>
+            `;
+
+            // Hospital
+            efficiency.innerHTML = `
+                <div class="kpi-value" style="color: var(--accent-amber)">${data.hospital_efficiency.bed_occupancy_percent}%</div>
+                <p style="color: var(--muted)">Bed Occupancy. Avg consultation: ${data.hospital_efficiency.avg_consultation_mins} mins.</p>
+            `;
+
+            // Logistics Risk
+            risk.innerHTML = `
+                <table class="table" style="width:100%; border-collapse: collapse;">
+                    <thead><tr style="text-align:left; color: var(--muted); font-size: 12px;"><th>Route</th><th>Total</th><th>Failures</th><th>Risk</th></tr></thead>
+                    <tbody>
+                        ${data.logistics_risk.route_risk.map(r => `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 13px;">
+                                <td style="padding: 8px 0;">${r.route}</td>
+                                <td>${r.total}</td>
+                                <td style="color: var(--accent-red)">${r.failures}</td>
+                                <td><span class="badge" style="background: ${r.failures > 0 ? 'var(--accent-red)' : 'var(--accent-green)'}">${r.failures > 0 ? 'High' : 'Low'}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+        } catch (e) {
+            console.error('Audit data failed', e);
+        }
+    }
 
     // Initial Load
     window.addEventListener('DOMContentLoaded', () => {
         fetchInsights();
         fetchPredictions();
+        fetchDeepIntelligence();
     });
 </script>
 

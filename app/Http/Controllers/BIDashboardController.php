@@ -199,15 +199,113 @@ class BIDashboardController extends Controller
         return response()->json(json_decode($json));
     }
 
+    /**
+     * Get Deep Intelligence Data for Audit Tab
+     */
+    public function getDeepIntelligence()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $summary = $this->getBusinessSummary($business_id);
+        
+        return response()->json($summary);
+    }
+
     private function getBusinessSummary($business_id)
     {
-        // Aggregated summary for Gemini context
+        // 1. Revenue & Sales Context
+        $revenue_6_months = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('transaction_date', '>=', Carbon::now()->subMonths(6))
+            ->select(DB::raw('MONTHNAME(transaction_date) as month'), DB::raw('SUM(final_total) as total'))
+            ->groupBy('month')
+            ->get();
+
+        // 2. Revenue Leakage Audit (Unbilled Medical Services)
+        $unbilled_labs = DB::table('hospital_lab_requests')
+            ->where('business_id', $business_id)
+            ->whereNull('transaction_id')
+            ->where('status', '!=', 'cancelled')
+            ->count();
+        
+        $unbilled_imaging = DB::table('hospital_radiography_requests')
+            ->where('business_id', $business_id)
+            ->whereNull('transaction_id')
+            ->count();
+
+        // 3. Hospital Load & Efficiency
+        $avg_consultation_time = DB::table('hospital_consultations')
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->select(DB::raw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min'))
+            ->first();
+        
+        $bed_occupancy = 0;
+        $total_beds = DB::table('hospital_beds')
+            ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
+            ->where('hospital_wards.business_id', $business_id)
+            ->count();
+        if ($total_beds > 0) {
+            $occupied = DB::table('hospital_beds')
+                ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
+                ->where('hospital_wards.business_id', $business_id)
+                ->where('is_available', 0)
+                ->count();
+            $bed_occupancy = ($occupied / $total_beds) * 100;
+        }
+
+        // 4. Logistics Risk Profile
+        $failed_parcels = DB::table('parcels')
+            ->where('business_id', $business_id)
+            ->where('status', 'failed')
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->count();
+        
+        $top_routes_performance = DB::table('parcels')
+            ->where('parcels.business_id', $business_id)
+            ->leftJoin('parcel_stations as s1', 's1.id', '=', 'parcels.origin_station_id')
+            ->leftJoin('parcel_stations as s2', 's2.id', '=', 'parcels.destination_station_id')
+            ->select(
+                DB::raw('CONCAT(s1.name, " ➔ ", s2.name) as route'), 
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(CASE WHEN status="failed" THEN 1 ELSE 0 END) as failures')
+            )
+            ->groupBy('route')
+            ->orderBy('total', 'desc')
+            ->limit(5)
+            ->get();
+
+        // 5. Customer & SaaS Churn Risk (Businesses for Superadmin)
+        $is_superadmin = auth()->user()->username == config('constants.administrator_usernames'); // Basic check
+        $saas_context = [];
+        if ($is_superadmin) {
+            $saas_context = [
+                'expiring_soon' => DB::table('saas_subscriptions')->where('end_date', '<=', Carbon::now()->addDays(7))->count(),
+                'inactive_businesses_30d' => DB::table('business')
+                    ->leftJoin('transactions', 'transactions.business_id', '=', 'business.id')
+                    ->select('business.id')
+                    ->groupBy('business.id')
+                    ->havingRaw('MAX(transactions.transaction_date) <= ?', [Carbon::now()->subDays(30)])
+                    ->count()
+            ];
+        }
+
         return [
-            'revenue_last_6_months' => DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('transaction_date', '>=', Carbon::now()->subMonths(6))->select(DB::raw('MONTHNAME(transaction_date) as month'), DB::raw('SUM(final_total) as total'))->groupBy('month')->get(),
-            'top_products_stock' => DB::table('products')->where('business_id', $business_id)->select('name', 'alert_quantity')->limit(10)->get(),
-            'payment_split' => DB::table('transaction_payments')->join('transactions', 'transactions.id', '=', 'transaction_payments.transaction_id')->where('transactions.business_id', $business_id)->select('method', DB::raw('SUM(amount) as total'))->groupBy('method')->get(),
-            'parcel_stats' => DB::table('parcels')->where('business_id', $business_id)->select('status', DB::raw('count(*) as count'))->groupBy('status')->get(),
-            'customer_count' => DB::table('contacts')->where('business_id', $business_id)->where('type', 'customer')->count(),
+            'revenue_leakage' => [
+                'unbilled_labs' => $unbilled_labs,
+                'unbilled_imaging' => $unbilled_imaging,
+                'estimated_loss' => ($unbilled_labs * 1000) + ($unbilled_imaging * 2500) // Rough estimation
+            ],
+            'hospital_efficiency' => [
+                'bed_occupancy_percent' => round($bed_occupancy, 1),
+                'avg_consultation_mins' => round($avg_consultation_time->avg_min ?? 0, 1),
+                'pending_appointments_today' => DB::table('hospital_appointments')->whereDate('appointment_date', today())->count()
+            ],
+            'logistics_risk' => [
+                'recent_failures' => $failed_parcels,
+                'route_risk' => $top_routes_performance
+            ],
+            'revenue_history' => $revenue_6_months,
+            'saas_health' => $saas_context,
             'currency' => 'KES'
         ];
     }

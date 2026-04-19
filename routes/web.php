@@ -139,8 +139,8 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     Route::delete('/subscriptions/{subscription}/feature/{feature}', [SaasAdminController::class, 'subscriptionFeatureDetach'])->name('subscriptions.feature.detach');
 
     // Global SaaS settings (trial, campaign, payment)
-    Route::get('/settings',  [SaasAdminController::class, 'settingsIndex'])->name('settings');
-    Route::put('/settings',  [SaasAdminController::class, 'settingsUpdate'])->name('settings.update');
+    Route::get('/settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
+    Route::put('/settings',  [SaasAdminController::class, 'settingsUpdate'])->name('saas_settings.update');
 });
 
 Route::middleware(['setData'])->group(function () {
@@ -182,6 +182,9 @@ Route::middleware(['setData'])->group(function () {
 
 //Routes for authenticated users only
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
+    Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
+    Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
+
     Route::get('pos/payment/{id}', [SellPosController::class, 'edit'])->name('edit-pos-payment');
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);
     Route::get('pause-resume-service-staff-timer/{user_id}', [SellPosController::class, 'pauseResumeServiceStaffTimer']);
@@ -356,8 +359,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/dda/destruction/{id}/status', [\App\Http\Controllers\DdaController::class, 'updateDisposalStatus'])->name('dda.destruction.status');
     Route::get('/dda/destruction/{id}/certificate', [\App\Http\Controllers\DdaController::class, 'viewCertificate'])->name('dda.destruction.certificate');
     Route::get('/dda/expired', [\App\Http\Controllers\DdaController::class, 'expiredDrugs'])->name('dda.expired');
-    Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
-    Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
     Route::get('/user/profile', [UserController::class, 'getProfile'])->name('user.getProfile');
     Route::post('/user/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     Route::post('/user/update-password', [UserController::class, 'updatePassword'])->name('user.updatePassword');

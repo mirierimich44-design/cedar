@@ -22,6 +22,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/bi/insights', [\App\Http\Controllers\BIDashboardController::class, 'getInsights']);
     Route::post('/bi/ask', [\App\Http\Controllers\BIDashboardController::class, 'askQuestion']);
     Route::get('/bi/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
+    Route::get('/bi/deep-intelligence', [\App\Http\Controllers\BIDashboardController::class, 'getDeepIntelligence']);
 });
 
 Route::post('/sync/receive', [\App\Http\Controllers\SyncController::class, 'receiveFromLocal']);
