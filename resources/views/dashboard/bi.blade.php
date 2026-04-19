@@ -365,7 +365,7 @@
         async function fetchInsights(refresh = false) {
             const container = $('#insights-container');
             try {
-                const res = await fetch(`/api/bi/insights${refresh ? '?refresh=1' : ''}`);
+                const res = await fetch(`/bi-api/insights${refresh ? '?refresh=1' : ''}`);
                 const data = await res.json();
                 container.empty();
                 data.insights.forEach(text => {
@@ -383,7 +383,7 @@
 
         async function fetchDeepIntelligence() {
             try {
-                const res = await fetch('/api/bi/deep-intelligence');
+                const res = await fetch('/bi-api/deep-intelligence');
                 const data = await res.json();
 
                 $('#leakage-content').html(`
@@ -411,7 +411,7 @@
         async function fetchPredictions() {
             const container = $('#predictions-container');
             try {
-                const res = await fetch('/api/bi/predictions');
+                const res = await fetch('/bi-api/predictions');
                 const data = await res.json();
                 container.empty();
                 
@@ -452,7 +452,7 @@
             btn.prop('disabled', true);
 
             try {
-                const res = await $.post('/api/bi/ask', { 
+                const res = await $.post('/bi-api/ask', { 
                     question: input.val(),
                     _token: $('meta[name="csrf-token"]').attr('content') 
                 });

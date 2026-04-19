@@ -189,6 +189,12 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     // BI Dashboard & Settings
     Route::get('/dashboard/bi', [\App\Http\Controllers\BIDashboardController::class, 'index'])->name('dashboard.bi');
     Route::post('/dashboard/bi/settings', [\App\Http\Controllers\BIDashboardController::class, 'saveSettings'])->name('dashboard.bi.settings.save');
+    
+    // BI AJAX Routes (for Apex AI)
+    Route::get('/bi-api/insights', [\App\Http\Controllers\BIDashboardController::class, 'getInsights']);
+    Route::post('/bi-api/ask', [\App\Http\Controllers\BIDashboardController::class, 'askQuestion']);
+    Route::get('/bi-api/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
+    Route::get('/bi-api/deep-intelligence', [\App\Http\Controllers\BIDashboardController::class, 'getDeepIntelligence']);
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);
     Route::get('pause-resume-service-staff-timer/{user_id}', [SellPosController::class, 'pauseResumeServiceStaffTimer']);
     Route::get('mark-as-available/{user_id}', [SellPosController::class, 'markAsAvailable']);
