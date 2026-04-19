@@ -310,10 +310,40 @@ class BIDashboardController extends Controller
         ];
     }
 
+    /**
+     * Save BI Settings (API Key)
+     */
+    public function saveSettings(Request $request)
+    {
+        try {
+            $business_id = $request->session()->get('user.business_id');
+            $business = \App\Business::findOrFail($business_id);
+            
+            $common_settings = !empty($business->common_settings) ? $business->common_settings : [];
+            $common_settings['gemini_api_key'] = $request->gemini_api_key;
+            
+            $business->common_settings = $common_settings;
+            $business->save();
+
+            return redirect()->back()->with('status', ['success' => 1, 'msg' => 'AI Settings updated successfully']);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('status', ['success' => 0, 'msg' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
     private function callGemini($prompt, $isJson = false)
     {
         try {
-            $apiKey = config('services.gemini.key');
+            $business_id = request()->session()->get('user.business_id');
+            $business = \App\Business::where('id', $business_id)->first();
+            $common_settings = !empty($business->common_settings) ? $business->common_settings : [];
+            
+            $apiKey = $common_settings['gemini_api_key'] ?? config('services.gemini.key');
+
+            if (empty($apiKey)) {
+                return $isJson ? json_encode(['error' => 'API Key missing']) : "Gemini API Key is missing. Please set it in Audit & Risk > AI Settings.";
+            }
+
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
