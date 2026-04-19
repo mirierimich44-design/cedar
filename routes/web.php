@@ -139,8 +139,8 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     Route::delete('/subscriptions/{subscription}/feature/{feature}', [SaasAdminController::class, 'subscriptionFeatureDetach'])->name('subscriptions.feature.detach');
 
     // Global SaaS settings (trial, campaign, payment)
-    Route::get('/settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
-    Route::put('/settings',  [SaasAdminController::class, 'settingsUpdate'])->name('saas_settings.update');
+    Route::get('/saas-settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
+    Route::put('/saas-settings',  [SaasAdminController::class, 'settingsUpdate'])->name('saas_settings.update');
 });
 
 Route::middleware(['setData'])->group(function () {
