@@ -234,6 +234,13 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/radiography/enter-result/{id}', [\App\Http\Controllers\Hospital\RadiographyController::class, 'enterResult'])->name('hospital.radiography.enterResult');
     Route::post('/hospital/radiography/store-result', [\App\Http\Controllers\Hospital\RadiographyController::class, 'storeResult'])->name('hospital.radiography.storeResult');
 
+    //Theatre/Surgery routes
+    Route::get('/hospital/theatre', [\App\Http\Controllers\Hospital\TheatreController::class, 'index'])->name('hospital.theatre.index');
+    Route::get('/hospital/theatre/create-booking', [\App\Http\Controllers\Hospital\TheatreController::class, 'createBooking'])->name('hospital.theatre.createBooking');
+    Route::post('/hospital/theatre/store-booking', [\App\Http\Controllers\Hospital\TheatreController::class, 'storeBooking'])->name('hospital.theatre.storeBooking');
+    Route::get('/hospital/theatre/edit-record/{id}', [\App\Http\Controllers\Hospital\TheatreController::class, 'editRecord'])->name('hospital.theatre.editRecord');
+    Route::post('/hospital/theatre/update-record/{id}', [\App\Http\Controllers\Hospital\TheatreController::class, 'updateRecord'])->name('hospital.theatre.updateRecord');
+
     //Billing routes
     Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
     Route::get('/hospital/billing/patient-bill/{id}', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'patientBill'])->name('hospital.billing.patientBill');
