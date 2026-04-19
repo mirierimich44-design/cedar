@@ -905,6 +905,7 @@ class AdminSidebarMenu
                     $sub->url(route('hospital.reports.moh705Index'),'MoH Reports',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'reports']);
                     $sub->url(route('hospital.assets.index'),      'Hospital Assets',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'assets']);
                     $sub->url(route('hospital.maternity.index'),   'Maternity & ANC',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'maternity']);
+                    $sub->url(route('hospital.radiography.index'), 'Radiography (X-Ray)', ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'radiography']);
                     $sub->url(route('hospital.pharmacy.index'),    'Pharmacy Dispensing',['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'pharmacy']);
                 },
                 ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">

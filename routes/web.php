@@ -227,6 +227,13 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/lab/enter-result/{id}', [\App\Http\Controllers\Hospital\LabController::class, 'enterResult'])->name('hospital.lab.enterResult');
     Route::post('/hospital/lab/store-result', [\App\Http\Controllers\Hospital\LabController::class, 'storeResult'])->name('hospital.lab.storeResult');
 
+    //Radiography routes
+    Route::get('/hospital/radiography', [\App\Http\Controllers\Hospital\RadiographyController::class, 'index'])->name('hospital.radiography.index');
+    Route::get('/hospital/radiography/create-test', [\App\Http\Controllers\Hospital\RadiographyController::class, 'createTest'])->name('hospital.radiography.createTest');
+    Route::post('/hospital/radiography/store-test', [\App\Http\Controllers\Hospital\RadiographyController::class, 'storeTest'])->name('hospital.radiography.storeTest');
+    Route::get('/hospital/radiography/enter-result/{id}', [\App\Http\Controllers\Hospital\RadiographyController::class, 'enterResult'])->name('hospital.radiography.enterResult');
+    Route::post('/hospital/radiography/store-result', [\App\Http\Controllers\Hospital\RadiographyController::class, 'storeResult'])->name('hospital.radiography.storeResult');
+
     //Billing routes
     Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
     Route::get('/hospital/billing/patient-bill/{id}', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'patientBill'])->name('hospital.billing.patientBill');
