@@ -1,0 +1,23 @@
+{
+    "name": "nwidart/parcel",
+    "description": "",
+    "authors": [
+        {
+            "name": "Gemini CLI",
+            "email": "gemini@cli.ai"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Parcel\\Providers\\ParcelServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Parcel\\": ""
+        }
+    }
+}

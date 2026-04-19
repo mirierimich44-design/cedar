@@ -543,6 +543,10 @@ class ModuleUtil extends Util
                 'name' => 'WhatsApp',
                 'tooltip' => 'Enable WhatsApp messaging to customers.',
             ],
+            'parcel' => [
+                'name' => 'Parcel Management',
+                'tooltip' => 'Long-distance parcel system for Kenya with M-Pesa integration.',
+            ],
         ];
     }
 

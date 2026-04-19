@@ -497,7 +497,40 @@ class MpesaController extends Controller
             }
 
             // Create C2B payment record
-            MpesaC2bPayment::createFromCallback($settings->business_id, $data);
+            $payment = MpesaC2bPayment::createFromCallback($settings->business_id, $data);
+
+            // Parcel Waybill Reconciliation
+            // If BillRefNumber matches "FS-" pattern, it's likely a parcel payment
+            $billRef = $data['BillRefNumber'] ?? '';
+            if (strpos($billRef, 'FS-') === 0) {
+                try {
+                    $parcel = \Modules\Parcel\Entities\Parcel::where('waybill_number', $billRef)
+                        ->where('business_id', $settings->business_id)
+                        ->first();
+                    
+                    if ($parcel) {
+                        $parcel->update([
+                            'payment_status' => 'paid',
+                            'mpesa_reference' => $data['TransID']
+                        ]);
+                        $payment->update([
+                            'status' => MpesaC2bPayment::STATUS_MATCHED,
+                            'matched_to_type' => 'parcel',
+                            'matched_to_id' => $parcel->id
+                        ]);
+                        
+                        Log::info('M-Pesa C2B: Parcel payment matched', ['waybill' => $billRef, 'trans_id' => $data['TransID']]);
+
+                        // Send SMS confirmation for COD paid
+                        if (class_exists('\Modules\Parcel\Services\ParcelSmsService')) {
+                            $smsService = app(\Modules\Parcel\Services\ParcelSmsService::class);
+                            $smsService->sendNotification($parcel, 'cod_paid');
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('M-Pesa C2B: Parcel reconciliation error', ['error' => $e->getMessage()]);
+                }
+            }
 
             Log::info('M-Pesa C2B payment recorded', [
                 'trans_id' => $data['TransID'] ?? null,

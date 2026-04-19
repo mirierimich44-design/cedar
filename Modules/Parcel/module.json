@@ -1,0 +1,14 @@
+{
+    "name": "Parcel",
+    "alias": "parcel",
+    "description": "Long-distance parcel management system for Kenya with M-Pesa and SMS integration.",
+    "keywords": [],
+    "active": 1,
+    "order": 1,
+    "providers": [
+        "Modules\\Parcel\\Providers\\ParcelServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
