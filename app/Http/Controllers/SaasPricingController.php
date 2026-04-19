@@ -11,6 +11,7 @@ use App\Business;
 use App\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
+use App\Services\SaasDarajaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -240,7 +241,13 @@ class SaasPricingController extends Controller
                 ]);
             }
 
-            // pay_now — show M-Pesa STK pending page (stub polls until admin marks paid)
+            // pay_now — fire Daraja STK push, then show pending page that polls status
+            try {
+                app(SaasDarajaService::class)->initiateStkPush($invoice, $request->phone);
+            } catch (\Throwable $e) {
+                \Log::warning('SaaS STK push failed: ' . $e->getMessage());
+                // Don't block the user — invoice stays unpaid, they can retry from pending page
+            }
             return redirect()->route('saas.mpesa.pending', ['invoice' => $invoice->id]);
 
         } catch (\Throwable $e) {
@@ -255,7 +262,19 @@ class SaasPricingController extends Controller
         }
     }
 
-    // M-Pesa STK pending page (stub — real STK push wired separately)
+    // Daraja STK async callback — public, no auth (Safaricom posts here)
+    public function mpesaCallback(Request $request, SaasInvoice $invoice)
+    {
+        \Log::info('SaaS M-Pesa callback received', [
+            'invoice' => $invoice->id,
+            'payload' => $request->all(),
+        ]);
+        app(SaasDarajaService::class)->handleCallback($invoice, $request->all());
+        // Safaricom expects a JSON ack
+        return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
+    }
+
+    // M-Pesa STK pending page
     public function mpesaPending(SaasInvoice $invoice)
     {
         // Only the account owner can see this

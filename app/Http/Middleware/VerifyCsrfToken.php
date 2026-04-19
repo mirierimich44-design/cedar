@@ -18,6 +18,7 @@ class VerifyCsrfToken extends BaseVerifier
         '/api/ecom/customers',
         '/api/ecom/orders',
         '/webhook/*',
-        'mobile-money/webhook/*'
+        'mobile-money/webhook/*',
+        'saas/mpesa/callback/*',
     ];
 }

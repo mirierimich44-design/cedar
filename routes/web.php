@@ -91,6 +91,11 @@ Route::middleware(['setData'])->group(function () {
     Route::post('/pricing/order',    [SaasPricingController::class, 'submitOrder'])->name('saas.order.submit');
 });
 
+// Daraja STK callback — Safaricom posts here, must be public (no auth, no CSRF)
+Route::post('/saas/mpesa/callback/{invoice}', [SaasPricingController::class, 'mpesaCallback'])
+    ->name('saas.mpesa.callback')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
 // ─── SaaS Customer Portal ─────────────────────────────────────────────────
 Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
     Route::get('/my-subscription', [SaasPricingController::class, 'portal'])->name('saas.portal');
@@ -190,8 +195,15 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('/sign-in-as-user/{id}', [ManageUserController::class, 'signInAsUser'])->name('sign-in-as-user');
 
-    //Hospital routes
+    //Hospital routes — gated by SaaS "hospital" feature + active subscription
+    Route::middleware('feature:hospital')->group(function () {
     Route::get('/hospital', [\App\Http\Controllers\Hospital\HospitalController::class, 'index'])->name('hospital.index');
+
+    // Patients
+    Route::get('/hospital/patients', [\App\Http\Controllers\Hospital\PatientController::class, 'index'])->name('hospital.patients.index');
+    Route::get('/hospital/patients/create', [\App\Http\Controllers\Hospital\PatientController::class, 'create'])->name('hospital.patients.create');
+    Route::post('/hospital/patients', [\App\Http\Controllers\Hospital\PatientController::class, 'store'])->name('hospital.patients.store');
+    Route::get('/hospital/patients/{id}', [\App\Http\Controllers\Hospital\PatientController::class, 'show'])->name('hospital.patients.show');
     Route::get('/hospital/create-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'createAppointment'])->name('hospital.createAppointment');
     Route::post('/hospital/store-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeAppointment'])->name('hospital.storeAppointment');
     Route::get('/hospital/triage/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'triage'])->name('hospital.triage');
@@ -255,8 +267,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/pharmacy', [\App\Http\Controllers\Hospital\PharmacyController::class, 'index'])->name('hospital.pharmacy.index');
     Route::get('/hospital/pharmacy/dispense/{patient_id}', [\App\Http\Controllers\Hospital\PharmacyController::class, 'dispense'])->name('hospital.pharmacy.dispense');
     Route::post('/hospital/pharmacy/store-dispense', [\App\Http\Controllers\Hospital\PharmacyController::class, 'storeDispense'])->name('hospital.pharmacy.storeDispense');
+    }); // end feature:hospital group
 
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->middleware('trial')->name('home');
     Route::get('/home/get-totals', [HomeController::class, 'getTotals']);
     Route::get('/home/live-stats', [HomeController::class, 'getLiveStats']);
     Route::get('/home/best-sellers', [HomeController::class, 'getBestSellers']);

@@ -41,6 +41,9 @@ class SaasFeaturesSeeder extends Seeder
             // RESTAURANT
             ['key' => 'restaurant',      'name' => 'Restaurant Module',         'category' => 'restaurant',    'icon' => 'fa-utensils',       'is_required' => false, 'price_monthly' => 500,  'price_quarterly' => 1350, 'price_yearly' => 5000,  'price_once' => 14000, 'sort_order' => 50],
 
+            // HOSPITAL / CLINIC
+            ['key' => 'hospital',        'name' => 'Hospital / Clinic Module',  'category' => 'hospital',      'icon' => 'fa-hospital',       'is_required' => false, 'price_monthly' => 1500, 'price_quarterly' => 4050, 'price_yearly' => 15000, 'price_once' => 45000, 'sort_order' => 55],
+
             // SERVICE / SETUP
             ['key' => 'setup_cost',      'name' => 'One-time Setup & Training', 'category' => 'service',       'icon' => 'fa-tools',          'is_required' => false, 'price_monthly' => 0,    'price_quarterly' => 0,    'price_yearly' => 0,     'price_once' => 5000,  'sort_order' => 60],
         ];
@@ -53,11 +56,13 @@ class SaasFeaturesSeeder extends Seeder
         $basicIds     = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'reports_basic', 'setup_cost'])->pluck('id');
         $pharmacyIds  = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'dda_module', 'prescriptions', 'pharmacy_reports', 'sms', 'reports_basic', 'etims', 'setup_cost'])->pluck('id');
         $retailIds    = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'purchases', 'multi_location', 'reports_basic', 'reports_advanced', 'sms', 'etims', 'setup_cost'])->pluck('id');
+        $hospitalIds  = SaasFeature::whereIn('key', ['core_pos', 'core_contacts', 'core_users', 'inventory', 'expiry_tracking', 'prescriptions', 'pharmacy_reports', 'hospital', 'reports_basic', 'sms', 'setup_cost'])->pluck('id');
 
         $bundles = [
             ['name' => 'Basic Retail',     'slug' => 'basic-retail',    'description' => 'Perfect for small shops and kiosks.',             'color' => '#0369a1', 'is_popular' => false, 'sort_order' => 1, 'features' => $basicIds],
             ['name' => 'Pharmacy Suite',   'slug' => 'pharmacy-suite',  'description' => 'Full DDA compliance and prescription management.', 'color' => '#0f766e', 'is_popular' => true,  'sort_order' => 2, 'features' => $pharmacyIds],
             ['name' => 'Retail Pro',       'slug' => 'retail-pro',      'description' => 'Multi-location retail with full analytics.',       'color' => '#7c3aed', 'is_popular' => false, 'sort_order' => 3, 'features' => $retailIds],
+            ['name' => 'Clinic / Hospital','slug' => 'clinic-hospital', 'description' => 'OPD queue, IPD, lab, pharmacy dispensing, MoH reports.', 'color' => '#b91c1c', 'is_popular' => false, 'sort_order' => 4, 'features' => $hospitalIds],
         ];
 
         foreach ($bundles as $b) {

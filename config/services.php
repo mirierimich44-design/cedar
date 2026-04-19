@@ -37,4 +37,15 @@ return [
         'whatsapp_from' => env('AFRICASTALKING_WHATSAPP_FROM'),
     ],
 
+    // Platform-level Daraja credentials used by SaaS billing (ApexPOS owner paybill)
+    'saas_daraja' => [
+        'env'              => env('SAAS_DARAJA_ENV', 'sandbox'), // sandbox|production
+        'consumer_key'     => env('SAAS_DARAJA_CONSUMER_KEY'),
+        'consumer_secret'  => env('SAAS_DARAJA_CONSUMER_SECRET'),
+        'shortcode'        => env('SAAS_DARAJA_SHORTCODE'),       // paybill/till
+        'passkey'          => env('SAAS_DARAJA_PASSKEY'),
+        'callback_url'     => env('SAAS_DARAJA_CALLBACK_URL'),    // must be publicly reachable HTTPS
+        'transaction_type' => env('SAAS_DARAJA_TX_TYPE', 'CustomerPayBillOnline'),
+    ],
+
 ];

@@ -72,5 +72,6 @@ class Kernel extends HttpKernel
         'superadmin' => \App\Http\Middleware\Superadmin::class,
         'CheckUserLogin' => \App\Http\Middleware\CheckUserLogin::class,
         'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+        'trial' => \App\Http\Middleware\TrialExpired::class,
     ];
 }

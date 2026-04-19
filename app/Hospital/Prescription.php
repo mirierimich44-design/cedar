@@ -18,6 +18,6 @@ class Prescription extends Model
     }
 
     public function variation() {
-        return $this->belongsTo(\App\ProductVariation::class, 'variation_id');
+        return $this->belongsTo(\App\Variation::class, 'variation_id');
     }
 }
