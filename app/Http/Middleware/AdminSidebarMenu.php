@@ -904,6 +904,7 @@ class AdminSidebarMenu
             $menu->dropdown(
                 'Hospital',
                 function ($sub) {
+                    $sub->url(route('hospital.flow'),              '⚡ Patient Flow',     ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'flow']);
                     $sub->url(route('hospital.patients.index'),    'Patients',           ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'patients']);
                     $sub->url(route('hospital.queue.index'),       'Outpatient Queue',   ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'queue']);
                     $sub->url(route('hospital.index'),             'Appointments',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == null]);

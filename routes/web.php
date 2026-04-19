@@ -234,9 +234,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/patients/{id}', [\App\Http\Controllers\Hospital\PatientController::class, 'show'])->name('hospital.patients.show');
     Route::get('/hospital/create-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'createAppointment'])->name('hospital.createAppointment');
     Route::post('/hospital/store-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeAppointment'])->name('hospital.storeAppointment');
+    Route::get('/hospital/flow', [\App\Http\Controllers\Hospital\HospitalController::class, 'flowDashboard'])->name('hospital.flow');
     Route::get('/hospital/triage/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'triage'])->name('hospital.triage');
     Route::post('/hospital/store-triage', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeTriage'])->name('hospital.storeTriage');
     Route::get('/hospital/consultation/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'consultation'])->name('hospital.consultation');
+    Route::get('/hospital/consult-walkin/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'consultWalkIn'])->name('hospital.consultWalkIn');
     Route::post('/hospital/store-consultation', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeConsultation'])->name('hospital.storeConsultation');
 
     // IPD routes

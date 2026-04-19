@@ -168,15 +168,17 @@ class HospitalController extends Controller
     public function storeTriage(Request $request)
     {
         $queue = HospitalQueue::findOrFail($request->queue_id);
-        
-        // Update the queue to move to consultation
+
+        // Persist vitals as JSON on the queue row
         $queue->update([
             'current_location' => 'consultation',
-            'status' => 'waiting'
+            'status'           => 'waiting',
+            'triage_vitals'    => json_encode($request->vitals ?? []),
+            'triage_notes'     => $request->notes,
         ]);
 
-        return redirect()->action([HospitalQueueController::class, 'index'])
-            ->with('status', ['success' => 1, 'msg' => 'Triage completed. Patient moved to Doctor.']);
+        return redirect()->route('hospital.consultWalkIn', $queue->id)
+            ->with('status', ['success' => 1, 'msg' => 'Triage done. Proceed with consultation below.']);
     }
 
     public function consultation($id)
@@ -184,8 +186,50 @@ class HospitalController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $appointment = Appointment::with(['patient.patientDetails'])->findOrFail($id);
         $lab_tests = LabTest::where('business_id', $business_id)->pluck('name', 'id');
-        
+
         return view('hospital.consultation', compact('appointment', 'lab_tests'));
+    }
+
+    /**
+     * Consultation page for walk-in patients who came through Triage (no Appointment).
+     */
+    public function consultWalkIn($queue_id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $queue   = HospitalQueue::with(['patient.patientDetails'])->findOrFail($queue_id);
+        $patient = $queue->patient;
+        $triage_vitals = $queue->triage_vitals ? json_decode($queue->triage_vitals, true) : [];
+        $lab_tests = LabTest::where('business_id', $business_id)->pluck('name', 'id');
+
+        return view('hospital.consultation_walkin', compact('queue', 'patient', 'triage_vitals', 'lab_tests'));
+    }
+
+    /**
+     * Patient Flow Kanban dashboard — all active patients by stage.
+     */
+    public function flowDashboard()
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        $active = HospitalQueue::where('business_id', $business_id)
+            ->where('status', '!=', 'completed')
+            ->with('patient')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $stages = ['triage', 'consultation', 'laboratory', 'pharmacy', 'billing'];
+        $by_stage = [];
+        foreach ($stages as $stage) {
+            $by_stage[$stage] = $active->where('current_location', $stage)->values();
+        }
+
+        // Today's completed count
+        $completed_today = HospitalQueue::where('business_id', $business_id)
+            ->where('status', 'completed')
+            ->whereDate('completed_at', \Carbon\Carbon::today())
+            ->count();
+
+        return view('hospital.flow', compact('by_stage', 'stages', 'completed_today', 'active'));
     }
 
     public function searchDrugs(Request $request)
@@ -263,12 +307,25 @@ class HospitalController extends Controller
                 }
             }
 
-            if($request->appointment_id) {
+            if ($request->appointment_id) {
                 Appointment::where('id', $request->appointment_id)->update(['status' => 'completed']);
+            }
+
+            // Move walk-in queue patient to next stage
+            if ($request->queue_id) {
+                $next_location = !empty($request->lab_tests) ? 'laboratory' : 'pharmacy';
+                HospitalQueue::where('id', $request->queue_id)->update([
+                    'current_location' => $next_location,
+                    'status'           => 'waiting',
+                ]);
             }
         });
 
-        return redirect()->action([HospitalController::class, 'index'])
+        $redirect = $request->queue_id
+            ? route('hospital.queue.index')
+            : action([HospitalController::class, 'index']);
+
+        return redirect($redirect)
             ->with('status', ['success' => 1, 'msg' => 'Consultation completed successfully']);
     }
 }

@@ -46,6 +46,10 @@
         <div class="box-header">
             <h3 class="box-title">Live Hospital Queue</h3>
             <div class="box-tools">
+                <a href="{{ route('hospital.flow') }}" class="btn btn-default btn-sm">
+                    <i class="fa fa-sitemap"></i> Patient Flow Board
+                </a>
+                &nbsp;
                 <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addToQueueModal">
                     <i class="fa fa-plus"></i> Add Patient to Queue
                 </button>
@@ -76,9 +80,16 @@
                     @foreach($queues as $q)
                         <tr>
                             <td><span class="label label-primary" style="font-size: 14px;">{{ $q->token_number }}</span></td>
-                            <td>{{ $q->patient->name }}</td>
                             <td>
-                                <span class="label bg-navy">{{ ucfirst($q->current_location) }}</span>
+                                <strong>{{ $q->patient->name }}</strong>
+                                <br><small class="text-muted">{{ $q->patient->mobile ?? '' }}</small>
+                            </td>
+                            <td>
+                                @php
+                                    $loc_colors = ['triage'=>'bg-yellow','consultation'=>'bg-blue','laboratory'=>'bg-purple','pharmacy'=>'bg-green','billing'=>'bg-red'];
+                                    $loc_color = $loc_colors[$q->current_location] ?? 'bg-navy';
+                                @endphp
+                                <span class="label {{ $loc_color }}">{{ ucfirst($q->current_location) }}</span>
                             </td>
                             <td>
                                 <span class="label {{ $q->status == 'serving' ? 'bg-green' : 'bg-orange' }}">
@@ -87,28 +98,49 @@
                             </td>
                             <td>{{ $q->created_at->diffForHumans(null, true) }}</td>
                             <td>
+                                {{-- Smart next-step button based on location --}}
+                                @if($q->current_location == 'triage')
+                                    <a href="{{ route('hospital.triage', $q->id) }}" class="btn btn-warning btn-xs">
+                                        <i class="fa fa-thermometer-half"></i> Triage
+                                    </a>
+                                @elseif($q->current_location == 'consultation')
+                                    <a href="{{ route('hospital.consultWalkIn', $q->id) }}" class="btn btn-primary btn-xs">
+                                        <i class="fa fa-stethoscope"></i> Consult
+                                    </a>
+                                @elseif($q->current_location == 'pharmacy')
+                                    <a href="{{ route('hospital.pharmacy.dispense', $q->patient_id) }}" class="btn btn-success btn-xs">
+                                        <i class="fa fa-medkit"></i> Dispense
+                                    </a>
+                                @elseif($q->current_location == 'billing')
+                                    <a href="{{ route('hospital.billing.patientBill', $q->patient_id) }}" class="btn btn-danger btn-xs">
+                                        <i class="fa fa-money"></i> Bill
+                                    </a>
+                                @endif
+                                &nbsp;
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                                        Actions <span class="caret"></span>
+                                        <span class="caret"></span>
                                     </button>
-                                    <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu dropdown-menu-right">
                                         @if($q->status == 'waiting')
-                                            <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'updateStatus'], ['queue_id' => $q->id, 'status' => 'serving']) }}">Start Serving</a></li>
+                                            <li><a href="{{ route('hospital.queue.updateStatus', ['queue_id' => $q->id, 'status' => 'serving']) }}"><i class="fa fa-play text-green"></i> Start Serving</a></li>
                                         @endif
-                                        
+                                        <li class="dropdown-header">Move to Stage:</li>
+                                        @foreach(['triage','consultation','laboratory','pharmacy','billing'] as $dest)
+                                            @if($dest != $q->current_location)
+                                            <li><a href="{{ route('hospital.queue.movePatient', ['queue_id' => $q->id, 'next_location' => $dest]) }}">→ {{ ucfirst($dest) }}</a></li>
+                                            @endif
+                                        @endforeach
                                         <li class="divider"></li>
-                                        <li class="dropdown-header">Consultation:</li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalController::class, 'consultation'], [$q->appointment_id ?? 0]) }}">General Consultation</a></li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\DentalController::class, 'index'], [$q->patient_id]) }}">Dental Charting</a></li>
-                                        
+                                        <li><a href="{{ route('hospital.patient.timeline', $q->patient_id) }}"><i class="fa fa-history"></i> Patient History</a></li>
+                                        <li><a href="{{ route('hospital.dental.index', $q->patient_id) }}"><i class="fa fa-tooth"></i> Dental Charting</a></li>
                                         <li class="divider"></li>
-                                        <li class="dropdown-header">Move to:</li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'movePatient'], ['queue_id' => $q->id, 'next_location' => 'consultation']) }}">Consultation</a></li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'movePatient'], ['queue_id' => $q->id, 'next_location' => 'laboratory']) }}">Laboratory</a></li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'movePatient'], ['queue_id' => $q->id, 'next_location' => 'pharmacy']) }}">Pharmacy</a></li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'movePatient'], ['queue_id' => $q->id, 'next_location' => 'billing']) }}">Billing</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="{{ action([\App\Http\Controllers\Hospital\HospitalQueueController::class, 'updateStatus'], ['queue_id' => $q->id, 'status' => 'completed']) }}">Mark Completed</a></li>
+                                        <li>
+                                            <a href="{{ route('hospital.queue.updateStatus', ['queue_id' => $q->id, 'status' => 'completed']) }}"
+                                               onclick="return confirm('Mark {{ $q->patient->name }} as completed?')">
+                                               <i class="fa fa-check text-green"></i> Mark Completed
+                                           </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
