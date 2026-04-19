@@ -119,6 +119,20 @@ class BIDashboardController extends Controller
         return response()->json($this->getDetailedContext(request()->session()->get('user.business_id')));
     }
 
+    /**
+     * Run Auto-Procurement manually from Dashboard
+     */
+    public function runAutoProcurement()
+    {
+        try {
+            $service = new \App\Services\AutoProcurementService();
+            $service->run();
+            return response()->json(['success' => true, 'msg' => 'Auto-procurement scan completed. Draft POs created where needed.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'msg' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
     public function generateCampaign(Request $request)
     {
         $prompt = "Write a professional, concise WhatsApp message for a customer based on this business insight: '{$request->insight}'. 

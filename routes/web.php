@@ -194,6 +194,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/bi-api/insights', [\App\Http\Controllers\BIDashboardController::class, 'getInsights']);
     Route::post('/bi-api/ask', [\App\Http\Controllers\BIDashboardController::class, 'askQuestion']);
     Route::post('/bi-api/generate-campaign', [\App\Http\Controllers\BIDashboardController::class, 'generateCampaign']);
+    Route::post('/bi-api/run-procurement', [\App\Http\Controllers\BIDashboardController::class, 'runAutoProcurement']);
     Route::get('/bi-api/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
     Route::get('/bi-api/deep-intelligence', [\App\Http\Controllers\BIDashboardController::class, 'getDeepIntelligence']);
     

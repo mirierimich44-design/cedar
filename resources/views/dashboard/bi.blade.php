@@ -237,6 +237,30 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-md-6">
+                                <div class="box box-solid">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Procurement & Inventory Actions</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <button class="btn btn-primary" onclick="runAutoProcure()">Run Auto-Procurement Scan</button>
+                                        <p class="text-muted" style="margin-top:10px;">This will generate draft Purchase Orders for all products below alert thresholds.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="box box-solid">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Audit Log</h3>
+                                    </div>
+                                    <div class="box-body" id="audit-log">
+                                        <p>Click 'Run Scan' to process pending alerts.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="box box-solid">
                                     <div class="box-header with-border">
@@ -411,15 +435,15 @@
             } catch (e) { container.html('<p class="text-red">Error loading insights.</p>'); }
         }
 
-        async function generateCampaign(insight) {
-            alert('Drafting campaign for: ' + insight.substring(0, 30) + '...');
+        async function runAutoProcure() {
+            if(!confirm('This will generate draft Purchase Orders. Continue?')) return;
+            $('#audit-log').html('<i class="fa fa-spin fa-spinner"></i> Scanning...');
             try {
-                const res = await $.post('/bi-api/generate-campaign', {
-                    insight: insight,
+                const res = await $.post('/bi-api/run-procurement', {
                     _token: $('meta[name="csrf-token"]').attr('content')
                 });
-                alert('Campaign Message:\n\n' + res.message);
-            } catch (e) { alert('Failed to generate campaign.'); }
+                $('#audit-log').html(`<div class="alert alert-success">${res.msg}</div>`);
+            } catch (e) { $('#audit-log').html('<div class="alert alert-danger">Procurement scan failed.</div>'); }
         }
 
         async function fetchDeepIntelligence() {
