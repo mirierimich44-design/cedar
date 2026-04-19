@@ -75,7 +75,7 @@
                                             </div>
                                             <div class="callout callout-info" style="margin-top:10px;">
                                                 <i class="fa fa-lightbulb-o"></i>
-                                                <strong>Insights:</strong> Check <a href="{{ action([\App\Http\Controllers\ReportController::class, 'index']) }}">Daily Summary</a> for breakdown or <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getDeadStockReport']) }}">Dead Stock</a> to clear capital.
+                                                <strong>Insights:</strong> Check <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getDeadStockReport']) }}">Dead Stock Report</a> to clear tied-up capital.
                                             </div>
                                         </div>
                                     </div>
