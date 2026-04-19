@@ -283,8 +283,7 @@ class HomeController extends Controller
             $month_year = date('m-Y', $date);
             $fy_months[] = $month_year;
 
-            $labels[] = \Carbon::createFromFormat('d-m-Y', '01-' . $month_year)
-                            ->format('M-Y');
+            $labels[] = \Carbon::createFromTimestamp($date)->format('M-Y');
             $date = strtotime('+1 month', $date);
 
             $total_sell_in_month_year = $sells_this_fy->where('yearmonth', $month_year)->sum('total_sells');
