@@ -35,16 +35,43 @@
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_overview" data-toggle="tab">Overview</a></li>
-                    <li><a href="#tab_audit" data-toggle="tab">Audit & Risk Intelligence</a></li>
-                    <li><a href="#tab_ai" data-toggle="tab">AI Assistant Lab</a></li>
+                    <li><a href="#tab_audit" data-toggle="tab">Audit & Risk</a></li>
+                    <li><a href="#tab_ai" data-toggle="tab">AI Assistant</a></li>
+                    <li><a href="#tab_predictive" data-toggle="tab">Predictive Lab</a></li>
                     <li class="pull-right">
                         <button class="btn btn-sm btn-default" id="refresh-bi" style="margin-top: 5px; margin-right: 10px;">
-                            <i class="fa fa-refresh"></i> Refresh AI Insights
+                            <i class="fa fa-refresh"></i> Refresh AI
                         </button>
                     </li>
                 </ul>
                 
                 <div class="tab-content" style="background: #f4f4f7;">
+                    
+                    <!-- 4. PREDICTIVE LAB TAB -->
+                    <div class="tab-pane" id="tab_predictive">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Patient Flow Forecast (7 Days)</h3>
+                                    </div>
+                                    <div class="box-body" id="forecast-content">
+                                        <div class="skeleton" style="height: 200px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="box box-success">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Customer Segmentation (RFM)</h3>
+                                    </div>
+                                    <div class="box-body" id="rfm-content">
+                                        <div class="skeleton" style="height: 200px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- 1. OVERVIEW TAB -->
                     <div class="tab-pane active" id="tab_overview">

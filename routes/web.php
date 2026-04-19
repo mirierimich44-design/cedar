@@ -196,6 +196,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/bi-api/generate-campaign', [\App\Http\Controllers\BIDashboardController::class, 'generateCampaign']);
     Route::get('/bi-api/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
     Route::get('/bi-api/deep-intelligence', [\App\Http\Controllers\BIDashboardController::class, 'getDeepIntelligence']);
+    
+    // New Advanced AI Routes
+    Route::get('/bi-api/customer-segments', [\App\Http\Controllers\Hospital\CustomerIntelligenceController::class, 'getSegments']);
+    Route::get('/bi-api/patient-forecast', [\App\Http\Controllers\Hospital\CustomerIntelligenceController::class, 'getVolumeForecast']);
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);
     Route::get('pause-resume-service-staff-timer/{user_id}', [SellPosController::class, 'pauseResumeServiceStaffTimer']);
     Route::get('mark-as-available/{user_id}', [SellPosController::class, 'markAsAvailable']);
