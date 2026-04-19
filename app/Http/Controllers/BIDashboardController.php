@@ -154,8 +154,19 @@ class BIDashboardController extends Controller
     {
         $summary = [
             'general' => [
-                'revenue_6m' => DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('transaction_date', '>=', Carbon::now()->subMonths(6))->select(DB::raw('MONTHNAME(transaction_date) as month'), DB::raw('SUM(final_total) as total'))->groupBy('month')->get(),
-                'payment_split' => DB::table('transaction_payments')->join('transactions', 'transactions.id', '=', 'transaction_payments.transaction_id')->where('transactions.business_id', $business_id)->select('method', DB::raw('SUM(amount) as total'))->groupBy('method')->get(),
+                'revenue_6m' => DB::table('transactions')
+                    ->where('transactions.business_id', $business_id)
+                    ->where('type', 'sell')
+                    ->where('transaction_date', '>=', Carbon::now()->subMonths(6))
+                    ->select(DB::raw('MONTHNAME(transaction_date) as month'), DB::raw('SUM(final_total) as total'))
+                    ->groupBy('month')
+                    ->get(),
+                'payment_split' => DB::table('transaction_payments')
+                    ->join('transactions', 'transactions.id', '=', 'transaction_payments.transaction_id')
+                    ->where('transactions.business_id', $business_id)
+                    ->select('method', DB::raw('SUM(amount) as total'))
+                    ->groupBy('method')
+                    ->get(),
             ],
             'inventory' => [
                 'stock_value' => DB::table('variation_location_details')
@@ -164,37 +175,58 @@ class BIDashboardController extends Controller
                     ->where('products.business_id', $business_id)
                     ->select(DB::raw('SUM(variation_location_details.qty_available * variations.default_sell_price) as total_value'))
                     ->first(),
-                'low_stock' => DB::table('products')->where('business_id', $business_id)->whereRaw('alert_quantity > 0')->limit(5)->get()
+                'low_stock' => DB::table('products')
+                    ->where('products.business_id', $business_id)
+                    ->whereRaw('alert_quantity > 0')
+                    ->limit(5)
+                    ->get()
             ]
         ];
 
         // Hospital Intelligence
         if ($this->moduleUtil->isModuleEnabled('hospital_module', $business_id)) {
             $summary['hospital'] = [
-                'total_patients' => DB::table('contacts')->where('business_id', $business_id)->where('type', 'customer')->count(),
-                'recent_consultations' => DB::table('hospital_consultations')->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
+                'total_patients' => DB::table('contacts')->where('contacts.business_id', $business_id)->where('type', 'customer')->count(),
+                'recent_consultations' => DB::table('hospital_consultations')->where('hospital_consultations.business_id', $business_id)->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
                 'unbilled_services' => [
-                    'labs' => DB::table('hospital_lab_requests')->where('business_id', $business_id)->whereNull('transaction_id')->count(),
-                    'imaging' => DB::table('hospital_radiography_requests')->where('business_id', $business_id)->whereNull('transaction_id')->count()
+                    'labs' => DB::table('hospital_lab_requests')->where('hospital_lab_requests.business_id', $business_id)->whereNull('transaction_id')->count(),
+                    'imaging' => DB::table('hospital_radiography_requests')->where('hospital_radiography_requests.business_id', $business_id)->whereNull('transaction_id')->count()
                 ],
-                'bed_occupancy' => DB::table('hospital_beds')->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')->where('hospital_wards.business_id', $business_id)->select(DB::raw('SUM(CASE WHEN is_available=0 THEN 1 ELSE 0 END) as occupied'), DB::raw('COUNT(*) as total'))->first()
+                'bed_occupancy' => DB::table('hospital_beds')
+                    ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
+                    ->where('hospital_wards.business_id', $business_id)
+                    ->select(DB::raw('SUM(CASE WHEN is_available=0 THEN 1 ELSE 0 END) as occupied'), DB::raw('COUNT(*) as total'))
+                    ->first()
             ];
         }
 
         // Logistics/Parcel Intelligence
         if ($this->moduleUtil->isModuleEnabled('parcel', $business_id)) {
             $summary['logistics'] = [
-                'total_parcels_30d' => DB::table('parcels')->where('business_id', $business_id)->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
-                'failure_rate' => DB::table('parcels')->where('business_id', $business_id)->select(DB::raw('SUM(CASE WHEN status="failed" THEN 1 ELSE 0 END) as failed'), DB::raw('COUNT(*) as total'))->first(),
-                'top_routes' => DB::table('parcels')->where('business_id', $business_id)->leftJoin('parcel_stations as s1', 's1.id', '=', 'parcels.origin_station_id')->leftJoin('parcel_stations as s2', 's2.id', '=', 'parcels.destination_station_id')->select(DB::raw('CONCAT(s1.name, " to ", s2.name) as route'), DB::raw('COUNT(*) as volume'), DB::raw('SUM(charge_amount) as revenue'))->groupBy('route')->orderBy('volume', 'desc')->limit(5)->get()
+                'total_parcels_30d' => DB::table('parcels')->where('parcels.business_id', $business_id)->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
+                'failure_rate' => DB::table('parcels')->where('parcels.business_id', $business_id)->select(DB::raw('SUM(CASE WHEN status="failed" THEN 1 ELSE 0 END) as failed'), DB::raw('COUNT(*) as total'))->first(),
+                'top_routes' => DB::table('parcels')
+                    ->where('parcels.business_id', $business_id)
+                    ->leftJoin('parcel_stations as s1', 's1.id', '=', 'parcels.origin_station_id')
+                    ->leftJoin('parcel_stations as s2', 's2.id', '=', 'parcels.destination_station_id')
+                    ->select(DB::raw('CONCAT(s1.name, " to ", s2.name) as route'), DB::raw('COUNT(*) as volume'), DB::raw('SUM(charge_amount) as revenue'))
+                    ->groupBy('route')
+                    ->orderBy('volume', 'desc')
+                    ->limit(5)
+                    ->get()
             ];
         }
 
         // Pharmacy/DDA Intelligence
         if ($this->moduleUtil->isModuleEnabled('dda_module', $business_id)) {
             $summary['pharmacy'] = [
-                'controlled_drugs_dispensed_30d' => DB::table('dda_dispense_logs')->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
-                'expiring_soon' => DB::table('purchase_lines')->join('transactions', 'transactions.id', '=', 'purchase_lines.transaction_id')->where('transactions.business_id', $business_id)->whereNotNull('exp_date')->whereBetween('exp_date', [now(), now()->addMonths(3)])->count()
+                'controlled_drugs_dispensed_30d' => DB::table('dda_dispense_logs')->where('dda_dispense_logs.business_id', $business_id)->where('created_at', '>=', Carbon::now()->subDays(30))->count(),
+                'expiring_soon' => DB::table('purchase_lines')
+                    ->join('transactions', 'transactions.id', '=', 'purchase_lines.transaction_id')
+                    ->where('transactions.business_id', $business_id)
+                    ->whereNotNull('exp_date')
+                    ->whereBetween('exp_date', [now(), now()->addMonths(3)])
+                    ->count()
             ];
         }
 
