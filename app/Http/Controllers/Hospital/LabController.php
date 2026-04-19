@@ -53,12 +53,17 @@ class LabController extends Controller
     {
         $lab_request = LabRequest::findOrFail($request->request_id);
         $lab_request->update([
-            'result_notes' => $request->result_notes,
-            'status' => 'completed',
-            'lab_tech_id' => auth()->user()->id
-        ]);
+            $lab_request->update([
+                'radiologist_findings' => $request->radiologist_findings, // Assuming this is LabController... wait.
+                'conclusion' => $request->conclusion,
+                'status' => 'completed',
+                'lab_tech_id' => auth()->user()->id
+            ]);
 
-        return redirect()->action([LabController::class, 'index'])
-            ->with('status', ['success' => 1, 'msg' => 'Test results updated']);
-    }
-}
+            event(new \App\Events\LabTestCompleted($lab_request));
+
+            return redirect()->action([LabController::class, 'index'])
+                ->with('status', ['success' => 1, 'msg' => 'Test results updated']);
+            }
+            }
+
