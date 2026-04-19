@@ -13,8 +13,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:api')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // BI Dashboard API
+    Route::get('/bi/insights', [\App\Http\Controllers\BIDashboardController::class, 'getInsights']);
+    Route::post('/bi/ask', [\App\Http\Controllers\BIDashboardController::class, 'askQuestion']);
+    Route::get('/bi/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
 });
 
 Route::post('/sync/receive', [\App\Http\Controllers\SyncController::class, 'receiveFromLocal']);

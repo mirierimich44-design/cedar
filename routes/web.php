@@ -263,6 +263,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //EHR Timeline
     Route::get('/hospital/patient-timeline/{id}', [\App\Http\Controllers\Hospital\PatientTimelineController::class, 'show'])->name('hospital.patient.timeline');
 
+    // BI Dashboard
+    Route::get('/dashboard/bi', [\App\Http\Controllers\BIDashboardController::class, 'index'])->name('dashboard.bi');
+
     //Billing routes
     Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
     Route::get('/hospital/billing/patient-bill/{id}', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'patientBill'])->name('hospital.billing.patientBill');

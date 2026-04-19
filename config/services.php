@@ -48,4 +48,8 @@ return [
         'transaction_type' => env('SAAS_DARAJA_TX_TYPE', 'CustomerPayBillOnline'),
     ],
 
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
 ];
