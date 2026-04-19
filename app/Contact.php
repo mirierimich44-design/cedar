@@ -408,4 +408,24 @@ class Contact extends Authenticatable
     {
         return $this->hasMany(\App\Job::class, 'contact_id');
     }
+
+    public function patientDetails()
+    {
+        return $this->hasOne(\App\Hospital\PatientDetail::class, 'contact_id');
+    }
+
+    public function consultations()
+    {
+        return $this->hasMany(\App\Hospital\Consultation::class, 'patient_id');
+    }
+
+    public function labRequests()
+    {
+        return $this->hasMany(\App\Hospital\LabRequest::class, 'patient_id');
+    }
+
+    public function admissions()
+    {
+        return $this->hasMany(\App\Hospital\Admission::class, 'patient_id');
+    }
 }

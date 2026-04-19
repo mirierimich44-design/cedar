@@ -870,6 +870,30 @@ class AdminSidebarMenu
                 )->order(28);
             }
 
+            //Hospital dropdown
+            $menu->dropdown(
+                'Hospital',
+                function ($sub) {
+                    $sub->url(route('hospital.queue.index'),       'Outpatient Queue',   ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'queue']);
+                    $sub->url(route('hospital.index'),             'Appointments',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == null]);
+                    $sub->url(route('hospital.lab.index'),         'Laboratory',         ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'lab']);
+                    $sub->url(route('hospital.ipdIndex'),          'Inpatient (IPD)',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'ipd']);
+                    $sub->url(route('hospital.billing.index'),     'Billing',            ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'billing']);
+                    $sub->url(route('hospital.reports.moh705Index'),'MoH Reports',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'reports']);
+                    $sub->url(route('hospital.assets.index'),      'Hospital Assets',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'assets']);
+                    $sub->url(route('hospital.maternity.index'),   'Maternity & ANC',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'maternity']);
+                    $sub->url(route('hospital.pharmacy.index'),    'Pharmacy Dispensing',['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'pharmacy']);
+                },
+                ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M3 21h18" />
+                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" />
+                <path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" />
+                <path d="M10 9h4" />
+                <path d="M12 7v4" />
+              </svg>', 'active' => request()->segment(1) == 'hospital']
+            )->order(58);
+
             //Backup menu
             if (auth()->user()->can('backup')) {
                 $menu->url(action([\App\Http\Controllers\BackUpController::class, 'index']), __('lang_v1.backup'), ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">

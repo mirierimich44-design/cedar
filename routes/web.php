@@ -190,6 +190,72 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('/sign-in-as-user/{id}', [ManageUserController::class, 'signInAsUser'])->name('sign-in-as-user');
 
+    //Hospital routes
+    Route::get('/hospital', [\App\Http\Controllers\Hospital\HospitalController::class, 'index'])->name('hospital.index');
+    Route::get('/hospital/create-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'createAppointment'])->name('hospital.createAppointment');
+    Route::post('/hospital/store-appointment', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeAppointment'])->name('hospital.storeAppointment');
+    Route::get('/hospital/triage/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'triage'])->name('hospital.triage');
+    Route::post('/hospital/store-triage', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeTriage'])->name('hospital.storeTriage');
+    Route::get('/hospital/consultation/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'consultation'])->name('hospital.consultation');
+    Route::post('/hospital/store-consultation', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeConsultation'])->name('hospital.storeConsultation');
+
+    // IPD routes
+    Route::get('/hospital/ipd', [\App\Http\Controllers\Hospital\HospitalController::class, 'ipdIndex'])->name('hospital.ipdIndex');
+    Route::get('/hospital/ipd/create-admission', [\App\Http\Controllers\Hospital\HospitalController::class, 'createAdmission'])->name('hospital.createAdmission');
+    Route::post('/hospital/ipd/store-admission', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeAdmission'])->name('hospital.storeAdmission');
+    Route::get('/hospital/ipd/discharge/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'dischargePatient'])->name('hospital.dischargePatient');
+    Route::get('/hospital/ipd/add-daily-record/{id}', [\App\Http\Controllers\Hospital\HospitalController::class, 'addDailyRecord'])->name('hospital.addDailyRecord');
+    Route::post('/hospital/ipd/store-daily-record', [\App\Http\Controllers\Hospital\HospitalController::class, 'storeDailyRecord'])->name('hospital.storeDailyRecord');
+    Route::get('/hospital/search-drugs', [\App\Http\Controllers\Hospital\HospitalController::class, 'searchDrugs'])->name('hospital.searchDrugs');
+
+    //Lab routes
+    Route::get('/hospital/lab', [\App\Http\Controllers\Hospital\LabController::class, 'index'])->name('hospital.lab.index');
+    Route::get('/hospital/lab/create-test', [\App\Http\Controllers\Hospital\LabController::class, 'createTest'])->name('hospital.lab.createTest');
+    Route::post('/hospital/lab/store-test', [\App\Http\Controllers\Hospital\LabController::class, 'storeTest'])->name('hospital.lab.storeTest');
+    Route::get('/hospital/lab/enter-result/{id}', [\App\Http\Controllers\Hospital\LabController::class, 'enterResult'])->name('hospital.lab.enterResult');
+    Route::post('/hospital/lab/store-result', [\App\Http\Controllers\Hospital\LabController::class, 'storeResult'])->name('hospital.lab.storeResult');
+
+    //Billing routes
+    Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
+    Route::get('/hospital/billing/patient-bill/{id}', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'patientBill'])->name('hospital.billing.patientBill');
+    Route::post('/hospital/billing/create-invoice', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'createInvoice'])->name('hospital.billing.createInvoice');
+
+    //Queue routes
+    Route::get('/hospital/queue', [\App\Http\Controllers\Hospital\HospitalQueueController::class, 'index'])->name('hospital.queue.index');
+    Route::get('/hospital/queue/live', [\App\Http\Controllers\Hospital\HospitalQueueController::class, 'liveDisplay'])->name('hospital.queue.liveDisplay');
+    Route::post('/hospital/queue/add', [\App\Http\Controllers\Hospital\HospitalQueueController::class, 'addToQueue'])->name('hospital.queue.addToQueue');
+    Route::get('/hospital/queue/move', [\App\Http\Controllers\Hospital\HospitalQueueController::class, 'movePatient'])->name('hospital.queue.movePatient');
+    Route::get('/hospital/queue/update-status', [\App\Http\Controllers\Hospital\HospitalQueueController::class, 'updateStatus'])->name('hospital.queue.updateStatus');
+
+    //Report routes
+    Route::get('/hospital/reports/moh705', [\App\Http\Controllers\Hospital\HospitalReportController::class, 'moh705Index'])->name('hospital.reports.moh705Index');
+    Route::get('/hospital/reports/moh705A', [\App\Http\Controllers\Hospital\HospitalReportController::class, 'moh705A'])->name('hospital.reports.moh705A');
+    Route::get('/hospital/reports/moh705B', [\App\Http\Controllers\Hospital\HospitalReportController::class, 'moh705B'])->name('hospital.reports.moh705B');
+
+    //Dental routes
+    Route::get('/hospital/dental/{patient_id}', [\App\Http\Controllers\Hospital\DentalController::class, 'index'])->name('hospital.dental.index');
+    Route::post('/hospital/dental/update-tooth', [\App\Http\Controllers\Hospital\DentalController::class, 'updateTooth'])->name('hospital.dental.updateTooth');
+    Route::post('/hospital/dental/add-procedure', [\App\Http\Controllers\Hospital\DentalController::class, 'addProcedure'])->name('hospital.dental.addProcedure');
+
+    //Asset routes
+    Route::get('/hospital/assets', [\App\Http\Controllers\Hospital\HospitalAssetController::class, 'index'])->name('hospital.assets.index');
+    Route::get('/hospital/assets/create', [\App\Http\Controllers\Hospital\HospitalAssetController::class, 'create'])->name('hospital.assets.create');
+    Route::post('/hospital/assets/store', [\App\Http\Controllers\Hospital\HospitalAssetController::class, 'store'])->name('hospital.assets.store');
+    Route::get('/hospital/assets/maintenance/{id}', [\App\Http\Controllers\Hospital\HospitalAssetController::class, 'addMaintenance'])->name('hospital.assets.addMaintenance');
+    Route::post('/hospital/assets/store-maintenance', [\App\Http\Controllers\Hospital\HospitalAssetController::class, 'storeMaintenance'])->name('hospital.assets.storeMaintenance');
+
+    //Maternity routes
+    Route::get('/hospital/maternity', [\App\Http\Controllers\Hospital\MaternityController::class, 'index'])->name('hospital.maternity.index');
+    Route::get('/hospital/maternity/create-profile', [\App\Http\Controllers\Hospital\MaternityController::class, 'createProfile'])->name('hospital.maternity.createProfile');
+    Route::post('/hospital/maternity/store-profile', [\App\Http\Controllers\Hospital\MaternityController::class, 'storeProfile'])->name('hospital.maternity.storeProfile');
+    Route::get('/hospital/maternity/profile/{id}', [\App\Http\Controllers\Hospital\MaternityController::class, 'showProfile'])->name('hospital.maternity.showProfile');
+    Route::post('/hospital/maternity/store-anc-visit', [\App\Http\Controllers\Hospital\MaternityController::class, 'storeAncVisit'])->name('hospital.maternity.storeAncVisit');
+
+    //Pharmacy routes
+    Route::get('/hospital/pharmacy', [\App\Http\Controllers\Hospital\PharmacyController::class, 'index'])->name('hospital.pharmacy.index');
+    Route::get('/hospital/pharmacy/dispense/{patient_id}', [\App\Http\Controllers\Hospital\PharmacyController::class, 'dispense'])->name('hospital.pharmacy.dispense');
+    Route::post('/hospital/pharmacy/store-dispense', [\App\Http\Controllers\Hospital\PharmacyController::class, 'storeDispense'])->name('hospital.pharmacy.storeDispense');
+
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/home/get-totals', [HomeController::class, 'getTotals']);
     Route::get('/home/live-stats', [HomeController::class, 'getLiveStats']);
