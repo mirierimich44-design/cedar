@@ -904,21 +904,32 @@ class AdminSidebarMenu
             $menu->dropdown(
                 'Hospital',
                 function ($sub) {
-                    $sub->url(route('hospital.flow'),              '⚡ Patient Flow',     ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'flow']);
-                    $sub->url(route('hospital.patients.index'),    'Patients',           ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'patients']);
-                    $sub->url(route('hospital.queue.index'),       'Outpatient Queue',   ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'queue']);
-                    $sub->url(route('hospital.index'),             'Appointments',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == null]);
-                    $sub->url(route('hospital.lab.index'),         'Laboratory',         ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'lab']);
-                    $sub->url(route('hospital.inpatient.index'),   'Inpatient (IPD)',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'inpatient']);
-                    $sub->url(route('hospital.billing.index'),     'Billing',            ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'billing']);
-                    $sub->url(route('hospital.reports.moh705Index'),'MoH Reports',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'reports']);
-                    $sub->url(route('hospital.assets.index'),      'Hospital Assets',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'assets']);
-                    $sub->url(route('hospital.maternity.index'),   'Maternity & ANC',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'maternity']);
-                    $sub->url(route('hospital.radiography.index'), 'Radiography (X-Ray)', ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'radiography']);
-                    $sub->url(route('hospital.theatre.index'),     'Theatre (Surgery)',  ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'theatre']);
-                    $sub->url(route('hospital.physio.index'),      'Physiotherapy',      ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'physio']);
-                    $sub->url(route('hospital.mortuary.index'),    'Mortuary',           ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'mortuary']);
-                    $sub->url(route('hospital.pharmacy.index'),    'Pharmacy Dispensing',['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'pharmacy']);
+                    $links = [
+                        ['hospital.flow',               '⚡ Patient Flow',     'flow'],
+                        ['hospital.patients.index',     'Patients',            'patients'],
+                        ['hospital.queue.index',        'Outpatient Queue',    'queue'],
+                        ['hospital.index',              'Appointments',        null],
+                        ['hospital.lab.index',          'Laboratory',          'lab'],
+                        ['hospital.inpatient.index',    'Inpatient (IPD)',     'inpatient'],
+                        ['hospital.billing.index',      'Billing',             'billing'],
+                        ['hospital.reports.moh705Index','MoH Reports',         'reports'],
+                        ['hospital.assets.index',       'Hospital Assets',     'assets'],
+                        ['hospital.maternity.index',    'Maternity & ANC',     'maternity'],
+                        ['hospital.radiography.index',  'Radiography (X-Ray)', 'radiography'],
+                        ['hospital.theatre.index',      'Theatre (Surgery)',   'theatre'],
+                        ['hospital.physio.index',       'Physiotherapy',       'physio'],
+                        ['hospital.mortuary.index',     'Mortuary',            'mortuary'],
+                        ['hospital.pharmacy.index',     'Pharmacy Dispensing', 'pharmacy'],
+                    ];
+                    foreach ($links as [$name, $label, $seg2]) {
+                        try {
+                            $url = route($name);
+                            $active = request()->segment(1) == 'hospital' && request()->segment(2) == $seg2;
+                            $sub->url($url, $label, ['icon' => '', 'active' => $active]);
+                        } catch (\Exception $e) {
+                            // Route not cached yet — skip rather than crash the whole dropdown
+                        }
+                    }
                 },
                 ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>

@@ -262,14 +262,14 @@ class HospitalController extends Controller
         
         DB::transaction(function() use ($request, $business_id) {
             $consultation = Consultation::create([
-                'business_id' => $business_id,
-                'patient_id' => $request->patient_id,
-                'doctor_id' => auth()->user()->id,
-                'appointment_id' => $request->appointment_id,
-                'vitals' => $request->vitals,
-                'symptoms' => $request->symptoms,
-                'diagnosis' => $request->diagnosis,
-                'status' => 'completed'
+                'business_id'    => $business_id,
+                'patient_id'     => $request->patient_id,
+                'doctor_id'      => auth()->user()->id,
+                'appointment_id' => $request->appointment_id ?: null,   // empty string → NULL
+                'vitals'         => $request->vitals ?? [],
+                'symptoms'       => $request->symptoms,
+                'diagnosis'      => $request->diagnosis,
+                'status'         => 'completed',
             ]);
 
             // Save Structured Prescriptions
