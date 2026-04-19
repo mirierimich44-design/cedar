@@ -6,7 +6,7 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>APEX BI 
-        <small>AI-Powered Business Intelligence <span class="label label-primary" style="font-size: 10px; margin-left: 10px;">Gemini 2.0 Flash</span></small>
+        <small>AI-Powered Business Intelligence <span class="label label-primary" style="font-size: 10px; margin-left: 10px;">Gemini 3.1 Pro</span></small>
     </h1>
 </section>
 

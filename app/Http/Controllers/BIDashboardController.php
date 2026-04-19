@@ -344,15 +344,16 @@ class BIDashboardController extends Controller
                 return $isJson ? json_encode(['error' => 'API Key missing']) : "Gemini API Key is missing. Please set it in Audit & Risk > AI Settings.";
             }
 
+            // Upgrading to Gemini 3.1 Pro Preview (Latest Flagship April 2026)
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
+            ])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=" . $apiKey, [
                 'contents' => [
                     ['parts' => [['text' => $prompt]]]
                 ],
                 'generationConfig' => [
-                    'temperature' => 0.4,
-                    'maxOutputTokens' => 1024,
+                    'temperature' => 0.5,
+                    'maxOutputTokens' => 2048, // Increased for deeper thinking
                     'responseMimeType' => $isJson ? "application/json" : "text/plain"
                 ]
             ]);
