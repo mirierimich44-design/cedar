@@ -6,7 +6,7 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>APEX BI 
-        <small>AI-Powered Business Intelligence <span class="label label-primary" style="font-size: 10px; margin-left: 10px;">Gemini 3.1 Pro</span></small>
+        <small>AI-Powered Business Intelligence <span class="label label-primary" style="font-size: 10px; margin-left: 10px;">Gemini 2.0 Flash</span></small>
     </h1>
 </section>
 
@@ -35,6 +35,7 @@
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#tab_overview" data-toggle="tab">Overview</a></li>
+                    <li><a href="#tab_digest" data-toggle="tab"><i class="fa fa-coffee"></i> Morning Digest</a></li>
                     <li><a href="#tab_audit" data-toggle="tab">Audit & Risk</a></li>
                     <li><a href="#tab_ai" data-toggle="tab">AI Assistant</a></li>
                     <li><a href="#tab_predictive" data-toggle="tab">Predictive Lab</a></li>
@@ -47,6 +48,42 @@
                 
                 <div class="tab-content" style="background: #f4f4f7;">
                     
+                    <!-- MORNING DIGEST TAB -->
+                    <div class="tab-pane" id="tab_digest">
+                        <div class="row" style="padding:20px;">
+                            <div class="col-md-12">
+                                <div class="box box-primary">
+                                    <div class="box-header with-border" style="display:flex;align-items:center;justify-content:space-between;">
+                                        <h3 class="box-title"><i class="fa fa-coffee"></i> Morning Digest <small>(Yesterday &amp; Today)</small></h3>
+                                        <button class="btn btn-sm btn-default" id="refresh_morning_digest"><i class="fa fa-refresh"></i> Refresh</button>
+                                    </div>
+                                    <div class="box-body">
+                                        <div id="morning_digest_loader" class="text-center" style="padding:30px 0;">
+                                            <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+                                            <p class="text-muted" style="margin-top:10px;">Brewing your morning digest...</p>
+                                        </div>
+                                        <div id="morning_digest_data" style="display:none;">
+                                            <div class="row">
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-green"><i class="fa fa-dollar"></i></span><div class="info-box-content"><span class="info-box-text">Today Sales</span><span class="info-box-number display_currency" data-currency_symbol="true" id="md_today_sales">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-yellow"><i class="fa fa-calendar"></i></span><div class="info-box-content"><span class="info-box-text">Yesterday Sales</span><span class="info-box-number display_currency" data-currency_symbol="true" id="md_yesterday_sales">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-blue"><i class="fa fa-users"></i></span><div class="info-box-content"><span class="info-box-text">Customers Today</span><span class="info-box-number" id="md_total_customers">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-aqua"><i class="fa fa-money"></i></span><div class="info-box-content"><span class="info-box-text">Cash in Register</span><span class="info-box-number display_currency" data-currency_symbol="true" id="md_cash_in_register">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-red"><i class="fa fa-file-text-o"></i></span><div class="info-box-content"><span class="info-box-text">Unpaid Invoices</span><span class="info-box-number" id="md_unpaid_invoices">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-red"><i class="fa fa-exclamation-triangle"></i></span><div class="info-box-content"><span class="info-box-text">Low Stock Alerts</span><span class="info-box-number" id="md_low_stock">0</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-orange"><i class="fa fa-clock-o"></i></span><div class="info-box-content"><span class="info-box-text">Expiry Risk (&lt;30d)</span><span class="info-box-number display_currency" data-currency_symbol="true" id="md_expiry_value">0</span><span class="progress-description" id="md_expiry_count">0 items</span></div></div></div>
+                                                <div class="col-md-3 col-sm-6"><div class="info-box"><span class="info-box-icon bg-purple"><i class="fa fa-star"></i></span><div class="info-box-content"><span class="info-box-text">Top Product</span><span class="info-box-number" id="md_top_product" style="font-size:14px;">N/A</span></div></div></div>
+                                            </div>
+                                            <div class="callout callout-info" style="margin-top:10px;">
+                                                <i class="fa fa-lightbulb-o"></i>
+                                                <strong>Insights:</strong> Check <a href="{{ action([\App\Http\Controllers\ReportController::class, 'index']) }}">Daily Summary</a> for breakdown or <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getDeadStockReport']) }}">Dead Stock</a> to clear capital.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 4. PREDICTIVE LAB TAB -->
                     <div class="tab-pane" id="tab_predictive">
                         <div class="row">
@@ -532,5 +569,33 @@
 
         loadAI();
     });
+
+    // ── Morning Digest ──────────────────────────────────────────────
+    function loadMorningDigest() {
+        $('#morning_digest_data').hide();
+        $('#morning_digest_loader').show();
+        $.ajax({
+            url: '{{ route("home.morning_digest") }}',
+            success: function(data) {
+                $('#morning_digest_loader').hide();
+                $('#morning_digest_data').show();
+                $('#md_today_sales').text(parseFloat(data.today_sales).toFixed(2));
+                $('#md_yesterday_sales').text(parseFloat(data.yesterday_sales).toFixed(2));
+                $('#md_total_customers').text(data.total_customers_today || 0);
+                $('#md_cash_in_register').text(parseFloat(data.current_cash_in_register).toFixed(2));
+                $('#md_unpaid_invoices').text(data.unpaid_invoices_count || 0);
+                $('#md_low_stock').text(data.low_stock_alerts_count || 0);
+                $('#md_expiry_value').text(parseFloat(data.expiry_risk_value).toFixed(2));
+                $('#md_expiry_count').text('(' + data.expiry_item_count + ' items)');
+                $('#md_top_product').text(data.top_product_name || 'N/A');
+                __currency_convert_recursively($('#morning_digest_data'));
+            },
+            error: function() {
+                $('#morning_digest_loader').html('<span class="text-danger">Failed to load morning digest.</span>');
+            }
+        });
+    }
+    $('a[href="#tab_digest"]').on('shown.bs.tab', function() { loadMorningDigest(); });
+    $('#refresh_morning_digest').click(function() { loadMorningDigest(); });
 </script>
 @endsection

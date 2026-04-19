@@ -240,7 +240,7 @@ class BIDashboardController extends Controller
             $apiKey = ($business->common_settings ?? [])['gemini_api_key'] ?? config('services.gemini.key');
             if (empty($apiKey)) return $isJson ? json_encode(['error' => 'API Key missing']) : "Please set your Gemini API Key in the settings tab.";
 
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=" . $apiKey, [
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
                 'contents' => [['parts' => [['text' => $prompt]]]],
                 'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
             ]);

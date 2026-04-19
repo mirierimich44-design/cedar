@@ -255,74 +255,6 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
             </div>
         </div>
 
-        @if (auth()->user()->can('dashboard.data'))
-        <!-- MORNING DIGEST WIDGET -->
-        <div style="padding: 20px; background: linear-gradient(to right, var(--theme-dark), var(--theme-main));">
-
-            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.07);">
-                <div style="padding:16px 20px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; justify-content:space-between;">
-                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#ffffff; display:flex; align-items:center; gap:8px;">
-                        <span style="width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fa fa-coffee" style="color:#fff; font-size:13px;"></i>
-                        </span>
-                        Morning Digest <span style="font-size:12px; font-weight:400; color:#9ca3af; margin-left:4px;">(Yesterday &amp; Today)</span>
-                    </h3>
-                    <button type="button" id="refresh_morning_digest" title="Refresh" style="background:none;border:none;color:#9ca3af;cursor:pointer;padding:4px;">
-                        <i class="fas fa-sync"></i>
-                    </button>
-                </div>
-                <div style="padding:20px;">
-                    <div id="morning_digest_content">
-                        <div class="text-center" id="morning_digest_loader" style="padding:20px 0;">
-                            <i class="fa fa-spinner fa-spin fa-2x" style="color:#6366f1;"></i>
-                            <p style="font-size:13px; color:#6b7280; margin-top:8px;">Brewing your morning digest...</p>
-                        </div>
-                        <div id="morning_digest_data" style="display:none; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px;">
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Today Sales</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_today_sales">0</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Yesterday Sales</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_yesterday_sales">0</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Total Customers</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span id="md_total_customers">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">today</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Cash in Register</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_cash_in_register">0</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Unpaid Invoices</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span id="md_unpaid_invoices">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">due</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Low Stock Alerts</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#ef4444; margin:6px 0 0; font-family:monospace;"><span id="md_low_stock">0</span> <span style="font-size:13px; font-weight:400; color:#6b7280;">items</span></h4>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Expiry Risk (&lt;30d)</p>
-                                <h4 style="font-size:20px; font-weight:700; color:#111827; margin:6px 0 0; font-family:monospace;"><span class="display_currency" data-currency_symbol="true" id="md_expiry_value">0</span></h4>
-                                <p style="font-size:12px; color:#6b7280; margin:4px 0 0;" id="md_expiry_count">0 items</p>
-                            </div>
-                            <div style="padding:16px; background:#f9fafb; border:1px solid #f3f4f6; border-radius:10px;">
-                                <p style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em; margin:0;">Top Product</p>
-                                <h4 style="font-size:16px; font-weight:700; color:#111827; margin:6px 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="md_top_product">N/A</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top:16px;">
-                        <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:#4f46e5; background:#eef2ff; padding:12px; border-radius:8px; border:1px solid #e0e7ff;">
-                            <i class="fa fa-lightbulb-o"></i>
-                            <span><strong>Insights:</strong> Check <a href="{{ route('reports.daily_summary') }}" style="font-weight:700; text-decoration:underline; color:#4f46e5;">Daily Summary</a> for breakdown or <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getDeadStockReport']) }}" style="font-weight:700; text-decoration:underline; color:#4f46e5;">Dead Stock</a> to clear capital.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
 
     </div>
     @if (auth()->user()->can('dashboard.data'))
@@ -1507,43 +1439,6 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                     ]
                 });
             }
-
-            // Morning Digest Logic
-            function loadMorningDigest() {
-                $('#morning_digest_data').hide();
-                $('#morning_digest_loader').show();
-                
-                $.ajax({
-                    url: '{{ route("home.morning_digest") }}',
-                    success: function(data) {
-                        $('#morning_digest_loader').hide();
-                        $('#morning_digest_data').css('display', 'grid');
-                        
-                        $('#md_today_sales').text(parseFloat(data.today_sales).toFixed(2));
-                        $('#md_yesterday_sales').text(parseFloat(data.yesterday_sales).toFixed(2));
-                        $('#md_total_customers').text(data.total_customers_today || 0);
-                        $('#md_cash_in_register').text(parseFloat(data.current_cash_in_register).toFixed(2));
-                        $('#md_unpaid_invoices').text(data.unpaid_invoices_count || 0);
-                        $('#md_low_stock').text(data.low_stock_alerts_count || 0);
-                        $('#md_expiry_value').text(parseFloat(data.expiry_risk_value).toFixed(2));
-                        $('#md_expiry_count').text('(' + data.expiry_item_count + ' items)');
-                        $('#md_top_product').text(data.top_product_name || 'N/A');
-                        $('#md_dead_stock').text(data.dead_stock_count || 0);
-                        
-                        __currency_convert_recursively($('#morning_digest_data'));
-                    },
-                    error: function() {
-                        $('#morning_digest_loader').html('<span class="text-danger">Failed to load morning digest.</span>');
-                    }
-                });
-            }
-
-            $('#refresh_morning_digest').click(function() {
-                loadMorningDigest();
-            });
-
-            // Initial load
-            loadMorningDigest();
 
             // Initial load
             updateLiveStats();            loadBestSellers();

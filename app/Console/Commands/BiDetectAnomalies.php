@@ -66,7 +66,7 @@ class BiDetectAnomalies extends Command
         if (empty($apiKey)) return '[]';
 
         try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=" . $apiKey, [
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
                 'contents' => [['parts' => [['text' => $prompt]]]],
                 'generationConfig' => ['temperature' => 0.2, 'maxOutputTokens' => 1024, 'responseMimeType' => "application/json"]
             ]);

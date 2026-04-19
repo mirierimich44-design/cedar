@@ -1189,6 +1189,18 @@ class AdminSidebarMenu
             }
         });
 
+        // Approval System
+        $pending_count = \App\Approval::where('business_id', request()->session()->get('user.business_id'))
+            ->where('status', 'pending')->count();
+        \Menu::modify('admin-sidebar-menu', function ($menu) use ($pending_count) {
+            $menu->url(
+                route('approvals.index'),
+                '<i class="fa fa-check-square-o"></i> <span>Approvals</span>'
+                . ($pending_count ? ' <span class="pull-right-container"><span class="label label-primary pull-right">' . $pending_count . '</span></span>' : ''),
+                ['active' => request()->is('approvals*'), 'id' => 'approvals_menu']
+            )->order(86);
+        });
+
         //Add menus from modules
         $moduleUtil = new ModuleUtil;
         $moduleUtil->getModuleData('modifyAdminMenu');

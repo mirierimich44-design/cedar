@@ -186,6 +186,16 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
     Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
 
+    // ── Approval System ────────────────────────────────────────────
+    Route::prefix('approvals')->name('approvals.')->group(function () {
+        Route::get('/',                                      [\App\Http\Controllers\ApprovalController::class, 'index'])->name('index');
+        Route::post('/{approval}/decide',                   [\App\Http\Controllers\ApprovalController::class, 'decide'])->name('decide');
+        Route::post('/{approval}/resubmit',                 [\App\Http\Controllers\ApprovalController::class, 'resubmit'])->name('resubmit');
+        Route::get('/flows',                                 [\App\Http\Controllers\ApprovalController::class, 'flows'])->name('flows');
+        Route::post('/flows',                                [\App\Http\Controllers\ApprovalController::class, 'storeFlow'])->name('flows.store');
+        Route::delete('/flows/{flow}',                       [\App\Http\Controllers\ApprovalController::class, 'destroyFlow'])->name('flows.destroy');
+    });
+
     // BI Dashboard & Settings
     Route::get('/dashboard/bi', [\App\Http\Controllers\BIDashboardController::class, 'index'])->name('dashboard.bi');
     Route::post('/dashboard/bi/settings', [\App\Http\Controllers\BIDashboardController::class, 'saveSettings'])->name('dashboard.bi.settings.save');
@@ -280,9 +290,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     //EHR Timeline
     Route::get('/hospital/patient-timeline/{id}', [\App\Http\Controllers\Hospital\PatientTimelineController::class, 'show'])->name('hospital.patient.timeline');
-
-    // BI Dashboard
-    Route::get('/dashboard/bi', [\App\Http\Controllers\BIDashboardController::class, 'index'])->name('dashboard.bi');
 
     //Billing routes
     Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
