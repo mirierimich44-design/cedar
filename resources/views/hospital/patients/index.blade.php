@@ -50,6 +50,9 @@
                                 <a href="{{ route('hospital.patients.show', $p->id) }}" class="btn btn-xs btn-info">
                                     <i class="fa fa-eye"></i> View
                                 </a>
+                                <a href="{{ route('hospital.patient.timeline', $p->id) }}" class="btn btn-xs btn-primary">
+                                    <i class="fa fa-history"></i> Medical History
+                                </a>
                                 <a href="{{ route('hospital.queue.index') }}?patient_id={{ $p->id }}"
                                    class="btn btn-xs btn-success">
                                     <i class="fa fa-plus"></i> Add to Queue

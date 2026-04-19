@@ -241,6 +241,28 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/theatre/edit-record/{id}', [\App\Http\Controllers\Hospital\TheatreController::class, 'editRecord'])->name('hospital.theatre.editRecord');
     Route::post('/hospital/theatre/update-record/{id}', [\App\Http\Controllers\Hospital\TheatreController::class, 'updateRecord'])->name('hospital.theatre.updateRecord');
 
+    //Physiotherapy routes
+    Route::get('/hospital/physio', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'index'])->name('hospital.physio.index');
+    Route::get('/hospital/physio/create-plan', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'createPlan'])->name('hospital.physio.createPlan');
+    Route::post('/hospital/physio/store-plan', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'storePlan'])->name('hospital.physio.storePlan');
+    Route::get('/hospital/physio/add-session/{plan_id}', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'addSession'])->name('hospital.physio.addSession');
+    Route::post('/hospital/physio/store-session', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'storeSession'])->name('hospital.physio.storeSession');
+
+    //Mortuary routes
+    Route::get('/hospital/mortuary', [\App\Http\Controllers\Hospital\MortuaryController::class, 'index'])->name('hospital.mortuary.index');
+    Route::get('/hospital/mortuary/create', [\App\Http\Controllers\Hospital\MortuaryController::class, 'create'])->name('hospital.mortuary.create');
+    Route::post('/hospital/mortuary/store', [\App\Http\Controllers\Hospital\MortuaryController::class, 'store'])->name('hospital.mortuary.store');
+    Route::get('/hospital/mortuary/release/{id}', [\App\Http\Controllers\Hospital\MortuaryController::class, 'release'])->name('hospital.mortuary.release');
+
+    //Inpatient Nursing & Fluid Balance
+    Route::get('/hospital/inpatient', [\App\Http\Controllers\Hospital\InpatientController::class, 'index'])->name('hospital.inpatient.index');
+    Route::get('/hospital/inpatient/admission/{id}', [\App\Http\Controllers\Hospital\InpatientController::class, 'showAdmission'])->name('hospital.inpatient.show');
+    Route::post('/hospital/inpatient/add-nursing-note', [\App\Http\Controllers\Hospital\InpatientController::class, 'addNursingNote'])->name('hospital.inpatient.addNursingNote');
+    Route::get('/hospital/inpatient/discharge/{id}', [\App\Http\Controllers\Hospital\InpatientController::class, 'discharge'])->name('hospital.inpatient.discharge');
+
+    //EHR Timeline
+    Route::get('/hospital/patient-timeline/{id}', [\App\Http\Controllers\Hospital\PatientTimelineController::class, 'show'])->name('hospital.patient.timeline');
+
     //Billing routes
     Route::get('/hospital/billing', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'index'])->name('hospital.billing.index');
     Route::get('/hospital/billing/patient-bill/{id}', [\App\Http\Controllers\Hospital\HospitalBillingController::class, 'patientBill'])->name('hospital.billing.patientBill');

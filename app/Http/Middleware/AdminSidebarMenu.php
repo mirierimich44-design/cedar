@@ -900,13 +900,15 @@ class AdminSidebarMenu
                     $sub->url(route('hospital.queue.index'),       'Outpatient Queue',   ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'queue']);
                     $sub->url(route('hospital.index'),             'Appointments',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == null]);
                     $sub->url(route('hospital.lab.index'),         'Laboratory',         ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'lab']);
-                    $sub->url(route('hospital.ipdIndex'),          'Inpatient (IPD)',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'ipd']);
+                    $sub->url(route('hospital.inpatient.index'),   'Inpatient (IPD)',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'inpatient']);
                     $sub->url(route('hospital.billing.index'),     'Billing',            ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'billing']);
                     $sub->url(route('hospital.reports.moh705Index'),'MoH Reports',       ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'reports']);
                     $sub->url(route('hospital.assets.index'),      'Hospital Assets',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'assets']);
                     $sub->url(route('hospital.maternity.index'),   'Maternity & ANC',    ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'maternity']);
                     $sub->url(route('hospital.radiography.index'), 'Radiography (X-Ray)', ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'radiography']);
                     $sub->url(route('hospital.theatre.index'),     'Theatre (Surgery)',  ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'theatre']);
+                    $sub->url(route('hospital.physio.index'),      'Physiotherapy',      ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'physio']);
+                    $sub->url(route('hospital.mortuary.index'),    'Mortuary',           ['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'mortuary']);
                     $sub->url(route('hospital.pharmacy.index'),    'Pharmacy Dispensing',['icon' => '', 'active' => request()->segment(1) == 'hospital' && request()->segment(2) == 'pharmacy']);
                 },
                 ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
