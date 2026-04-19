@@ -283,7 +283,7 @@ class HomeController extends Controller
             $month_year = date('m-Y', $date);
             $fy_months[] = $month_year;
 
-            $labels[] = \Carbon::createFromFormat('m-Y', $month_year)
+            $labels[] = \Carbon::createFromFormat('d-m-Y', '01-' . $month_year)
                             ->format('M-Y');
             $date = strtotime('+1 month', $date);
 

@@ -15,7 +15,7 @@ class CreateHospitalPrescriptionsTable extends Migration
         Schema::create('hospital_prescriptions', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_id');
-            $table->unsignedBigInteger('patient_id');           // contacts.id
+            $table->unsignedInteger('patient_id');               // contacts.id
             $table->unsignedBigInteger('doctor_id')->nullable(); // users.id
             $table->unsignedBigInteger('consultation_id')->nullable();
             $table->unsignedInteger('variation_id')->nullable(); // variations.id
