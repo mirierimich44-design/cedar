@@ -135,8 +135,8 @@ class BIDashboardController extends Controller
             : 0;
         $avg_consultation = DB::table('hospital_consultations')
             ->where('business_id', $business_id)
-            ->whereNotNull('ended_at')
-            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, ended_at)) as avg_mins')
+            ->where('status', 'completed')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_mins')
             ->value('avg_mins');
 
         // Logistics risk by route
