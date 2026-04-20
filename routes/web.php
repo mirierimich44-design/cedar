@@ -64,6 +64,7 @@ use App\Http\Controllers\MpesaController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\SaasPricingController;
 use App\Http\Controllers\SaasAdminController;
+use App\Http\Controllers\CloudSyncController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\JobTemplateController;
@@ -120,6 +121,27 @@ Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
     Route::get('/pricing/mpesa-status/{invoice}',  [SaasPricingController::class, 'mpesaStatus'])->name('saas.mpesa.status');
 });
 
+// ─── Cloud Sync Routes ────────────────────────────────────────────────────
+// Public token-authenticated API endpoints (no CSRF — secured by X-Sync-Token)
+Route::prefix('sync')->name('sync.')->group(function () {
+    // Device registration requires a logged-in user
+    Route::post('/register', [CloudSyncController::class, 'register'])
+        ->middleware(['auth', 'SetSessionData'])
+        ->name('register');
+
+    // Pull / Push / Status use the device token instead of session auth
+    Route::post('/pull',   [CloudSyncController::class, 'pull'])->name('pull');
+    Route::post('/push',   [CloudSyncController::class, 'push'])->name('push');
+    Route::get('/status',  [CloudSyncController::class, 'status'])->name('status');
+
+    // Dashboard and token management require normal auth
+    Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
+        Route::get('/',               [CloudSyncController::class, 'dashboard'])->name('dashboard');
+        Route::delete('/token/{id}',  [CloudSyncController::class, 'revokeToken'])->name('token.revoke');
+    });
+});
+
+// Exempt push/pull from CSRF (they use the device token header instead)
 // ─── SaaS Superadmin Routes ───────────────────────────────────────────────
 Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
     Route::get('/',                   [SaasAdminController::class, 'dashboard'])->name('dashboard');

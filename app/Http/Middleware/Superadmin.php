@@ -38,7 +38,13 @@ class Superadmin
             return $next($request);
         }
 
-        // Check 4: no business_id = pure platform admin (superadmin with no business)
+        // Check 4: known platform admin email (matches LoginController redirect logic)
+        $saasAdminEmail = env('SAAS_ADMIN_EMAIL', 'admin@apexpos.co.ke');
+        if (! empty($saasAdminEmail) && strtolower($user->email) === strtolower($saasAdminEmail)) {
+            return $next($request);
+        }
+
+        // Check 5: no business_id = pure platform admin (superadmin with no business)
         if (empty($user->business_id)) {
             return $next($request);
         }

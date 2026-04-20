@@ -35,7 +35,9 @@ class CreateSaasAdminCommand extends Command
         $password = $this->argument('password');
         $username = 'saas_admin';
 
-        $user = User::where('username', $username)->orWhere('email', $email)->first();
+        // Search only by username — do NOT use orWhere('email') which could
+        // accidentally find and overwrite a real business-owner account.
+        $user = User::where('username', $username)->first();
 
         // A SaaS super admin shouldn't normally need a business, but the base LoginController 
         // checks `$user->business->is_active`. We'll assign it to the first active business

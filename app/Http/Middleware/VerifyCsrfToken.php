@@ -22,5 +22,8 @@ class VerifyCsrfToken extends BaseVerifier
         'saas/mpesa/callback/*',
         'pesapal/ipn',
         'pesapal/callback',
+        'sync/pull',   // device-token authenticated, no session
+        'sync/push',   // device-token authenticated, no session
+        'sync/status', // device-token authenticated, no session
     ];
 }
