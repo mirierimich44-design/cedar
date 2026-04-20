@@ -284,7 +284,7 @@ class CloudSyncController extends Controller
                 ->with('user')
                 ->orderBy('last_seen_at', 'desc')
                 ->get();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $tokens = collect();
         }
 
@@ -294,7 +294,7 @@ class CloudSyncController extends Controller
                 ->orderBy('synced_at', 'desc')
                 ->limit(50)
                 ->get();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $logs = collect();
         }
 
@@ -303,7 +303,7 @@ class CloudSyncController extends Controller
                 ->where('business_id', $businessId)
                 ->where('resolution', 'pending')
                 ->count();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $conflicts = 0;
         }
 
