@@ -66,6 +66,10 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\JobTemplateController;
 use App\Http\Controllers\EtimsReportController;
+use App\Http\Controllers\HospitalBillingController;
+use App\Http\Controllers\Parcel\ParcelController;
+use App\Http\Controllers\Parcel\ParcelRouteController;
+use App\Http\Controllers\SaasAdminController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -572,6 +576,28 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('reports/daily-product-profit', [ReportController::class, 'getDailyProductProfitReport']);
     Route::get('reports/activity-log', [ReportController::class, 'activityLog']);
     Route::get('user-location/{latlng}', [HomeController::class, 'getUserLocation']);
+
+    // ── Hospital Billing ─────────────────────────────────────────────────────
+    Route::get('hospital-billing/{id}/print', [HospitalBillingController::class, 'printBill'])->name('hospital-billing.print');
+    Route::resource('hospital-billing', HospitalBillingController::class);
+
+    // ── Parcel Management ─────────────────────────────────────────────────────
+    Route::post('parcels/{id}/status', [ParcelController::class, 'updateStatus'])->name('parcels.update-status');
+    Route::post('parcels/bulk-scan', [ParcelController::class, 'bulkScan'])->name('parcels.bulk-scan');
+    Route::get('parcels/{id}/waybill', [ParcelController::class, 'waybill'])->name('parcels.waybill');
+    Route::get('parcel-manifest', [ParcelController::class, 'manifest'])->name('parcel-manifest');
+    Route::get('parcel-track', [ParcelController::class, 'track'])->name('parcels.track');
+    Route::get('parcel-reports', [ParcelController::class, 'reports'])->name('parcel-reports');
+    Route::resource('parcels', ParcelController::class);
+
+    // Parcel Routes CRUD + price calculator
+    Route::get('parcel-routes/calculate-price', [ParcelRouteController::class, 'calculatePrice'])->name('parcel-routes.calculate-price');
+    Route::resource('parcel-routes', ParcelRouteController::class);
+
+    // ── SaaS Admin ───────────────────────────────────────────────────────────
+    Route::post('saas-admin/{business_id}/features', [SaasAdminController::class, 'updateFeatures'])->name('saas-admin.update-features');
+    Route::get('saas-admin/{business_id}/features', [SaasAdminController::class, 'features'])->name('saas-admin.features');
+    Route::get('saas-admin', [SaasAdminController::class, 'index'])->name('saas-admin.index');
 
     // M-Pesa Routes
     Route::prefix('mpesa')->name('mpesa.')->group(function () {
