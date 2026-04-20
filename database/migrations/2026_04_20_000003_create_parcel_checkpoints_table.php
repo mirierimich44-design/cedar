@@ -8,6 +8,7 @@ class CreateParcelCheckpointsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('parcel_checkpoints')) return;
         Schema::create('parcel_checkpoints', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('parcel_id');

@@ -8,6 +8,7 @@ class CreateParcelsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('parcels')) return;
         Schema::create('parcels', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_id');

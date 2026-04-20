@@ -8,6 +8,7 @@ class CreateHospitalBillsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('hospital_bills')) return;
         Schema::create('hospital_bills', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_id');
