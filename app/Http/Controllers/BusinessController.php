@@ -94,26 +94,10 @@ class BusinessController extends Controller
 
         $currencies = $this->businessUtil->allCurrencies();
 
-        $timezone_list = $this->businessUtil->allTimeZones();
+        // Pre-select KES (Kenyan Shilling) if available
+        $kes_id = \App\Currency::where('code', 'KES')->value('id');
 
-        $months = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $months[$i] = __('business.months.'.$i);
-        }
-
-        $accounting_methods = $this->businessUtil->allAccountingMethods();
-        $package_id = request()->package;
-
-        $system_settings = System::getProperties(['superadmin_enable_register_tc', 'superadmin_register_tc'], true);
-
-        return view('business.register', compact(
-            'currencies',
-            'timezone_list',
-            'months',
-            'accounting_methods',
-            'package_id',
-            'system_settings'
-        ));
+        return view('auth.register', compact('currencies', 'kes_id'));
     }
 
     /**
@@ -196,7 +180,16 @@ class BusinessController extends Controller
             //Create the business
             $business_details['owner_id'] = $user->id;
             if (! empty($business_details['start_date'])) {
-                $business_details['start_date'] = Carbon::createFromFormat(config('constants.default_date_format'), $business_details['start_date'])->toDateString();
+                try {
+                    $business_details['start_date'] = Carbon::createFromFormat(
+                        config('constants.default_date_format', 'd/m/Y'),
+                        $business_details['start_date']
+                    )->toDateString();
+                } catch (\Exception $e) {
+                    $business_details['start_date'] = Carbon::today()->toDateString();
+                }
+            } else {
+                $business_details['start_date'] = Carbon::today()->toDateString();
             }
 
             //upload logo
@@ -205,8 +198,14 @@ class BusinessController extends Controller
                 $business_details['logo'] = $logo_name;
             }
 
-            //default enabled modules
-            $business_details['enabled_modules'] = ['purchases', 'add_sale', 'pos_sale', 'stock_transfers', 'stock_adjustment', 'expenses'];
+            // Enabled modules: use request input if provided (from onboarding), else default set
+            $enabled_modules = $request->input('enabled_modules');
+            $business_details['enabled_modules'] = ! empty($enabled_modules)
+                ? $enabled_modules
+                : ['purchases', 'add_sale', 'pos_sale', 'stock_transfers', 'stock_adjustment', 'expenses'];
+
+            // Store business type from simplified onboarding
+            $business_details['business_type'] = $request->input('business_type');
 
             $business = $this->businessUtil->createNewBusiness($business_details);
 
