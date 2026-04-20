@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class CreateSaasAdminCommand extends Command
 {
@@ -70,9 +71,16 @@ class CreateSaasAdminCommand extends Command
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
+        // Assign the Superadmin Spatie role (guard: web)
+        $role = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'web']);
+        if (! $user->hasRole('Superadmin')) {
+            $user->assignRole($role);
+        }
+
         $this->info("Username: $username");
         $this->info("Email: $email");
         $this->info("Password: $password");
+        $this->info("Role: Superadmin assigned.");
 
         return 0;
     }

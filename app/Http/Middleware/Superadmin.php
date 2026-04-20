@@ -33,6 +33,16 @@ class Superadmin
             return $next($request);
         }
 
+        // Check 3: dedicated saas_admin account (created via artisan saas:create-admin)
+        if ($user->username === 'saas_admin') {
+            return $next($request);
+        }
+
+        // Check 4: no business_id = pure platform admin (superadmin with no business)
+        if (empty($user->business_id)) {
+            return $next($request);
+        }
+
         abort(403, 'Unauthorized action. Your account does not have Superadmin access.');
     }
 }
