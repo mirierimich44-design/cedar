@@ -69,18 +69,36 @@ class CreateSaasAdminCommand extends Command
             $this->info("SaaS Super Admin updated successfully.");
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // Assign the Superadmin Spatie role (disable FK checks — roles table has business_id FK)
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            $role = Role::where('name', 'Superadmin')->where('guard_name', 'web')->first();
+            if (! $role) {
+                // Insert directly to bypass the business_id FK constraint
+                $roleId = DB::table('roles')->insertGetId([
+                    'name'        => 'Superadmin',
+                    'guard_name'  => 'web',
+                    'business_id' => null,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ]);
+                $role = Role::find($roleId);
+            }
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Assign the Superadmin Spatie role (guard: web)
-        $role = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'web']);
-        if (! $user->hasRole('Superadmin')) {
-            $user->assignRole($role);
+            if ($role && ! $user->hasRole('Superadmin')) {
+                $user->assignRole($role);
+            }
+            $this->info("Role: Superadmin assigned.");
+        } catch (\Exception $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            $this->warn("Could not assign Spatie role (not critical): " . $e->getMessage());
+            $this->info("Access still works via username check in Superadmin middleware.");
         }
 
         $this->info("Username: $username");
         $this->info("Email: $email");
         $this->info("Password: $password");
-        $this->info("Role: Superadmin assigned.");
 
         return 0;
     }
