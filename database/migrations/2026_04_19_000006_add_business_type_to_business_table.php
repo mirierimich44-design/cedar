@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddBusinessTypeToBusinessTable2026Apr19 extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -21,4 +21,4 @@ class AddBusinessTypeToBusinessTable2026Apr19 extends Migration
             $table->dropColumn('business_type');
         });
     }
-}
+};

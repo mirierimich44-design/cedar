@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddOnboardingPriceToSaasSettings2026 extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -30,4 +30,4 @@ class AddOnboardingPriceToSaasSettings2026 extends Migration
     {
         \DB::table('saas_settings')->where('key', 'onboarding_monthly_price')->delete();
     }
-}
+};

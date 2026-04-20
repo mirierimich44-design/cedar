@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateParcelCheckpointsTable2026 extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -36,4 +36,4 @@ class CreateParcelCheckpointsTable2026 extends Migration
     {
         Schema::dropIfExists('parcel_checkpoints');
     }
-}
+};
