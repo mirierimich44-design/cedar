@@ -136,11 +136,8 @@ Route::prefix('sync')->name('sync.')->group(function () {
     // CORS pre-flight for cross-domain requests (Laragon → live server)
     Route::options('/{any}', [CloudSyncController::class, 'preflight'])->where('any', '.*');
 
-    // Dashboard and token management require normal auth
-    Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
-        Route::get('/',               [CloudSyncController::class, 'dashboard'])->name('dashboard');
-        Route::delete('/token/{id}',  [CloudSyncController::class, 'revokeToken'])->name('token.revoke');
-    });
+    // Dashboard is handled inside the full-auth group (see ~line 985) to get
+    // AdminSidebarMenu + CheckUserLogin middleware like all other dashboard pages.
 });
 
 // Exempt push/pull from CSRF (they use the device token header instead)
@@ -981,10 +978,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/daily-summary',         [\App\Http\Controllers\PesapalGatewayController::class, 'dailySummary'])->name('daily-summary');
     });
 
-    // Cloud Sync Routes
-    Route::get('/sync', [\App\Http\Controllers\SyncController::class, 'index'])->name('sync.index');
-    Route::post('/sync/push', [\App\Http\Controllers\SyncController::class, 'pushToCloud'])->name('sync.push');
-    Route::post('/sync/settings', [\App\Http\Controllers\SyncController::class, 'saveSettings'])->name('sync.settings');
+    // Cloud Sync Dashboard (full auth + sidebar)
+    Route::get('/sync',               [CloudSyncController::class, 'dashboard'])->name('sync.dashboard');
+    Route::delete('/sync/token/{id}', [CloudSyncController::class, 'revokeToken'])->name('sync.token.revoke');
 
     // ── Customer Order Token Management (owner/authenticated) ──────────────
     Route::get('/customer-order-links', [CustomerOrderController::class, 'index'])->name('customer_order.links');

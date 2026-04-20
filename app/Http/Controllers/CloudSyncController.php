@@ -278,21 +278,34 @@ class CloudSyncController extends Controller
     {
         $businessId = session('business.id') ?? auth()->user()->business_id;
 
-        $tokens = SyncToken::where('business_id', $businessId)
-            ->with('user')
-            ->orderBy('last_seen_at', 'desc')
-            ->get();
+        // Guard against tables not yet migrated
+        try {
+            $tokens = SyncToken::where('business_id', $businessId)
+                ->with('user')
+                ->orderBy('last_seen_at', 'desc')
+                ->get();
+        } catch (\Exception $e) {
+            $tokens = collect();
+        }
 
-        $logs = SyncLog::where('business_id', $businessId)
-            ->with('token')
-            ->orderBy('synced_at', 'desc')
-            ->limit(50)
-            ->get();
+        try {
+            $logs = SyncLog::where('business_id', $businessId)
+                ->with('token')
+                ->orderBy('synced_at', 'desc')
+                ->limit(50)
+                ->get();
+        } catch (\Exception $e) {
+            $logs = collect();
+        }
 
-        $conflicts = DB::table('sync_conflicts')
-            ->where('business_id', $businessId)
-            ->where('resolution', 'pending')
-            ->count();
+        try {
+            $conflicts = DB::table('sync_conflicts')
+                ->where('business_id', $businessId)
+                ->where('resolution', 'pending')
+                ->count();
+        } catch (\Exception $e) {
+            $conflicts = 0;
+        }
 
         return view('sync.dashboard', compact('tokens', 'logs', 'conflicts', 'businessId'));
     }
