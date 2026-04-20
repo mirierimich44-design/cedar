@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Make roles.business_id nullable using raw SQL — no Doctrine DBAL needed.
  * This allows a platform-level Superadmin role (not tied to any business).
  */
-class MakeRolesBusinessIdNullable extends Migration
+class MakeRolesBusinessIdNullable2026 extends Migration
 {
     public function up()
     {

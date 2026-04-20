@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddBusinessTypeToBusinessTable extends Migration
+class AddBusinessTypeToBusinessTable2026Apr19 extends Migration
 {
     public function up()
     {
