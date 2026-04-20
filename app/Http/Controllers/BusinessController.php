@@ -112,44 +112,41 @@ class BusinessController extends Controller
         }
 
         try {
-            $validator = $request->validate(
-                [
-                    'name' => 'required|max:255',
-                    'currency_id' => 'required|numeric',
-                    'country' => 'required|max:255',
-                    'state' => 'required|max:255',
-                    'city' => 'required|max:255',
-                    'zip_code' => 'required|max:255',
-                    'landmark' => 'required|max:255',
-                    'time_zone' => 'required|max:255',
-                    'surname' => 'max:10',
-                    'email' => 'sometimes|nullable|email|unique:users|max:255',
-                    'first_name' => 'required|max:255',
-                    'username' => 'required|min:4|max:255|unique:users',
-                    'password' => 'required|min:4|max:255',
-                    'fy_start_month' => 'required',
-                    'accounting_method' => 'required',
-                ],
-                [
-                    'name.required' => __('validation.required', ['attribute' => __('business.business_name')]),
-                    'name.currency_id' => __('validation.required', ['attribute' => __('business.currency')]),
-                    'country.required' => __('validation.required', ['attribute' => __('business.country')]),
-                    'state.required' => __('validation.required', ['attribute' => __('business.state')]),
-                    'city.required' => __('validation.required', ['attribute' => __('business.city')]),
-                    'zip_code.required' => __('validation.required', ['attribute' => __('business.zip_code')]),
-                    'landmark.required' => __('validation.required', ['attribute' => __('business.landmark')]),
-                    'time_zone.required' => __('validation.required', ['attribute' => __('business.time_zone')]),
-                    'email.email' => __('validation.email', ['attribute' => __('business.email')]),
-                    'email.email' => __('validation.unique', ['attribute' => __('business.email')]),
-                    'first_name.required' => __('validation.required', ['attribute' => __('business.first_name')]),
-                    'username.required' => __('validation.required', ['attribute' => __('business.username')]),
-                    'username.min' => __('validation.min', ['attribute' => __('business.username')]),
-                    'password.required' => __('validation.required', ['attribute' => __('business.username')]),
-                    'password.min' => __('validation.min', ['attribute' => __('business.username')]),
-                    'fy_start_month.required' => __('validation.required', ['attribute' => __('business.fy_start_month')]),
-                    'accounting_method.required' => __('validation.required', ['attribute' => __('business.accounting_method')]),
-                ]
-            );
+            // Simplified onboarding — only show what matters, auto-fill the rest
+            $request->validate([
+                'name'       => 'required|max:255',
+                'first_name' => 'required|max:255',
+                'last_name'  => 'nullable|max:255',
+                'email'      => 'required|email|unique:users|max:255',
+                'mobile'     => 'required|max:20',
+                'username'   => 'required|min:4|max:255|unique:users',
+                'password'   => 'required|min:6|max:255',
+            ], [
+                'name.required'       => 'Business name is required.',
+                'first_name.required' => 'Your first name is required.',
+                'email.required'      => 'Email address is required.',
+                'email.unique'        => 'That email is already registered. Please log in.',
+                'mobile.required'     => 'Phone number is required.',
+                'username.required'   => 'Username is required.',
+                'username.min'        => 'Username must be at least 4 characters.',
+                'username.unique'     => 'That username is taken. Please choose another.',
+                'password.required'   => 'Password is required.',
+                'password.min'        => 'Password must be at least 6 characters.',
+            ]);
+
+            // Auto-fill Kenya defaults for hidden/missing fields
+            $request->merge([
+                'currency_id'        => $request->input('currency_id') ?: (\App\Currency::where('code', 'KES')->value('id') ?: 1),
+                'country'            => $request->input('country', 'Kenya'),
+                'state'              => $request->input('state', 'Nairobi'),
+                'city'               => $request->input('city', 'Nairobi'),
+                'zip_code'           => $request->input('zip_code', '00100'),
+                'landmark'           => $request->input('landmark', 'Kenya'),
+                'time_zone'          => $request->input('time_zone', 'Africa/Nairobi'),
+                'fy_start_month'     => $request->input('fy_start_month', 1),
+                'accounting_method'  => $request->input('accounting_method', 'FIFO'),
+                'surname'            => '.',
+            ]);
 
             if (config('constants.enable_recaptcha')) {
                 $recaptcha_validator = Validator::make($request->all(), [
@@ -226,22 +223,10 @@ class BusinessController extends Controller
                 $this->moduleUtil->getModuleData('after_business_created', ['business' => $business]);
             }
 
-            //Process payment information if superadmin is installed & package information is present
-            $is_installed_superadmin = $this->moduleUtil->isSuperadminInstalled();
-            $package_id = $request->get('package_id', null);
-            if ($is_installed_superadmin && ! empty($package_id) && (config('app.env') != 'demo')) {
-                $package = \Modules\Superadmin\Entities\Package::find($package_id);
-                if (! empty($package)) {
-                    Auth::login($user);
-                    return redirect()->route('register-pay', ['package_id' => $package_id]);
-                }
-            }
+            // Log the user in and redirect to the activation/trial page
+            Auth::login($user);
 
-            $output = ['success' => 1,
-                'msg' => __('business.business_created_succesfully'),
-            ];
-
-            return redirect('login')->with('status', $output);
+            return redirect()->route('onboarding.activate');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());

@@ -17,6 +17,8 @@ class TrialExpired
 {
     protected array $whitelistPrefixes = [
         'saas/',
+        'onboarding/',
+        'onboarding',
         'logout',
         'login',
     ];

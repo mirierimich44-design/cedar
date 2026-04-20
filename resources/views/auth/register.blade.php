@@ -122,11 +122,20 @@
                 </div>
             </div>
 
-            <!-- Phone (optional, used to build username suggestion) -->
+            <!-- Email -->
             <div class="tw-mb-4">
                 <label class="tw-block tw-font-semibold tw-text-gray-700 tw-mb-1">Email <span class="tw-text-red-500">*</span></label>
                 <input type="email" name="email" value="{{ old('email') }}" required placeholder="you@business.com"
                     id="reg_email"
+                    class="tw-w-full tw-border tw-border-gray-300 tw-rounded-xl tw-px-4 tw-py-3 tw-text-gray-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-400">
+            </div>
+
+            <!-- Phone (used for M-Pesa STK push on activation) -->
+            <div class="tw-mb-4">
+                <label class="tw-block tw-font-semibold tw-text-gray-700 tw-mb-1">Phone Number <span class="tw-text-red-500">*</span>
+                    <span class="tw-text-xs tw-font-normal tw-text-gray-500">(for M-Pesa payments)</span>
+                </label>
+                <input type="text" name="mobile" value="{{ old('mobile') }}" required placeholder="0712 345 678"
                     class="tw-w-full tw-border tw-border-gray-300 tw-rounded-xl tw-px-4 tw-py-3 tw-text-gray-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-400">
             </div>
 
@@ -154,14 +163,11 @@
                 </div>
             </div>
 
-            <!-- Currency (pre-selected KES but editable) -->
-            <div class="tw-mb-6">
-                <label class="tw-block tw-font-semibold tw-text-gray-700 tw-mb-1">Currency</label>
-                {!! Form::select('currency_id', $currencies, $kes_id ?? '', ['class' => 'tw-w-full tw-border tw-border-gray-300 tw-rounded-xl tw-px-4 tw-py-3 tw-text-gray-800 select2_register']) !!}
-            </div>
+            <!-- Currency: auto KES, hidden -->
+            <input type="hidden" name="currency_id" value="{{ $kes_id ?? '' }}">
 
-            <button type="submit" class="tw-w-full tw-bg-gradient-to-r tw-from-blue-600 tw-to-indigo-600 tw-text-white tw-font-bold tw-text-lg tw-py-4 tw-rounded-xl tw-shadow-lg hover:tw-shadow-xl tw-transition-all">
-                🚀 Create My Account
+            <button type="submit" id="submit_btn" class="tw-w-full tw-bg-gradient-to-r tw-from-blue-600 tw-to-indigo-600 tw-text-white tw-font-bold tw-text-lg tw-py-4 tw-rounded-xl tw-shadow-lg hover:tw-shadow-xl tw-transition-all">
+                Continue to Activation →
             </button>
 
             <p class="tw-text-center tw-text-gray-500 tw-text-sm tw-mt-4">

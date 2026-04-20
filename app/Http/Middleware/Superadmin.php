@@ -15,12 +15,24 @@ class Superadmin
      */
     public function handle($request, Closure $next)
     {
-        $administrator_list = config('constants.administrator_usernames');
+        $user = $request->user();
 
-        if (! empty($request->user()) && in_array(strtolower($request->user()->username), explode(',', strtolower($administrator_list)))) {
-            return $next($request);
-        } else {
+        if (empty($user)) {
             abort(403, 'Unauthorized action.');
         }
+
+        // Check 1: Spatie role (preferred — set via artisan saas:create-admin)
+        if ($user->hasRole('Superadmin')) {
+            return $next($request);
+        }
+
+        // Check 2: ADMINISTRATOR_USERNAMES env fallback
+        $administrator_list = config('constants.administrator_usernames');
+        if (! empty($administrator_list) &&
+            in_array(strtolower($user->username), explode(',', strtolower($administrator_list)))) {
+            return $next($request);
+        }
+
+        abort(403, 'Unauthorized action. Your account does not have Superadmin access.');
     }
 }

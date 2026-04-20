@@ -71,6 +71,7 @@ use App\Http\Controllers\EtimsReportController;
 use App\Http\Controllers\HospitalBillingController;
 use App\Http\Controllers\Parcel\ParcelController;
 use App\Http\Controllers\Parcel\ParcelRouteController;
+use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -98,6 +99,19 @@ Route::middleware(['setData'])->group(function () {
 Route::post('/saas/mpesa/callback/{invoice}', [SaasPricingController::class, 'mpesaCallback'])
     ->name('saas.mpesa.callback')
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// ─── Onboarding M-Pesa callback (no auth, no CSRF) ────────────────────────
+Route::post('/onboarding/mpesa/callback', [OnboardingController::class, 'mpesaCallback'])
+    ->name('onboarding.mpesa.callback')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// ─── Onboarding (post-registration activation) ────────────────────────────
+Route::middleware(['auth', 'SetSessionData'])->prefix('onboarding')->name('onboarding.')->group(function () {
+    Route::get('/activate',       [OnboardingController::class, 'showActivate'])->name('activate');
+    Route::post('/trial',         [OnboardingController::class, 'startTrial'])->name('trial');
+    Route::post('/stk-push',      [OnboardingController::class, 'initiateStkPush'])->name('stk_push');
+    Route::get('/check-payment',  [OnboardingController::class, 'checkPaymentStatus'])->name('check_payment');
+});
 
 // ─── SaaS Customer Portal ─────────────────────────────────────────────────
 Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {
@@ -143,7 +157,7 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
 
     // Global SaaS settings (trial, campaign, payment)
     Route::get('/saas-settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
-    Route::put('/saas-settings',  [SaasAdminController::class, 'settingsUpdate'])->name('saas_settings.update');
+    Route::put('/saas-settings',  [SaasAdminController::class, 'settingsUpdate'])->name('saas.admin.settings.update');
 });
 
 Route::middleware(['setData'])->group(function () {
