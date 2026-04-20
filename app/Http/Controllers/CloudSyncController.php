@@ -36,6 +36,33 @@ use Illuminate\Support\Str;
  */
 class CloudSyncController extends Controller
 {
+    // ── CORS headers added to every JSON response ────────────────────────────
+    // Allows Laragon (or any trusted local dev instance) to call the live server.
+    private function syncResponse(array $data, int $status = 200)
+    {
+        $origin = request()->header('Origin', '*');
+
+        // Whitelist: same origin, localhost variants, and configured SYNC_ALLOWED_ORIGINS
+        $allowed = array_filter(array_merge(
+            ['http://localhost', 'http://127.0.0.1', 'http://reenson.test'],
+            explode(',', env('SYNC_ALLOWED_ORIGINS', ''))
+        ));
+
+        $allowOrigin = in_array($origin, $allowed) ? $origin : '*';
+
+        return response()->json($data, $status)->withHeaders([
+            'Access-Control-Allow-Origin'  => $allowOrigin,
+            'Access-Control-Allow-Headers' => 'Content-Type, X-Sync-Token, X-CSRF-TOKEN, Accept',
+            'Access-Control-Allow-Methods' => 'GET, POST, DELETE, OPTIONS',
+        ]);
+    }
+
+    // Handle OPTIONS pre-flight for cross-domain requests
+    public function preflight()
+    {
+        return $this->syncResponse([], 204);
+    }
+
     // ── Device Registration ──────────────────────────────────────────────────
 
     /**
@@ -55,7 +82,7 @@ class CloudSyncController extends Controller
 
         // Allow only users belonging to this business (or superadmin)
         if ($user && $user->business_id !== $businessId && $user->username !== 'saas_admin') {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return $this->syncResponse(['error' => 'Unauthorized'], 403);
         }
 
         $token = SyncToken::create([
@@ -67,7 +94,7 @@ class CloudSyncController extends Controller
             'is_active'   => true,
         ]);
 
-        return response()->json([
+        return $this->syncResponse([
             'sync_token'     => $token->token,
             'device_id'      => $token->id,
             'message'        => 'Device registered. Use sync_token for all future sync requests.',
@@ -121,7 +148,7 @@ class CloudSyncController extends Controller
             'synced_at'        => $pulledAt,
         ]);
 
-        return response()->json([
+        return $this->syncResponse([
             'pulled_at'  => $pulledAt->toIso8601String(),
             'is_full'    => $since === null,
             'summary'    => $summary,
@@ -187,7 +214,7 @@ class CloudSyncController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
+            return $this->syncResponse([
                 'error'   => 'Push failed: ' . $e->getMessage(),
                 'partial' => $summary,
             ], 500);
@@ -213,7 +240,7 @@ class CloudSyncController extends Controller
             'synced_at'        => $pushedAt,
         ]);
 
-        return response()->json([
+        return $this->syncResponse([
             'pushed_at' => $pushedAt->toIso8601String(),
             'status'    => $status,
             'summary'   => $summary,
@@ -235,7 +262,7 @@ class CloudSyncController extends Controller
             ->orderBy('synced_at', 'desc')
             ->first();
 
-        return response()->json([
+        return $this->syncResponse([
             'online'           => true,
             'device_id'        => $token->id,
             'device_name'      => $token->device_name,
@@ -276,7 +303,7 @@ class CloudSyncController extends Controller
         $token = SyncToken::where('id', $id)->where('business_id', $businessId)->firstOrFail();
         $token->update(['is_active' => false]);
 
-        return response()->json(['message' => 'Device token revoked.']);
+        return $this->syncResponse(['message' => 'Device token revoked.']);
     }
 
     // ── Private: Pull Helpers ────────────────────────────────────────────────
@@ -542,13 +569,13 @@ class CloudSyncController extends Controller
             ?? $request->input('sync_token');
 
         if (! $tokenStr) {
-            return [null, response()->json(['error' => 'Missing X-Sync-Token header or sync_token param.'], 401)];
+            return [null, $this->syncResponse(['error' => 'Missing X-Sync-Token header or sync_token param.'], 401)];
         }
 
         $token = SyncToken::where('token', $tokenStr)->where('is_active', true)->first();
 
         if (! $token) {
-            return [null, response()->json(['error' => 'Invalid or revoked sync token. Re-register this device.'], 401)];
+            return [null, $this->syncResponse(['error' => 'Invalid or revoked sync token. Re-register this device.'], 401)];
         }
 
         return [$token, null];

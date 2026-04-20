@@ -1,13 +1,12 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * The custom `roles` table has business_id NOT NULL, which prevents creating
- * a platform-level Superadmin role (not tied to any business).
- * Make it nullable so saas:create-admin can insert cleanly.
+ * Make roles.business_id nullable using raw SQL — no Doctrine DBAL needed.
+ * This allows a platform-level Superadmin role (not tied to any business).
  */
 class MakeRolesBusinessIdNullable extends Migration
 {
@@ -15,36 +14,44 @@ class MakeRolesBusinessIdNullable extends Migration
     {
         if (! Schema::hasTable('roles')) return;
 
-        Schema::table('roles', function (Blueprint $table) {
-            // Drop the FK first, change the column, then re-add FK
-            try {
-                $table->dropForeign(['business_id']);
-            } catch (\Exception $e) {
-                // FK may already be gone or named differently — ignore
-            }
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-            $table->integer('business_id')->unsigned()->nullable()->change();
-
+        // Drop the FK if it exists (try common name patterns)
+        foreach (['roles_business_id_foreign', 'roles_ibfk_1'] as $fk) {
             try {
-                $table->foreign('business_id')
-                      ->references('id')->on('business')
-                      ->onDelete('cascade');
+                DB::statement("ALTER TABLE `roles` DROP FOREIGN KEY `{$fk}`");
             } catch (\Exception $e) {
-                // If FK re-add fails (e.g. old MySQL), fine — column is nullable now
+                // FK not found by this name — try next
             }
-        });
+        }
+
+        // Change the column to nullable (raw SQL, no Doctrine DBAL required)
+        DB::statement('ALTER TABLE `roles` MODIFY `business_id` INT UNSIGNED NULL DEFAULT NULL');
+
+        // Re-add the FK (nullable column still participates in FK — NULL rows are skipped)
+        try {
+            DB::statement('ALTER TABLE `roles` ADD CONSTRAINT `roles_business_id_foreign`
+                           FOREIGN KEY (`business_id`) REFERENCES `business` (`id`) ON DELETE CASCADE');
+        } catch (\Exception $e) {
+            // If FK already exists or business table has issues, ignore — column is nullable now
+        }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     public function down()
     {
         if (! Schema::hasTable('roles')) return;
 
-        Schema::table('roles', function (Blueprint $table) {
-            try { $table->dropForeign(['business_id']); } catch (\Exception $e) {}
-            $table->integer('business_id')->unsigned()->nullable(false)->change();
-            try {
-                $table->foreign('business_id')->references('id')->on('business')->onDelete('cascade');
-            } catch (\Exception $e) {}
-        });
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        try {
+            DB::statement("ALTER TABLE `roles` DROP FOREIGN KEY `roles_business_id_foreign`");
+        } catch (\Exception $e) {}
+        DB::statement('ALTER TABLE `roles` MODIFY `business_id` INT UNSIGNED NOT NULL');
+        try {
+            DB::statement('ALTER TABLE `roles` ADD CONSTRAINT `roles_business_id_foreign`
+                           FOREIGN KEY (`business_id`) REFERENCES `business` (`id`) ON DELETE CASCADE');
+        } catch (\Exception $e) {}
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 }

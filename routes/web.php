@@ -130,9 +130,11 @@ Route::prefix('sync')->name('sync.')->group(function () {
         ->name('register');
 
     // Pull / Push / Status use the device token instead of session auth
-    Route::post('/pull',   [CloudSyncController::class, 'pull'])->name('pull');
-    Route::post('/push',   [CloudSyncController::class, 'push'])->name('push');
-    Route::get('/status',  [CloudSyncController::class, 'status'])->name('status');
+    Route::post('/pull',     [CloudSyncController::class, 'pull'])->name('pull');
+    Route::post('/push',     [CloudSyncController::class, 'push'])->name('push');
+    Route::get('/status',    [CloudSyncController::class, 'status'])->name('status');
+    // CORS pre-flight for cross-domain requests (Laragon → live server)
+    Route::options('/{any}', [CloudSyncController::class, 'preflight'])->where('any', '.*');
 
     // Dashboard and token management require normal auth
     Route::middleware(['setData', 'auth', 'SetSessionData'])->group(function () {

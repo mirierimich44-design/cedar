@@ -1,404 +1,439 @@
 /**
- * ApexPOS Cloud Sync Manager
- * Two-way sync: Online ↔ Offline
+ * ApexPOS Cloud Sync Manager  v2
+ * ═══════════════════════════════
+ * Two-way sync between any device (browser / Laragon) and the cloud server.
  *
- * Usage:
- *   CloudSync.init({ businessId: 1, syncToken: 'abc...', autoSync: true });
- *   CloudSync.pull();   // Download latest from server
- *   CloudSync.push();   // Upload offline changes
- *   CloudSync.sync();   // Full two-way sync
+ * How it works:
+ *  1. Register this device once  → get a unique sync token
+ *  2. PULL  (cloud → device)     → products, contacts, stock cached in IndexedDB
+ *  3. PUSH  (device → cloud)     → sales made offline uploaded to server
+ *  4. Auto-sync every 5 min while online
+ *
+ * Cross-domain (Laragon ↔ Live server):
+ *  Set data-sync-remote="https://reenson.apextechsolutions.co.ke" on <body>
+ *  OR call CloudSync.init({ remoteUrl: 'https://...' })
+ *
+ * Auto-init: add these data attributes to <body>:
+ *   data-sync-token="your-token"
+ *   data-business-id="1"
+ *   data-sync-remote="https://reenson.apextechsolutions.co.ke"  ← optional, for cross-domain
  */
 
 const CloudSync = (function () {
     'use strict';
 
-    // ── Config ─────────────────────────────────────────────────────────────
+    // ── Constants ──────────────────────────────────────────────────────────
     const DB_NAME    = 'apexpos_offline';
-    const DB_VERSION = 1;
+    const DB_VERSION = 2;
     const STORES = ['products', 'contacts', 'transactions', 'stock',
-                    'categories', 'tax_rates', 'locations', 'pending_push'];
+                    'categories', 'tax_rates', 'locations', 'units',
+                    'brands', 'pending_push', 'meta'];
 
-    let config = {
+    // ── State ──────────────────────────────────────────────────────────────
+    let cfg = {
         businessId  : null,
         syncToken   : null,
+        remoteUrl   : '',          // '' = same origin; 'https://example.com' = cross-domain
         autoSync    : true,
-        autoInterval: 5 * 60 * 1000, // 5 minutes
-        baseUrl     : '/sync',
+        autoInterval: 5 * 60 * 1000,
     };
 
-    let db         = null;
+    let idb        = null;
     let syncTimer  = null;
     let isSyncing  = false;
+    let isOnline   = navigator.onLine;
 
-    // ── IndexedDB bootstrap ────────────────────────────────────────────────
+    // ── IndexedDB ──────────────────────────────────────────────────────────
 
     function openDB() {
-        return new Promise((resolve, reject) => {
-            if (db) { resolve(db); return; }
-
+        if (idb) return Promise.resolve(idb);
+        return new Promise((res, rej) => {
             const req = indexedDB.open(DB_NAME, DB_VERSION);
-
             req.onupgradeneeded = e => {
-                const database = e.target.result;
-                STORES.forEach(store => {
-                    if (!database.objectStoreNames.contains(store)) {
-                        const s = database.createObjectStore(store, { keyPath: 'id', autoIncrement: store === 'pending_push' });
-                        if (store === 'products')     s.createIndex('updated_at', 'updated_at');
-                        if (store === 'contacts')     s.createIndex('updated_at', 'updated_at');
-                        if (store === 'transactions') s.createIndex('offline_id', 'offline_id', { unique: false });
-                        if (store === 'stock')        s.createIndex('variation_id', 'variation_id');
-                    }
+                const d = e.target.result;
+                STORES.forEach(name => {
+                    if (d.objectStoreNames.contains(name)) return;
+                    const store = d.createObjectStore(name, {
+                        keyPath      : name === 'pending_push' || name === 'meta' ? 'id' : 'id',
+                        autoIncrement: name === 'pending_push',
+                    });
+                    if (name === 'stock')   store.createIndex('variation_id', 'variation_id');
+                    if (name === 'products') store.createIndex('sku', 'sku');
+                    if (name === 'contacts') store.createIndex('mobile', 'mobile');
+                    if (name === 'meta')     store.createIndex('key', 'key', { unique: true });
                 });
             };
-
-            req.onsuccess = e => { db = e.target.result; resolve(db); };
-            req.onerror   = e => reject(e.target.error);
+            req.onsuccess = e => { idb = e.target.result; res(idb); };
+            req.onerror   = e => rej(e.target.error);
         });
     }
 
-    // ── IDB helpers ────────────────────────────────────────────────────────
-
-    function idbPutAll(storeName, records) {
-        return openDB().then(database => new Promise((resolve, reject) => {
-            const tx    = database.transaction(storeName, 'readwrite');
-            const store = tx.objectStore(storeName);
-            records.forEach(r => store.put(r));
-            tx.oncomplete = () => resolve(records.length);
-            tx.onerror    = e  => reject(e.target.error);
+    function dbRun(storeName, mode, fn) {
+        return openDB().then(d => new Promise((res, rej) => {
+            const tx = d.transaction(storeName, mode);
+            const st = tx.objectStore(storeName);
+            fn(st, res, rej, tx);
+            tx.onerror = e => rej(e.target.error);
         }));
     }
 
-    function idbGetAll(storeName) {
-        return openDB().then(database => new Promise((resolve, reject) => {
-            const req = database.transaction(storeName, 'readonly')
-                               .objectStore(storeName).getAll();
-            req.onsuccess = e => resolve(e.target.result);
-            req.onerror   = e => reject(e.target.error);
-        }));
+    function putAll(store, rows)   { return dbRun(store, 'readwrite', (s, res) => { rows.forEach(r => s.put(r)); s.transaction.oncomplete = () => res(rows.length); }); }
+    function getAll(store)         { return dbRun(store, 'readonly',  (s, res) => { const r = s.getAll(); r.onsuccess = e => res(e.target.result); }); }
+    function clearStore(store)     { return dbRun(store, 'readwrite', (s, res) => { s.clear(); s.transaction.oncomplete = () => res(); }); }
+    function addOne(store, record) { return dbRun(store, 'readwrite', (s, res) => { const r = s.add(record); r.onsuccess = e => res(e.target.result); }); }
+    function deleteOne(store, key) { return dbRun(store, 'readwrite', (s, res) => { s.delete(key); s.transaction.oncomplete = () => res(); }); }
+
+    function getMeta(key) {
+        return dbRun('meta', 'readonly', (s, res) => {
+            const idx = s.index('key');
+            const r   = idx.get(key);
+            r.onsuccess = e => res(e.target.result?.value ?? null);
+        });
     }
 
-    function idbClear(storeName) {
-        return openDB().then(database => new Promise((resolve, reject) => {
-            const req = database.transaction(storeName, 'readwrite')
-                               .objectStore(storeName).clear();
-            req.onsuccess = () => resolve();
-            req.onerror   = e  => reject(e.target.error);
-        }));
-    }
-
-    function idbAdd(storeName, record) {
-        return openDB().then(database => new Promise((resolve, reject) => {
-            const req = database.transaction(storeName, 'readwrite')
-                               .objectStore(storeName).add(record);
-            req.onsuccess = e => resolve(e.target.result); // returns new id
-            req.onerror   = e => reject(e.target.error);
-        }));
-    }
-
-    function idbDelete(storeName, key) {
-        return openDB().then(database => new Promise((resolve, reject) => {
-            const req = database.transaction(storeName, 'readwrite')
-                               .objectStore(storeName).delete(key);
-            req.onsuccess = () => resolve();
-            req.onerror   = e  => reject(e.target.error);
-        }));
+    function setMeta(key, value) {
+        return dbRun('meta', 'readwrite', (s, res) => {
+            s.put({ id: key, key, value });
+            s.transaction.oncomplete = () => res();
+        });
     }
 
     // ── HTTP helpers ───────────────────────────────────────────────────────
 
-    function apiPost(endpoint, payload) {
-        return fetch(config.baseUrl + endpoint, {
-            method: 'POST',
+    function apiUrl(path) {
+        const base = cfg.remoteUrl ? cfg.remoteUrl.replace(/\/$/, '') : '';
+        return base + '/sync' + path;
+    }
+
+    function apiPost(path, body) {
+        return fetch(apiUrl(path), {
+            method : 'POST',
             headers: {
-                'Content-Type'  : 'application/json',
-                'X-Sync-Token'  : config.syncToken,
-                'X-CSRF-TOKEN'  : document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-                'Accept'        : 'application/json',
+                'Content-Type' : 'application/json',
+                'Accept'       : 'application/json',
+                'X-Sync-Token' : cfg.syncToken,
+                'X-CSRF-TOKEN' : document.querySelector('meta[name="csrf-token"]')?.content ?? '',
             },
-            body: JSON.stringify(payload),
-        }).then(async res => {
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Sync request failed');
+            credentials: cfg.remoteUrl ? 'omit' : 'same-origin',
+            body: JSON.stringify(body),
+        }).then(_handleResponse);
+    }
+
+    function apiGet(path) {
+        return fetch(apiUrl(path) + '?sync_token=' + encodeURIComponent(cfg.syncToken), {
+            headers    : { 'Accept': 'application/json', 'X-Sync-Token': cfg.syncToken },
+            credentials: cfg.remoteUrl ? 'omit' : 'same-origin',
+        }).then(_handleResponse);
+    }
+
+    function _handleResponse(res) {
+        return res.json().then(json => {
+            if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
             return json;
         });
     }
 
-    function apiGet(endpoint) {
-        return fetch(config.baseUrl + endpoint + '?sync_token=' + config.syncToken, {
-            headers: { 'Accept': 'application/json', 'X-Sync-Token': config.syncToken },
-        }).then(async res => {
-            const json = await res.json();
-            if (!res.ok) throw new Error(json.error || 'Sync request failed');
-            return json;
-        });
-    }
-
-    // ── Pull ───────────────────────────────────────────────────────────────
+    // ── PULL  (cloud → device) ─────────────────────────────────────────────
 
     async function pull() {
-        if (!navigator.onLine) {
-            _emit('pull:skipped', { reason: 'offline' });
-            return;
-        }
+        if (!isOnline) { _emit('pull:skipped', { reason: 'offline' }); return null; }
+        _setButtonState('pull', 'loading');
         _emit('pull:start');
 
         try {
+            const lastPulled = await getMeta('last_pulled_at');
             const res = await apiPost('/pull', {
-                business_id: config.businessId,
-                sync_token : config.syncToken,
+                business_id: cfg.businessId,
+                sync_token : cfg.syncToken,
+                since      : lastPulled,
             });
 
-            const { data, pulled_at, summary } = res;
-
-            // Persist all received data into IndexedDB
+            const d = res.data;
             const ops = [];
-            if (data.products?.length)     ops.push(idbPutAll('products',     data.products));
-            if (data.contacts?.length)     ops.push(idbPutAll('contacts',     data.contacts));
-            if (data.transactions?.length) ops.push(idbPutAll('transactions', data.transactions));
-            if (data.stock?.length)        ops.push(idbPutAll('stock',        _normaliseStock(data.stock)));
-            if (data.categories?.length)   ops.push(idbPutAll('categories',   data.categories));
-            if (data.tax_rates?.length)    ops.push(idbPutAll('tax_rates',    data.tax_rates));
-            if (data.locations?.length)    ops.push(idbPutAll('locations',    data.locations));
+
+            // Store each dataset — normalise stock to composite key
+            if (d.products?.length)     ops.push(putAll('products',   d.products));
+            if (d.contacts?.length)     ops.push(putAll('contacts',   d.contacts));
+            if (d.transactions?.length) ops.push(putAll('transactions', d.transactions));
+            if (d.categories?.length)   ops.push(putAll('categories', d.categories));
+            if (d.tax_rates?.length)    ops.push(putAll('tax_rates',  d.tax_rates));
+            if (d.locations?.length)    ops.push(putAll('locations',  d.locations));
+            if (d.units?.length)        ops.push(putAll('units',      d.units));
+            if (d.brands?.length)       ops.push(putAll('brands',     d.brands));
+            if (d.stock?.length) {
+                const normalised = d.stock.map(s => ({ ...s, id: `${s.variation_id}_${s.location_id}` }));
+                ops.push(putAll('stock', normalised));
+            }
 
             await Promise.all(ops);
+            await setMeta('last_pulled_at', res.pulled_at);
+            await setMeta('last_pull_summary', JSON.stringify(res.summary));
 
-            _setMeta('last_pulled_at', pulled_at);
-            _emit('pull:success', { pulled_at, summary });
-            _updateBadge('pull', 'success', summary);
-
+            _emit('pull:success', { pulled_at: res.pulled_at, summary: res.summary });
+            _setButtonState('pull', 'idle');
+            _updateLastSyncLabel('pull', res.pulled_at, res.summary);
             return res;
         } catch (err) {
             _emit('pull:error', { error: err.message });
-            _updateBadge('pull', 'error', {});
+            _setButtonState('pull', 'error');
+            console.error('[CloudSync] pull error:', err);
             throw err;
         }
     }
 
-    // ── Push ───────────────────────────────────────────────────────────────
+    // ── PUSH  (device → cloud) ─────────────────────────────────────────────
 
     async function push() {
-        if (!navigator.onLine) {
-            _emit('push:skipped', { reason: 'offline' });
-            return;
-        }
+        if (!isOnline) { _emit('push:skipped', { reason: 'offline' }); return null; }
 
-        const pendingItems = await idbGetAll('pending_push');
-        if (pendingItems.length === 0) {
+        const pending = await getAll('pending_push');
+        if (!pending.length) {
             _emit('push:skipped', { reason: 'nothing_pending' });
-            return;
+            return { summary: {}, status: 'skipped' };
         }
 
-        _emit('push:start', { count: pendingItems.length });
+        _setButtonState('push', 'loading');
+        _emit('push:start', { count: pending.length });
 
-        // Bucket by type
-        const contacts     = pendingItems.filter(i => i.type === 'contact').map(i => i.data);
-        const transactions = pendingItems.filter(i => i.type === 'transaction').map(i => i.data);
-        const adjustments  = pendingItems.filter(i => i.type === 'stock_adjustment').map(i => i.data);
+        const contacts     = pending.filter(i => i.type === 'contact').map(i => i.data);
+        const transactions = pending.filter(i => i.type === 'transaction').map(i => i.data);
+        const adjustments  = pending.filter(i => i.type === 'stock_adjustment').map(i => i.data);
 
         try {
             const res = await apiPost('/push', {
-                sync_token        : config.syncToken,
-                contacts          : contacts,
-                transactions      : transactions,
-                stock_adjustments : adjustments,
+                sync_token       : cfg.syncToken,
+                contacts,
+                transactions,
+                stock_adjustments: adjustments,
             });
 
-            // Clear pushed items from queue
-            for (const item of pendingItems) {
-                await idbDelete('pending_push', item.id);
+            // Remove successfully pushed items
+            for (const item of pending) {
+                await deleteOne('pending_push', item.id);
             }
 
+            await setMeta('last_pushed_at', new Date().toISOString());
             _emit('push:success', res);
-            _updateBadge('push', 'success', res.summary);
-
+            _setButtonState('push', 'idle');
+            _updateLastSyncLabel('push', new Date().toISOString(), res.summary);
+            await _refreshPendingCount();
             return res;
         } catch (err) {
             _emit('push:error', { error: err.message });
-            _updateBadge('push', 'error', {});
+            _setButtonState('push', 'error');
+            console.error('[CloudSync] push error:', err);
             throw err;
         }
     }
 
-    // ── Full Two-Way Sync ──────────────────────────────────────────────────
+    // ── FULL SYNC ──────────────────────────────────────────────────────────
 
     async function sync() {
         if (isSyncing) return;
         isSyncing = true;
+        _setButtonState('sync', 'loading');
         _emit('sync:start');
 
         try {
-            // Push first (send local → server), then pull (get server → local)
-            await push().catch(e => console.warn('[CloudSync] push error:', e));
-            await pull().catch(e => console.warn('[CloudSync] pull error:', e));
-
-            _setMeta('last_synced_at', new Date().toISOString());
+            await push().catch(e => console.warn('[CloudSync] push partial error:', e.message));
+            await pull().catch(e => console.warn('[CloudSync] pull partial error:', e.message));
+            await setMeta('last_synced_at', new Date().toISOString());
             _emit('sync:complete');
         } finally {
             isSyncing = false;
+            _setButtonState('sync', 'idle');
         }
     }
 
-    // ── Queue an offline change ────────────────────────────────────────────
+    // ── QUEUE (offline write) ──────────────────────────────────────────────
 
     /**
-     * Call this when user creates a transaction or contact while offline.
-     * type: 'transaction' | 'contact' | 'stock_adjustment'
+     * Queue a record to be pushed next time we go online.
+     *
+     * @param {string} type  'transaction' | 'contact' | 'stock_adjustment'
+     * @param {object} data  The record payload
+     * @returns {string}     offline_id (use this as temp ID in your UI)
      */
-    async function queueForPush(type, data) {
-        const item = {
-            type     : type,
-            data     : data,
-            queued_at: new Date().toISOString(),
-            offline_id: data.offline_id ?? ('OFL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5)),
-        };
-        // Ensure offline_id is on the data too (for server idempotency)
-        item.data.offline_id = item.offline_id;
+    async function queue(type, data) {
+        const offline_id = data.offline_id
+            || ('OFL-' + cfg.businessId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7));
 
-        await idbAdd('pending_push', item);
-        _emit('queue:added', { type, offline_id: item.offline_id });
-        _updatePendingCount();
+        data.offline_id = offline_id;
 
-        return item.offline_id;
+        await addOne('pending_push', { type, data, queued_at: new Date().toISOString() });
+        _emit('queue:added', { type, offline_id });
+        await _refreshPendingCount();
+
+        // If online, push immediately
+        if (isOnline) {
+            push().catch(() => {});
+        }
+
+        return offline_id;
     }
 
-    // ── Local queries (for offline POS) ───────────────────────────────────
+    // ── OFFLINE QUERIES ────────────────────────────────────────────────────
 
-    async function getProducts(query) {
-        const all = await idbGetAll('products');
-        if (!query) return all;
-        const q = query.toLowerCase();
-        return all.filter(p =>
-            p.name?.toLowerCase().includes(q) ||
-            p.sku?.toLowerCase().includes(q)
-        );
+    async function searchProducts(q) {
+        const all = await getAll('products');
+        if (!q) return all;
+        const s = q.toLowerCase();
+        return all.filter(p => p.name?.toLowerCase().includes(s) || p.sku?.toLowerCase().includes(s));
     }
 
-    async function getContacts(query) {
-        const all = await idbGetAll('contacts');
-        if (!query) return all;
-        const q = query.toLowerCase();
-        return all.filter(c =>
-            c.name?.toLowerCase().includes(q) ||
-            c.mobile?.includes(q)
-        );
+    async function searchContacts(q) {
+        const all = await getAll('contacts');
+        if (!q) return all;
+        const s = q.toLowerCase();
+        return all.filter(c => c.name?.toLowerCase().includes(s) || c.mobile?.includes(s));
     }
 
-    async function getStock(variationId, locationId) {
-        const all = await idbGetAll('stock');
-        return all.find(s => s.variation_id === variationId &&
-                             s.location_id  === locationId) || { qty_available: 0 };
+    async function getStockLevel(variationId, locationId) {
+        const all = await getAll('stock');
+        const row = all.find(s => s.variation_id == variationId && s.location_id == locationId);
+        return row?.qty_available ?? 0;
     }
 
-    async function getPendingCount() {
-        const items = await idbGetAll('pending_push');
+    async function pendingCount() {
+        const items = await getAll('pending_push');
         return items.length;
     }
 
-    // ── Init ───────────────────────────────────────────────────────────────
+    // ── STATUS ─────────────────────────────────────────────────────────────
 
-    async function init(options) {
-        Object.assign(config, options);
+    async function getLocalStatus() {
+        const [lastPull, lastPush, lastSync, pending] = await Promise.all([
+            getMeta('last_pulled_at'),
+            getMeta('last_pushed_at'),
+            getMeta('last_synced_at'),
+            pendingCount(),
+        ]);
+        return { lastPull, lastPush, lastSync, pending, online: isOnline };
+    }
+
+    // ── INIT ───────────────────────────────────────────────────────────────
+
+    async function init(options = {}) {
+        Object.assign(cfg, options);
 
         await openDB();
 
-        // Online/offline listeners
-        window.addEventListener('online', () => {
-            _emit('connection:online');
-            _updateConnectionBadge(true);
-            if (config.autoSync) sync();
-        });
+        // Restore last sync times into UI labels
+        const [lp, ls] = await Promise.all([getMeta('last_pulled_at'), getMeta('last_pushed_at')]);
+        if (lp) _updateLastSyncLabel('pull', lp);
+        if (ls) _updateLastSyncLabel('push', ls);
+        await _refreshPendingCount();
 
-        window.addEventListener('offline', () => {
-            _emit('connection:offline');
-            _updateConnectionBadge(false);
-        });
+        // Online/offline events
+        window.addEventListener('online',  _goOnline);
+        window.addEventListener('offline', _goOffline);
+        _updateConnectionBadge(isOnline);
 
-        // Auto-sync interval
-        if (config.autoSync) {
-            syncTimer = setInterval(sync, config.autoInterval);
-            // Do an initial sync after 2s
-            setTimeout(sync, 2000);
+        // Auto-sync timer
+        if (cfg.autoSync) {
+            clearInterval(syncTimer);
+            syncTimer = setInterval(sync, cfg.autoInterval);
+            // Initial sync after 3s
+            setTimeout(sync, 3000);
         }
 
-        _updateConnectionBadge(navigator.onLine);
-        await _updatePendingCount();
+        // Expose to window for console debugging
+        window._CloudSync = { pull, push, sync, queue, searchProducts, searchContacts, getStockLevel, getLocalStatus, cfg };
 
-        return {
-            pull, push, sync, queueForPush,
-            getProducts, getContacts, getStock, getPendingCount,
-        };
+        return { pull, push, sync, queue, searchProducts, searchContacts, getStockLevel, pendingCount, getLocalStatus };
     }
 
-    // ── Event emitter ──────────────────────────────────────────────────────
-
-    const _listeners = {};
-
-    function on(event, fn) { (_listeners[event] = _listeners[event] || []).push(fn); }
-
-    function _emit(event, detail) {
-        (_listeners[event] || []).forEach(fn => fn(detail || {}));
-        // Also dispatch a DOM event for components that don't import this module
-        window.dispatchEvent(new CustomEvent('cloud-sync:' + event, { detail: detail || {} }));
+    function _goOnline() {
+        isOnline = true;
+        _updateConnectionBadge(true);
+        _emit('online');
+        if (cfg.autoSync) sync();
     }
 
-    // ── UI helpers ─────────────────────────────────────────────────────────
+    function _goOffline() {
+        isOnline = false;
+        _updateConnectionBadge(false);
+        _emit('offline');
+    }
+
+    // ── EVENTS ─────────────────────────────────────────────────────────────
+
+    const _handlers = {};
+
+    function on(event, fn) {
+        (_handlers[event] = _handlers[event] || []).push(fn);
+        return () => { _handlers[event] = _handlers[event].filter(h => h !== fn); }; // returns unsubscribe
+    }
+
+    function _emit(event, detail = {}) {
+        (_handlers[event] || []).forEach(fn => fn(detail));
+        window.dispatchEvent(new CustomEvent('cs:' + event, { detail }));
+    }
+
+    // ── UI HELPERS ─────────────────────────────────────────────────────────
+
+    const ICONS = {
+        idle   : { pull: '↓ Pull', push: '↑ Push', sync: '⟳ Sync' },
+        loading: { pull: 'Pulling…', push: 'Pushing…', sync: 'Syncing…' },
+        error  : { pull: 'Retry Pull', push: 'Retry Push', sync: 'Retry' },
+    };
+
+    function _setButtonState(action, state) {
+        const btn = document.getElementById('btn-' + action);
+        if (!btn) return;
+        btn.disabled = state === 'loading';
+        btn.textContent = ICONS[state]?.[action] ?? ICONS.idle[action];
+        btn.className = btn.className
+            .replace(/tw-bg-\w+-\d+/g, '')
+            .trimEnd();
+        const colours = { pull: 'tw-bg-blue-600', push: 'tw-bg-green-600', sync: 'tw-bg-purple-600' };
+        if (state === 'error')   btn.classList.add('tw-bg-red-600');
+        else if (state === 'loading') btn.classList.add('tw-opacity-60');
+        else btn.classList.add(colours[action]);
+    }
 
     function _updateConnectionBadge(online) {
-        const badge = document.getElementById('sync-connection-badge');
-        if (!badge) return;
-        badge.className = online
-            ? 'tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-green-700 tw-bg-green-100 tw-rounded-full tw-px-2 tw-py-0.5'
-            : 'tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-red-700 tw-bg-red-100 tw-rounded-full tw-px-2 tw-py-0.5';
-        badge.innerHTML = online
-            ? '<span class="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-green-500"></span> Online'
+        const el = document.getElementById('sync-connection-badge');
+        if (!el) return;
+        el.className = online
+            ? 'tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-green-700 tw-bg-green-100 tw-rounded-full tw-px-3 tw-py-1'
+            : 'tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-red-700 tw-bg-red-100 tw-rounded-full tw-px-3 tw-py-1';
+        el.innerHTML = online
+            ? '<span class="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-green-500 tw-animate-pulse"></span> Online'
             : '<span class="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-red-500"></span> Offline';
     }
 
-    function _updateBadge(direction, status, summary) {
-        const el = document.getElementById('sync-last-' + direction);
+    function _updateLastSyncLabel(dir, isoTime, summary) {
+        const el = document.getElementById('sync-last-' + dir);
         if (!el) return;
-        const count = summary ? Object.values(summary).reduce((a, b) => a + b, 0) : 0;
-        el.textContent = status === 'success'
-            ? `Last ${direction}: ${new Date().toLocaleTimeString()} (${count} records)`
-            : `Last ${direction}: FAILED`;
+        const d    = new Date(isoTime);
+        const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const date = d.toLocaleDateString([], { day: 'numeric', month: 'short' });
+        const total = summary ? Object.values(summary).reduce((a, b) => a + b, 0) : null;
+        el.textContent = `Last ${dir}: ${time}, ${date}${total !== null ? ` · ${total} records` : ''}`;
     }
 
-    async function _updatePendingCount() {
-        const count = await getPendingCount();
-        const el = document.getElementById('sync-pending-count');
-        if (el) el.textContent = count;
-        const badge = document.getElementById('sync-pending-badge');
-        if (badge) {
-            badge.style.display = count > 0 ? 'inline-flex' : 'none';
-            badge.textContent   = count;
-        }
+    async function _refreshPendingCount() {
+        const n   = await pendingCount();
+        const el  = document.getElementById('sync-pending-count');
+        const bdg = document.getElementById('sync-pending-badge');
+        if (el)  el.textContent = n;
+        if (bdg) { bdg.textContent = n; bdg.style.display = n > 0 ? 'inline-flex' : 'none'; }
     }
 
-    function _setMeta(key, value) {
-        try { localStorage.setItem('apexpos_sync_' + key, value); } catch (_) {}
-    }
-
-    function _normaliseStock(stockRows) {
-        // stock rows from server have variation_id + location_id — create a composite ID
-        return stockRows.map(s => ({
-            ...s,
-            id: `${s.variation_id}_${s.location_id}`,
-        }));
-    }
-
-    // ── Public API ─────────────────────────────────────────────────────────
-    return { init, pull, push, sync, queueForPush, on, getProducts, getContacts, getStock, getPendingCount };
-
+    // ── PUBLIC API ─────────────────────────────────────────────────────────
+    return { init, pull, push, sync, queue, on, searchProducts, searchContacts, getStockLevel, pendingCount, getLocalStatus };
 })();
 
-// Auto-init if data attributes are present on the <body>
-document.addEventListener('DOMContentLoaded', function () {
-    const body = document.body;
-    const token      = body.dataset.syncToken;
+// ── Auto-init from <body> data attributes ────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const body       = document.body;
+    const token      = body.dataset.syncToken      || localStorage.getItem('apexpos_sync_token_' + body.dataset.businessId);
     const businessId = parseInt(body.dataset.businessId, 10);
+    const remoteUrl  = body.dataset.syncRemote     || localStorage.getItem('apexpos_sync_remote') || '';
 
     if (token && businessId) {
-        CloudSync.init({ businessId, syncToken: token, autoSync: true })
-            .then(() => console.log('[CloudSync] Initialized for business #' + businessId));
+        CloudSync.init({ businessId, syncToken: token, remoteUrl, autoSync: true })
+            .then(() => console.info('[CloudSync] Ready. Remote:', remoteUrl || '(same origin)'));
     }
 });
