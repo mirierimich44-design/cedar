@@ -128,7 +128,7 @@ class BIDashboardController extends Controller
         $bed_data = DB::table('hospital_beds')
             ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
             ->where('hospital_wards.business_id', $business_id)
-            ->select(DB::raw('SUM(CASE WHEN is_available=0 THEN 1 ELSE 0 END) as occupied'), DB::raw('COUNT(*) as total'))
+            ->select(DB::raw("SUM(CASE WHEN status='occupied' THEN 1 ELSE 0 END) as occupied"), DB::raw('COUNT(*) as total'))
             ->first();
         $occupancy = ($bed_data && $bed_data->total > 0)
             ? round($bed_data->occupied / $bed_data->total * 100, 1)
@@ -261,7 +261,7 @@ class BIDashboardController extends Controller
                 'bed_occupancy' => DB::table('hospital_beds')
                     ->join('hospital_wards', 'hospital_wards.id', '=', 'hospital_beds.ward_id')
                     ->where('hospital_wards.business_id', $business_id)
-                    ->select(DB::raw('SUM(CASE WHEN is_available=0 THEN 1 ELSE 0 END) as occupied'), DB::raw('COUNT(*) as total'))
+                    ->select(DB::raw("SUM(CASE WHEN status='occupied' THEN 1 ELSE 0 END) as occupied"), DB::raw('COUNT(*) as total'))
                     ->first()
             ];
         }

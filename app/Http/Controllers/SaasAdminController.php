@@ -9,8 +9,10 @@ use App\SaasInvoice;
 use App\SaasHostedAccount;
 use App\SaasSetting;
 use App\Business;
+use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class SaasAdminController extends Controller
 {
@@ -290,5 +292,97 @@ class SaasAdminController extends Controller
         $subscription->save();
 
         return back()->with('success', "Disabled: {$feature->name}");
+    }
+
+    // ─── Per-Business Module Toggles (simple enabled_modules approach) ───
+
+    /**
+     * List all businesses (simple module-toggle panel)
+     */
+    public function businessIndex(Request $request)
+    {
+        if ($request->ajax()) {
+            $query = Business::with('owner')->select('business.*');
+            return DataTables::of($query)
+                ->addColumn('action', function ($row) {
+                    return '<a href="' . route('saas-admin.features', $row->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>';
+                })
+                ->addColumn('owner_name', fn($r) => optional($r->owner)->first_name . ' ' . optional($r->owner)->last_name)
+                ->addColumn('modules_count', fn($r) => count($r->enabled_modules ?? []) . ' modules')
+                ->editColumn('business_type', fn($r) => ucfirst($r->business_type ?? '—'))
+                ->editColumn('created_at', fn($r) => $r->created_at ? $r->created_at->format('d M Y') : '')
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        return view('saas_admin.index');
+    }
+
+    /**
+     * Show per-business feature toggles
+     */
+    public function businessFeatures($business_id)
+    {
+        $business        = Business::findOrFail($business_id);
+        $all_modules     = $this->getAllFeatures();
+        $enabled_modules = $business->enabled_modules ?? [];
+        return view('saas_admin.features', compact('business', 'all_modules', 'enabled_modules'));
+    }
+
+    /**
+     * Save per-business feature toggles
+     */
+    public function updateBusinessFeatures(Request $request, $business_id)
+    {
+        $business = Business::findOrFail($business_id);
+        $enabled  = $request->input('enabled_modules', []);
+        $business->update(['enabled_modules' => $enabled]);
+        return redirect()->route('saas-admin.features', $business_id)
+            ->with('status', ['success' => 1, 'msg' => 'Features updated for ' . $business->name]);
+    }
+
+    private function getAllFeatures(): array
+    {
+        return [
+            'Sales & POS' => [
+                'add_sale'         => ['name' => 'Add Sale (Invoice)',    'icon' => 'fa-file-invoice'],
+                'pos_sale'         => ['name' => 'POS / Point of Sale',   'icon' => 'fa-cash-register'],
+                'subscription'     => ['name' => 'Recurring Invoices',    'icon' => 'fa-sync'],
+                'types_of_service' => ['name' => 'Types of Service',      'icon' => 'fa-concierge-bell'],
+            ],
+            'Inventory & Purchasing' => [
+                'purchases'        => ['name' => 'Purchases',             'icon' => 'fa-shopping-cart'],
+                'stock_transfers'  => ['name' => 'Stock Transfers',       'icon' => 'fa-exchange-alt'],
+                'stock_adjustment' => ['name' => 'Stock Adjustments',     'icon' => 'fa-sliders-h'],
+                'stocktake'        => ['name' => 'Stocktake',             'icon' => 'fa-clipboard-list'],
+            ],
+            'Finance' => [
+                'expenses'         => ['name' => 'Expenses',              'icon' => 'fa-wallet'],
+                'account'          => ['name' => 'Accounts / Ledger',     'icon' => 'fa-book'],
+            ],
+            'Restaurant' => [
+                'tables'           => ['name' => 'Table Management',      'icon' => 'fa-utensils'],
+                'modifiers'        => ['name' => 'Menu Modifiers',        'icon' => 'fa-sliders-h'],
+                'service_staff'    => ['name' => 'Service Staff',         'icon' => 'fa-user-tie'],
+                'kitchen'          => ['name' => 'Kitchen Display',       'icon' => 'fa-fire'],
+                'booking'          => ['name' => 'Bookings / Reservations','icon'=> 'fa-calendar-check'],
+            ],
+            'Courier & Logistics' => [
+                'parcels'          => ['name' => 'Parcel Management',     'icon' => 'fa-box'],
+                'parcel'           => ['name' => 'Parcel (legacy key)',   'icon' => 'fa-box-open'],
+            ],
+            'Healthcare' => [
+                'hospital_billing' => ['name' => 'Hospital / Clinic Billing','icon'=> 'fa-hospital'],
+            ],
+            'Kenya Compliance' => [
+                'etims'            => ['name' => 'eTIMS (KRA)',           'icon' => 'fa-receipt'],
+                'dda'              => ['name' => 'DDA Register',          'icon' => 'fa-pills'],
+            ],
+            'Operations' => [
+                'jobs'             => ['name' => 'Jobs / Job Cards',      'icon' => 'fa-tools'],
+                'cooler'           => ['name' => 'Cooler Management',     'icon' => 'fa-snowflake'],
+                'sms'              => ['name' => 'SMS Messaging',         'icon' => 'fa-sms'],
+                'whatsapp'         => ['name' => 'WhatsApp Messaging',    'icon' => 'fa-whatsapp'],
+            ],
+        ];
     }
 }
