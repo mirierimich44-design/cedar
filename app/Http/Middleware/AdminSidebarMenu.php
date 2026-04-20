@@ -977,7 +977,7 @@ class AdminSidebarMenu
 
             // Cloud Sync
             $menu->url(
-                action([\App\Http\Controllers\SyncController::class, 'index']),
+                action([\App\Http\Controllers\CloudSyncController::class, 'dashboard']),
                 'Cloud Sync',
                 ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
