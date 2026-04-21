@@ -581,6 +581,26 @@ class CloudSyncController extends Controller
         $tokenStr = $request->header('X-Sync-Token')
             ?? $request->input('sync_token');
 
+        // ── Session fallback: browser dashboard buttons (user already logged in) ──
+        // When no X-Sync-Token is present but the user has an active Laravel session,
+        // auto-create (or reuse) a browser token so Pull/Push work without pre-registration.
+        if (! $tokenStr && auth()->check()) {
+            $businessId = session('business.id') ?? auth()->user()->business_id;
+            $token = SyncToken::firstOrCreate(
+                [
+                    'user_id'     => auth()->id(),
+                    'business_id' => $businessId,
+                    'device_type' => 'browser',
+                    'device_name' => 'Dashboard Browser',
+                ],
+                [
+                    'token'     => SyncToken::generate(),
+                    'is_active' => true,
+                ]
+            );
+            return [$token, null];
+        }
+
         if (! $tokenStr) {
             return [null, $this->syncResponse(['error' => 'Missing X-Sync-Token header or sync_token param.'], 401)];
         }

@@ -15,8 +15,10 @@ class AutoProcurementService
     {
         $business_id = request()->session()->get('user.business_id');
 
+        // purchase_price lives on variations.default_purchase_price, not on products
         $low_stock = DB::table('products')
             ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
+            ->join('variations as v', 'v.product_id', '=', 'products.id')
             ->where('products.business_id', $business_id)
             ->where('products.alert_quantity', '>', 0)
             ->whereRaw('vld.qty_available <= products.alert_quantity')
@@ -24,11 +26,11 @@ class AutoProcurementService
                 'products.id',
                 'products.name',
                 'products.alert_quantity',
-                'products.purchase_price',
                 DB::raw('SUM(vld.qty_available) as qty_available'),
-                DB::raw('MAX(products.alert_quantity * 2) as reorder_qty')
+                DB::raw('MAX(products.alert_quantity * 2) as reorder_qty'),
+                DB::raw('MAX(COALESCE(v.default_purchase_price, 0)) as purchase_price')
             )
-            ->groupBy('products.id', 'products.name', 'products.alert_quantity', 'products.purchase_price')
+            ->groupBy('products.id', 'products.name', 'products.alert_quantity')
             ->orderBy('qty_available')
             ->get();
 
