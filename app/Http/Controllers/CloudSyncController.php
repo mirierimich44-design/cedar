@@ -109,49 +109,75 @@ class CloudSyncController extends Controller
      */
     public function pull(Request $request)
     {
-        [$token, $errorResponse] = $this->resolveToken($request);
-        if ($errorResponse) return $errorResponse;
+        try {
+            [$token, $errorResponse] = $this->resolveToken($request);
+            if ($errorResponse) return $errorResponse;
+        } catch (\Throwable $e) {
+            return $this->syncResponse([
+                'error' => 'Sync tables not ready. Please run: php artisan migrate --force on the server. (' . $e->getMessage() . ')',
+            ], 503);
+        }
 
         $since      = $token->last_pulled_at;     // null = full sync
         $businessId = $token->business_id;
         $pulledAt   = now();
 
-        $data = [
-            'business'           => $this->pullBusiness($businessId),
-            'locations'          => $this->pullLocations($businessId, $since),
-            'categories'         => $this->pullCategories($businessId, $since),
-            'brands'             => $this->pullBrands($businessId, $since),
-            'units'              => $this->pullUnits($businessId, $since),
-            'tax_rates'          => $this->pullTaxRates($businessId, $since),
-            'contacts'           => $this->pullContacts($businessId, $since),
-            'products'           => $this->pullProducts($businessId, $since),
-            'stock'              => $this->pullStock($businessId, $since),
-            'transactions'       => $this->pullTransactions($businessId, $since),
+        // Pull each dataset individually so one failure doesn't kill everything
+        $data    = [];
+        $errors  = [];
+        $labels  = [
+            'business'     => 'Business settings',
+            'locations'    => 'Locations',
+            'categories'   => 'Categories',
+            'brands'       => 'Brands',
+            'units'        => 'Units',
+            'tax_rates'    => 'Tax rates',
+            'contacts'     => 'Contacts',
+            'products'     => 'Products',
+            'stock'        => 'Stock levels',
+            'transactions' => 'Transactions (30d)',
         ];
+
+        foreach ($labels as $key => $label) {
+            try {
+                $method      = 'pull' . ucfirst(str_replace('_', '', ucwords($key, '_')));
+                $data[$key]  = method_exists($this, $method)
+                    ? $this->$method($businessId, $since)
+                    : [];
+            } catch (\Throwable $e) {
+                $data[$key]  = [];
+                $errors[$key] = $e->getMessage();
+            }
+        }
 
         $summary = array_map('count', $data);
 
-        // Update token
+        // Update token timestamps
         $token->last_pulled_at = $pulledAt;
         $token->last_seen_at   = $pulledAt;
         $token->save();
 
         // Log the pull
-        SyncLog::create([
-            'business_id'      => $businessId,
-            'sync_token_id'    => $token->id,
-            'direction'        => 'pull',
-            'status'           => 'success',
-            'summary'          => $summary,
-            'records_sent'     => array_sum($summary),
-            'records_received' => 0,
-            'synced_at'        => $pulledAt,
-        ]);
+        try {
+            SyncLog::create([
+                'business_id'      => $businessId,
+                'sync_token_id'    => $token->id,
+                'direction'        => 'pull',
+                'status'           => empty($errors) ? 'success' : 'partial',
+                'summary'          => $summary,
+                'errors'           => $errors ?: null,
+                'records_sent'     => array_sum($summary),
+                'records_received' => 0,
+                'synced_at'        => $pulledAt,
+            ]);
+        } catch (\Throwable $e) { /* log table may not exist yet */ }
 
         return $this->syncResponse([
             'pulled_at'  => $pulledAt->toIso8601String(),
             'is_full'    => $since === null,
             'summary'    => $summary,
+            'labels'     => $labels,
+            'errors'     => $errors,
             'data'       => $data,
         ]);
     }
@@ -321,7 +347,7 @@ class CloudSyncController extends Controller
 
     // ── Private: Pull Helpers ────────────────────────────────────────────────
 
-    private function pullBusiness(int $businessId): array
+    private function pullBusiness(int $businessId, $since = null): array
     {
         $b = Business::find($businessId);
         return $b ? $b->only([
