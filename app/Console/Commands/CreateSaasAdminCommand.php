@@ -15,7 +15,7 @@ class CreateSaasAdminCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'saas:create-admin {email=admin@apexpos.co.ke} {password=admin123} {--grant= : Grant Superadmin role to an existing user by email} {--grant-id= : Grant Superadmin role to an existing user by ID}';
+    protected $signature = 'saas:create-admin {email=admin@apexpos.co.ke} {password=admin123} {--grant= : Grant Superadmin role to an existing user by email} {--grant-id= : Grant Superadmin role to an existing user by ID} {--list : List all users with their IDs}';
 
     /**
      * The console command description.
@@ -31,6 +31,15 @@ class CreateSaasAdminCommand extends Command
      */
     public function handle()
     {
+        if ($this->option('list')) {
+            $headers = ['ID', 'Username', 'Email', 'Has Superadmin'];
+            $rows = User::select('id', 'username', 'email')->orderBy('id')->get()->map(function ($u) {
+                return [$u->id, $u->username, $u->email, $u->hasRole('Superadmin') ? 'YES' : 'no'];
+            })->toArray();
+            $this->table($headers, $rows);
+            return 0;
+        }
+
         // --grant-id=1 promotes an existing user by ID
         if ($grantId = $this->option('grant-id')) {
             $user = User::find($grantId);
