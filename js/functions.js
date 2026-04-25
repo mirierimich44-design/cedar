@@ -506,7 +506,11 @@ function getSelectedRows() {
 
 function __is_online() {
     //if localhost always return true
-    if ($('#__is_localhost').length > 0) {
+    if ($('#__is_localhost').length > 0 || 
+        window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' || 
+        window.location.hostname.endsWith('.test') || 
+        window.location.hostname.endsWith('.local')) {
         return true;
     }
 

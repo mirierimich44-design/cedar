@@ -30,17 +30,23 @@ class SyncPullCommand extends Command
 
     public function handle(): int
     {
-        $remoteUrl  = rtrim($this->option('url')      ?: env('SYNC_REMOTE_URL', ''), '/');
-        $token      = $this->option('token')           ?: env('SYNC_TOKEN', '');
-        $businessId = (int)($this->option('business')  ?: env('SYNC_BUSINESS_ID', 0));
+        // Priority: CLI option > saved settings file > .env
+        // Note: use ?: not env($key, default) so that empty .env values don't shadow saved settings
+        $saved      = $this->loadSavedSettings();
+        $remoteUrl  = rtrim($this->option('url')     ?: ($saved['remote_url']  ?? '') ?: env('SYNC_REMOTE_URL', ''), '/');
+        $token      = $this->option('token')          ?: ($saved['sync_token'] ?? '') ?: env('SYNC_TOKEN', '');
+        $businessId = (int)($this->option('business') ?: ($saved['business_id'] ?? 0) ?: env('SYNC_BUSINESS_ID', 0));
 
         if (! $remoteUrl) {
-            $this->error('No remote URL. Set SYNC_REMOTE_URL in .env or use --url=https://...');
+            $this->error('No remote URL. Set it via:');
+            $this->line('  1. The /sync settings panel on the live server');
+            $this->line('  2. SYNC_REMOTE_URL in .env');
+            $this->line('  3. --url=https://reenson.apextechsolutions.co.ke');
             return 1;
         }
         if (! $token) {
-            $this->error('No sync token. Set SYNC_TOKEN in .env or use --token=xxx');
-            $this->line('  Get a token from: ' . $remoteUrl . '/sync  → Register Device');
+            $this->error('No sync token. Get one from: ' . $remoteUrl . '/sync → Register Device');
+            $this->line('  Then save it via the /sync settings panel OR add SYNC_TOKEN to .env');
             return 1;
         }
 
@@ -175,6 +181,23 @@ class SyncPullCommand extends Command
             );
             $bar->advance();
         }
+    }
+
+    // ── Load settings saved from the /sync dashboard UI ─────────────────────
+
+    private function loadSavedSettings(): array
+    {
+        // Try business 1 first, then scan for any saved config
+        foreach ([1, 2, 3] as $bid) {
+            $path = storage_path("app/sync_config_{$bid}.json");
+            if (file_exists($path)) {
+                $data = json_decode(file_get_contents($path), true);
+                if (is_array($data) && ! empty($data['remote_url'])) {
+                    return $data;
+                }
+            }
+        }
+        return [];
     }
 
     // ── Persisting last_pulled_at ─────────────────────────────────────────────

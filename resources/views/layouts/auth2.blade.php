@@ -26,6 +26,12 @@
 
 <body class="pace-done" data-new-gr-c-s-check-loaded="14.1172.0" data-gr-ext-installed="" cz-shortcut-listen="true">
     @inject('request', 'Illuminate\Http\Request')
+    @php
+        $whitelist = ['127.0.0.1', '::1'];
+    @endphp
+    @if (in_array($_SERVER['REMOTE_ADDR'], $whitelist))
+        <input type="hidden" id="__is_localhost" value="true">
+    @endif
     @if (session('status') && session('status.success'))
         <input type="hidden" id="status_span" data-status="{{ session('status.success') }}"
             data-msg="{{ session('status.msg') }}">

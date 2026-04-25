@@ -4676,7 +4676,7 @@ class TransactionUtil extends Util
         return $output;
     }
 
-    public function getGrossProfit($business_id, $start_date = null, $end_date = null, $location_id = null, $user_id = null, $permitted_locations)
+    public function getGrossProfit($business_id, $start_date = null, $end_date = null, $location_id = null, $user_id = null, $permitted_locations = 'all')
     {
         $query = TransactionSellLine::join('transactions as sale', 'transaction_sell_lines.transaction_id', '=', 'sale.id')
             ->leftjoin('transaction_sell_lines_purchase_lines as TSPL', 'transaction_sell_lines.id', '=', 'TSPL.sell_line_id')
@@ -5663,7 +5663,7 @@ class TransactionUtil extends Util
     }
 
     //
-    public function getProfitLossDetails($business_id, $location_id, $start_date, $end_date, $user_id = null, $permitted_locations = null)
+    public function getProfitLossDetails($business_id, $location_id, $start_date, $end_date, $user_id = null, $permitted_locations = 'all')
     {
         //For Opening stock date should be 1 day before
         $day_before_start_date = \Carbon::createFromFormat('Y-m-d', $start_date)->subDay()->format('Y-m-d');

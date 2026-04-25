@@ -32,18 +32,8 @@ class SaasPricingController extends Controller
     // Public pricing page
     public function index()
     {
-        $featuresByCategory = SaasFeature::activeByCategory();
-        $bundles = SaasBundle::with('features')->where('is_active', true)->orderBy('sort_order')->get();
-
-        $categories = [
-            'core'          => ['label' => 'Core (Always Included)', 'icon' => 'fa-star'],
-            'inventory'     => ['label' => 'Inventory & Stock',       'icon' => 'fa-boxes'],
-            'pharmacy'      => ['label' => 'Pharmacy / DDA',          'icon' => 'fa-pills'],
-            'reporting'     => ['label' => 'Reports & Analytics',     'icon' => 'fa-chart-bar'],
-            'communication' => ['label' => 'Communication',           'icon' => 'fa-comment-dots'],
-            'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
-        ];
-
+        // We no longer need all the feature parsing logic for the fixed tiers,
+        // but we can pass basic business types for the first step
         $business_types = [
             'hospital'   => ['label' => 'Hospital / Clinic', 'icon' => 'fa-hospital-alt', 'desc' => 'Medical record, wards, and labs.'],
             'pharmacy'   => ['label' => 'Pharmacy',          'icon' => 'fa-pills',        'desc' => 'DDA register and prescriptions.'],
@@ -52,45 +42,43 @@ class SaasPricingController extends Controller
             'mixed'      => ['label' => 'Mixed Business',    'icon' => 'fa-random',       'desc' => 'A bit of everything.'],
         ];
 
-        return view('saas.pricing', compact('featuresByCategory', 'bundles', 'categories', 'business_types'));
+        return view('saas.pricing', compact('business_types'));
     }
 
-    // Calculate price via AJAX
+    // Calculate price via AJAX (No longer heavily used, but kept for legacy if needed)
     public function calculate(Request $request)
     {
-        $featureIds = $request->feature_ids ?? [];
-        $cycle      = $request->cycle ?? 'monthly';
-
-        $features = SaasFeature::whereIn('id', $featureIds)->where('is_active', true)->get();
-        $total    = $features->sum(fn($f) => $f->priceFor($cycle));
-
         return response()->json([
-            'total'    => $total,
+            'total'    => 0,
             'currency' => 'KES',
-            'features' => $features->map(fn($f) => [
-                'id'    => $f->id,
-                'name'  => $f->name,
-                'price' => $f->priceFor($cycle),
-            ]),
+            'features' => [],
         ]);
     }
 
     // Checkout page
     public function checkout(Request $request)
     {
-        $featureIds = $request->feature_ids ? explode(',', $request->feature_ids) : [];
-        $cycle      = $request->cycle ?? 'monthly';
-        $biz_type   = $request->biz ?? 'retail';
+        $plan     = $request->plan ?? 'basic';
+        $biz_type = $request->biz ?? 'retail';
 
-        if (empty($featureIds)) {
-            return redirect()->route('saas.pricing')->with('error', 'Please select at least one feature.');
+        // Define the fixed tiers
+        $tiers = [
+            'basic'      => ['name' => 'Basic Plan', 'price' => 500, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'pro'        => ['name' => 'Pro Plan', 'price' => 1200, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'enterprise' => ['name' => 'Enterprise Plan', 'price' => 3500, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'lifetime'   => ['name' => 'Lifetime Deal', 'price' => 16000, 'cycle' => 'once', 'hosting' => 'cloud'],
+        ];
+
+        if (!array_key_exists($plan, $tiers)) {
+            $plan = 'basic';
         }
 
-        $features = SaasFeature::whereIn('id', $featureIds)->where('is_active', true)->get();
-        $total    = $features->sum(fn($f) => $f->priceFor($cycle));
-        $hosting  = $request->hosting ?? 'cloud';
+        $selectedTier = $tiers[$plan];
+        $total        = $selectedTier['price'];
+        $cycle        = $selectedTier['cycle'];
+        $hosting      = $selectedTier['hosting'];
 
-        return view('saas.checkout', compact('features', 'featureIds', 'cycle', 'total', 'hosting', 'biz_type'));
+        return view('saas.checkout', compact('plan', 'selectedTier', 'cycle', 'total', 'hosting', 'biz_type'));
     }
 
     // Submit order — creates user + business + subscription, logs in, routes to trial or M-Pesa
@@ -103,20 +91,24 @@ class SaasPricingController extends Controller
             'email'         => 'required|email|max:255|unique:users,email',
             'phone'         => 'required|string|max:30',
             'password'      => 'required|string|min:6|max:255',
-            'cycle'         => 'required|in:monthly,quarterly,yearly,once',
-            'feature_ids'   => 'required|array|min:1',
-            'hosting'       => 'required|in:cloud,self_hosted',
+            'plan'          => 'required|in:basic,pro,enterprise,lifetime',
             'action'        => 'required|in:trial,pay_now',
             'biz_type'      => 'nullable|string|max:50',
         ], [
             'email.unique' => 'An account with this email already exists. Please sign in instead.',
         ]);
 
-        $features = SaasFeature::whereIn('id', $request->feature_ids)->where('is_active', true)->get();
-        if ($features->isEmpty()) {
-            return redirect()->route('saas.pricing')->with('error', 'Please select at least one feature.');
-        }
-        $total = $features->sum(fn($f) => $f->priceFor($request->cycle));
+        $tiers = [
+            'basic'      => ['price' => 500, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'pro'        => ['price' => 1200, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'enterprise' => ['price' => 3500, 'cycle' => 'monthly', 'hosting' => 'cloud'],
+            'lifetime'   => ['price' => 16000, 'cycle' => 'once', 'hosting' => 'cloud'],
+        ];
+
+        $selectedTier = $tiers[$request->plan];
+        $total        = $selectedTier['price'];
+        $cycle        = $selectedTier['cycle'];
+        $hosting      = $selectedTier['hosting'];
 
         // Apply campaign discount (admin-controlled)
         if (SaasSetting::campaignActive() && SaasSetting::campaignDiscount() > 0) {
@@ -189,7 +181,6 @@ class SaasPricingController extends Controller
             $user->save();
 
             // 3b. Persist canonical business_type for AI persona + vertical logic
-            // Normalize wizard keys to the canonical types the BI system recognises
             $canonicalType = match($request->biz_type) {
                 'hospital', 'clinic' => 'hospital',
                 'pharmacy'           => 'pharmacy',
@@ -215,7 +206,7 @@ class SaasPricingController extends Controller
             ]);
             Permission::firstOrCreate(['name' => 'location.' . $location->id]);
 
-            // 5b. Fire module hooks (Superadmin, Essentials, etc.) — matches BusinessController::postRegister
+            // 5b. Fire module hooks
             if (config('app.env') != 'demo') {
                 try {
                     $this->moduleUtil->getModuleData('after_business_created', ['business' => $business]);
@@ -228,27 +219,25 @@ class SaasPricingController extends Controller
             if ($request->action === 'trial') {
                 $sub = SaasSubscription::create([
                     'business_id'   => $business->id,
-                    'billing_cycle' => $request->cycle,
-                    'hosting_type'  => $request->hosting,
+                    'billing_cycle' => $cycle,
+                    'hosting_type'  => $hosting,
                     'total_amount'  => $total,
                     'status'        => 'trial',
                     'starts_at'     => now(),
                     'ends_at'       => now()->addDays($trialDays),
                     'grace_ends_at' => now()->addDays($trialDays + $graceDays),
+                    'notes'         => 'Plan: ' . $request->plan,
                 ]);
             } else {
                 // pay_now — pending until STK callback confirms payment
                 $sub = SaasSubscription::create([
                     'business_id'   => $business->id,
-                    'billing_cycle' => $request->cycle,
-                    'hosting_type'  => $request->hosting,
+                    'billing_cycle' => $cycle,
+                    'hosting_type'  => $hosting,
                     'total_amount'  => $total,
                     'status'        => 'pending',
+                    'notes'         => 'Plan: ' . $request->plan,
                 ]);
-            }
-
-            foreach ($features as $f) {
-                $sub->features()->attach($f->id, ['price_locked' => $f->priceFor($request->cycle)]);
             }
 
             // 7. Invoice (unpaid until STK confirms OR trial converts)
@@ -341,8 +330,7 @@ class SaasPricingController extends Controller
             : null;
 
         $subscription = $business
-            ? SaasSubscription::with('features')
-                ->where('business_id', $business->id)
+            ? SaasSubscription::where('business_id', $business->id)
                 ->latest()
                 ->first()
             : null;

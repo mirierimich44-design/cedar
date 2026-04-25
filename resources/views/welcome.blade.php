@@ -157,7 +157,7 @@ html, body { background:#0a1628 !important; margin:0; padding:0; }
         <p>POS, inventory, invoicing, reporting, SMS and more — configured for your shop, pharmacy, restaurant or clinic. Pick only the features you need. Pay only for what you use.</p>
 
         <div class="hero-ctas">
-            <a href="{{ route('business.getRegister') }}" class="hero-cta">
+            <a href="{{ route('saas.pricing') }}" class="hero-cta">
                 Get Started Free <i class="fas fa-arrow-right"></i>
             </a>
             <a href="#features" class="hero-cta outline">See all features</a>
@@ -313,7 +313,7 @@ html, body { background:#0a1628 !important; margin:0; padding:0; }
                 <span class="teaser-chip"><i class="fas fa-check"></i> Cloud or On-Premise</span>
                 <span class="teaser-chip"><i class="fas fa-check"></i> No long-term contract</span>
             </div>
-            <a href="{{ route('business.getRegister') }}" class="hero-cta">Get Started Free <i class="fas fa-arrow-right"></i></a>
+            <a href="{{ route('saas.pricing') }}" class="hero-cta">Get Started Free <i class="fas fa-arrow-right"></i></a>
         </div>
     </section>
 
@@ -345,12 +345,12 @@ html, body { background:#0a1628 !important; margin:0; padding:0; }
     <section class="final-cta">
         <h2>Ready to run your business better?</h2>
         <p>Set up your business in under 2 minutes. Start with a free trial — no card needed.</p>
-        <a href="{{ route('business.getRegister') }}" class="hero-cta">Start Free Trial <i class="fas fa-arrow-right"></i></a>
+        <a href="{{ route('saas.pricing') }}" class="hero-cta">Start Free Trial <i class="fas fa-arrow-right"></i></a>
     </section>
 
     <div class="lp-foot">
         &copy; {{ date('Y') }} {{ config('app.name', 'Apex POS') }} ·
-        <a href="{{ route('saas.pricing') }}">Pricing</a> · <a href="{{ route('business.getRegister') }}">Register</a> ·
+        <a href="{{ route('saas.pricing') }}">Pricing</a> · <a href="{{ route('saas.pricing') }}">Register</a> ·
         <a href="#features">Features</a> ·
         <a href="#faq">FAQ</a> ·
         <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'login']) }}">Sign In</a>

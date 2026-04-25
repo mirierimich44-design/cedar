@@ -48,7 +48,6 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
 /* CTA */
 .cta { width:100%; height:52px; background:linear-gradient(135deg,#0d9488,#0f766e); border:none; border-radius:12px; color:#fff; font-size:1rem; font-weight:800; cursor:pointer; transition:all .2s; margin-top:10px; font-family:inherit; box-shadow:0 8px 20px -6px rgba(13,148,136,.45); }
 .cta:hover { transform:translateY(-1px); box-shadow:0 12px 24px -6px rgba(13,148,136,.55); }
-.cta .save-tag { background:rgba(255,255,255,.25); font-size:.72rem; padding:3px 8px; border-radius:50px; margin-left:8px; font-weight:700; }
 .trust { text-align:center; margin-top:14px; font-size:.78rem; color:#64748b; line-height:1.6; }
 .trust i { color:#10b981; margin-right:5px; }
 
@@ -74,14 +73,14 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
         <img src="{{ asset('img/logo-small.png') }}" alt="logo">
         <span>{{ config('app.name') }}</span>
     </a>
-    <a href="{{ route('saas.pricing') }}"><i class="fas fa-arrow-left"></i> Back to wizard</a>
+    <a href="{{ route('saas.pricing') }}"><i class="fas fa-arrow-left"></i> Change Plan</a>
 </nav>
 
 <div class="container">
     <div>
-        <a href="{{ route('saas.pricing') }}" class="back-link"><i class="fas fa-arrow-left"></i> Change features</a>
+        <a href="{{ route('saas.pricing') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Plans</a>
         <div class="card">
-            <h2>Create your account</h2>
+            <h2>Register your business</h2>
             <p class="sub">You'll be logged in immediately. No credit card required.</p>
 
             @if($errors->any())
@@ -92,14 +91,9 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
 
             <form method="POST" action="{{ route('saas.order.submit') }}" id="checkout-form">
                 @csrf
-                <input type="hidden" name="cycle" value="{{ $cycle }}">
-                <input type="hidden" name="hosting" value="{{ $hosting }}">
-                <input type="hidden" name="total" value="{{ $total }}">
-                <input type="hidden" name="biz_type" value="{{ request('biz') }}">
+                <input type="hidden" name="plan" value="{{ $plan }}">
+                <input type="hidden" name="biz_type" value="{{ $biz_type }}">
                 <input type="hidden" name="action" id="action-input" value="trial">
-                @foreach($featureIds as $fid)
-                <input type="hidden" name="feature_ids[]" value="{{ $fid }}">
-                @endforeach
 
                 <div class="form-group">
                     <label>Business / Company Name <span class="req">*</span></label>
@@ -123,7 +117,7 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
                         <input type="email" name="email" required value="{{ old('email') }}" placeholder="you@business.co.ke">
                     </div>
                     <div class="form-group">
-                        <label>M-Pesa Phone <span class="req">*</span></label>
+                        <label>Phone Number (M-Pesa) <span class="req">*</span></label>
                         <input type="text" name="phone" required value="{{ old('phone') }}" placeholder="0712 345 678">
                     </div>
                 </div>
@@ -131,7 +125,7 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
                 <div class="form-group">
                     <label>Set a Password <span class="req">*</span></label>
                     <input type="password" name="password" required minlength="6" placeholder="At least 6 characters">
-                    <div class="hint">You'll use this to sign in.</div>
+                    <div class="hint">You'll use this to sign into your dashboard.</div>
                 </div>
 
                 <div style="margin:22px 0 8px;">
@@ -139,25 +133,25 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
                     <div class="plans">
                         <div class="plan selected" data-action="trial" onclick="pickPlan(this)">
                             <span class="pbadge">Recommended</span>
-                            <div class="ptop"><span class="pic">🎉</span><h3>Start Free 3-Day Trial</h3></div>
-                            <p class="psub">Full access to everything you picked. No card, no payment now.</p>
+                            <div class="ptop"><span class="pic">🎉</span><h3>Start Free 14-Day Trial</h3></div>
+                            <p class="psub">Full access to the {{ $selectedTier['name'] }}. No payment needed now.</p>
                             <div class="ppay">Pay nothing today</div>
                         </div>
                         <div class="plan pay-now" data-action="pay_now" onclick="pickPlan(this)">
                             <div class="ptop"><span class="pic">💳</span><h3>Activate Now (M-Pesa)</h3></div>
-                            <p class="psub">Skip the trial. STK push sent to your phone — done in 10 seconds.</p>
+                            <p class="psub">Skip the trial. Fast STK push sent directly to your phone.</p>
                             <div class="ppay">Pay KES {{ number_format($total, 0) }} now</div>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit" class="cta" id="cta-btn">
-                    Start My 3-Day Free Trial <i class="fas fa-arrow-right"></i>
+                    Start My 14-Day Free Trial <i class="fas fa-arrow-right"></i>
                 </button>
 
                 <div class="trust">
                     <div><i class="fas fa-check-circle"></i> Your account is created instantly</div>
-                    <div><i class="fas fa-check-circle"></i> Cancel any time — we only charge when you're ready</div>
+                    <div><i class="fas fa-check-circle"></i> Cancel any time — no hidden fees</div>
                     <div><i class="fas fa-check-circle"></i> M-Pesa / card / bank transfer accepted</div>
                 </div>
             </form>
@@ -171,12 +165,14 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
             <span class="badge hosting">{{ $hosting === 'cloud' ? '☁️ Cloud' : '🖥️ On-Premise' }}</span>
         </div>
 
-        @foreach($features as $feature)
-        <div class="order-item">
-            <span>{{ $feature->name }}</span>
-            <b>{{ $feature->priceFor($cycle) == 0 ? 'Free' : 'KES ' . number_format($feature->priceFor($cycle), 0) }}</b>
+        <div class="order-item" style="margin-top: 10px;">
+            <span>{{ $selectedTier['name'] }}</span>
+            <b>KES {{ number_format($total, 0) }}</b>
         </div>
-        @endforeach
+        <div class="order-item">
+            <span>Setup & Onboarding</span>
+            <b style="color:#047857;">Free</b>
+        </div>
 
         <div class="order-total">
             <span>Total</span>
@@ -186,7 +182,7 @@ input:focus, select:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,1
         @if($cycle !== 'once')
         <p style="font-size:.78rem; color:#64748b; margin-top:10px;">Billed {{ $cycle }} after your trial. Cancel anytime.</p>
         @else
-        <p style="font-size:.78rem; color:#64748b; margin-top:10px;">One-off payment. Annual hosting fee billed separately.</p>
+        <p style="font-size:.78rem; color:#64748b; margin-top:10px;">One-off payment. Own the software forever.</p>
         @endif
     </div>
 </div>
@@ -199,7 +195,7 @@ function pickPlan(el) {
     document.getElementById('action-input').value = action;
     const btn = document.getElementById('cta-btn');
     if (action === 'trial') {
-        btn.innerHTML = 'Start My 3-Day Free Trial <i class="fas fa-arrow-right"></i>';
+        btn.innerHTML = 'Start My 14-Day Free Trial <i class="fas fa-arrow-right"></i>';
     } else {
         btn.innerHTML = 'Pay KES {{ number_format($total, 0) }} via M-Pesa <i class="fas fa-mobile-alt"></i>';
     }

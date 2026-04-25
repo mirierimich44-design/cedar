@@ -78,7 +78,7 @@ class MyFatoorahController extends Controller {
      * 
      * @return array
      */
-    private function getPayLoadData($package_id = null, $amount, $currency, $coupon_code, $email, $name, $user_id, $business_id, $language) {
+    private function getPayLoadData($package_id = null, $amount = null, $currency = null, $coupon_code = null, $email = null, $name = null, $user_id = null, $business_id = null, $language = null) {
         $callbackURL = route('myfatoorah_callback');
 
         //You can get the data using the order object in your system

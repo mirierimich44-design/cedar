@@ -133,6 +133,12 @@ Route::prefix('sync')->name('sync.')->group(function () {
     Route::post('/pull',     [CloudSyncController::class, 'pull'])->name('pull');
     Route::post('/push',     [CloudSyncController::class, 'push'])->name('push');
     Route::get('/status',    [CloudSyncController::class, 'status'])->name('status');
+    // Sync settings (saved to storage, readable by artisan sync:pull)
+    Route::get('/settings',       [CloudSyncController::class, 'getSettings'])->middleware(['auth'])->name('settings.get');
+    Route::post('/settings',      [CloudSyncController::class, 'saveSettings'])->middleware(['auth'])->name('settings.save');
+    // Remote pull/push: server-to-server sync (Laragon → live server, no terminal needed)
+    Route::post('/pull-remote',   [CloudSyncController::class, 'pullRemote'])->middleware(['auth'])->name('pull.remote');
+    Route::post('/push-remote',   [CloudSyncController::class, 'pushRemote'])->middleware(['auth'])->name('push.remote');
     // CORS pre-flight for cross-domain requests (Laragon → live server)
     Route::options('/{any}', [CloudSyncController::class, 'preflight'])->where('any', '.*');
 
@@ -981,6 +987,12 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     // Cloud Sync Dashboard (full auth + sidebar)
     Route::get('/sync',               [CloudSyncController::class, 'dashboard'])->name('sync.dashboard');
     Route::delete('/sync/token/{id}', [CloudSyncController::class, 'revokeToken'])->name('sync.token.revoke');
+
+    // ── Per-Business Feature Management ──────────────────────────────────────
+    Route::get('/business-features',             [\App\Http\Controllers\BusinessFeaturesController::class, 'index'])->name('business-features.index');
+    Route::post('/business-features/toggle',     [\App\Http\Controllers\BusinessFeaturesController::class, 'toggle'])->name('business-features.toggle');
+    Route::post('/business-features/enable-all', [\App\Http\Controllers\BusinessFeaturesController::class, 'enableAll'])->name('business-features.enable-all');
+    Route::post('/business-features/disable-all',[\App\Http\Controllers\BusinessFeaturesController::class, 'disableAll'])->name('business-features.disable-all');
 
     // ── Customer Order Token Management (owner/authenticated) ──────────────
     Route::get('/customer-order-links', [CustomerOrderController::class, 'index'])->name('customer_order.links');
