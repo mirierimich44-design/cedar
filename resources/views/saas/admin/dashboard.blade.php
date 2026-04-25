@@ -3,7 +3,7 @@
 @section('content')
 <section class="content-header">
     <h1 class="tw-text-2xl tw-font-bold">SaaS Dashboard
-        <a href="{{ route('saas.admin.settings') }}" class="btn btn-warning btn-sm pull-right">
+        <a href="{{ route('saas.admin.saas_settings') }}" class="btn btn-warning btn-sm pull-right">
             <i class="fas fa-sliders-h"></i> Control Panel
         </a>
     </h1>
@@ -42,7 +42,7 @@
         </span>
     </div>
     <div style="margin-left:auto;">
-        <a href="{{ route('saas.admin.settings') }}" class="btn btn-xs btn-warning"><i class="fas fa-edit"></i> Change</a>
+        <a href="{{ route('saas.admin.saas_settings') }}" class="btn btn-xs btn-warning"><i class="fas fa-edit"></i> Change</a>
     </div>
 </div>
 
@@ -91,7 +91,7 @@
     <div class="col-md-4">
         @component('components.widget', ['header' => 'Quick Links'])
         <div class="list-group">
-            <a href="{{ route('saas.admin.settings') }}" class="list-group-item" style="background:#fff7e6;border-left:4px solid #f59e0b;">
+            <a href="{{ route('saas.admin.saas_settings') }}" class="list-group-item" style="background:#fff7e6;border-left:4px solid #f59e0b;">
                 <i class="fas fa-sliders-h"></i> <strong>Control Panel</strong>
                 <small class="text-muted" style="display:block;margin-left:20px;">Trial length, campaigns, M-Pesa</small>
             </a>
