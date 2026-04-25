@@ -1008,7 +1008,7 @@ class AdminSidebarMenu
                         $sub->url(route('saas.admin.features'), 'Features & Pricing', ['icon' => '', 'active' => request()->is('saas-admin/features*')]);
                         $sub->url(route('saas.admin.bundles'), 'Bundles', ['icon' => '', 'active' => request()->is('saas-admin/bundles*')]);
                         $sub->url(route('saas.admin.subscriptions'), 'Subscriptions', ['icon' => '', 'active' => request()->is('saas-admin/subscriptions*')]);
-                        $sub->url(route('saas.admin.settings'), 'SaaS Settings', ['icon' => '', 'active' => request()->is('saas-admin/saas-settings*')]);
+                        $sub->url(route('saas.admin.saas_settings'), 'SaaS Settings', ['icon' => '', 'active' => request()->is('saas-admin/saas-settings*')]);
                     },
                     ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
