@@ -35,7 +35,7 @@ $(function() {
     $('#businesses_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ route("saas-admin.index") }}',
+        ajax: '{{ route("saas.admin.business") }}',
         columns: [
             { data: 'action', orderable: false, searchable: false },
             { data: 'id', width: '50px' },

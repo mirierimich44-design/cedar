@@ -15,7 +15,7 @@ class CreateSaasAdminCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'saas:create-admin {email=admin@apexpos.co.ke} {password=admin123}';
+    protected $signature = 'saas:create-admin {email=admin@apexpos.co.ke} {password=admin123} {--grant= : Grant Superadmin role to an existing user by email}';
 
     /**
      * The console command description.
@@ -31,6 +31,18 @@ class CreateSaasAdminCommand extends Command
      */
     public function handle()
     {
+        // --grant=some@email.com just promotes an existing user without creating saas_admin
+        if ($grantEmail = $this->option('grant')) {
+            $user = User::where('email', $grantEmail)->first();
+            if (! $user) {
+                $this->error("No user found with email: $grantEmail");
+                return 1;
+            }
+            $this->ensureSuperadminRole($user);
+            $this->info("Superadmin role granted to: {$user->email} (username: {$user->username})");
+            return 0;
+        }
+
         $email = $this->argument('email');
         $password = $this->argument('password');
         $username = 'saas_admin';
@@ -71,12 +83,21 @@ class CreateSaasAdminCommand extends Command
             $this->info("SaaS Super Admin updated successfully.");
         }
 
-        // Assign the Superadmin Spatie role (disable FK checks — roles table has business_id FK)
+        $this->ensureSuperadminRole($user);
+
+        $this->info("Username: $username");
+        $this->info("Email: $email");
+        $this->info("Password: $password");
+
+        return 0;
+    }
+
+    private function ensureSuperadminRole(User $user): void
+    {
         try {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             $role = Role::where('name', 'Superadmin')->where('guard_name', 'web')->first();
             if (! $role) {
-                // Insert directly to bypass the business_id FK constraint
                 $roleId = DB::table('roles')->insertGetId([
                     'name'        => 'Superadmin',
                     'guard_name'  => 'web',
@@ -94,15 +115,8 @@ class CreateSaasAdminCommand extends Command
             $this->info("Role: Superadmin assigned.");
         } catch (\Exception $e) {
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-            $this->warn("Could not assign Spatie role (not critical): " . $e->getMessage());
-            $this->info("Access still works via username check in Superadmin middleware.");
+            $this->warn("Could not assign Spatie role: " . $e->getMessage());
         }
-
-        $this->info("Username: $username");
-        $this->info("Email: $email");
-        $this->info("Password: $password");
-
-        return 0;
     }
 }
 
