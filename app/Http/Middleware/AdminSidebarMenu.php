@@ -1000,17 +1000,24 @@ class AdminSidebarMenu
 
             // Per-client Business Features menu (superadmin or manage_modules)
             if (empty(auth()->user()->business_id) || auth()->user()->hasRole('Superadmin') || auth()->user()->can('manage_modules')) {
-                $menu->url(
-                    action([\App\Http\Controllers\BusinessFeaturesController::class, 'index']),
-                    'Business Features',
+                $menu->dropdown(
+                    'SaaS Management',
+                    function ($sub) {
+                        $sub->url(route('saas.admin.dashboard'), 'Dashboard', ['icon' => '', 'active' => request()->is('saas-admin')]);
+                        $sub->url(route('saas-admin.index'), 'Manage Businesses', ['icon' => '', 'active' => request()->is('saas-admin/business*')]);
+                        $sub->url(route('saas.admin.features'), 'Features & Pricing', ['icon' => '', 'active' => request()->is('saas-admin/features*')]);
+                        $sub->url(route('saas.admin.bundles'), 'Bundles', ['icon' => '', 'active' => request()->is('saas-admin/bundles*')]);
+                        $sub->url(route('saas.admin.subscriptions'), 'Subscriptions', ['icon' => '', 'active' => request()->is('saas-admin/subscriptions*')]);
+                        $sub->url(route('saas.admin.settings'), 'SaaS Settings', ['icon' => '', 'active' => request()->is('saas-admin/saas-settings*')]);
+                    },
                     ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                         <path d="M4 4h6v6h-6z" /><path d="M14 4h6v6h-6z" />
                         <path d="M4 14h6v6h-6z" />
                         <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
                     </svg>',
-                    'active' => request()->segment(1) == 'business-features']
-                )->order(24);
+                    'active' => request()->is('saas-admin*')]
+                )->order(10);
             }
 
             //Booking menu
