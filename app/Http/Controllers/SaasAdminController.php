@@ -305,7 +305,7 @@ class SaasAdminController extends Controller
             $query = Business::with('owner')->select('business.*');
             return DataTables::of($query)
                 ->addColumn('action', function ($row) {
-                    return '<a href="' . route('saas-admin.features', $row->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>';
+                    return '<a href="' . route('saas.admin.business.features', $row->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>';
                 })
                 ->addColumn('owner_name', fn($r) => optional($r->owner)->first_name . ' ' . optional($r->owner)->last_name)
                 ->addColumn('modules_count', fn($r) => count($r->enabled_modules ?? []) . ' modules')
@@ -336,7 +336,7 @@ class SaasAdminController extends Controller
         $business = Business::findOrFail($business_id);
         $enabled  = $request->input('enabled_modules', []);
         $business->update(['enabled_modules' => $enabled]);
-        return redirect()->route('saas-admin.features', $business_id)
+        return redirect()->route('saas.admin.business.features', $business_id)
             ->with('status', ['success' => 1, 'msg' => 'Features updated for ' . $business->name]);
     }
 

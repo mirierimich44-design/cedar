@@ -159,7 +159,7 @@
         <button type="submit" class="btn btn-primary btn-lg">
             <i class="fas fa-save"></i> Save All Settings
         </button>
-        <a href="{{ route('saas.admin.dashboard') }}" class="btn btn-default btn-lg">Cancel</a>
+        <a href="{{ url('saas-admin') }}" class="btn btn-default btn-lg">Cancel</a>
         <span class="pull-right text-muted" style="line-height:42px;">
             <i class="fas fa-info-circle"></i> Changes apply to new signups immediately.
         </span>
