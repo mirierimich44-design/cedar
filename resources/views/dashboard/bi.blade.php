@@ -32,6 +32,25 @@
     .bi-tab-icon { margin-right:4px; }
     .period-btn.active { font-weight:bold; }
     #bi-kpi-strip .info-box { margin-bottom:8px; }
+    /* AI Intelligence Panels */
+    .ai-panel { border-radius:6px; margin-bottom:16px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .ai-panel-header { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; font-weight:600; font-size:14px; color:#fff; }
+    .ai-panel-header .ai-title { display:flex; align-items:center; gap:8px; }
+    .ai-panel-body { background:#fff; padding:14px 16px; min-height:56px; }
+    .ai-panel-sales   .ai-panel-header { background:linear-gradient(135deg,#605ca8,#8e7de8); }
+    .ai-panel-customers .ai-panel-header { background:linear-gradient(135deg,#00a65a,#00d673); }
+    .ai-panel-financial .ai-panel-header { background:linear-gradient(135deg,#e67e22,#f1a64e); }
+    .ai-panel-procurement .ai-panel-header { background:linear-gradient(135deg,#dd4b39,#e8715e); }
+    .ai-panel-invhealth .ai-panel-header { background:linear-gradient(135deg,#3c8dbc,#5ba7d4); }
+    .ai-insight-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+    .ai-insight-card { flex:1; min-width:220px; border-left:4px solid #3c8dbc; padding:10px 12px; background:#f8f9fa; border-radius:0 4px 4px 0; }
+    .ai-insight-card.danger  { border-color:#dd4b39; background:#fff5f5; }
+    .ai-insight-card.success { border-color:#00a65a; background:#f0fff4; }
+    .ai-insight-card.warning { border-color:#f39c12; background:#fffbf0; }
+    .ai-insight-card.info    { border-color:#3c8dbc; background:#f0f8ff; }
+    .ai-insight-card h6 { margin:0 0 4px; font-size:13px; font-weight:700; }
+    .ai-insight-card p  { margin:0; font-size:12px; color:#555; }
+    .ai-placeholder { text-align:center; padding:8px 0; color:#999; font-size:13px; }
 </style>
 
 <section class="content">
@@ -174,7 +193,22 @@
 
                     {{-- ══ 2. SALES ANALYTICS ═══════════════════════════════════ --}}
                     <div class="tab-pane" id="tab_sales">
-                        <div style="padding:15px 0 5px 5px;">
+
+                        {{-- AI Sales Intelligence — TOP --}}
+                        <div class="ai-panel ai-panel-sales" style="margin-top:12px;">
+                            <div class="ai-panel-header">
+                                <span class="ai-title"><i class="fa fa-magic"></i> AI Sales Intelligence</span>
+                                <div>
+                                    <span id="ai-sales-spinner" style="display:none;margin-right:8px;"><i class="fa fa-spinner fa-spin"></i> Analysing…</span>
+                                    <button class="btn btn-xs btn-light ai-refresh-btn" data-target="sales" style="display:none;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);"><i class="fa fa-refresh"></i> Refresh</button>
+                                </div>
+                            </div>
+                            <div class="ai-panel-body" id="ai-sales-panel">
+                                <p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Loading AI insights…</p>
+                            </div>
+                        </div>
+
+                        <div style="padding:5px 0 5px 5px;">
                             <span class="text-muted" style="margin-right:8px;">Period:</span>
                             @foreach([7=>'7 Days',30=>'30 Days',90=>'90 Days',365=>'1 Year'] as $d=>$label)
                                 <button class="btn btn-xs btn-default period-btn {{ $d==30?'active':'' }}" data-days="{{$d}}">{{$label}}</button>
@@ -230,27 +264,25 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- AI Sales Insights Panel --}}
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="box box-solid" style="border-top:3px solid #605ca8;">
-                                    <div class="box-header with-border" style="background:#f9f6ff;">
-                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#605ca8;"></i> <strong>AI Sales Intelligence</strong></h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="sales"><i class="fa fa-bolt"></i> Analyse with AI</button>
-                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="sales" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="ai-sales-panel">
-                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" to get Gemini-powered sales insights, anomaly detection &amp; pricing recommendations.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>{{-- /sales --}}
 
                     {{-- ══ 3. CUSTOMER INTELLIGENCE ════════════════════════════ --}}
                     <div class="tab-pane" id="tab_customers">
+
+                        {{-- AI Customer Intelligence — TOP --}}
+                        <div class="ai-panel ai-panel-customers" style="margin-top:12px;">
+                            <div class="ai-panel-header">
+                                <span class="ai-title"><i class="fa fa-magic"></i> AI Customer Intelligence</span>
+                                <div>
+                                    <span id="ai-customers-spinner" style="display:none;margin-right:8px;"><i class="fa fa-spinner fa-spin"></i> Analysing…</span>
+                                    <button class="btn btn-xs ai-refresh-btn" data-target="customers" style="display:none;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);"><i class="fa fa-refresh"></i> Refresh</button>
+                                </div>
+                            </div>
+                            <div class="ai-panel-body" id="ai-customers-panel">
+                                <p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Loading AI insights…</p>
+                            </div>
+                        </div>
+
                         <div class="row" id="cust-kpis" style="margin-top:10px;">
                             <div class="col-md-3 col-sm-6">
                                 <div class="info-box bg-teal"><span class="info-box-icon"><i class="fa fa-user-plus"></i></span>
@@ -298,27 +330,25 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- AI Customer Intelligence Panel --}}
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="box box-solid" style="border-top:3px solid #00a65a;">
-                                    <div class="box-header with-border" style="background:#f0fff4;">
-                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#00a65a;"></i> <strong>AI Customer Intelligence</strong></h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="customers"><i class="fa fa-bolt"></i> Analyse with AI</button>
-                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="customers" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="ai-customers-panel">
-                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" to get churn risk alerts, customer segments &amp; upsell opportunities.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>{{-- /customers --}}
 
                     {{-- ══ 4. FINANCIAL KPIs ═══════════════════════════════════ --}}
                     <div class="tab-pane" id="tab_financial">
+
+                        {{-- AI Financial Advisor — TOP --}}
+                        <div class="ai-panel ai-panel-financial" style="margin-top:12px;">
+                            <div class="ai-panel-header">
+                                <span class="ai-title"><i class="fa fa-magic"></i> AI Financial Advisor</span>
+                                <div>
+                                    <span id="ai-financial-spinner" style="display:none;margin-right:8px;"><i class="fa fa-spinner fa-spin"></i> Analysing…</span>
+                                    <button class="btn btn-xs ai-refresh-btn" data-target="financial" style="display:none;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);"><i class="fa fa-refresh"></i> Refresh</button>
+                                </div>
+                            </div>
+                            <div class="ai-panel-body" id="ai-financial-panel">
+                                <p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Loading AI insights…</p>
+                            </div>
+                        </div>
+
                         <div class="row" id="fin-kpis" style="margin-top:10px;">
                             <div class="col-md-3 col-sm-6">
                                 <div class="info-box bg-teal"><span class="info-box-icon"><i class="fa fa-money"></i></span>
@@ -352,27 +382,43 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- AI Financial Advisor Panel --}}
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="box box-solid" style="border-top:3px solid #f39c12;">
-                                    <div class="box-header with-border" style="background:#fffbf0;">
-                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#f39c12;"></i> <strong>AI Financial Advisor</strong></h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="financial"><i class="fa fa-bolt"></i> Analyse with AI</button>
-                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="financial" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="ai-financial-panel">
-                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" for cash flow forecast, expense alerts &amp; margin trend analysis.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>{{-- /financial --}}
 
                     {{-- ══ 5. INVENTORY INTELLIGENCE ════════════════════════════ --}}
                     <div class="tab-pane" id="tab_inventory">
+
+                        {{-- AI Inventory Intelligence — TOP --}}
+                        <div class="row" style="margin-top:12px;">
+                            <div class="col-md-6">
+                                <div class="ai-panel ai-panel-procurement">
+                                    <div class="ai-panel-header">
+                                        <span class="ai-title"><i class="fa fa-magic"></i> AI Restocking &amp; Procurement</span>
+                                        <div>
+                                            <span id="ai-procurement-spinner" style="display:none;margin-right:8px;"><i class="fa fa-spinner fa-spin"></i> Analysing…</span>
+                                            <button class="btn btn-xs ai-refresh-btn" data-target="procurement" style="display:none;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="ai-panel-body" id="ai-procurement-panel">
+                                        <p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Loading AI insights…</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ai-panel ai-panel-invhealth">
+                                    <div class="ai-panel-header">
+                                        <span class="ai-title"><i class="fa fa-magic"></i> AI Inventory Health</span>
+                                        <div>
+                                            <span id="ai-inv-health-spinner" style="display:none;margin-right:8px;"><i class="fa fa-spinner fa-spin"></i> Analysing…</span>
+                                            <button class="btn btn-xs ai-refresh-btn" data-target="inv-health" style="display:none;background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="ai-panel-body" id="ai-inv-health-panel">
+                                        <p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Loading AI insights…</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row" id="inv-kpis" style="margin-top:10px;">
                             <div class="col-md-3 col-sm-6">
                                 <div class="info-box bg-red"><span class="info-box-icon"><i class="fa fa-exclamation-triangle"></i></span>
@@ -441,37 +487,6 @@
                                             <thead><tr><th>Product</th><th>Category</th><th>Stock</th></tr></thead>
                                             <tbody id="dead-stock-tbody"><tr><td colspan="3" class="text-center text-muted">Loading…</td></tr></tbody>
                                         </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {{-- AI Procurement & Inventory Health Panels --}}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="box box-solid" style="border-top:3px solid #dd4b39;">
-                                    <div class="box-header with-border" style="background:#fff5f5;">
-                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#dd4b39;"></i> <strong>AI Restocking &amp; Procurement</strong></h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="procurement"><i class="fa fa-bolt"></i> Analyse with AI</button>
-                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="procurement" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="ai-procurement-panel">
-                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> AI will recommend exact reorder quantities, flag dead stock &amp; estimate restock costs.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="box box-solid" style="border-top:3px solid #e67e22;">
-                                    <div class="box-header with-border" style="background:#fff8f0;">
-                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#e67e22;"></i> <strong>AI Inventory Health</strong></h3>
-                                        <div class="box-tools pull-right">
-                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="inv-health"><i class="fa fa-bolt"></i> Analyse with AI</button>
-                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="inv-health" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
-                                        </div>
-                                    </div>
-                                    <div class="box-body" id="ai-inv-health-panel">
-                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> AI will suggest clearance discounts, flag expiry risks &amp; estimate capital recovery.</p>
                                     </div>
                                 </div>
                             </div>
@@ -1055,14 +1070,64 @@ $(function() {
        AI INTELLIGENCE PANELS
     ──────────────────────────────────────────────────────────────── */
     const AI_ENDPOINTS = {
-        sales:       '/bi-api/ai/sales',
-        customers:   '/bi-api/ai/customers',
-        financial:   '/bi-api/ai/financial',
-        procurement: '/bi-api/ai/procurement',
-        'inv-health':'/bi-api/ai/inventory',
+        sales:        '/bi-api/ai/sales',
+        customers:    '/bi-api/ai/customers',
+        financial:    '/bi-api/ai/financial',
+        procurement:  '/bi-api/ai/procurement',
+        'inv-health': '/bi-api/ai/inventory',
     };
+    const AI_LOADED = { sales:false, customers:false, financial:false, procurement:false, 'inv-health':false };
 
-    function aiLoadingHTML(){ return '<div class="text-center" style="padding:20px;"><i class="fa fa-spinner fa-spin fa-2x text-purple"></i><p class="text-muted" style="margin-top:8px;">Gemini AI is analysing your data…</p></div>'; }
+    function aiLoadingHTML(){ return '<p class="ai-placeholder"><i class="fa fa-spinner fa-spin"></i> Gemini AI is analysing your data…</p>'; }
+
+    function triggerAI(target, refresh){
+        const panel   = $('#ai-' + (target==='inv-health'?'inv-health':target) + '-panel');
+        const spinner = $('#ai-' + (target==='inv-health'?'inv-health':target) + '-spinner');
+        const refBtn  = $('[data-target="'+target+'"].ai-refresh-btn');
+        const url     = AI_ENDPOINTS[target] + (refresh ? '?refresh=1' : '');
+
+        if (!refresh && AI_LOADED[target]) return;
+
+        panel.html(aiLoadingHTML());
+        spinner.show();
+        refBtn.hide().prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(d){
+                spinner.hide();
+                refBtn.show().prop('disabled', false);
+                AI_LOADED[target] = true;
+                if (d && d.error) {
+                    panel.html('<div class="alert alert-warning" style="margin:0;"><strong>AI returned an error:</strong> '+d.error+'<br><small>'+( d.raw||'' )+'</small></div>');
+                } else {
+                    AI_RENDERERS[target](d, panel);
+                }
+            },
+            error: function(xhr){
+                spinner.hide();
+                refBtn.show().prop('disabled', false);
+                let msg = 'HTTP '+xhr.status+' — ';
+                try { const j=JSON.parse(xhr.responseText); msg += j.message||j.error||xhr.responseText.substring(0,200); }
+                catch(e){ msg += xhr.responseText.substring(0,300)||'No response body'; }
+                panel.html('<div class="alert alert-danger" style="margin:0;"><strong>AI endpoint error:</strong><br><small>'+msg+'</small></div>');
+            }
+        });
+    }
+
+    // Auto-load AI when each tab is opened
+    $('a[href="#tab_sales"]').on('shown.bs.tab',     function(){ triggerAI('sales', false); });
+    $('a[href="#tab_customers"]').on('shown.bs.tab', function(){ triggerAI('customers', false); });
+    $('a[href="#tab_financial"]').on('shown.bs.tab', function(){ triggerAI('financial', false); });
+    $('a[href="#tab_inventory"]').on('shown.bs.tab', function(){ triggerAI('procurement', false); triggerAI('inv-health', false); });
+
+    // Refresh buttons
+    $(document).on('click', '.ai-refresh-btn', function(){
+        triggerAI($(this).data('target'), true);
+    });
+
 
     function renderAISales(d, panel){
         let html = '';
@@ -1258,7 +1323,6 @@ $(function() {
         panel.html(html || '<p class="text-muted">Inventory is healthy — no urgent actions needed.</p>');
     }
 
-    // Dispatcher
     const AI_RENDERERS = {
         sales:       renderAISales,
         customers:   renderAICustomers,
@@ -1266,36 +1330,6 @@ $(function() {
         procurement: renderAIProcurement,
         'inv-health':renderAIInventoryHealth,
     };
-    const AI_PANELS = {
-        sales:'#ai-sales-panel', customers:'#ai-customers-panel',
-        financial:'#ai-financial-panel', procurement:'#ai-procurement-panel',
-        'inv-health':'#ai-inv-health-panel',
-    };
-
-    $(document).on('click', '.ai-load-btn, .ai-refresh-btn', function(){
-        const target  = $(this).data('target');
-        const panel   = $(AI_PANELS[target]);
-        const loadBtn = $(this).closest('.box-tools').find('.ai-load-btn');
-        const refBtn  = $(this).closest('.box-tools').find('.ai-refresh-btn');
-        const refresh = $(this).hasClass('ai-refresh-btn');
-
-        panel.html(aiLoadingHTML());
-        loadBtn.prop('disabled', true);
-        refBtn.hide();
-
-        $.getJSON(AI_ENDPOINTS[target] + (refresh ? '?refresh=1' : ''), function(d){
-            if (d && d.error) {
-                panel.html(`<div class="alert alert-danger"><strong>AI Error:</strong> ${d.error}<br><small>${d.raw||''}</small></div>`);
-            } else {
-                AI_RENDERERS[target](d, panel);
-            }
-            loadBtn.hide();
-            refBtn.show().prop('disabled', false);
-        }).fail(function(){
-            panel.html('<div class="alert alert-danger">Failed to reach AI endpoint. Check your Gemini API key in Audit &amp; Risk settings.</div>');
-            loadBtn.prop('disabled', false);
-        });
-    });
 
 });
 </script>
