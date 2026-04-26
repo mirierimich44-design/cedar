@@ -306,28 +306,28 @@ class BIDashboardController extends Controller
         $days = (int) request()->get('days', 30);
         $from = Carbon::now()->subDays($days)->startOfDay();
 
-        $top_products = DB::table('transaction_lines')
-            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
-            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+        $top_products = DB::table('transaction_sell_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_sell_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_sell_lines.product_id')
             ->where('transactions.business_id', $business_id)
             ->where('transactions.type', 'sell')
             ->where('transactions.status', 'final')
             ->where('transactions.transaction_date', '>=', $from)
-            ->select('products.name', DB::raw('SUM(transaction_lines.quantity) as qty_sold'), DB::raw('SUM(transaction_lines.unit_price_inc_tax * transaction_lines.quantity) as revenue'))
+            ->select('products.name', DB::raw('SUM(transaction_sell_lines.quantity) as qty_sold'), DB::raw('SUM(transaction_sell_lines.unit_price_inc_tax * transaction_sell_lines.quantity) as revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('revenue')
             ->limit(10)
             ->get();
 
-        $top_categories = DB::table('transaction_lines')
-            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
-            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+        $top_categories = DB::table('transaction_sell_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_sell_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_sell_lines.product_id')
             ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
             ->where('transactions.business_id', $business_id)
             ->where('transactions.type', 'sell')
             ->where('transactions.status', 'final')
             ->where('transactions.transaction_date', '>=', $from)
-            ->select(DB::raw('COALESCE(categories.name, "Uncategorised") as category'), DB::raw('SUM(transaction_lines.unit_price_inc_tax * transaction_lines.quantity) as revenue'), DB::raw('COUNT(DISTINCT transactions.id) as txn_count'))
+            ->select(DB::raw('COALESCE(categories.name, "Uncategorised") as category'), DB::raw('SUM(transaction_sell_lines.unit_price_inc_tax * transaction_sell_lines.quantity) as revenue'), DB::raw('COUNT(DISTINCT transactions.id) as txn_count'))
             ->groupBy('products.category_id', 'categories.name')
             ->orderByDesc('revenue')
             ->limit(8)
@@ -502,18 +502,18 @@ class BIDashboardController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         $slow_movers = DB::table('products')
-            ->leftJoin('transaction_lines', function ($join) {
-                $join->on('transaction_lines.product_id', '=', 'products.id')
+            ->leftJoin('transaction_sell_lines', function ($join) {
+                $join->on('transaction_sell_lines.product_id', '=', 'products.id')
                      ->whereExists(function ($q) {
                          $q->from('transactions')
-                           ->whereColumn('transactions.id', 'transaction_lines.transaction_id')
+                           ->whereColumn('transactions.id', 'transaction_sell_lines.transaction_id')
                            ->where('transactions.type', 'sell')
                            ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(30));
                      });
             })
             ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
             ->where('products.business_id', $business_id)
-            ->whereNull('transaction_lines.id')
+            ->whereNull('transaction_sell_lines.id')
             ->where('vld.qty_available', '>', 0)
             ->select('products.name', DB::raw('SUM(vld.qty_available) as stock'), DB::raw('MAX(products.alert_quantity) as alert_qty'))
             ->groupBy('products.id', 'products.name')
@@ -522,18 +522,18 @@ class BIDashboardController extends Controller
             ->get();
 
         $dead_stock = DB::table('products')
-            ->leftJoin('transaction_lines', function ($join) {
-                $join->on('transaction_lines.product_id', '=', 'products.id')
+            ->leftJoin('transaction_sell_lines', function ($join) {
+                $join->on('transaction_sell_lines.product_id', '=', 'products.id')
                      ->whereExists(function ($q) {
                          $q->from('transactions')
-                           ->whereColumn('transactions.id', 'transaction_lines.transaction_id')
+                           ->whereColumn('transactions.id', 'transaction_sell_lines.transaction_id')
                            ->where('transactions.type', 'sell')
                            ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(90));
                      });
             })
             ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
             ->where('products.business_id', $business_id)
-            ->whereNull('transaction_lines.id')
+            ->whereNull('transaction_sell_lines.id')
             ->where('vld.qty_available', '>', 0)
             ->select('products.name', DB::raw('SUM(vld.qty_available) as stock'))
             ->groupBy('products.id', 'products.name')
@@ -541,16 +541,16 @@ class BIDashboardController extends Controller
             ->limit(10)
             ->get();
 
-        $turnover = DB::table('transaction_lines')
-            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
-            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+        $turnover = DB::table('transaction_sell_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_sell_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_sell_lines.product_id')
             ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
             ->where('transactions.business_id', $business_id)
             ->where('transactions.type', 'sell')
             ->where('transactions.status', 'final')
             ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(30))
             ->where('vld.qty_available', '>', 0)
-            ->select('products.name', DB::raw('SUM(transaction_lines.quantity) as sold'), DB::raw('AVG(vld.qty_available) as avg_stock'))
+            ->select('products.name', DB::raw('SUM(transaction_sell_lines.quantity) as sold'), DB::raw('AVG(vld.qty_available) as avg_stock'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('sold')
             ->limit(10)
@@ -591,7 +591,7 @@ class BIDashboardController extends Controller
                     ->groupBy('products.id', 'products.name', 'vld.qty_available', 'products.alert_quantity')
                     ->limit(20)->get();
 
-                $velocity = DB::table('transaction_lines as tl')
+                $velocity = DB::table('transaction_sell_lines as tl')
                     ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
                     ->join('products', 'products.id', '=', 'tl.product_id')
                     ->where('t.business_id', $business_id)
@@ -608,7 +608,7 @@ class BIDashboardController extends Controller
                     ->where('p.business_id', $business_id)
                     ->where('vld.qty_available', '>', 0)
                     ->whereNotExists(function ($q) use ($cutoff60) {
-                        $q->from('transaction_lines as tl2')
+                        $q->from('transaction_sell_lines as tl2')
                           ->join('transactions as t2', 't2.id', '=', 'tl2.transaction_id')
                           ->whereColumn('tl2.product_id', 'p.id')
                           ->where('t2.type', 'sell')
@@ -692,7 +692,7 @@ Data: " . json_encode($context);
                     ->orderByDesc('spend')
                     ->limit(10)->get();
 
-                $top_products = DB::table('transaction_lines as tl')
+                $top_products = DB::table('transaction_sell_lines as tl')
                     ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
                     ->join('products as p', 'p.id', '=', 'tl.product_id')
                     ->where('t.business_id', $business_id)
@@ -753,8 +753,8 @@ Data: " . json_encode($context);
                     ->groupBy(DB::raw('DATE(transaction_date)'))
                     ->orderBy('date')->get();
 
-                // Margin analysis using only columns that exist in transaction_lines
-                $margin_analysis = DB::table('transaction_lines as tl')
+                // Margin analysis using only columns that exist in transaction_sell_lines
+                $margin_analysis = DB::table('transaction_sell_lines as tl')
                     ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
                     ->join('products as p', 'p.id', '=', 'tl.product_id')
                     ->leftJoin('variations as v', 'v.product_id', '=', 'p.id')
@@ -908,7 +908,7 @@ Data: " . json_encode($context);
                     ->where('p.business_id', $business_id)
                     ->where('vld.qty_available', '>', 0)
                     ->whereNotExists(function ($q) use ($cutoff90) {
-                        $q->from('transaction_lines as tl')
+                        $q->from('transaction_sell_lines as tl')
                           ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
                           ->whereColumn('tl.product_id', 'p.id')
                           ->where('t.type', 'sell')
