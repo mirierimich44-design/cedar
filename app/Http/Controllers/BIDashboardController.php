@@ -299,6 +299,277 @@ class BIDashboardController extends Controller
         return $summary;
     }
 
+    // ─── Business Intelligence: Sales Analytics ──────────────────
+    public function getSalesAnalytics()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $days = (int) request()->get('days', 30);
+        $from = Carbon::now()->subDays($days)->startOfDay();
+
+        $top_products = DB::table('transaction_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->where('transactions.transaction_date', '>=', $from)
+            ->select('products.name', DB::raw('SUM(transaction_lines.quantity) as qty_sold'), DB::raw('SUM(transaction_lines.unit_price_inc_tax * transaction_lines.quantity) as revenue'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('revenue')
+            ->limit(10)
+            ->get();
+
+        $top_categories = DB::table('transaction_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->where('transactions.transaction_date', '>=', $from)
+            ->select(DB::raw('COALESCE(categories.name, "Uncategorised") as category'), DB::raw('SUM(transaction_lines.unit_price_inc_tax * transaction_lines.quantity) as revenue'), DB::raw('COUNT(DISTINCT transactions.id) as txn_count'))
+            ->groupBy('products.category_id', 'categories.name')
+            ->orderByDesc('revenue')
+            ->limit(8)
+            ->get();
+
+        $avg_basket = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->where('transaction_date', '>=', $from)
+            ->avg('final_total');
+
+        $daily_sales = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->where('transaction_date', '>=', $from)
+            ->select(DB::raw('DATE(transaction_date) as date'), DB::raw('SUM(final_total) as total'), DB::raw('COUNT(*) as count'))
+            ->groupBy(DB::raw('DATE(transaction_date)'))
+            ->orderBy('date')
+            ->get();
+
+        $hourly_sales = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->where('transaction_date', '>=', $from)
+            ->select(DB::raw('HOUR(transaction_date) as hour'), DB::raw('COUNT(*) as count'), DB::raw('SUM(final_total) as total'))
+            ->groupBy(DB::raw('HOUR(transaction_date)'))
+            ->orderBy('hour')
+            ->get();
+
+        return response()->json(compact('top_products', 'top_categories', 'avg_basket', 'daily_sales', 'hourly_sales'));
+    }
+
+    // ─── Business Intelligence: Customer Analytics ────────────────
+    public function getCustomerAnalytics()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $days = (int) request()->get('days', 30);
+        $from = Carbon::now()->subDays($days)->startOfDay();
+
+        $top_customers = DB::table('transactions')
+            ->join('contacts', 'contacts.id', '=', 'transactions.contact_id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->where('transactions.transaction_date', '>=', $from)
+            ->select('contacts.name', 'contacts.mobile', DB::raw('SUM(transactions.final_total) as spent'), DB::raw('COUNT(transactions.id) as visits'))
+            ->groupBy('contacts.id', 'contacts.name', 'contacts.mobile')
+            ->orderByDesc('spent')
+            ->limit(10)
+            ->get();
+
+        $new_customers = DB::table('contacts')
+            ->where('business_id', $business_id)
+            ->where('type', 'customer')
+            ->where('created_at', '>=', $from)
+            ->count();
+
+        $returning = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->where('transaction_date', '>=', $from)
+            ->whereNotNull('contact_id')
+            ->select('contact_id', DB::raw('COUNT(*) as visits'))
+            ->groupBy('contact_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->get()->count();
+
+        $total_buying = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->where('transaction_date', '>=', $from)
+            ->whereNotNull('contact_id')
+            ->distinct('contact_id')
+            ->count('contact_id');
+
+        $customer_growth = DB::table('contacts')
+            ->where('business_id', $business_id)
+            ->where('type', 'customer')
+            ->where('created_at', '>=', Carbon::now()->subMonths(6))
+            ->select(DB::raw('DATE_FORMAT(created_at, "%b %Y") as month'), DB::raw('COUNT(*) as new_customers'))
+            ->groupBy(DB::raw('YEAR(created_at), MONTH(created_at)'))
+            ->orderBy(DB::raw('YEAR(created_at), MONTH(created_at)'))
+            ->get();
+
+        return response()->json(compact('top_customers', 'new_customers', 'returning', 'total_buying', 'customer_growth'));
+    }
+
+    // ─── Business Intelligence: Financial KPIs ────────────────────
+    public function getFinancialKpis()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $year = Carbon::now()->year;
+
+        $monthly = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereYear('transaction_date', $year)
+            ->select(
+                DB::raw('MONTH(transaction_date) as month'),
+                DB::raw('SUM(final_total) as revenue'),
+                DB::raw('SUM(total_before_tax) as subtotal'),
+                DB::raw('COUNT(*) as txn_count')
+            )
+            ->groupBy(DB::raw('MONTH(transaction_date)'))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $purchase_monthly = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'purchase')
+            ->where('status', 'received')
+            ->whereYear('transaction_date', $year)
+            ->select(DB::raw('MONTH(transaction_date) as month'), DB::raw('SUM(final_total) as cost'))
+            ->groupBy(DB::raw('MONTH(transaction_date)'))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $expenses_monthly = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'expense')
+            ->whereYear('transaction_date', $year)
+            ->select(DB::raw('MONTH(transaction_date) as month'), DB::raw('SUM(final_total) as expenses'))
+            ->groupBy(DB::raw('MONTH(transaction_date)'))
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $chart = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $rev  = $monthly[$m]->revenue ?? 0;
+            $cost = $purchase_monthly[$m]->cost ?? 0;
+            $exp  = $expenses_monthly[$m]->expenses ?? 0;
+            $chart[] = [
+                'month'       => Carbon::create($year, $m)->format('M'),
+                'revenue'     => round($rev, 2),
+                'gross_profit'=> round($rev - $cost, 2),
+                'net_profit'  => round($rev - $cost - $exp, 2),
+                'expenses'    => round($exp, 2),
+            ];
+        }
+
+        $ytd_revenue  = array_sum(array_column($chart, 'revenue'));
+        $ytd_gp       = array_sum(array_column($chart, 'gross_profit'));
+        $ytd_net      = array_sum(array_column($chart, 'net_profit'));
+        $gp_margin    = $ytd_revenue > 0 ? round($ytd_gp / $ytd_revenue * 100, 1) : 0;
+        $net_margin   = $ytd_revenue > 0 ? round($ytd_net / $ytd_revenue * 100, 1) : 0;
+
+        $expense_breakdown = DB::table('transactions')
+            ->join('expense_categories', 'expense_categories.id', '=', 'transactions.expense_category_id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'expense')
+            ->whereYear('transactions.transaction_date', $year)
+            ->select('expense_categories.name', DB::raw('SUM(transactions.final_total) as total'))
+            ->groupBy('expense_categories.id', 'expense_categories.name')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json(compact('chart', 'ytd_revenue', 'ytd_gp', 'ytd_net', 'gp_margin', 'net_margin', 'expense_breakdown'));
+    }
+
+    // ─── Business Intelligence: Inventory Analytics ───────────────
+    public function getInventoryAnalytics()
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        $slow_movers = DB::table('products')
+            ->leftJoin('transaction_lines', function ($join) {
+                $join->on('transaction_lines.product_id', '=', 'products.id')
+                     ->whereExists(function ($q) {
+                         $q->from('transactions')
+                           ->whereColumn('transactions.id', 'transaction_lines.transaction_id')
+                           ->where('transactions.type', 'sell')
+                           ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(30));
+                     });
+            })
+            ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
+            ->where('products.business_id', $business_id)
+            ->whereNull('transaction_lines.id')
+            ->where('vld.qty_available', '>', 0)
+            ->select('products.name', DB::raw('SUM(vld.qty_available) as stock'), DB::raw('MAX(products.alert_quantity) as alert_qty'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('stock')
+            ->limit(15)
+            ->get();
+
+        $dead_stock = DB::table('products')
+            ->leftJoin('transaction_lines', function ($join) {
+                $join->on('transaction_lines.product_id', '=', 'products.id')
+                     ->whereExists(function ($q) {
+                         $q->from('transactions')
+                           ->whereColumn('transactions.id', 'transaction_lines.transaction_id')
+                           ->where('transactions.type', 'sell')
+                           ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(90));
+                     });
+            })
+            ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
+            ->where('products.business_id', $business_id)
+            ->whereNull('transaction_lines.id')
+            ->where('vld.qty_available', '>', 0)
+            ->select('products.name', DB::raw('SUM(vld.qty_available) as stock'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('stock')
+            ->limit(10)
+            ->get();
+
+        $turnover = DB::table('transaction_lines')
+            ->join('transactions', 'transactions.id', '=', 'transaction_lines.transaction_id')
+            ->join('products', 'products.id', '=', 'transaction_lines.product_id')
+            ->join('variation_location_details as vld', 'vld.product_id', '=', 'products.id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'sell')
+            ->where('transactions.status', 'final')
+            ->where('transactions.transaction_date', '>=', Carbon::now()->subDays(30))
+            ->where('vld.qty_available', '>', 0)
+            ->select('products.name', DB::raw('SUM(transaction_lines.quantity) as sold'), DB::raw('AVG(vld.qty_available) as avg_stock'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('sold')
+            ->limit(10)
+            ->get()
+            ->map(fn($p) => array_merge((array)$p, ['turnover_rate' => $p->avg_stock > 0 ? round($p->sold / $p->avg_stock, 2) : 0]));
+
+        $low_stock = DB::table('variation_location_details')
+            ->join('products', 'products.id', '=', 'variation_location_details.product_id')
+            ->where('products.business_id', $business_id)
+            ->whereRaw('variation_location_details.qty_available <= products.alert_quantity')
+            ->where('products.alert_quantity', '>', 0)
+            ->select('products.name', 'variation_location_details.qty_available', 'products.alert_quantity')
+            ->orderBy('variation_location_details.qty_available')
+            ->limit(15)
+            ->get();
+
+        return response()->json(compact('slow_movers', 'dead_stock', 'turnover', 'low_stock'));
+    }
+
     private function callGemini($prompt, $isJson = false)
     {
         try {
