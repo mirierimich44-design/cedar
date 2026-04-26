@@ -654,6 +654,28 @@
     </div>
 
 </section>
+
+{{-- Campaign Modal --}}
+<div class="modal fade" id="campaignModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#00a65a,#00d673);color:#fff;">
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1;">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-whatsapp"></i> Draft Campaign Message</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="font-size:12px;margin-bottom:6px;"><strong>Based on insight:</strong> <span id="campaign-insight-text"></span></p>
+                <hr style="margin:8px 0;">
+                <div id="campaign-output" style="white-space:pre-wrap;background:#f9f9f9;padding:14px;border-radius:4px;border:1px solid #ddd;min-height:80px;font-size:14px;line-height:1.6;"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="campaign-copy-btn" class="btn btn-success" style="display:none;"><i class="fa fa-copy"></i> Copy</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('javascript')
@@ -1063,8 +1085,32 @@ $(function() {
         if (active==='#tab_audit')     { fetchDeepIntelligence(); auditLoaded=true; }
     });
 
-    /* Campaign generator exposed globally for inline onclick */
-    window.generateCampaign = function(text){ alert('Campaign draft for: '+text.substring(0,60)+'…\n(hook to WhatsApp/SMS module)'); };
+    /* Campaign generator — shows a proper modal with Gemini-written message */
+    window.generateCampaign = function(insight){
+        $('#campaign-insight-text').text(insight.substring(0, 120) + (insight.length > 120 ? '…' : ''));
+        $('#campaign-output').html('<i class="fa fa-spinner fa-spin"></i> Gemini is writing your campaign message…');
+        $('#campaign-copy-btn').hide();
+        $('#campaignModal').modal('show');
+
+        $.ajax({
+            url: '/bi-api/generate-campaign',
+            method: 'POST',
+            data: { insight: insight, _token: $('meta[name="csrf-token"]').attr('content') },
+            success: function(res){
+                const msg = res.message || 'Could not generate message.';
+                $('#campaign-output').text(msg);
+                $('#campaign-copy-btn').show().off('click').on('click', function(){
+                    navigator.clipboard.writeText(msg).then(function(){
+                        $('#campaign-copy-btn').html('<i class="fa fa-check"></i> Copied!').prop('disabled', true);
+                        setTimeout(function(){ $('#campaign-copy-btn').html('<i class="fa fa-copy"></i> Copy').prop('disabled', false); }, 2000);
+                    });
+                });
+            },
+            error: function(xhr){
+                $('#campaign-output').html('<span class="text-red">Error generating message. Check your Gemini API key.</span>');
+            }
+        });
+    };
 
     /* ────────────────────────────────────────────────────────────────
        AI INTELLIGENCE PANELS
