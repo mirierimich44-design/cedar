@@ -230,6 +230,23 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- AI Sales Insights Panel --}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box box-solid" style="border-top:3px solid #605ca8;">
+                                    <div class="box-header with-border" style="background:#f9f6ff;">
+                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#605ca8;"></i> <strong>AI Sales Intelligence</strong></h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="sales"><i class="fa fa-bolt"></i> Analyse with AI</button>
+                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="sales" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="ai-sales-panel">
+                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" to get Gemini-powered sales insights, anomaly detection &amp; pricing recommendations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>{{-- /sales --}}
 
                     {{-- ══ 3. CUSTOMER INTELLIGENCE ════════════════════════════ --}}
@@ -281,6 +298,23 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- AI Customer Intelligence Panel --}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box box-solid" style="border-top:3px solid #00a65a;">
+                                    <div class="box-header with-border" style="background:#f0fff4;">
+                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#00a65a;"></i> <strong>AI Customer Intelligence</strong></h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="customers"><i class="fa fa-bolt"></i> Analyse with AI</button>
+                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="customers" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="ai-customers-panel">
+                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" to get churn risk alerts, customer segments &amp; upsell opportunities.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>{{-- /customers --}}
 
                     {{-- ══ 4. FINANCIAL KPIs ═══════════════════════════════════ --}}
@@ -315,6 +349,23 @@
                                 <div class="box box-danger">
                                     <div class="box-header with-border"><h3 class="box-title">Expense Breakdown</h3></div>
                                     <div class="box-body"><canvas id="expenseChart" style="height:260px;"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- AI Financial Advisor Panel --}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box box-solid" style="border-top:3px solid #f39c12;">
+                                    <div class="box-header with-border" style="background:#fffbf0;">
+                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#f39c12;"></i> <strong>AI Financial Advisor</strong></h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="financial"><i class="fa fa-bolt"></i> Analyse with AI</button>
+                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="financial" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="ai-financial-panel">
+                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> Click "Analyse with AI" for cash flow forecast, expense alerts &amp; margin trend analysis.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -390,6 +441,37 @@
                                             <thead><tr><th>Product</th><th>Category</th><th>Stock</th></tr></thead>
                                             <tbody id="dead-stock-tbody"><tr><td colspan="3" class="text-center text-muted">Loading…</td></tr></tbody>
                                         </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- AI Procurement & Inventory Health Panels --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="box box-solid" style="border-top:3px solid #dd4b39;">
+                                    <div class="box-header with-border" style="background:#fff5f5;">
+                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#dd4b39;"></i> <strong>AI Restocking &amp; Procurement</strong></h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="procurement"><i class="fa fa-bolt"></i> Analyse with AI</button>
+                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="procurement" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="ai-procurement-panel">
+                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> AI will recommend exact reorder quantities, flag dead stock &amp; estimate restock costs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="box box-solid" style="border-top:3px solid #e67e22;">
+                                    <div class="box-header with-border" style="background:#fff8f0;">
+                                        <h3 class="box-title"><i class="fa fa-magic" style="color:#e67e22;"></i> <strong>AI Inventory Health</strong></h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-xs btn-default ai-load-btn" data-target="inv-health"><i class="fa fa-bolt"></i> Analyse with AI</button>
+                                            <button class="btn btn-xs btn-default ai-refresh-btn" data-target="inv-health" style="display:none;"><i class="fa fa-refresh"></i> Refresh</button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body" id="ai-inv-health-panel">
+                                        <p class="text-muted text-center" style="padding:10px 0;"><i class="fa fa-bolt"></i> AI will suggest clearance discounts, flag expiry risks &amp; estimate capital recovery.</p>
                                     </div>
                                 </div>
                             </div>
@@ -968,6 +1050,252 @@ $(function() {
 
     /* Campaign generator exposed globally for inline onclick */
     window.generateCampaign = function(text){ alert('Campaign draft for: '+text.substring(0,60)+'…\n(hook to WhatsApp/SMS module)'); };
+
+    /* ────────────────────────────────────────────────────────────────
+       AI INTELLIGENCE PANELS
+    ──────────────────────────────────────────────────────────────── */
+    const AI_ENDPOINTS = {
+        sales:       '/bi-api/ai/sales',
+        customers:   '/bi-api/ai/customers',
+        financial:   '/bi-api/ai/financial',
+        procurement: '/bi-api/ai/procurement',
+        'inv-health':'/bi-api/ai/inventory',
+    };
+
+    function aiLoadingHTML(){ return '<div class="text-center" style="padding:20px;"><i class="fa fa-spinner fa-spin fa-2x text-purple"></i><p class="text-muted" style="margin-top:8px;">Gemini AI is analysing your data…</p></div>'; }
+
+    function renderAISales(d, panel){
+        let html = '';
+        // Summary
+        if (d.sales_summary) html += `<div class="callout callout-info" style="margin-bottom:12px;"><i class="fa fa-lightbulb-o"></i> ${d.sales_summary}</div>`;
+        // Anomalies
+        if (d.anomalies && d.anomalies.length) {
+            html += `<h5><i class="fa fa-exclamation-triangle text-orange"></i> Sales Anomalies Detected</h5><div class="row">`;
+            d.anomalies.forEach(function(a){
+                html += `<div class="col-md-4"><div class="callout callout-warning">
+                    <strong>${a.date}</strong><br>Revenue: KES ${Number(a.revenue).toLocaleString()}
+                    <br><span class="text-red">${a.deviation_pct}% deviation</span>
+                    <br><small><em>${a.likely_cause}</em></small>
+                    <br><span class="label label-warning">${a.recommendation}</span></div></div>`;
+            });
+            html += `</div>`;
+        }
+        // Margin insights
+        if (d.top_margin_products && d.top_margin_products.length) {
+            html += `<h5 style="margin-top:12px;"><i class="fa fa-trophy text-green"></i> High-Margin Stars</h5><div class="row">`;
+            d.top_margin_products.slice(0,3).forEach(function(p){
+                html += `<div class="col-md-4"><div class="callout callout-success">
+                    <strong>${p.product}</strong>
+                    <br><span class="label label-success">${p.margin_pct}% margin</span>
+                    <br><small>${p.insight}</small>
+                    <br><i class="fa fa-arrow-right"></i> ${p.pricing_suggestion}</div></div>`;
+            });
+            html += `</div>`;
+        }
+        if (d.low_margin_warnings && d.low_margin_warnings.length) {
+            html += `<h5 style="margin-top:8px;"><i class="fa fa-warning text-red"></i> Low-Margin Warnings</h5><div class="row">`;
+            d.low_margin_warnings.slice(0,3).forEach(function(p){
+                html += `<div class="col-md-4"><div class="callout callout-danger">
+                    <strong>${p.product}</strong> &mdash; <span class="text-red">${p.margin_pct}% margin</span>
+                    <br><small>${p.risk}</small>
+                    <br><i class="fa fa-arrow-right"></i> ${p.action}</div></div>`;
+            });
+            html += `</div>`;
+        }
+        if (d.best_selling_day) html += `<p><i class="fa fa-calendar text-blue"></i> <strong>Best day to push sales:</strong> ${d.best_selling_day}</p>`;
+        panel.html(html || '<p class="text-muted">No insights available — add more sales data.</p>');
+    }
+
+    function renderAICustomers(d, panel){
+        let html = '';
+        if (d.retention_summary) html += `<div class="callout callout-info"><i class="fa fa-lightbulb-o"></i> ${d.retention_summary}</div>`;
+        // Segments
+        if (d.segments) {
+            html += `<h5><i class="fa fa-users text-blue"></i> Customer Segments</h5><div class="row">`;
+            [['vip','success','crown'],['regular','info','user'],['at_risk','warning','exclamation'],['lost','danger','times']].forEach(function(s){
+                const seg = d.segments[s[0]];
+                if (seg) html += `<div class="col-md-3"><div class="callout callout-${s[1]}"><i class="fa fa-${s[2]}"></i> <strong>${s[0].replace('_',' ').toUpperCase()}</strong><br><small>${typeof seg==='object'?seg.description||'':seg}</small></div></div>`;
+            });
+            html += `</div>`;
+        }
+        // Churn risk
+        if (d.churn_actions && d.churn_actions.length) {
+            html += `<h5 style="margin-top:10px;"><i class="fa fa-exclamation-circle text-red"></i> Churn Risk — Take Action Now</h5>
+            <table class="table table-condensed table-bordered table-hover">
+            <thead><tr><th>Customer</th><th>Last Purchase</th><th>Lifetime Value</th><th>Recommended Action</th></tr></thead><tbody>`;
+            d.churn_actions.slice(0,8).forEach(function(c){
+                html += `<tr>
+                    <td><strong>${c.customer_name}</strong></td>
+                    <td><span class="text-red">${c.days_since_purchase} days ago</span></td>
+                    <td>KES ${Number(c.lifetime_value||0).toLocaleString()}</td>
+                    <td>${c.recommended_action}
+                        ${c.message_template?`<br><small class="text-muted"><em>"${c.message_template}"</em></small>`:''}
+                    </td></tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+        // Upsell
+        if (d.upsell_opportunities && d.upsell_opportunities.length) {
+            html += `<h5 style="margin-top:10px;"><i class="fa fa-arrow-up text-green"></i> Upsell Opportunities</h5><div class="row">`;
+            d.upsell_opportunities.slice(0,3).forEach(function(u){
+                html += `<div class="col-md-4"><div class="callout callout-success"><strong>${u.product}</strong><br><small>${u.insight}</small><br><i class="fa fa-arrow-right"></i> ${u.suggested_bundle_or_action}</div></div>`;
+            });
+            html += `</div>`;
+        }
+        panel.html(html || '<p class="text-muted">No insights available.</p>');
+    }
+
+    function renderAIFinancial(d, panel){
+        let html = '';
+        if (d.financial_summary) html += `<div class="callout callout-info"><i class="fa fa-lightbulb-o"></i> ${d.financial_summary}</div>`;
+        // Cash flow forecast
+        if (d.cash_flow_forecast) {
+            const cf = d.cash_flow_forecast;
+            html += `<div class="row"><div class="col-md-6">
+                <div class="callout callout-${cf.risk_level==='high'?'danger':cf.risk_level==='medium'?'warning':'success'}">
+                    <h5><i class="fa fa-line-chart"></i> 30-Day Cash Flow Forecast</h5>
+                    <h4>KES ${Number(cf.next_30_days_estimate||0).toLocaleString()}</h4>
+                    <span class="label label-default">Confidence: ${cf.confidence||'—'}</span>
+                    <p style="margin-top:6px;"><small>${cf.key_assumptions||''}</small></p>
+                    ${cf.risks?`<p class="text-red"><small><strong>Risk:</strong> ${cf.risks}</small></p>`:''}
+                </div></div>`;
+            // Margin trend
+            if (d.margin_trend) html += `<div class="col-md-6"><div class="callout callout-${d.margin_trend.direction==='improving'?'success':d.margin_trend.direction==='declining'?'danger':'warning'}">
+                <h5><i class="fa fa-percent"></i> Margin Trend: <strong>${(d.margin_trend.direction||'').toUpperCase()}</strong></h5>
+                <p><small>${d.margin_trend.insight||''}</small></p>
+                <p><i class="fa fa-arrow-right"></i> ${d.margin_trend.action||''}</p>
+            </div></div>`;
+            html += `</div>`;
+        }
+        // Expense alerts
+        if (d.expense_alerts && d.expense_alerts.length) {
+            html += `<h5><i class="fa fa-warning text-orange"></i> Expense Alerts</h5><div class="row">`;
+            d.expense_alerts.forEach(function(e){
+                html += `<div class="col-md-4"><div class="callout callout-warning"><strong>${e.category}</strong><br><small>${e.observation}</small><br><i class="fa fa-arrow-right"></i> ${e.recommended_action}</div></div>`;
+            });
+            html += `</div>`;
+        }
+        // Receivables
+        if (d.receivables_risk) {
+            const r = d.receivables_risk;
+            html += `<div class="callout callout-${r.risk_level==='high'?'danger':'warning'}">
+                <i class="fa fa-file-text-o"></i> <strong>Unpaid Receivables:</strong> KES ${Number(r.outstanding_amount||0).toLocaleString()}
+                &nbsp; <span class="label label-${r.risk_level==='high'?'danger':'warning'}">${(r.risk_level||'').toUpperCase()} RISK</span>
+                <br><small>${r.recommended_action||''}</small></div>`;
+        }
+        panel.html(html || '<p class="text-muted">No financial insights available.</p>');
+    }
+
+    function renderAIProcurement(d, panel){
+        let html = '';
+        if (d.procurement_summary) html += `<div class="callout callout-info"><i class="fa fa-lightbulb-o"></i> ${d.procurement_summary}</div>`;
+        if (d.reorder_recommendations && d.reorder_recommendations.length) {
+            html += `<h5><i class="fa fa-shopping-cart text-blue"></i> Reorder Recommendations</h5>
+            <table class="table table-condensed table-bordered">
+            <thead><tr><th>Product</th><th>Stock</th><th>Order Qty</th><th>Urgency</th><th>Reason</th></tr></thead><tbody>`;
+            d.reorder_recommendations.forEach(function(r){
+                const uc = r.urgency==='high'?'danger':r.urgency==='medium'?'warning':'info';
+                html += `<tr><td><strong>${r.product}</strong></td><td class="text-red">${r.current_stock}</td>
+                    <td><strong>${r.suggested_order_qty}</strong></td>
+                    <td><span class="label label-${uc}">${(r.urgency||'').toUpperCase()}</span></td>
+                    <td><small>${r.reason}</small></td></tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+        if (d.dead_stock_actions && d.dead_stock_actions.length) {
+            html += `<h5 style="margin-top:10px;"><i class="fa fa-times-circle text-orange"></i> Dead Stock Actions</h5><div class="row">`;
+            d.dead_stock_actions.slice(0,4).forEach(function(s){
+                html += `<div class="col-md-6"><div class="callout callout-warning">
+                    <strong>${s.product}</strong> &mdash; Stock: ${s.stock}
+                    <br>Tied Capital: KES ${Number(s.tied_capital||0).toLocaleString()}
+                    <br><i class="fa fa-arrow-right"></i> <em>${s.suggested_action}</em></div></div>`;
+            });
+            html += `</div>`;
+        }
+        panel.html(html || '<p class="text-muted">All stock levels healthy — no urgent reorders needed.</p>');
+    }
+
+    function renderAIInventoryHealth(d, panel){
+        let html = '';
+        // Health score badge
+        if (d.inventory_health_score !== undefined) {
+            const score = d.inventory_health_score;
+            const sc = score>=75?'success':score>=50?'warning':'danger';
+            html += `<div class="callout callout-${sc}" style="display:flex;align-items:center;gap:16px;">
+                <div style="font-size:36px;font-weight:bold;color:${score>=75?'#00a65a':score>=50?'#f39c12':'#dd4b39'};">${score}<small style="font-size:14px;">/100</small></div>
+                <div><strong>Inventory Health Score</strong><br><small>${d.inventory_summary||''}</small></div>
+            </div>`;
+        } else if (d.inventory_summary) {
+            html += `<div class="callout callout-info">${d.inventory_summary}</div>`;
+        }
+        // Capital recovery
+        if (d.capital_recovery_estimate) html += `<p><i class="fa fa-money text-green"></i> <strong>Estimated Capital Recoverable:</strong> KES ${Number(d.capital_recovery_estimate).toLocaleString()}</p>`;
+        // Clearance plan
+        if (d.clearance_plan && d.clearance_plan.length) {
+            html += `<h5><i class="fa fa-tag text-orange"></i> Clearance Plan</h5>
+            <table class="table table-condensed table-bordered">
+            <thead><tr><th>Product</th><th>Stock</th><th>Tied Capital</th><th>Discount %</th><th>Recovery Est.</th><th>Timeline</th></tr></thead><tbody>`;
+            d.clearance_plan.forEach(function(c){
+                html += `<tr><td><strong>${c.product}</strong></td><td>${c.stock}</td>
+                    <td>KES ${Number(c.tied_capital||0).toLocaleString()}</td>
+                    <td><span class="label label-warning">${c.suggested_discount_pct}% OFF</span></td>
+                    <td class="text-green">KES ${Number(c.expected_recovery||0).toLocaleString()}</td>
+                    <td><small>${c.timeline}</small></td></tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+        // Expiry actions
+        if (d.expiry_actions && d.expiry_actions.length) {
+            html += `<h5 style="margin-top:10px;"><i class="fa fa-clock-o text-red"></i> Expiry Urgent Actions</h5><div class="row">`;
+            d.expiry_actions.forEach(function(e){
+                html += `<div class="col-md-4"><div class="callout callout-danger">
+                    <strong>${e.product}</strong>
+                    <br><span class="text-red"><i class="fa fa-warning"></i> ${e.days_left} days left</span> &mdash; Qty: ${e.qty}
+                    <br><i class="fa fa-arrow-right"></i> <em>${e.urgent_action}</em></div></div>`;
+            });
+            html += `</div>`;
+        }
+        panel.html(html || '<p class="text-muted">Inventory is healthy — no urgent actions needed.</p>');
+    }
+
+    // Dispatcher
+    const AI_RENDERERS = {
+        sales:       renderAISales,
+        customers:   renderAICustomers,
+        financial:   renderAIFinancial,
+        procurement: renderAIProcurement,
+        'inv-health':renderAIInventoryHealth,
+    };
+    const AI_PANELS = {
+        sales:'#ai-sales-panel', customers:'#ai-customers-panel',
+        financial:'#ai-financial-panel', procurement:'#ai-procurement-panel',
+        'inv-health':'#ai-inv-health-panel',
+    };
+
+    $(document).on('click', '.ai-load-btn, .ai-refresh-btn', function(){
+        const target  = $(this).data('target');
+        const panel   = $(AI_PANELS[target]);
+        const loadBtn = $(this).closest('.box-tools').find('.ai-load-btn');
+        const refBtn  = $(this).closest('.box-tools').find('.ai-refresh-btn');
+        const refresh = $(this).hasClass('ai-refresh-btn');
+
+        panel.html(aiLoadingHTML());
+        loadBtn.prop('disabled', true);
+        refBtn.hide();
+
+        $.getJSON(AI_ENDPOINTS[target] + (refresh ? '?refresh=1' : ''), function(d){
+            if (d && d.error) {
+                panel.html(`<div class="alert alert-danger"><strong>AI Error:</strong> ${d.error}<br><small>${d.raw||''}</small></div>`);
+            } else {
+                AI_RENDERERS[target](d, panel);
+            }
+            loadBtn.hide();
+            refBtn.show().prop('disabled', false);
+        }).fail(function(){
+            panel.html('<div class="alert alert-danger">Failed to reach AI endpoint. Check your Gemini API key in Audit &amp; Risk settings.</div>');
+            loadBtn.prop('disabled', false);
+        });
+    });
 
 });
 </script>

@@ -257,7 +257,20 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/bi-api/predictions', [\App\Http\Controllers\BIDashboardController::class, 'getPredictions']);
     Route::get('/bi-api/deep-intelligence', [\App\Http\Controllers\BIDashboardController::class, 'getDeepIntelligence']);
     
-    // New Advanced AI Routes
+    // BI Analytics Data APIs
+    Route::get('/bi-api/sales',     [\App\Http\Controllers\BIDashboardController::class, 'getSalesAnalytics']);
+    Route::get('/bi-api/customers', [\App\Http\Controllers\BIDashboardController::class, 'getCustomerAnalytics']);
+    Route::get('/bi-api/financial', [\App\Http\Controllers\BIDashboardController::class, 'getFinancialKpis']);
+    Route::get('/bi-api/inventory', [\App\Http\Controllers\BIDashboardController::class, 'getInventoryAnalytics']);
+
+    // AI Intelligence APIs (Gemini-powered)
+    Route::get('/bi-api/ai/procurement', [\App\Http\Controllers\BIDashboardController::class, 'getAIProcurement']);
+    Route::get('/bi-api/ai/customers',   [\App\Http\Controllers\BIDashboardController::class, 'getAICustomerInsights']);
+    Route::get('/bi-api/ai/sales',       [\App\Http\Controllers\BIDashboardController::class, 'getAISalesInsights']);
+    Route::get('/bi-api/ai/financial',   [\App\Http\Controllers\BIDashboardController::class, 'getAIFinancialAdvice']);
+    Route::get('/bi-api/ai/inventory',   [\App\Http\Controllers\BIDashboardController::class, 'getAIInventoryHealth']);
+
+    // Advanced AI Routes
     Route::get('/bi-api/customer-segments', [\App\Http\Controllers\Hospital\CustomerIntelligenceController::class, 'getSegments']);
     Route::get('/bi-api/patient-forecast', [\App\Http\Controllers\Hospital\CustomerIntelligenceController::class, 'getVolumeForecast']);
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);

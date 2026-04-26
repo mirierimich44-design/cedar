@@ -570,6 +570,383 @@ class BIDashboardController extends Controller
         return response()->json(compact('slow_movers', 'dead_stock', 'turnover', 'low_stock'));
     }
 
+    // ─── AI: Procurement & Restocking Recommendations ────────────
+    public function getAIProcurement()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $cache_key   = "bi_ai_procurement_{$business_id}";
+        if (request()->has('refresh')) Cache::forget($cache_key);
+
+        return Cache::remember($cache_key, 1800, function () use ($business_id) {
+
+            // Products below alert quantity
+            $low_stock = DB::table('variation_location_details as vld')
+                ->join('products', 'products.id', '=', 'vld.product_id')
+                ->leftJoin('variations', 'variations.product_id', '=', 'products.id')
+                ->where('products.business_id', $business_id)
+                ->where('products.alert_quantity', '>', 0)
+                ->whereRaw('vld.qty_available <= products.alert_quantity')
+                ->select('products.name', 'vld.qty_available', 'products.alert_quantity',
+                    DB::raw('COALESCE(variations.default_purchase_price, 0) as unit_cost'))
+                ->limit(20)->get();
+
+            // Sales velocity for those products (units/day last 30d)
+            $velocity = DB::table('transaction_lines as tl')
+                ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
+                ->join('products', 'products.id', '=', 'tl.product_id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'sell')->where('t.status', 'final')
+                ->where('t.transaction_date', '>=', Carbon::now()->subDays(30))
+                ->whereIn('products.name', $low_stock->pluck('name'))
+                ->select('products.name', DB::raw('SUM(tl.quantity) as sold_30d'))
+                ->groupBy('products.id', 'products.name')
+                ->get()->keyBy('name');
+
+            // Slow movers with tied-up capital
+            $slow = DB::table('products as p')
+                ->join('variation_location_details as vld', 'vld.product_id', '=', 'p.id')
+                ->leftJoin('variations as v', 'v.product_id', '=', 'p.id')
+                ->where('p.business_id', $business_id)
+                ->where('vld.qty_available', '>', 0)
+                ->whereNotExists(function ($q) {
+                    $q->from('transaction_lines as tl2')
+                      ->join('transactions as t2', 't2.id', '=', 'tl2.transaction_id')
+                      ->whereColumn('tl2.product_id', 'p.id')
+                      ->where('t2.type', 'sell')
+                      ->where('t2.transaction_date', '>=', Carbon::now()->subDays(60));
+                })
+                ->select('p.name',
+                    DB::raw('SUM(vld.qty_available) as stock'),
+                    DB::raw('COALESCE(AVG(v.default_purchase_price), 0) as unit_cost'),
+                    DB::raw('SUM(vld.qty_available * COALESCE(v.default_purchase_price, 0)) as tied_capital'))
+                ->groupBy('p.id', 'p.name')
+                ->orderByDesc('tied_capital')
+                ->limit(10)->get();
+
+            $context = [
+                'low_stock_items'    => $low_stock,
+                'sales_velocity_30d' => $velocity->values(),
+                'slow_movers_60d'    => $slow,
+            ];
+
+            $prompt = "You are an expert Procurement & Inventory Manager for a Kenyan business.
+Analyze the data below and return a JSON object with these keys:
+- reorder_recommendations: array of objects {product, current_stock, suggested_order_qty, urgency (high/medium/low), reason}
+- dead_stock_actions: array of objects {product, stock, tied_capital, suggested_action}
+- procurement_summary: one-paragraph executive summary
+
+Return ONLY valid JSON, no markdown.
+Data: " . json_encode($context);
+
+            $raw = $this->callGemini($prompt, true);
+            $decoded = json_decode(preg_replace('/```json|```/', '', $raw), true);
+            return response()->json($decoded ?? ['error' => 'AI response parse failed', 'raw' => $raw]);
+        });
+    }
+
+    // ─── AI: Customer Intelligence ────────────────────────────────
+    public function getAICustomerInsights()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $cache_key   = "bi_ai_customers_{$business_id}";
+        if (request()->has('refresh')) Cache::forget($cache_key);
+
+        return Cache::remember($cache_key, 1800, function () use ($business_id) {
+
+            // Customers who bought before but not in last 45 days
+            $churn_risk = DB::table('contacts as c')
+                ->join('transactions as t', 't.contact_id', '=', 'c.id')
+                ->where('c.business_id', $business_id)
+                ->where('c.type', 'customer')
+                ->where('t.type', 'sell')->where('t.status', 'final')
+                ->where('t.transaction_date', '<', Carbon::now()->subDays(45))
+                ->whereNotExists(function ($q) {
+                    $q->from('transactions as t2')
+                      ->whereColumn('t2.contact_id', 'c.id')
+                      ->where('t2.type', 'sell')->where('t2.status', 'final')
+                      ->where('t2.transaction_date', '>=', Carbon::now()->subDays(45));
+                })
+                ->select('c.name', 'c.mobile',
+                    DB::raw('MAX(t.transaction_date) as last_purchase'),
+                    DB::raw('SUM(t.final_total) as lifetime_value'),
+                    DB::raw('COUNT(t.id) as total_orders'))
+                ->groupBy('c.id', 'c.name', 'c.mobile')
+                ->orderByDesc('lifetime_value')
+                ->limit(15)->get();
+
+            // VIP customers (top 10% by spend last 90 days)
+            $vip = DB::table('contacts as c')
+                ->join('transactions as t', 't.contact_id', '=', 'c.id')
+                ->where('c.business_id', $business_id)
+                ->where('c.type', 'customer')
+                ->where('t.type', 'sell')->where('t.status', 'final')
+                ->where('t.transaction_date', '>=', Carbon::now()->subDays(90))
+                ->select('c.name', DB::raw('SUM(t.final_total) as spend'), DB::raw('COUNT(t.id) as orders'))
+                ->groupBy('c.id', 'c.name')
+                ->orderByDesc('spend')
+                ->limit(10)->get();
+
+            // Product affinity: what customers frequently buy together
+            $top_products = DB::table('transaction_lines as tl')
+                ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
+                ->join('products as p', 'p.id', '=', 'tl.product_id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'sell')->where('t.status', 'final')
+                ->where('t.transaction_date', '>=', Carbon::now()->subDays(90))
+                ->select('p.name', DB::raw('COUNT(DISTINCT t.id) as txn_count'),
+                    DB::raw('SUM(tl.quantity) as qty_sold'))
+                ->groupBy('p.id', 'p.name')
+                ->orderByDesc('txn_count')
+                ->limit(10)->get();
+
+            $context = [
+                'churn_risk_customers' => $churn_risk,
+                'vip_customers'        => $vip,
+                'top_products_90d'     => $top_products,
+                'total_churn_risk'     => $churn_risk->count(),
+            ];
+
+            $prompt = "You are a Customer Success and Retention expert for a Kenyan business.
+Analyze the data below and return a JSON object with these keys:
+- churn_actions: array of objects {customer_name, days_since_purchase, lifetime_value, recommended_action, message_template}
+- segments: object with keys vip (count+description), regular (count+description), at_risk (count+description), lost (count+description)
+- upsell_opportunities: array of objects {product, insight, suggested_bundle_or_action}
+- retention_summary: one-paragraph executive summary with specific actions
+
+Return ONLY valid JSON, no markdown.
+Data: " . json_encode($context);
+
+            $raw = $this->callGemini($prompt, true);
+            $decoded = json_decode(preg_replace('/```json|```/', '', $raw), true);
+            return response()->json($decoded ?? ['error' => 'AI response parse failed', 'raw' => $raw]);
+        });
+    }
+
+    // ─── AI: Sales Intelligence ───────────────────────────────────
+    public function getAISalesInsights()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $cache_key   = "bi_ai_sales_{$business_id}";
+        if (request()->has('refresh')) Cache::forget($cache_key);
+
+        return Cache::remember($cache_key, 1800, function () use ($business_id) {
+
+            // Daily sales last 30 days for anomaly detection
+            $daily = DB::table('transactions')
+                ->where('business_id', $business_id)
+                ->where('type', 'sell')->where('status', 'final')
+                ->where('transaction_date', '>=', Carbon::now()->subDays(30))
+                ->select(DB::raw('DATE(transaction_date) as date'), DB::raw('SUM(final_total) as revenue'), DB::raw('COUNT(*) as orders'))
+                ->groupBy(DB::raw('DATE(transaction_date)'))
+                ->orderBy('date')->get();
+
+            // Margin analysis: revenue vs cost of goods
+            $margin_analysis = DB::table('transaction_lines as tl')
+                ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
+                ->join('products as p', 'p.id', '=', 'tl.product_id')
+                ->leftJoin('variations as v', 'v.product_id', '=', 'p.id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'sell')->where('t.status', 'final')
+                ->where('t.transaction_date', '>=', Carbon::now()->subDays(30))
+                ->select('p.name',
+                    DB::raw('SUM(tl.quantity * tl.unit_price_inc_tax) as revenue'),
+                    DB::raw('SUM(tl.quantity * COALESCE(tl.purchase_price, v.default_purchase_price, 0)) as cost'),
+                    DB::raw('SUM(tl.quantity) as units_sold'))
+                ->groupBy('p.id', 'p.name')
+                ->orderByDesc('revenue')
+                ->limit(15)->get()
+                ->map(fn($p) => array_merge((array)$p, [
+                    'margin_pct' => $p->revenue > 0 ? round(($p->revenue - $p->cost) / $p->revenue * 100, 1) : 0
+                ]));
+
+            // Best day-of-week performance
+            $dow_performance = DB::table('transactions')
+                ->where('business_id', $business_id)
+                ->where('type', 'sell')->where('status', 'final')
+                ->where('transaction_date', '>=', Carbon::now()->subDays(90))
+                ->select(DB::raw('DAYNAME(transaction_date) as day_name'), DB::raw('AVG(daily_total) as avg_revenue'))
+                ->fromSub(
+                    DB::table('transactions')
+                        ->where('business_id', $business_id)
+                        ->where('type', 'sell')->where('status', 'final')
+                        ->where('transaction_date', '>=', Carbon::now()->subDays(90))
+                        ->select(DB::raw('DATE(transaction_date) as sale_date'), DB::raw('DAYNAME(transaction_date) as day_name'), DB::raw('SUM(final_total) as daily_total'))
+                        ->groupBy(DB::raw('DATE(transaction_date)')),
+                    'daily_agg'
+                )
+                ->groupBy('day_name')
+                ->get();
+
+            $avg_daily = $daily->avg('revenue') ?? 0;
+            $anomalies = $daily->filter(fn($d) => $avg_daily > 0 && abs($d->revenue - $avg_daily) / $avg_daily > 0.4)->values();
+
+            $context = [
+                'daily_sales_30d'    => $daily,
+                'avg_daily_revenue'  => round($avg_daily, 2),
+                'anomaly_days'       => $anomalies,
+                'margin_by_product'  => $margin_analysis,
+                'best_days_of_week'  => $dow_performance,
+            ];
+
+            $prompt = "You are a Sales Intelligence Analyst for a Kenyan business.
+Analyze the data below and return a JSON object with these keys:
+- anomalies: array of objects {date, revenue, deviation_pct, likely_cause, recommendation}
+- top_margin_products: array of objects {product, margin_pct, insight, pricing_suggestion}
+- low_margin_warnings: array of objects {product, margin_pct, risk, action}
+- best_selling_day: string (day name) with reason
+- sales_summary: one-paragraph executive summary with 3 specific action points
+
+Return ONLY valid JSON, no markdown.
+Data: " . json_encode($context);
+
+            $raw = $this->callGemini($prompt, true);
+            $decoded = json_decode(preg_replace('/```json|```/', '', $raw), true);
+            return response()->json($decoded ?? ['error' => 'AI response parse failed', 'raw' => $raw]);
+        });
+    }
+
+    // ─── AI: Financial Advisor ────────────────────────────────────
+    public function getAIFinancialAdvice()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $cache_key   = "bi_ai_financial_{$business_id}";
+        if (request()->has('refresh')) Cache::forget($cache_key);
+
+        return Cache::remember($cache_key, 1800, function () use ($business_id) {
+
+            $year = Carbon::now()->year;
+
+            // Monthly P&L
+            $pnl = [];
+            for ($m = 1; $m <= Carbon::now()->month; $m++) {
+                $rev  = DB::table('transactions')->where('business_id', $business_id)->where('type', 'sell')->where('status', 'final')->whereYear('transaction_date', $year)->whereMonth('transaction_date', $m)->sum('final_total');
+                $cost = DB::table('transactions')->where('business_id', $business_id)->where('type', 'purchase')->where('status', 'received')->whereYear('transaction_date', $year)->whereMonth('transaction_date', $m)->sum('final_total');
+                $exp  = DB::table('transactions')->where('business_id', $business_id)->where('type', 'expense')->whereYear('transaction_date', $year)->whereMonth('transaction_date', $m)->sum('final_total');
+                $pnl[] = ['month' => Carbon::create($year, $m)->format('M Y'), 'revenue' => round($rev, 2), 'cogs' => round($cost, 2), 'expenses' => round($exp, 2), 'net_profit' => round($rev - $cost - $exp, 2)];
+            }
+
+            // Expense categories trend
+            $expense_trend = DB::table('transactions as t')
+                ->join('expense_categories as ec', 'ec.id', '=', 't.expense_category_id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'expense')
+                ->where('t.transaction_date', '>=', Carbon::now()->subMonths(3))
+                ->select('ec.name', DB::raw('MONTH(t.transaction_date) as month'), DB::raw('SUM(t.final_total) as total'))
+                ->groupBy('ec.id', 'ec.name', DB::raw('MONTH(t.transaction_date)'))
+                ->orderBy('total', 'desc')->get();
+
+            // Unpaid invoices / receivables
+            $unpaid = DB::table('transactions')
+                ->where('business_id', $business_id)
+                ->where('type', 'sell')->where('status', 'final')
+                ->where('payment_status', '!=', 'paid')
+                ->select(DB::raw('SUM(final_total - (SELECT COALESCE(SUM(amount),0) FROM transaction_payments WHERE transaction_id = transactions.id)) as outstanding'), DB::raw('COUNT(*) as count'))
+                ->first();
+
+            $context = [
+                'monthly_pnl'        => $pnl,
+                'expense_trend_3m'   => $expense_trend,
+                'unpaid_receivables' => $unpaid,
+                'current_month'      => Carbon::now()->format('F Y'),
+            ];
+
+            $prompt = "You are a CFO and Financial Advisor for a Kenyan SME.
+Analyze the data below and return a JSON object with these keys:
+- cash_flow_forecast: object {next_30_days_estimate, confidence, key_assumptions, risks}
+- expense_alerts: array of objects {category, observation, recommended_action}
+- margin_trend: object {direction (improving/declining/stable), insight, action}
+- receivables_risk: object {outstanding_amount, risk_level, recommended_action}
+- financial_summary: one-paragraph executive summary with top 3 priority actions
+
+Return ONLY valid JSON, no markdown.
+Data: " . json_encode($context);
+
+            $raw = $this->callGemini($prompt, true);
+            $decoded = json_decode(preg_replace('/```json|```/', '', $raw), true);
+            return response()->json($decoded ?? ['error' => 'AI response parse failed', 'raw' => $raw]);
+        });
+    }
+
+    // ─── AI: Inventory Health ─────────────────────────────────────
+    public function getAIInventoryHealth()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $cache_key   = "bi_ai_inventory_{$business_id}";
+        if (request()->has('refresh')) Cache::forget($cache_key);
+
+        return Cache::remember($cache_key, 1800, function () use ($business_id) {
+
+            // Dead stock with tied capital
+            $dead = DB::table('products as p')
+                ->join('variation_location_details as vld', 'vld.product_id', '=', 'p.id')
+                ->leftJoin('variations as v', 'v.product_id', '=', 'p.id')
+                ->where('p.business_id', $business_id)
+                ->where('vld.qty_available', '>', 0)
+                ->whereNotExists(function ($q) {
+                    $q->from('transaction_lines as tl')
+                      ->join('transactions as t', 't.id', '=', 'tl.transaction_id')
+                      ->whereColumn('tl.product_id', 'p.id')
+                      ->where('t.type', 'sell')
+                      ->where('t.transaction_date', '>=', Carbon::now()->subDays(90));
+                })
+                ->select('p.name',
+                    DB::raw('SUM(vld.qty_available) as stock'),
+                    DB::raw('COALESCE(AVG(v.default_sell_price), 0) as sell_price'),
+                    DB::raw('COALESCE(AVG(v.default_purchase_price), 0) as cost_price'),
+                    DB::raw('SUM(vld.qty_available * COALESCE(v.default_purchase_price, 0)) as tied_capital'))
+                ->groupBy('p.id', 'p.name')
+                ->orderByDesc('tied_capital')->limit(15)->get();
+
+            // Expiry risk (if exp_date tracked)
+            $expiry = DB::table('purchase_lines as pl')
+                ->join('transactions as t', 't.id', '=', 'pl.transaction_id')
+                ->join('products as p', 'p.id', '=', 'pl.product_id')
+                ->where('t.business_id', $business_id)
+                ->whereNotNull('pl.exp_date')
+                ->whereBetween('pl.exp_date', [now(), now()->addDays(60)])
+                ->where('pl.quantity_remaining', '>', 0)
+                ->select('p.name', 'pl.exp_date', 'pl.quantity_remaining',
+                    DB::raw('DATEDIFF(pl.exp_date, NOW()) as days_left'))
+                ->orderBy('pl.exp_date')->limit(15)->get();
+
+            // Over-ordered products (high stock, low turnover)
+            $over_stocked = DB::table('products as p')
+                ->join('variation_location_details as vld', 'vld.product_id', '=', 'p.id')
+                ->leftJoin('variations as v', 'v.product_id', '=', 'p.id')
+                ->where('p.business_id', $business_id)
+                ->where('vld.qty_available', '>', DB::raw('p.alert_quantity * 5'))
+                ->select('p.name',
+                    DB::raw('SUM(vld.qty_available) as stock'),
+                    DB::raw('p.alert_quantity as alert_qty'),
+                    DB::raw('SUM(vld.qty_available * COALESCE(v.default_purchase_price,0)) as tied_capital'))
+                ->groupBy('p.id', 'p.name', 'p.alert_quantity')
+                ->orderByDesc('tied_capital')->limit(10)->get();
+
+            $context = [
+                'dead_stock_90d'  => $dead,
+                'expiry_risk_60d' => $expiry,
+                'over_stocked'    => $over_stocked,
+                'total_tied_capital' => $dead->sum('tied_capital'),
+            ];
+
+            $prompt = "You are an Inventory Optimisation expert for a Kenyan business.
+Analyze the data below and return a JSON object with these keys:
+- clearance_plan: array of objects {product, stock, tied_capital, suggested_discount_pct, expected_recovery, timeline}
+- expiry_actions: array of objects {product, days_left, qty, urgent_action}
+- over_stock_warnings: array of objects {product, excess_stock, recommendation}
+- capital_recovery_estimate: number (total KES recoverable)
+- inventory_health_score: number 0-100
+- inventory_summary: one-paragraph executive summary with top 3 actions
+
+Return ONLY valid JSON, no markdown.
+Data: " . json_encode($context);
+
+            $raw = $this->callGemini($prompt, true);
+            $decoded = json_decode(preg_replace('/```json|```/', '', $raw), true);
+            return response()->json($decoded ?? ['error' => 'AI response parse failed', 'raw' => $raw]);
+        });
+    }
+
     private function callGemini($prompt, $isJson = false)
     {
         try {
