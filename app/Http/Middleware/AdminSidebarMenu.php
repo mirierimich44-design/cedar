@@ -978,16 +978,18 @@ class AdminSidebarMenu
             }
 
             // Cloud Sync
-            $menu->url(
-                action([\App\Http\Controllers\CloudSyncController::class, 'dashboard']),
-                'Cloud Sync',
-                ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            if (in_array('cloud_sync', $enabled_modules)) {
+                $menu->url(
+                    action([\App\Http\Controllers\CloudSyncController::class, 'dashboard']),
+                    'Cloud Sync',
+                    ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
                 <path d="M9 15l3 -3l3 3" />
                 <path d="M12 12l0 9" />
               </svg>', 'active' => request()->segment(1) == 'sync']
-            )->order(13);
+                )->order(13);
+            }
 
             //Modules menu
             if (auth()->user()->can('manage_modules')) {
@@ -1249,16 +1251,19 @@ class AdminSidebarMenu
         });
 
         // Approval System
-        $pending_count = \App\Approval::where('business_id', request()->session()->get('user.business_id'))
-            ->where('status', 'pending')->count();
-        \Menu::modify('admin-sidebar-menu', function ($menu) use ($pending_count) {
-            $menu->url(
-                route('approvals.index'),
-                '<i class="fa fa-check-square-o"></i> <span>Approvals</span>'
-                . ($pending_count ? ' <span class="pull-right-container"><span class="label label-primary pull-right">' . $pending_count . '</span></span>' : ''),
-                ['active' => request()->is('approvals*'), 'id' => 'approvals_menu']
-            )->order(86);
-        });
+        $enabled_modules_for_approvals = !empty(session('business.enabled_modules')) ? session('business.enabled_modules') : [];
+        if (in_array('approvals', $enabled_modules_for_approvals)) {
+            $pending_count = \App\Approval::where('business_id', request()->session()->get('user.business_id'))
+                ->where('status', 'pending')->count();
+            \Menu::modify('admin-sidebar-menu', function ($menu) use ($pending_count) {
+                $menu->url(
+                    route('approvals.index'),
+                    '<i class="fa fa-check-square-o"></i> <span>Approvals</span>'
+                    . ($pending_count ? ' <span class="pull-right-container"><span class="label label-primary pull-right">' . $pending_count . '</span></span>' : ''),
+                    ['active' => request()->is('approvals*'), 'id' => 'approvals_menu']
+                )->order(86);
+            });
+        }
 
         //Add menus from modules
         $moduleUtil = new ModuleUtil;
