@@ -87,8 +87,9 @@ class BusinessFeaturesController extends Controller
             ['is_enabled'  => $data['is_enabled']]
         );
 
-        // Clear the cache so the change takes effect immediately
         BusinessFeatureSetting::clearCache((int) $data['business_id'], $data['feature_key']);
+
+        $this->syncToBusinessTable((int) $data['business_id']);
 
         return response()->json(['success' => true]);
     }
@@ -124,5 +125,21 @@ class BusinessFeaturesController extends Controller
             );
             BusinessFeatureSetting::clearCache($businessId, $key);
         }
+        $this->syncToBusinessTable($businessId);
+    }
+
+    /**
+     * Sync the business_feature_settings table back to business.enabled_modules
+     * so the sidebar and session reflect the current toggle state.
+     */
+    private function syncToBusinessTable(int $businessId): void
+    {
+        $enabled = BusinessFeatureSetting::where('business_id', $businessId)
+            ->where('is_enabled', true)
+            ->pluck('feature_key')
+            ->values()
+            ->all();
+
+        Business::where('id', $businessId)->update(['enabled_modules' => json_encode($enabled)]);
     }
 }
