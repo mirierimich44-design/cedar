@@ -305,7 +305,12 @@ class SaasAdminController extends Controller
             $query = Business::with('owner')->select('business.*');
             return DataTables::of($query)
                 ->addColumn('action', function ($row) {
-                    return '<a href="' . route('saas.admin.business.features', $row->id) . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>';
+                    $featuresUrl     = route('saas.admin.business.features', $row->id);
+                    $loginScreenUrl  = route('business.getBusinessSettings') . '?business_id=' . $row->id;
+                    return '
+                        <a href="' . $featuresUrl . '" class="btn btn-xs btn-primary" title="Modules"><i class="fa fa-toggle-on"></i> Features</a>
+                        <a href="' . $loginScreenUrl . '" class="btn btn-xs btn-default" title="Business Settings"><i class="fa fa-cog"></i> Settings</a>
+                    ';
                 })
                 ->addColumn('owner_name', fn($r) => optional($r->owner)->first_name . ' ' . optional($r->owner)->last_name)
                 ->addColumn('modules_count', fn($r) => count($r->enabled_modules ?? []) . ' modules')
