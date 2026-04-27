@@ -340,6 +340,21 @@ class SaasAdminController extends Controller
             ->with('status', ['success' => 1, 'msg' => 'Features updated for ' . $business->name]);
     }
 
+    /**
+     * Save a single platform-level key/value setting to the system table.
+     */
+    public function saveSetting(Request $request)
+    {
+        $data = $request->validate([
+            'key'   => 'required|string|max:100',
+            'value' => 'required|string',
+        ]);
+
+        \App\System::addProperty($data['key'], $data['value']);
+
+        return response()->json(['success' => true]);
+    }
+
     private function getAllFeatures(): array
     {
         return [

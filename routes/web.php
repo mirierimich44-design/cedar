@@ -190,6 +190,9 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     // Global SaaS settings (trial, campaign, payment)
     Route::get('/saas-settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
     Route::put('/saas-settings',  [SaasAdminController::class, 'settingsUpdate'])->name('settings.update');
+
+    // Platform-level key/value settings (allow_registration, etc.)
+    Route::post('/setting', [SaasAdminController::class, 'saveSetting'])->name('setting');
 });
 
 Route::middleware(['setData'])->group(function () {

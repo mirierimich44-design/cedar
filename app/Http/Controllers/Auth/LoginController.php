@@ -54,7 +54,42 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        return view('auth.login');
+        // Detect business by subdomain and load its login branding
+        $loginSettings = [];
+        try {
+            $host      = request()->getHost();
+            $parts     = explode('.', $host);
+            $subdomain = count($parts) >= 3 ? $parts[0] : null;
+
+            $business = null;
+            if ($subdomain) {
+                $business = \App\Business::whereRaw('LOWER(name) = ?', [strtolower($subdomain)])->first();
+            }
+            if (! $business) {
+                $business = \App\Business::where('is_active', 1)->first();
+            }
+            if ($business && ! empty($business->login_settings)) {
+                $loginSettings = json_decode($business->login_settings, true) ?? [];
+            }
+        } catch (\Throwable $e) {
+            // fail silently — defaults will be used
+        }
+
+        // Allow registration: check system table, fall back to env
+        $allowRegistration = \App\System::getProperty('allow_registration');
+        if ($allowRegistration === null) {
+            $allowRegistration = config('constants.allow_registration');
+        } else {
+            $allowRegistration = (bool) $allowRegistration;
+        }
+
+        $username = '';
+        $password = '';
+        if (config('app.env') == 'demo' && request('demo_type')) {
+            // preserve demo login passthrough if needed
+        }
+
+        return view('auth.login', compact('loginSettings', 'allowRegistration', 'username', 'password'));
     }
 
     /**

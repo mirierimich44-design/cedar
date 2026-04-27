@@ -4,8 +4,18 @@
 
 @section('content')
 @php
-    $username = old('username');
-    $password = null;
+    $username = $username ?? old('username');
+    $password = $password ?? null;
+    $loginSettings  = $loginSettings ?? [];
+    $allowRegistration = $allowRegistration ?? config('constants.allow_registration');
+
+    $ls_headline      = $loginSettings['headline']      ?? 'Pharmacy Management Made Simple.';
+    $ls_tagline       = $loginSettings['tagline']       ?? 'A complete solution for DDA compliance, inventory, prescriptions, and pharmacy sales — all in one platform.';
+    $ls_bullets       = $loginSettings['bullets']       ?? ['💊 DDA Drug Compliance & Audit Trails','📋 Prescription Tracking & Dispensing','📦 Real-time Inventory & Expiry Alerts','📊 Sales Reports & Financial Analytics','💬 Automated SMS Notifications'];
+    $ls_primary       = $loginSettings['primary_color'] ?? '#0f766e';
+    $ls_bg_from       = $loginSettings['bg_from']       ?? '#0f4c5c';
+    $ls_bg_to         = $loginSettings['bg_to']         ?? '#0a7a62';
+
     if (config('app.env') == 'demo') {
         $username = 'admin';
         $password = '123456';
@@ -43,7 +53,7 @@
     .sp-left {
         width: 52%;
         min-width: 52%;
-        background: linear-gradient(150deg, #0f766e 0%, #0369a1 55%, #1e3a8a 100%);
+        background: linear-gradient(150deg, {{ $ls_bg_from }} 0%, {{ $ls_bg_to }} 100%);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -226,16 +236,16 @@
             <span>{{ config('app.name', 'Reenson Pharmacy') }}</span>
         </a>
 
-        <h2 class="sp-headline">Pharmacy Management<br>Made Simple.</h2>
-        <p class="sp-tagline">A complete solution for DDA compliance, inventory, prescriptions, and pharmacy sales — all in one platform.</p>
+        <h2 class="sp-headline">{!! nl2br(e($ls_headline)) !!}</h2>
+        <p class="sp-tagline">{{ $ls_tagline }}</p>
 
+        @if(!empty($ls_bullets))
         <ul class="sp-features">
-            <li><div class="sp-icon">💊</div><span>DDA Drug Compliance &amp; Audit Trails</span></li>
-            <li><div class="sp-icon">📋</div><span>Prescription Tracking &amp; Dispensing</span></li>
-            <li><div class="sp-icon">📦</div><span>Real-time Inventory &amp; Expiry Alerts</span></li>
-            <li><div class="sp-icon">📊</div><span>Sales Reports &amp; Financial Analytics</span></li>
-            <li><div class="sp-icon">💬</div><span>Automated SMS Notifications</span></li>
+            @foreach(array_slice((array)$ls_bullets, 0, 6) as $bullet)
+            <li><div class="sp-icon">{{ mb_substr(trim($bullet), 0, 2) }}</div><span>{{ trim(preg_replace('/^\S+\s*/u', '', $bullet)) ?: $bullet }}</span></li>
+            @endforeach
         </ul>
+        @endif
     </div>
 
     {{-- RIGHT PANEL --}}
@@ -300,7 +310,7 @@
 
                 <button type="submit" class="sp-submit">@lang('lang_v1.login')</button>
 
-                @if(config('constants.allow_registration'))
+                @if($allowRegistration)
                 <p class="sp-register">
                     {{ __('business.not_yet_registered') }}
                     <a href="{{ route('business.getRegister') }}">{{ __('business.register_now') }}</a>

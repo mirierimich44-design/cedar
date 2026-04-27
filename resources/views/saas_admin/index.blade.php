@@ -9,6 +9,25 @@
 </section>
 
 <section class="content">
+
+    {{-- Platform Settings --}}
+    <div class="box box-default" style="margin-bottom:20px;">
+        <div class="box-header with-border"><h3 class="box-title">Platform Settings</h3></div>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="tw-flex tw-items-center tw-gap-3 tw-cursor-pointer">
+                        <input type="checkbox" id="allow_registration_toggle"
+                            {{ \App\System::getProperty('allow_registration') !== '0' ? 'checked' : '' }}
+                            style="width:18px;height:18px;">
+                        <span><strong>Allow new business registration</strong><br>
+                        <small class="text-muted">Show "Create Account" link on the login page.</small></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @component('components.widget', ['class' => 'box-primary', 'title' => 'All Businesses'])
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="businesses_table">
@@ -32,6 +51,18 @@
 @section('javascript')
 <script>
 $(function() {
+    $('#allow_registration_toggle').on('change', function() {
+        $.post('{{ route("saas.admin.setting") }}', {
+            _token: '{{ csrf_token() }}',
+            key: 'allow_registration',
+            value: $(this).is(':checked') ? '1' : '0'
+        }).done(function() {
+            toastr.success('Setting saved.');
+        }).fail(function() {
+            toastr.error('Failed to save setting.');
+        });
+    });
+
     $('#businesses_table').DataTable({
         processing: true,
         serverSide: true,

@@ -40,6 +40,7 @@
                     <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('lang_v1.modules')</a>
                     <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('lang_v1.custom_labels')</a>
                     <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">eTIMS</a>
+                    <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">Login Screen</a>
                 </div>
             </div>
             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
@@ -91,6 +92,7 @@
                 @include('business.partials.settings_custom_labels')
                 
                 @include('business.partials.settings_etims')
+                @include('business.partials.settings_login_screen')
             </div>
         @endcomponent
         {{-- </div> --}}
