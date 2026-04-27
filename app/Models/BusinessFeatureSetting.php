@@ -25,6 +25,7 @@ class BusinessFeatureSetting extends Model
             'bi_dashboard'      => ['label' => 'BI Dashboard',      'icon' => '📊', 'category' => 'Custom Features', 'description' => 'Business intelligence dashboard with advanced analytics'],
             'hospital_module'   => ['label' => 'Hospital (HMS)',     'icon' => '🏥', 'category' => 'Custom Features', 'description' => 'Hospital management: patients, queues, wards, theatre'],
             'parcel_module'     => ['label' => 'Parcel & Courier',  'icon' => '📦', 'category' => 'Custom Features', 'description' => 'Parcel tracking, routes, checkpoints and delivery management'],
+            'customer_orders'   => ['label' => 'Customer Orders',   'icon' => '🛍️', 'category' => 'Custom Features', 'description' => 'Online customer orders and order links management'],
             // ── nWidart Modules ────────────────────────────────────────────────
             'essentials'        => ['label' => 'Essentials',        'icon' => '⚡', 'category' => 'Modules', 'description' => 'Core POS essentials — required for basic operation'],
             'accounting'        => ['label' => 'Accounting',        'icon' => '📒', 'category' => 'Modules', 'description' => 'Full accounting: journals, ledgers, trial balance, P&L'],

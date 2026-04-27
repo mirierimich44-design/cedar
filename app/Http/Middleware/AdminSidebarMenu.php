@@ -544,7 +544,7 @@ class AdminSidebarMenu
             }
 
             // ── Customer Orders (standalone) ───────────────────────────────
-            if ($is_admin || auth()->user()->can('orders.view')) {
+            if (in_array('customer_orders', $enabled_modules) && ($is_admin || auth()->user()->can('orders.view'))) {
                 $menu->dropdown(
                     __('Customer Orders'),
                     function ($sub) use ($is_admin) {
