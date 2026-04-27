@@ -183,9 +183,11 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     Route::delete('/subscriptions/{subscription}/feature/{feature}', [SaasAdminController::class, 'subscriptionFeatureDetach'])->name('subscriptions.feature.detach');
 
     // Business management
-    Route::get('/business',                          [SaasAdminController::class, 'businessIndex'])->name('business');
-    Route::get('/business/{business_id}/features',   [SaasAdminController::class, 'businessFeatures'])->name('business.features');
-    Route::post('/business/{business_id}/features',  [SaasAdminController::class, 'updateBusinessFeatures'])->name('business.features.update');
+    Route::get('/business',                              [SaasAdminController::class, 'businessIndex'])->name('business');
+    Route::get('/business/{business_id}/features',       [SaasAdminController::class, 'businessFeatures'])->name('business.features');
+    Route::post('/business/{business_id}/features',      [SaasAdminController::class, 'updateBusinessFeatures'])->name('business.features.update');
+    Route::get('/business/{business_id}/login-screen',   [SaasAdminController::class, 'businessLoginScreen'])->name('business.login-screen');
+    Route::post('/business/{business_id}/login-screen',  [SaasAdminController::class, 'saveBusinessLoginScreen'])->name('business.login-screen.save');
 
     // Global SaaS settings (trial, campaign, payment)
     Route::get('/saas-settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');

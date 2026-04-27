@@ -305,11 +305,11 @@ class SaasAdminController extends Controller
             $query = Business::with('owner')->select('business.*');
             return DataTables::of($query)
                 ->addColumn('action', function ($row) {
-                    $featuresUrl     = route('saas.admin.business.features', $row->id);
-                    $loginScreenUrl  = route('business.getBusinessSettings') . '?business_id=' . $row->id;
+                    $featuresUrl    = route('saas.admin.business.features', $row->id);
+                    $loginScreenUrl = route('saas.admin.business.login-screen', $row->id);
                     return '
-                        <a href="' . $featuresUrl . '" class="btn btn-xs btn-primary" title="Modules"><i class="fa fa-toggle-on"></i> Features</a>
-                        <a href="' . $loginScreenUrl . '" class="btn btn-xs btn-default" title="Business Settings"><i class="fa fa-cog"></i> Settings</a>
+                        <a href="' . $featuresUrl . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>
+                        <a href="' . $loginScreenUrl . '" class="btn btn-xs btn-default"><i class="fa fa-tv"></i> Login Screen</a>
                     ';
                 })
                 ->addColumn('owner_name', fn($r) => optional($r->owner)->first_name . ' ' . optional($r->owner)->last_name)
@@ -343,6 +343,28 @@ class SaasAdminController extends Controller
         $business->update(['enabled_modules' => $enabled]);
         return redirect()->route('saas.admin.business.features', $business_id)
             ->with('status', ['success' => 1, 'msg' => 'Features updated for ' . $business->name]);
+    }
+
+    public function businessLoginScreen($business_id)
+    {
+        $business = Business::findOrFail($business_id);
+        $ls = ! empty($business->login_settings) ? json_decode($business->login_settings, true) : [];
+        return view('saas_admin.login_screen', compact('business', 'ls'));
+    }
+
+    public function saveBusinessLoginScreen(Request $request, $business_id)
+    {
+        $business = Business::findOrFail($business_id);
+
+        $ls = $request->only(['headline', 'tagline', 'primary_color', 'bg_from', 'bg_to']);
+        if ($request->filled('bullets')) {
+            $ls['bullets'] = array_values(array_filter(array_map('trim', explode("\n", $request->input('bullets')))));
+        }
+
+        $business->update(['login_settings' => json_encode(array_filter($ls))]);
+
+        return redirect()->route('saas.admin.business.login-screen', $business_id)
+            ->with('status', 'Login screen updated for ' . $business->name);
     }
 
     /**
