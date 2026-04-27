@@ -195,7 +195,10 @@ class ProductController extends Controller
             return Datatables::of($products)
                 ->addColumn(
                     'product_locations',
-                    function ($row) {
+                    function ($row) use ($location_id) {
+                        if (! empty($location_id) && $location_id != 'none') {
+                            return $row->product_locations->where('id', $location_id)->implode('name', ', ');
+                        }
                         return $row->product_locations->implode('name', ', ');
                     }
                 )
