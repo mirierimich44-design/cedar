@@ -81,9 +81,11 @@ class ProductController extends Controller
                 ->leftJoin('categories as c2', 'products.sub_category_id', '=', 'c2.id')
                 ->leftJoin('tax_rates', 'products.tax', '=', 'tax_rates.id')
                 ->join('variations as v', 'v.product_id', '=', 'products.id')
-                ->leftJoin('variation_location_details as vld', function ($join) use ($permitted_locations) {
+                ->leftJoin('variation_location_details as vld', function ($join) use ($permitted_locations, $location_id) {
                     $join->on('vld.variation_id', '=', 'v.id');
-                    if ($permitted_locations != 'all') {
+                    if (! empty($location_id) && $location_id != 'none') {
+                        $join->where('vld.location_id', $location_id);
+                    } elseif ($permitted_locations != 'all') {
                         $join->whereIn('vld.location_id', $permitted_locations);
                     }
                 })
