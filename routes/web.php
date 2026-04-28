@@ -570,6 +570,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/products/view-product-group-price/{id}', [ProductController::class, 'viewGroupPrice']);
     Route::get('/products/add-selling-prices/{id}', [ProductController::class, 'addSellingPrices']);
     Route::post('/products/save-selling-prices', [ProductController::class, 'saveSellingPrices']);
+    Route::get('/products/location-prices/{id}', [ProductController::class, 'locationPrices']);
+    Route::post('/products/save-location-prices', [ProductController::class, 'saveLocationPrices']);
     Route::post('/products/mass-delete', [ProductController::class, 'massDestroy']);
     Route::get('/products/view/{id}', [ProductController::class, 'view']);
     Route::get('/products/list', [ProductController::class, 'getProducts']);

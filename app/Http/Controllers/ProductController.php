@@ -246,6 +246,8 @@ class ProductController extends Controller
                                 $html .= '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'addSellingPrices'], [$row->id]).'"><i class="fas fa-money-bill-alt"></i> '.__('lang_v1.add_selling_price_group_prices').'</a></li>';
                             }
 
+                            $html .= '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'locationPrices'], [$row->id]).'"><i class="fas fa-store"></i> '.__('lang_v1.branch_prices').'</a></li>';
+
                             $html .= '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'create'], ['d' => $row->id]).'"><i class="fa fa-copy"></i> '.__('lang_v1.duplicate_product').'</a></li>';
                         }
 
@@ -2546,5 +2548,82 @@ class ProductController extends Controller
         $filename = 'products-export-'.\Carbon::now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(new ProductsExport, $filename);
+    }
+
+    public function locationPrices($id)
+    {
+        if (! auth()->user()->can('product.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $product = Product::where('business_id', $business_id)
+                    ->with(['variations', 'variations.product_variation'])
+                    ->findOrFail($id);
+
+        $locations = BusinessLocation::forDropdown($business_id, false, false, false, false);
+
+        $location_prices = [];
+        foreach ($product->variations as $variation) {
+            $details = VariationLocationDetails::where('variation_id', $variation->id)->get();
+            foreach ($details as $detail) {
+                $location_prices[$variation->id][$detail->location_id] = [
+                    'default_sell_price' => $detail->default_sell_price,
+                    'sell_price_inc_tax' => $detail->sell_price_inc_tax,
+                ];
+            }
+        }
+
+        return view('product.location-prices')->with(compact('product', 'locations', 'location_prices'));
+    }
+
+    public function saveLocationPrices(Request $request)
+    {
+        if (! auth()->user()->can('product.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $business_id = $request->session()->get('user.business_id');
+            $product = Product::where('business_id', $business_id)
+                            ->with(['variations'])
+                            ->findOrFail($request->input('product_id'));
+
+            DB::beginTransaction();
+
+            foreach ($product->variations as $variation) {
+                $location_data = $request->input('location_prices.' . $variation->id, []);
+                foreach ($location_data as $location_id => $prices) {
+                    $detail = VariationLocationDetails::firstOrNew([
+                        'variation_id'        => $variation->id,
+                        'product_id'          => $product->id,
+                        'product_variation_id' => $variation->product_variation_id,
+                        'location_id'         => $location_id,
+                    ]);
+
+                    $dsp = isset($prices['default_sell_price']) && $prices['default_sell_price'] !== ''
+                        ? $this->productUtil->num_uf($prices['default_sell_price'])
+                        : null;
+                    $dsp_inc = isset($prices['sell_price_inc_tax']) && $prices['sell_price_inc_tax'] !== ''
+                        ? $this->productUtil->num_uf($prices['sell_price_inc_tax'])
+                        : null;
+
+                    $detail->default_sell_price = $dsp;
+                    $detail->sell_price_inc_tax = $dsp_inc;
+                    $detail->save();
+                }
+            }
+
+            $product->touch();
+            DB::commit();
+
+            $output = ['success' => 1, 'msg' => __('lang_v1.updated_success')];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+            $output = ['success' => 0, 'msg' => __('messages.something_went_wrong')];
+        }
+
+        return redirect('products')->with('status', $output);
     }
 }
