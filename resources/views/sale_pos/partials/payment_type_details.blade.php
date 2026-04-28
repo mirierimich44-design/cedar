@@ -92,6 +92,16 @@
 	</div>
 </div>
 
+<div class="payment_details_div @if( $payment_line['method'] !== 'kcb_buni' ) {{ 'hide' }} @endif" data-type="kcb_buni" >
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label("kcb_buni_reference_$row_index", 'KCB Buni Reference') !!}
+			{!! Form::text("payment[$row_index][kcb_buni_reference]", $payment_line['transaction_no'] ?? '', ['class' => 'form-control', 'placeholder' => 'KCB Buni transaction reference', 'id' => "kcb_buni_reference_$row_index"]) !!}
+			<p class="help-block">Enter the KCB Buni payment reference number from the customer's confirmation.</p>
+		</div>
+	</div>
+</div>
+
 <div class="payment_details_div @if( $payment_line['method'] !== 'custom_pay_1' ) {{ 'hide' }} @endif" data-type="custom_pay_1" >
 	<div class="col-md-12">
 		<div class="form-group">

@@ -775,6 +775,10 @@ class TransactionUtil extends Util
                         $payment_data['transaction_no'] = $payment['pesapal_reference'] ?? null;
                     }
 
+                    if ($payment['method'] == 'kcb_buni') {
+                        $payment_data['transaction_no'] = $payment['kcb_buni_reference'] ?? null;
+                    }
+
                     for ($i = 1; $i < 8; $i++) {
                         if ($payment['method'] == 'custom_pay_'.$i) {
                             $payment_data['transaction_no'] = $payment["transaction_no_{$i}"];
@@ -851,6 +855,10 @@ class TransactionUtil extends Util
 
         if ($payment['method'] == 'pesapal') {
             $payment['transaction_no'] = $payment['pesapal_reference'] ?? ($payment['transaction_no'] ?? null);
+        }
+
+        if ($payment['method'] == 'kcb_buni') {
+            $payment['transaction_no'] = $payment['kcb_buni_reference'] ?? ($payment['transaction_no'] ?? null);
         }
 
         for ($i = 1; $i < 8; $i++) {
