@@ -424,6 +424,8 @@ return [
     'access_selling_price_groups' => 'Access selling price groups',
     'save_n_add_selling_price_group_prices' => 'Save & Add Selling-Price-Group Prices',
     'add_selling_price_group_prices' => 'Add or edit Group Prices',
+    'branch_prices' => 'Branch Prices',
+    'branch_price_note' => 'Leave a field blank to use the default product price for that branch.',
     'default_selling_price_inc_tax' => 'Default Selling Price (Inc. Tax)',
     'variation' => 'Variation',
     'price_group' => 'Price Group',

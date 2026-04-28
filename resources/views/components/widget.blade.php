@@ -1,30 +1,24 @@
-<div class="{{$class ?? ''}} tw-mb-4 tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200"
+<div class="{{ $class ?? '' }} tw-mb-4 tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200"
     @if (!empty($id)) id="{{ $id }}" @endif>
-    <div class="tw-p-2 sm:tw-p-3">
-        @if (empty($header))
-            @if (!empty($title) || !empty($tool))
-                <div class="box-header">
+    @if (empty($header))
+        @if (!empty($title) || !empty($tool))
+            <div class="tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3 tw-border-b tw-border-gray-100">
+                <div class="tw-flex tw-items-center tw-gap-2">
                     {!! $icon ?? '' !!}
-                    <h3 class="box-title">{{ $title ?? '' }}</h3>
-                    {!! $tool ?? '' !!}
-
+                    <h3 class="tw-text-base tw-font-semibold tw-text-gray-800 tw-m-0">{{ $title ?? '' }}</h3>
                     @if (isset($help_text))
-                        <br />
-                        <small>{!! $help_text !!}</small>
+                        <span class="tw-text-xs tw-text-gray-400 tw-font-normal">{!! $help_text !!}</span>
                     @endif
                 </div>
-            @endif
-        @else
-            <div class="box-header">
-                {!! $header !!}
+                {!! $tool ?? '' !!}
             </div>
         @endif
-        <div class="tw-flow-root tw-border-gray-200">
-            <div class="">
-                <div class="tw-py-2 tw-align-middle sm:tw-px-5">
-                    {{ $slot }}
-                </div>
-            </div>
+    @else
+        <div class="tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3 tw-border-b tw-border-gray-100">
+            {!! $header !!}
         </div>
+    @endif
+    <div class="tw-p-2 sm:tw-p-4">
+        {{ $slot }}
     </div>
 </div>

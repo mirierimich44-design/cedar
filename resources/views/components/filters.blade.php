@@ -1,47 +1,27 @@
-{{-- <div class="box @if (!empty($class)) {{$class}} @else box-solid @endif" id="accordion">
-  <div class="box-header with-border" style="cursor: pointer;">
-    <h3 class="box-title">
-      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFilter">
-        @if (!empty($icon)) {!! $icon !!} @else <i class="fa fa-filter" aria-hidden="true"></i> @endif {{$title ?? ''}}
-      </a>
-    </h3>
-  </div>
-  @php
-    if(isMobile()) {
-      $closed = true;
-    }
-  @endphp
-  <div id="collapseFilter" class="panel-collapse active collapse @if (empty($closed)) in @endif" aria-expanded="true">
-    <div class="box-body">
-      {{$slot}}
+<div class="tw-mb-4 tw-bg-white tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-shadow-sm">
+    <div class="tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3 tw-border-b tw-border-gray-100 tw-cursor-pointer"
+         data-toggle="collapse" data-target="#collapseFilter" aria-expanded="true">
+        <div class="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-gray-600">
+            @if (!empty($icon))
+                {!! $icon !!}
+            @else
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+            @endif
+            {{ $title ?? __('report.filters') }}
+        </div>
+        <svg class="tw-w-4 tw-h-4 tw-text-gray-400 tw-transition-transform" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
     </div>
-  </div>
-</div> --}}
-
-
-<div
-    class="tw-transition-all tw-mb-4 lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
-    <div class="box-header with-border" style="cursor: pointer;">
-        <h3 class="box-title tw-pt-2 tw-pb-2 tw-pl-2">
-            <a data-toggle="collapse" data-parent="#accordion" href="#collapseFilter">
-                @if (!empty($icon))
-                    {!! $icon !!}
-                @else
-                    <i class="fa fa-filter" aria-hidden="true"></i>
-                @endif {{ $title ?? '' }}
-            </a>
-        </h3>
-    </div>
-    @php
-        if (isMobile()) {
-            $closed = true;
-        }
-        $closed = true;
-    @endphp
-    <div id="collapseFilter" class="panel-collapse active collapse @if (empty($closed)) in @endif tw-pt-4 tw-pb-4"
-        aria-expanded="true">
-        <div class="box-body">
-            {{ $slot }}
+    <div id="collapseFilter" class="collapse in">
+        <div class="tw-px-5 tw-py-4">
+            <div class="row">
+                {{ $slot }}
+            </div>
         </div>
     </div>
 </div>

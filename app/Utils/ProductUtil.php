@@ -1724,14 +1724,14 @@ class ProductUtil extends Util
                 'variations.id as variation_id',
                 'variations.name as variation',
                 'VLD.qty_available',
-                'variations.sell_price_inc_tax as selling_price',
+                DB::raw('COALESCE(VLD.sell_price_inc_tax, variations.sell_price_inc_tax) as selling_price'),
                 'variations.default_purchase_price as purchase_price',
                 'variations.sub_sku',
                 'U.short_name as unit'
             );
 
         if (! empty($price_group_id)) {
-            $query->addSelect(DB::raw('IF (VGP.price_type = "fixed", VGP.price_inc_tax, VGP.price_inc_tax * variations.sell_price_inc_tax / 100) as variation_group_price'));
+            $query->addSelect(DB::raw('IF (VGP.price_type = "fixed", VGP.price_inc_tax, VGP.price_inc_tax * COALESCE(VLD.sell_price_inc_tax, variations.sell_price_inc_tax) / 100) as variation_group_price'));
         }
 
         if (in_array('lot', $search_fields)) {
