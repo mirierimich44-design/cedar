@@ -549,8 +549,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     });
     // ── End Cooler Management Module ─────────────────────────────────────────
 
-    Route::get('etims-report', [EtimsReportController::class, 'index']);
-    Route::get('etims-report/sync-invoice/{id}', [EtimsReportController::class, 'syncInvoice']);
+    Route::get('etims-report', [EtimsReportController::class, 'index'])->name('etims.index');
+    Route::get('etims-report/sales-data', [EtimsReportController::class, 'salesData'])->name('etims.sales-data');
+    Route::get('etims-report/purchases-data', [EtimsReportController::class, 'purchasesData'])->name('etims.purchases-data');
+    Route::get('etims-report/analytics', [EtimsReportController::class, 'analytics'])->name('etims.analytics');
+    Route::get('etims-report/sync-invoice/{id}', [EtimsReportController::class, 'syncInvoice'])->name('etims.sync-invoice');
     Route::post('etims-report/sync-all', [EtimsReportController::class, 'syncAll'])->name('etims.sync-all');
     Route::post('products/bulk-etims-sync', [\App\Http\Controllers\ProductController::class, 'bulkEtimsSync']);
     Route::get('etims-settings', [EtimsReportController::class, 'settings'])->name('etims.settings');
