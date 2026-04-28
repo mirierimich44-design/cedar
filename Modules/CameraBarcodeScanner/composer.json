@@ -1,0 +1,24 @@
+{
+    "name": "nwidart/camera-barcode-scanner",
+    "description": "Camera Barcode Scanner Module for UltimatePOS",
+    "authors": [
+        {
+            "name": "UltimatePOS",
+            "email": "support@ultimatefosters.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\CameraBarcodeScanner\\Providers\\CameraBarcodeScannerServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CameraBarcodeScanner\\": ""
+        }
+    }
+}
+

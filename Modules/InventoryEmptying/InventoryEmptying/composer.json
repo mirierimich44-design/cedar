@@ -1,0 +1,25 @@
+{
+    "name": "abdelazizdev/inventoryemptying",
+    "description": "تصفير المخزون",
+    "authors": [
+        {
+            "name": "Abdelaziz Dev",
+            "email": "zeseoudi@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\InventoryEmptying\\Providers\\InventoryEmptyingServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\InventoryEmptying\\": ""
+        }
+    }
+}

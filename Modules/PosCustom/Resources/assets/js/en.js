@@ -1,0 +1,3 @@
+LANG = {
+    'subcategory': 'Sub Category',
+};

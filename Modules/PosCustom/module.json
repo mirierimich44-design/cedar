@@ -1,0 +1,15 @@
+{
+    "name": "PosCustom",
+    "alias": "PosCustom",
+    "description": "PosCustom for UPOS v6.11 [2025]. A new alternative of UI for POS users. Include Second Screen",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\PosCustom\\Providers\\PosCustomServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
+

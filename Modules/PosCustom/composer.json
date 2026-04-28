@@ -1,0 +1,23 @@
+{
+    "name": "JCN/PosCustom",
+    "description": "PosCustom a new alternative of UI for POS users. Include Second Screen",
+    "authors": [
+        {
+            "name": "By JoCaNi",
+            "email": "jocani19@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PosCustom\\": ""
+        }
+    }
+}

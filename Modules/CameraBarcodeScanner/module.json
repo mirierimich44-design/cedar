@@ -1,0 +1,15 @@
+{
+    "name": "CameraBarcodeScanner",
+    "alias": "camera-barcode-scanner",
+    "description": "Camera Barcode Scanner Module for UltimatePOS",
+    "keywords": ["barcode", "scanner", "camera", "qr-code"],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\CameraBarcodeScanner\\Providers\\CameraBarcodeScannerServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
+
