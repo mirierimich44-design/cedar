@@ -82,6 +82,16 @@
 	</div>
 </div>
 
+<div class="payment_details_div @if( $payment_line['method'] !== 'pesapal' ) {{ 'hide' }} @endif" data-type="pesapal" >
+	<div class="col-md-12">
+		<div class="form-group">
+			{!! Form::label("pesapal_reference_$row_index", 'Pesapal Reference / Order ID') !!}
+			{!! Form::text("payment[$row_index][pesapal_reference]", $payment_line['transaction_no'] ?? '', ['class' => 'form-control', 'placeholder' => 'Pesapal order tracking ID', 'id' => "pesapal_reference_$row_index"]) !!}
+			<p class="help-block">Enter the Pesapal order tracking ID or leave blank and complete via the Pesapal portal.</p>
+		</div>
+	</div>
+</div>
+
 <div class="payment_details_div @if( $payment_line['method'] !== 'custom_pay_1' ) {{ 'hide' }} @endif" data-type="custom_pay_1" >
 	<div class="col-md-12">
 		<div class="form-group">
