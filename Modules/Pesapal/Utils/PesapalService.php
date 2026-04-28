@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Utils;
+namespace Modules\Pesapal\Utils;
 
-use App\PesapalSetting;
+use Modules\Pesapal\Entities\PesapalSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

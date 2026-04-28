@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\Pesapal\Http\Controllers;
 
-use App\PesapalSetting;
-use App\PesapalTransaction;
-use App\Utils\PesapalService;
+use Illuminate\Routing\Controller;
+use Modules\Pesapal\Entities\PesapalSetting;
+use Modules\Pesapal\Entities\PesapalTransaction;
+use Modules\Pesapal\Utils\PesapalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,7 @@ class PesapalGatewayController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $settings    = PesapalSetting::getForBusiness($business_id);
 
-        return view('pesapal.settings', compact('settings'));
+        return view('pesapal::settings', compact('settings'));
     }
 
     public function saveSettings(Request $request)
@@ -381,7 +382,7 @@ class PesapalGatewayController extends Controller
         $orderTrackingId   = $request->input('OrderTrackingId');
         $merchantReference = $request->input('OrderMerchantReference');
 
-        return view('pesapal.payment_complete', compact('orderTrackingId', 'merchantReference'));
+        return view('pesapal::payment_complete', compact('orderTrackingId', 'merchantReference'));
     }
 
     // -----------------------------------------------------------------------
@@ -420,7 +421,7 @@ class PesapalGatewayController extends Controller
                 ->make(true);
         }
 
-        return view('pesapal.transactions');
+        return view('pesapal::transactions');
     }
 
     // -----------------------------------------------------------------------

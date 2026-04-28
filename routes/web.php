@@ -997,44 +997,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/check-matching-payment', [MpesaController::class, 'checkMatchingPayment'])->name('check-matching-payment-payment');
     });
 
-    // Pesapal Gateway Routes (per-business credentials, v3 API)
-    Route::prefix('pesapal')->name('pesapal.')->group(function () {
-        Route::get('/settings',              [\App\Http\Controllers\PesapalGatewayController::class, 'settings'])->name('settings');
-        Route::post('/settings',             [\App\Http\Controllers\PesapalGatewayController::class, 'saveSettings'])->name('settings.save');
-        Route::post('/test-connection',      [\App\Http\Controllers\PesapalGatewayController::class, 'testConnection'])->name('test');
-        Route::post('/register-ipn',         [\App\Http\Controllers\PesapalGatewayController::class, 'registerIpn'])->name('register-ipn');
-        Route::post('/initiate-payment',     [\App\Http\Controllers\PesapalGatewayController::class, 'initiatePayment'])->name('initiate-payment');
-        Route::post('/check-payment-status', [\App\Http\Controllers\PesapalGatewayController::class, 'checkPaymentStatus'])->name('check-status');
-        Route::get('/transactions',          [\App\Http\Controllers\PesapalGatewayController::class, 'transactions'])->name('transactions');
-        Route::get('/daily-summary',         [\App\Http\Controllers\PesapalGatewayController::class, 'dailySummary'])->name('daily-summary');
-    });
-
     // Cloud Sync Dashboard (full auth + sidebar)
     Route::get('/sync',               [CloudSyncController::class, 'dashboard'])->name('sync.dashboard');
     Route::delete('/sync/token/{id}', [CloudSyncController::class, 'revokeToken'])->name('sync.token.revoke');
-
-    // ── Per-Business Feature Management ──────────────────────────────────────
-    Route::get('/business-features',             [\App\Http\Controllers\BusinessFeaturesController::class, 'index'])->name('business-features.index');
-    Route::post('/business-features/toggle',     [\App\Http\Controllers\BusinessFeaturesController::class, 'toggle'])->name('business-features.toggle');
-    Route::post('/business-features/enable-all', [\App\Http\Controllers\BusinessFeaturesController::class, 'enableAll'])->name('business-features.enable-all');
-    Route::post('/business-features/disable-all',[\App\Http\Controllers\BusinessFeaturesController::class, 'disableAll'])->name('business-features.disable-all');
-
-    // ── Customer Order Token Management (owner/authenticated) ──────────────
-    Route::get('/customer-order-links', [CustomerOrderController::class, 'index'])->name('customer_order.links');
-    Route::get('/contacts/{contact_id}/order-token', [CustomerOrderController::class, 'generateToken'])->name('customer_order.generate_token');
-    Route::post('/contacts/{contact_id}/regenerate-order-token', [CustomerOrderController::class, 'regenerateToken'])->name('customer_order.regenerate_token');
 });
-
-// ── Customer Order Links (public, no auth required) ─────────────────────────
-// Fixed routes must be declared BEFORE the {token} wildcard routes
-Route::post('/customer-order/check-payment', [CustomerOrderController::class, 'checkPayment'])->name('customer_order.check_payment');
-Route::get('/customer-order/{token}/search', [CustomerOrderController::class, 'search'])->name('customer_order.search');
-Route::get('/customer-order/{token}', [CustomerOrderController::class, 'show'])->name('customer_order.show');
-Route::post('/customer-order/{token}', [CustomerOrderController::class, 'store'])->name('customer_order.store');
-
-// Pesapal Webhooks (public, no auth — called by Pesapal)
-Route::get('/pesapal/ipn',      [\App\Http\Controllers\PesapalGatewayController::class, 'ipnCallback'])->name('pesapal.ipn');
-Route::get('/pesapal/callback', [\App\Http\Controllers\PesapalGatewayController::class, 'paymentCallback'])->name('pesapal.customer-callback');
 
 // M-Pesa Webhooks (public, no auth required - called by Safaricom)
 // NOTE: Using 'mobile-money' instead of 'mpesa' because Safaricom rejects URLs containing 'MPESA'

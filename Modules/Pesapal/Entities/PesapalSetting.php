@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Modules\Pesapal\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
