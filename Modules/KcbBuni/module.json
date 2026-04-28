@@ -1,0 +1,11 @@
+{
+    "name": "KcbBuni",
+    "alias": "kcbbuni",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\KcbBuni\\Providers\\KcbBuniServiceProvider"
+    ],
+    "files": []
+}

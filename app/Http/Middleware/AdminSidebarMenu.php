@@ -777,6 +777,29 @@ class AdminSidebarMenu
                 )->order(23);
             }
 
+            // KCB Buni menu (B2B/B2C gateway)
+            if ($is_admin || auth()->user()->can('kcb_buni.manage_settings') || auth()->user()->can('kcb_buni.view_transactions')) {
+                $menu->dropdown(
+                    'KCB Buni',
+                    function ($sub) use ($is_admin) {
+                        if ($is_admin || auth()->user()->can('kcb_buni.manage_settings')) {
+                            $sub->url(route('kcb-buni.settings'), 'Settings',
+                                ['icon' => '', 'active' => request()->segment(1) == 'kcb-buni' && request()->segment(2) == 'settings']);
+                        }
+                        if ($is_admin || auth()->user()->can('kcb_buni.view_transactions')) {
+                            $sub->url(route('kcb-buni.transactions'), 'Transactions',
+                                ['icon' => '', 'active' => request()->segment(1) == 'kcb-buni' && request()->segment(2) == 'transactions']);
+                        }
+                    },
+                    ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 3v18" />
+                    <path d="M16 7l-4 -4l-4 4" />
+                    <path d="M16 17l-4 4l-4 -4" />
+                  </svg>', 'active' => request()->segment(1) == 'kcb-buni']
+                )->order(24);
+            }
+
             //Reports dropdown
             if (auth()->user()->can('purchase_n_sell_report.view') || auth()->user()->can('contacts_report.view')
                 || auth()->user()->can('stock_report.view') || auth()->user()->can('tax_report.view')

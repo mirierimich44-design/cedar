@@ -20,5 +20,7 @@
     "CustomDashboard": true,
     "Gym": true,
     "ZatcaIntegrationKsa": true,
-    "Parcel": true
+    "Parcel": true,
+    "Pesapal": true,
+    "KcbBuni": true
 }
