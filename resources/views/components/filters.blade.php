@@ -1,24 +1,23 @@
-<div class="tw-mb-4 tw-bg-white tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-shadow-sm">
-    <div class="tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3 tw-border-b tw-border-gray-100 tw-cursor-pointer"
-         data-toggle="collapse" data-target="#collapseFilter" aria-expanded="true">
-        <div class="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-gray-600">
-            @if (!empty($icon))
-                {!! $icon !!}
-            @else
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                </svg>
-            @endif
-            {{ $title ?? __('report.filters') }}
+<div class="tw-transition-all tw-mb-4 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200" style="overflow:hidden;">
+    <div style="background:linear-gradient(135deg,var(--theme-dark,#312e81) 0%,var(--theme-main,#4f46e5) 100%); padding:10px 16px; cursor:pointer;"
+         data-toggle="collapse" data-parent="#accordion" href="#collapseFilter">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:26px;height:26px;background:rgba(255,255,255,0.15);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                @if (!empty($icon))
+                    {!! $icon !!}
+                @else
+                    <i class="fa fa-filter" style="color:white;font-size:11px;"></i>
+                @endif
+            </span>
+            <h3 style="color:white;font-weight:600;font-size:13px;margin:0;">{{ $title ?? __('report.filters') }}</h3>
+            <i class="fa fa-chevron-down" style="color:rgba(255,255,255,0.6);font-size:10px;margin-left:auto;"></i>
         </div>
-        <svg class="tw-w-4 tw-h-4 tw-text-gray-400 tw-transition-transform" xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"/>
-        </svg>
     </div>
-    <div id="collapseFilter" class="collapse in">
-        <div class="tw-px-5 tw-py-4">
+    @php
+        $closed = isMobile();
+    @endphp
+    <div id="collapseFilter" class="panel-collapse collapse @if(empty($closed)) in @endif tw-pt-3 tw-pb-3" aria-expanded="{{ empty($closed) ? 'true' : 'false' }}">
+        <div class="box-body">
             <div class="row">
                 {{ $slot }}
             </div>

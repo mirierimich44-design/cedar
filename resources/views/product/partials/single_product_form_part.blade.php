@@ -1,8 +1,9 @@
-@if(!session('business.enable_price_tax'))
-  @php $default = 0; @endphp
-@else
-  @php $default = null; @endphp
-@endif
+@php
+    /* Always default to 0 so jQuery Validate's required rule passes on page load.
+       When enable_price_tax is ON the original code used null, but null fails
+       the `required` validator and triggers "Invalid inputs" on first submit. */
+    $default = 0;
+@endphp
 
 <style>
 .price-flow { display: flex; align-items: stretch; gap: 0; margin-bottom: 4px; }

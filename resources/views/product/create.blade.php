@@ -44,6 +44,13 @@
     .form-group label { font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
     .form-group .form-control { border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; }
     .form-group .form-control:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
+    /* Fix Bootstrap input-group border-radius — don't override the internal corners */
+    .input-group .form-control:not(:last-child) { border-radius: 8px 0 0 8px !important; }
+    .input-group .form-control:not(:first-child) { border-radius: 0 8px 8px 0 !important; }
+    .input-group .form-control:only-child         { border-radius: 8px !important; }
+    .input-group-btn .btn { border-radius: 0 8px 8px 0 !important; border-left: 0; }
+    /* Prevent input-group overflow into adjacent columns */
+    .input-group { position: relative; z-index: 2; }
     .sticky-save-bar {
         position: fixed; bottom: 0; left: 0; right: 0;
         background: #fff;
