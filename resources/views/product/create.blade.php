@@ -206,7 +206,7 @@
                 </div>
             </div>
             {{-- Unit --}}
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('unit_id', __('product.unit') . ' *') !!}
                     <div class="input-group">
@@ -225,7 +225,7 @@
                 </div>
             </div>
             {{-- Sub units --}}
-            <div class="col-md-3 @if(!session('business.enable_sub_units')) hide @endif">
+            <div class="col-md-4 @if(!session('business.enable_sub_units')) hide @endif">
                 <div class="form-group">
                     {!! Form::label('sub_unit_ids', __('lang_v1.related_sub_units')) !!}
                     @show_tooltip(__('lang_v1.sub_units_tooltip'))
@@ -234,7 +234,7 @@
                 </div>
             </div>
             @if(!empty($common_settings['enable_secondary_unit']))
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('secondary_unit_id', __('lang_v1.secondary_unit')) !!}
                     @show_tooltip(__('lang_v1.secondary_unit_help'))
@@ -247,7 +247,7 @@
         </div>
         <div class="row">
             {{-- Manage stock --}}
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-group">
                     <label class="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer" style="text-transform:none;">
                         {!! Form::checkbox('enable_stock', 1, !empty($duplicate_product) ? $duplicate_product->enable_stock : true,
@@ -259,7 +259,7 @@
                 </div>
             </div>
             {{-- Alert quantity --}}
-            <div class="col-md-3 @if(!empty($duplicate_product) && $duplicate_product->enable_stock == 0) hide @endif" id="alert_quantity_div">
+            <div class="col-md-4 @if(!empty($duplicate_product) && $duplicate_product->enable_stock == 0) hide @endif" id="alert_quantity_div">
                 <div class="form-group">
                     {!! Form::label('alert_quantity', __('product.alert_quantity')) !!}
                     @show_tooltip(__('tooltip.alert_quantity'))
@@ -270,7 +270,7 @@
             </div>
             {{-- Warranty --}}
             @if(!empty($common_settings['enable_product_warranty']))
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('warranty_id', __('lang_v1.warranty')) !!}
                     {!! Form::select('warranty_id', $warranties, null,
