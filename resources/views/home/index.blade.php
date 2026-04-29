@@ -1414,15 +1414,15 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                         }
                     },
                     columns: [
-                        { 
-                            data: 'name', 
+                        {
+                            data: 'name',
                             name: 'p.name',
                             render: function(data, type, row) {
                                 return '<span class="tw-text-sm">' + (data || '') + ' <small>(' + (row.sku || '') + ')</small></span>';
                             }
                         },
-                        { 
-                            data: 'current_stock', 
+                        {
+                            data: 'current_stock',
                             name: 'current_stock',
                             render: function(data) {
                                 var val = parseFloat(data || 0);
@@ -1430,10 +1430,19 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             }
                         },
                         {
-                            data: 'suggestion',
-                            name: 'suggestion',
+                            data: 'avg_daily_sales',
+                            name: 'avg_daily_sales',
                             render: function(data) {
-                                return '<span class="tw-text-xs tw-text-gray-500">' + data + '</span>';
+                                var val = parseFloat(data || 0);
+                                return '<span class="tw-text-gray-600">' + val.toFixed(2) + '</span>';
+                            }
+                        },
+                        {
+                            data: 'suggested_reorder_qty',
+                            name: 'suggested_reorder_qty',
+                            render: function(data) {
+                                var val = parseFloat(data || 0);
+                                return '<span class="tw-text-xs tw-font-semibold tw-text-blue-600">Order ' + val.toFixed(0) + ' units</span>';
                             }
                         }
                     ]
