@@ -515,6 +515,8 @@ class ModuleUtil extends Util
             'cooler'           => ['name' => 'Cooler Management', 'tooltip' => 'Enable the Cooler Asset tracking and compliance module.'],
             'stocktake'        => ['name' => 'Stocktake', 'tooltip' => 'Enable periodic inventory counting / stocktake module.'],
             'customer_orders'  => ['name' => 'Customer Orders', 'tooltip' => 'Enable the Customer Orders module for managing online/pre-orders from customers.'],
+            // Analytics
+            'ai_analytics'     => ['name' => 'AI Analytics', 'tooltip' => 'Enable AI-powered business intelligence dashboard with predictive insights and trend analysis.'],
             // Kenya Compliance
             'etims'            => ['name' => 'eTIMS', 'tooltip' => 'Enable Kenya Revenue Authority eTIMS integration for VAT invoicing.'],
             'dda'              => ['name' => 'DDA Register', 'tooltip' => 'Enable the Dangerous Drugs Act controlled-substances register (Kenya PPB compliance).'],
