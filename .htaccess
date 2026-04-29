@@ -10,6 +10,11 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Serve static assets from public/ subfolder
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(css|js|images|fonts|img|mix-manifest\.json|favicon\.ico|robots\.txt|storage/.*)$ public/$1 [L,QSA]
+
     # Send Requests To Front Controller (index.php is in the root)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
