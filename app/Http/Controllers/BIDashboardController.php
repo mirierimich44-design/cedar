@@ -986,13 +986,34 @@ Data: " . json_encode($context);
         try {
             $business = \App\Business::where('id', request()->session()->get('user.business_id'))->first();
             $apiKey = ($business->common_settings ?? [])['gemini_api_key'] ?? config('services.gemini.key');
-            if (empty($apiKey)) return $isJson ? json_encode(['error' => 'API Key missing']) : "Please set your Gemini API Key in the settings tab.";
 
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
-                'contents' => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
-            ]);
-            return $response->json('candidates.0.content.parts.0.text');
-        } catch (\Exception $e) { return "AI Advisor Offline: " . $e->getMessage(); }
+            if (empty($apiKey)) {
+                return $isJson ? json_encode(['error' => 'Gemini API key not configured. Go to AI Analytics → Settings tab to add your key.']) : "Please set your Gemini API Key in the Settings tab.";
+            }
+
+            $response = Http::timeout(30)->withHeaders(['Content-Type' => 'application/json'])
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                    'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
+                ]);
+
+            if (!$response->successful()) {
+                $err = $response->json('error.message') ?? $response->status();
+                return $isJson ? json_encode(['error' => "Gemini API error: $err"]) : "Gemini API error: $err";
+            }
+
+            $text = $response->json('candidates.0.content.parts.0.text');
+
+            if ($text === null) {
+                // Might be blocked or finish reason non-STOP
+                $reason = $response->json('candidates.0.finishReason') ?? 'unknown';
+                return $isJson ? json_encode(['error' => "Gemini returned no content (reason: $reason). Check your API key or try again."]) : "AI returned no content (reason: $reason).";
+            }
+
+            return $text;
+
+        } catch (\Exception $e) {
+            return $isJson ? json_encode(['error' => 'AI Offline: ' . $e->getMessage()]) : "AI Offline: " . $e->getMessage();
+        }
     }
 }
