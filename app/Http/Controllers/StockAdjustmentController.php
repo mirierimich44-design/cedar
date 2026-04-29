@@ -210,24 +210,38 @@ class StockAdjustmentController extends Controller
                 $product_data = [];
 
                 foreach ($products as $product) {
+                    // Shelf-count mode: user enters actual qty on shelf.
+                    // We compute the difference vs system stock and adjust accordingly.
+                    $shelf_qty   = $this->productUtil->num_uf($product['quantity']);
+                    $system_qty  = isset($product['qty_available'])
+                        ? $this->productUtil->num_uf($product['qty_available'])
+                        : 0;
+                    $diff = $shelf_qty - $system_qty; // negative = loss, positive = gain
+
+                    // Skip if no change
+                    if ($diff == 0) continue;
+
+                    // Store abs(diff) as the adjustment quantity for records
                     $adjustment_line = [
-                        'product_id' => $product['product_id'],
+                        'product_id'   => $product['product_id'],
                         'variation_id' => $product['variation_id'],
-                        'quantity' => $this->productUtil->num_uf($product['quantity']),
-                        'unit_price' => $this->productUtil->num_uf($product['unit_price']),
+                        'quantity'     => abs($diff),
+                        'unit_price'   => $this->productUtil->num_uf($product['unit_price']),
                     ];
                     if (! empty($product['lot_no_line_id'])) {
-                        //Add lot_no_line_id to stock adjustment line
                         $adjustment_line['lot_no_line_id'] = $product['lot_no_line_id'];
                     }
                     $product_data[] = $adjustment_line;
 
-                    //Decrease available quantity
-                    $this->productUtil->decreaseProductQuantity(
+                    // Apply stock change (updateProductQuantity handles both +/-)
+                    $this->productUtil->updateProductQuantity(
+                        $input_data['location_id'],
                         $product['product_id'],
                         $product['variation_id'],
-                        $input_data['location_id'],
-                        $this->productUtil->num_uf($product['quantity'])
+                        $shelf_qty,   // new (shelf count)
+                        $system_qty,  // old (system count)
+                        null,
+                        false         // already unformatted
                     );
                 }
 

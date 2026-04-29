@@ -94,7 +94,7 @@
                                         @lang('sale.product')
                                     </th>
                                     <th class="col-sm-2 text-center">
-                                        @lang('sale.qty')
+                                        Actual Shelf Qty
                                     </th>
                                     <th class="col-sm-2 text-center show_price_with_permission">
                                         @lang('sale.unit_price')
@@ -157,6 +157,28 @@
     <script src="{{ asset('js/stock_adjustment.js?v=' . $asset_v) }}"></script>
     <script type="text/javascript">
         __page_leave_confirmation('#stock_adjustment_form');
+
+        // Shelf-count mode: show live adjustment preview as user types
+        $(document).on('input change', '.shelf-count-input', function () {
+            var $input    = $(this);
+            var shelfQty  = parseFloat($input.val()) || 0;
+            var systemQty = parseFloat($input.data('qty_available')) || 0;
+            var diff      = shelfQty - systemQty;
+            var $preview  = $input.siblings('.shelf-adj-preview');
+
+            if (diff === 0) {
+                $preview.html('<span class="text-muted">No change</span>');
+            } else if (diff < 0) {
+                $preview.html('<span class="text-danger"><i class="fa fa-arrow-down"></i> Adjustment: ' + diff.toFixed(2) + '</span>');
+            } else {
+                $preview.html('<span class="text-success"><i class="fa fa-arrow-up"></i> Adjustment: +' + diff.toFixed(2) + '</span>');
+            }
+        });
+
+        // Trigger preview on page load for any pre-filled rows
+        $(document).on('product_added_to_table', function() {
+            $('.shelf-count-input').trigger('change');
+        });
     </script>
 @endsection
 
