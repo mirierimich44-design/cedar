@@ -21,6 +21,14 @@
 {!! Form::open(['url' => action([\App\Http\Controllers\ProductController::class, 'update'] , [$product->id] ), 'method' => 'PUT', 'id' => 'product_add_form',
         'class' => 'product_form', 'files' => true ]) !!}
     <input type="hidden" id="product_id" value="{{ $product->id }}">
+    @if(!empty($edit_location_id))
+        <input type="hidden" name="edit_location_id" value="{{ $edit_location_id }}">
+        <div class="alert alert-info alert-dismissible" style="margin-bottom:10px;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fa fa-map-marker"></i>
+            <strong>Branch-specific pricing:</strong> Selling price changes will apply to <strong>{{ $edit_location_name ?? 'the selected branch' }}</strong> only. Other branches are not affected.
+        </div>
+    @endif
 
     @component('components.widget', ['class' => 'box-primary'])
         <div class="row">

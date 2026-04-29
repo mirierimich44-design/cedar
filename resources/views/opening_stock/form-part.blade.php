@@ -12,7 +12,7 @@
 								<thead>
 								<tr class="bg-green">
 									<th>@lang( 'product.product_name' )</th>
-									<th>@lang( 'lang_v1.quantity_left' )</th>
+									<th>Actual Shelf Qty</th>
 									<th>@lang( 'purchase.unit_cost_before_tax' )</th>
 									@if($enable_expiry == 1 && $product->enable_stock == 1)
 										<th>Exp. Date</th>
@@ -71,11 +71,12 @@
 	</td>
 	<td>
 		<div class="input-group">
-		  {!! Form::text('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][quantity]', @format_quantity($qty) , ['class' => 'form-control input-sm input_number purchase_quantity input_quantity', 'required']); !!}
+		  {!! Form::text('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][quantity]', @format_quantity($qty) , ['class' => 'form-control input-sm input_number purchase_quantity input_quantity', 'required', 'placeholder' => 'Enter actual shelf count']); !!}
 		  <span class="input-group-addon">
 		    {{ $product->unit->short_name }}
 		  </span>
 		</div>
+		<small class="text-muted"><i class="fa fa-info-circle"></i> Enter actual physical count</small>
 		@if(!empty($product->second_unit))
 			<br>
             <span>

@@ -205,7 +205,7 @@ class ProductController extends Controller
                 ->editColumn('category', '{{$category}} @if(!empty($sub_category))<br/> -- {{$sub_category}}@endif')
                 ->addColumn(
                     'action',
-                    function ($row) use ($selling_price_group_count) {
+                    function ($row) use ($selling_price_group_count, $location_id) {
                         $html = '<div class="tw-flex tw-items-center tw-gap-1">';
 
                         $html .= '<div class="btn-group">
@@ -224,7 +224,11 @@ class ProductController extends Controller
                         }
 
                         if (auth()->user()->can('product.update')) {
-                            $html .= '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'edit'], [$row->id]).'"><i class="glyphicon glyphicon-edit"></i> '.__('messages.edit').'</a></li>';
+                            $edit_url = action([\App\Http\Controllers\ProductController::class, 'edit'], [$row->id]);
+                            if (!empty($location_id)) {
+                                $edit_url .= '?location_id=' . $location_id;
+                            }
+                            $html .= '<li><a href="'.$edit_url.'"><i class="glyphicon glyphicon-edit"></i> '.__('messages.edit').'</a></li>';
                         }
 
                         if (auth()->user()->can('product.delete')) {
@@ -674,8 +678,16 @@ class ProductController extends Controller
 
         $alert_quantity = ! is_null($product->alert_quantity) ? $this->productUtil->num_f($product->alert_quantity, false, null, true) : null;
 
+        // Branch-specific pricing: if editing from a location-filtered product list,
+        // capture the location so the update method can scope price changes to that branch.
+        $edit_location_id = request()->input('location_id');
+        $edit_location_name = null;
+        if (!empty($edit_location_id)) {
+            $edit_location_name = BusinessLocation::find($edit_location_id)?->name;
+        }
+
         return view('product.edit')
-                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity'));
+                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity', 'edit_location_id', 'edit_location_name'));
     }
 
     /**
@@ -827,6 +839,10 @@ class ProductController extends Controller
 
             $product->product_locations()->sync($product_locations);
 
+            // Branch-specific pricing: if a location_id was passed (editing from filtered list),
+            // scope selling price changes to that branch only via variation_location_details.
+            $edit_location_id = $request->input('edit_location_id');
+
             if ($product->type == 'single') {
                 $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);
                 $variation = Variation::find($single_data['single_variation_id']);
@@ -835,8 +851,22 @@ class ProductController extends Controller
                 $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
-                $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
-                $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
+
+                if (!empty($edit_location_id)) {
+                    // Save selling price to this branch only, leave global variation price unchanged
+                    $vld = VariationLocationDetails::firstOrNew([
+                        'variation_id'         => $variation->id,
+                        'product_id'           => $product->id,
+                        'product_variation_id' => $variation->product_variation_id,
+                        'location_id'          => $edit_location_id,
+                    ]);
+                    $vld->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+                    $vld->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
+                    $vld->save();
+                } else {
+                    $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
+                    $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
+                }
                 $variation->save();
 
                 Media::uploadMedia($product->business_id, $variation, $request, 'variation_images');
@@ -875,8 +905,20 @@ class ProductController extends Controller
                 $variation->default_purchase_price = $this->productUtil->num_uf($request->input('item_level_purchase_price_total'));
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($request->input('purchase_price_inc_tax'));
                 $variation->profit_percent = $this->productUtil->num_uf($request->input('profit_percent'));
-                $variation->default_sell_price = $this->productUtil->num_uf($request->input('selling_price'));
-                $variation->sell_price_inc_tax = $this->productUtil->num_uf($request->input('selling_price_inc_tax'));
+                if (!empty($edit_location_id)) {
+                    $vld = VariationLocationDetails::firstOrNew([
+                        'variation_id'         => $variation->id,
+                        'product_id'           => $product->id,
+                        'product_variation_id' => $variation->product_variation_id,
+                        'location_id'          => $edit_location_id,
+                    ]);
+                    $vld->default_sell_price = $this->productUtil->num_uf($request->input('selling_price'));
+                    $vld->sell_price_inc_tax = $this->productUtil->num_uf($request->input('selling_price_inc_tax'));
+                    $vld->save();
+                } else {
+                    $variation->default_sell_price = $this->productUtil->num_uf($request->input('selling_price'));
+                    $variation->sell_price_inc_tax = $this->productUtil->num_uf($request->input('selling_price_inc_tax'));
+                }
                 $variation->combo_variations = $combo_variations;
                 $variation->save();
             }
@@ -2594,6 +2636,16 @@ class ProductController extends Controller
             foreach ($product->variations as $variation) {
                 $location_data = $request->input('location_prices.' . $variation->id, []);
                 foreach ($location_data as $location_id => $prices) {
+                    $dsp_raw = $prices['default_sell_price'] ?? '';
+                    $dsp_inc_raw = $prices['sell_price_inc_tax'] ?? '';
+
+                    // If both price fields are blank, skip this branch entirely.
+                    // This prevents creating null-priced VLD records that would cause
+                    // the branch to silently fall back to the global variation price.
+                    if ($dsp_raw === '' && $dsp_inc_raw === '') {
+                        continue;
+                    }
+
                     $detail = VariationLocationDetails::firstOrNew([
                         'variation_id'        => $variation->id,
                         'product_id'          => $product->id,
@@ -2601,12 +2653,8 @@ class ProductController extends Controller
                         'location_id'         => $location_id,
                     ]);
 
-                    $dsp = isset($prices['default_sell_price']) && $prices['default_sell_price'] !== ''
-                        ? $this->productUtil->num_uf($prices['default_sell_price'])
-                        : null;
-                    $dsp_inc = isset($prices['sell_price_inc_tax']) && $prices['sell_price_inc_tax'] !== ''
-                        ? $this->productUtil->num_uf($prices['sell_price_inc_tax'])
-                        : null;
+                    $dsp = $dsp_raw !== '' ? $this->productUtil->num_uf($dsp_raw) : null;
+                    $dsp_inc = $dsp_inc_raw !== '' ? $this->productUtil->num_uf($dsp_inc_raw) : null;
 
                     $detail->default_sell_price = $dsp;
                     $detail->sell_price_inc_tax = $dsp_inc;
