@@ -13,10 +13,10 @@ return [
     |
     */
 
-    'paths' => [
-        base_path('custom_views'),
+    'paths' => array_filter([
+        is_dir(base_path('custom_views')) ? base_path('custom_views') : null,
         resource_path('views'),
-    ],
+    ]),
 
     /*
     |--------------------------------------------------------------------------
