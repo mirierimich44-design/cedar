@@ -417,7 +417,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/calendar', [HomeController::class, 'getCalendar'])->name('calendar');
 
     // Members - Coming Soon
-    Route::get('/members', [\App\Http\Controllers\MemberController::class, 'index'])->name('members.index');
+    Route::get('/members', [\App\Http\Controllers\MemberController::class, 'index'])->name('app.members.index');
 
     Route::post('/test-email', [BusinessController::class, 'testEmailConfiguration']);
     Route::post('/test-sms', [BusinessController::class, 'testSmsConfiguration']);
