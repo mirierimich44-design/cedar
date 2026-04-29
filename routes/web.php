@@ -742,6 +742,14 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/{id}/fetch-details-json', [\App\Http\Controllers\OrderController::class, 'getOrderDetailsJson'])->name('fetchDetailsJson');
     });
 
+    // Customer Order Links (shareable order links per contact)
+    Route::prefix('customer-order-links')->name('customer_order.')->group(function () {
+        Route::get('/', [CustomerOrderController::class, 'index'])->name('links');
+        Route::post('/generate/{contact_id}', [CustomerOrderController::class, 'generateToken'])->name('generateToken');
+        Route::post('/regenerate/{contact_id}', [CustomerOrderController::class, 'regenerateToken'])->name('regenerateToken');
+        Route::get('/check-payment', [CustomerOrderController::class, 'checkPayment'])->name('checkPayment');
+    });
+
     // Follow-ups Routes
     Route::prefix('pos-customer-followups')->name('followups.')->group(function () {
         Route::get('/', [\App\Http\Controllers\FollowupController::class, 'index'])->name('index');
