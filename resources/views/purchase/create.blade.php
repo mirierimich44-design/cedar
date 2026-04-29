@@ -597,7 +597,17 @@
 			set_payment_type_dropdown();
 			$('select#location_id').change(function() {
 				set_payment_type_dropdown();
+				// Enable product search once a location is selected
+				if ($(this).val()) {
+					$('#search_product').prop('disabled', false).focus();
+				} else {
+					$('#search_product').prop('disabled', true);
+				}
 			});
+			// If location is already pre-selected (single location), ensure search is enabled
+			if ($('select#location_id').val()) {
+				$('#search_product').prop('disabled', false);
+			}
     	});
     	$(document).on('change', '.payment_types_dropdown, #location_id', function(e) {
 		    var default_accounts = $('select#location_id').length ? 
