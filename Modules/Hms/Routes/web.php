@@ -11,7 +11,7 @@
 |
 */
 
-Route::middleware('web', 'auth', 'language', 'AdminSidebarMenu')->prefix('hms')->group(function () {
+Route::middleware('web', 'auth', 'language', 'AdminSidebarMenu')->prefix('hms')->name('hms.')->group(function () {
     Route::get('dashboard', [Modules\Hms\Http\Controllers\HmsController::class, 'index']);
     Route::resource('/rooms', Modules\Hms\Http\Controllers\RoomController::class);
     Route::get('/room/{id}/destroy', [Modules\Hms\Http\Controllers\RoomController::class, 'destroy']);

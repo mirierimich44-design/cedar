@@ -3,7 +3,7 @@
 // use App\Http\Controllers\Modules;
 // use Illuminate\Support\Facades\Route;
 
-Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezone', 'ContactSidebarMenu', 'CheckContactLogin')->prefix('contact')->group(function () {
+Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezone', 'ContactSidebarMenu', 'CheckContactLogin')->prefix('contact')->name('contact.')->group(function () {
     Route::resource('contact-dashboard', 'Modules\Crm\Http\Controllers\DashboardController');
     Route::get('contact-profile', [Modules\Crm\Http\Controllers\ManageProfileController::class, 'getProfile']);
     Route::post('contact-password-update', [Modules\Crm\Http\Controllers\ManageProfileController::class, 'updatePassword']);
@@ -18,7 +18,7 @@ Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezon
     Route::get('order-request/get_product_row/{variation_id}/{location_id}', [Modules\Crm\Http\Controllers\OrderRequestController::class, 'getProductRow']);
 });
 
-Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin')->prefix('crm')->group(function () {
+Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin')->prefix('crm')->name('crm.')->group(function () {
     Route::get('commissions', [Modules\Crm\Http\Controllers\ContactLoginController::class, 'commissions']);
     Route::get('all-contacts-login', [Modules\Crm\Http\Controllers\ContactLoginController::class, 'allContactsLoginList']);
     Route::resource('contact-login', 'Modules\Crm\Http\Controllers\ContactLoginController')->except(['show']);

@@ -21,7 +21,7 @@ Route::get('c/blog/{slug}-{id}', [Modules\Cms\Http\Controllers\CmsController::cl
 Route::get('c/contact-us', [Modules\Cms\Http\Controllers\CmsController::class, 'contactUs'])->name('cms.contact.us');
 Route::post('c/submit-contact-form', [Modules\Cms\Http\Controllers\CmsController::class, 'postContactForm'])->name('cms.submit.contact.form');
 
-Route::middleware('web', 'SetSessionData', 'auth', 'language', 'timezone', 'AdminSidebarMenu', 'superadmin')->prefix('cms')->group(function () {
+Route::middleware('web', 'SetSessionData', 'auth', 'language', 'timezone', 'AdminSidebarMenu', 'superadmin')->prefix('cms')->name('cms.')->group(function () {
     Route::get('install', [\Modules\Cms\Http\Controllers\InstallController::class, 'index']);
     Route::post('install', [\Modules\Cms\Http\Controllers\InstallController::class, 'install']);
     Route::get('install/uninstall', [\Modules\Cms\Http\Controllers\InstallController::class, 'uninstall']);

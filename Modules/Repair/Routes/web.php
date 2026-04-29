@@ -2,7 +2,7 @@
 
 Route::get('/repair-status', [Modules\Repair\Http\Controllers\CustomerRepairStatusController::class, 'index'])->name('repair-status');
 Route::post('/post-repair-status', [Modules\Repair\Http\Controllers\CustomerRepairStatusController::class, 'postRepairStatus'])->name('post-repair-status');
-Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu')->prefix('repair')->group(function () {
+Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu')->prefix('repair')->name('repair.')->group(function () {
     Route::get('edit-repair/{id}/status', [Modules\Repair\Http\Controllers\RepairController::class, 'editRepairStatus']);
     Route::post('update-repair-status', [Modules\Repair\Http\Controllers\RepairController::class, 'updateRepairStatus']);
     Route::get('delete-media/{id}', [Modules\Repair\Http\Controllers\RepairController::class, 'deleteMedia']);

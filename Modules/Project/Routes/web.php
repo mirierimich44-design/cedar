@@ -3,7 +3,7 @@
 // use App\Http\Controllers\Modules;
 // use Illuminate\Support\Facades\Route;
 
-Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezone', 'AdminSidebarMenu')->prefix('project')->group(function () {
+Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezone', 'AdminSidebarMenu')->prefix('project')->name('project.')->group(function () {
     Route::put('project/{id}/post-status', [Modules\Project\Http\Controllers\ProjectController::class, 'postProjectStatus']);
     Route::put('project-settings', [Modules\Project\Http\Controllers\ProjectController::class, 'postSettings']);
     Route::resource('project', 'Modules\Project\Http\Controllers\ProjectController');
