@@ -1,17 +1,20 @@
 <?php
-define('LARAVEL_START', microtime(true));
-require __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-$kernel->bootstrap();
+// Read most recent Laravel log — works with both single and daily log drivers
+$logDir = __DIR__ . '/storage/logs';
 
-$logFile = storage_path('logs/laravel.log');
-if (!file_exists($logFile)) {
-    echo "Log file not found.\n";
+// Find all log files sorted newest first
+$files = glob($logDir . '/*.log');
+if (empty($files)) {
+    echo "No log files found in $logDir\n";
     exit;
 }
+usort($files, fn($a,$b) => filemtime($b) - filemtime($a));
 
-// Get last 150 lines of the log
+$logFile = $files[0];
+echo "Reading: $logFile  (modified: " . date('Y-m-d H:i:s', filemtime($logFile)) . ")\n";
+echo str_repeat('-', 80) . "\n";
+
+// Last 200 lines
 $lines = file($logFile);
-$last  = array_slice($lines, -150);
+$last  = array_slice($lines, -200);
 echo implode('', $last);
