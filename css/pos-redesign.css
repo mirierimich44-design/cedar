@@ -1459,6 +1459,11 @@ body.pos-material {
         padding: 10px 14px !important;
     }
 
+    /* Hide totals card in Products tab — total is in bottom bar */
+    .pos-right-panel .pos-right-totals {
+        display: none !important;
+    }
+
     /* Right panel products full height */
     .pos-right-panel.pos-mobile-active .products-panel {
         min-height: 65vh !important;
