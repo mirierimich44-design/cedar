@@ -388,6 +388,20 @@
         function initMobile() {
             if (!isMobileView()) return;
 
+            // Auto-load products by triggering sidebar search with empty term
+            setTimeout(function () {
+                var $sidebarSearch = $('#product_search_sidebar');
+                if ($sidebarSearch.length && $sidebarSearch.val() === '') {
+                    $sidebarSearch.trigger('input').trigger('keyup');
+                }
+                // Also click the first category button if products still empty
+                setTimeout(function () {
+                    if ($('#product_list_body').is(':empty')) {
+                        $('.category-filter .category-btn').first().trigger('click');
+                    }
+                }, 800);
+            }, 600);
+
             // Cart trigger
             $('#mob_cart_trigger').off('click.mob').on('click.mob', function () {
                 cartOpen ? closeCart() : openCart();

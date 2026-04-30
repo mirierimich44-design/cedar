@@ -1493,7 +1493,55 @@ body.pos-material {
         height: 38px !important;
         font-size: 15px !important;
     }
-}
+
+    /* ── POS Header: mobile simplification ── */
+    /* Hide all right-side action buttons */
+    .pos-header-actions {
+        display: none !important;
+    }
+
+    /* Hide date/time — only business name in centre */
+    .pos-header-datetime {
+        display: none !important;
+    }
+
+    /* ── Cart table: show only Product | Qty | Price | Delete ── */
+    #pos_table {
+        min-width: auto !important;
+    }
+
+    .pos_product_div {
+        overflow-x: visible !important;
+    }
+
+    /* Hide disc, subtotal, staff, warranty, inline-tax-price columns */
+    #pos_table .col-discount,
+    #pos_table .col-total,
+    #pos_table .col-staff,
+    #pos_table .col-warranty {
+        display: none !important;
+    }
+
+    /* Make product name wrap cleanly */
+    #pos_table .col-product {
+        max-width: 140px !important;
+        word-break: break-word !important;
+        font-size: 12px !important;
+    }
+
+    /* Price column — show unit price */
+    #pos_table .col-price {
+        white-space: nowrap !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+    }
+
+    /* Delete button stays compact */
+    #pos_table .col-action {
+        width: 36px !important;
+        padding: 4px !important;
+        text-align: center !important;
+    }}
 
 /* ============================================================
    SCROLLBAR STYLING

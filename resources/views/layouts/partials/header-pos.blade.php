@@ -79,14 +79,14 @@
     {{-- Centre: Business Name --}}
     <div style="flex: 1; text-align: center;">
         <span style="font-size: 20px; font-weight: 600; letter-spacing: 0.5px;">{{ Session::get('business.name', 'Point of Sale') }}</span>
-        <div style="font-size: 11px; opacity: 0.8; margin-top: -2px;">
+        <div class="pos-header-datetime" style="font-size: 11px; opacity: 0.8; margin-top: -2px;">
             <i class="material-icons" style="font-size: 12px; vertical-align: middle;">schedule</i>
             <span class="curr_datetime">{{ @format_datetime('now') }}</span>
         </div>
     </div>
 
     {{-- Right Side: Action Buttons --}}
-    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+    <div class="pos-header-actions" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
         {{-- Custom Module Icons --}}
         @if (!empty($pos_module_data))
             @foreach ($pos_module_data as $key => $value)
