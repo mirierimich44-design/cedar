@@ -1482,16 +1482,78 @@ body.pos-material {
         padding: 10px 14px !important;
     }
 
-    /* Quantity controls touch-friendly */
+    /* ── Cart table rows: compact & uniform ── */
+    #pos_table td, #pos_table th {
+        padding: 6px 4px !important;
+        vertical-align: middle !important;
+    }
+
+    /* Product name: wrap to 2 lines, no truncation */
+    #pos_table .col-product {
+        max-width: 130px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+    }
+
+    #pos_table .col-product .product_name {
+        font-weight: 600 !important;
+        display: block !important;
+    }
+
+    /* Qty controls: small and uniform */
+    .quantity-controls {
+        display: flex !important;
+        align-items: center !important;
+        gap: 2px !important;
+        flex-wrap: nowrap !important;
+    }
+
     .quantity-controls button {
-        width: 36px !important;
-        height: 38px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        padding: 0 !important;
+        font-size: 13px !important;
+        line-height: 1 !important;
     }
 
     .quantity-controls .pos_quantity,
     .quantity-controls .input_quantity {
-        height: 38px !important;
-        font-size: 15px !important;
+        width: 38px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+        padding: 0 2px !important;
+        text-align: center !important;
+    }
+
+    /* Price input: same height as qty controls */
+    #pos_table .col-price input,
+    #pos_table .col-price .input-group,
+    #pos_table .col-price .form-control {
+        width: 62px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+        padding: 0 4px !important;
+        text-align: right !important;
+        border-radius: 6px !important;
+    }
+
+    /* Delete button: compact */
+    #pos_table .col-action {
+        width: 32px !important;
+        padding: 4px 2px !important;
+        text-align: center !important;
+    }
+
+    #pos_table .col-action button,
+    #pos_table .col-action a {
+        width: 28px !important;
+        height: 28px !important;
+        padding: 0 !important;
+        font-size: 13px !important;
+        line-height: 28px !important;
     }
 
     /* ── POS Header: mobile simplification ── */
