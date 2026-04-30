@@ -199,6 +199,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/products/mass-delete', [ProductController::class, 'massDestroy']);
     Route::get('/products/view/{id}', [ProductController::class, 'view']);
     Route::get('/products/list', [ProductController::class, 'getProducts']);
+    Route::get('/products/inquiry', [ProductController::class, 'inquiry'])->name('products.inquiry');
     Route::get('/products/list-no-variation', [ProductController::class, 'getProductsWithoutVariations']);
     Route::post('/products/bulk-edit', [ProductController::class, 'bulkEdit']);
     Route::post('/products/bulk-update', [ProductController::class, 'bulkUpdate']);

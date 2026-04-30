@@ -200,6 +200,14 @@ class AdminSidebarMenu
                             );
                         }
 
+                        if (auth()->user()->can('product.view')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ProductController::class, 'inquiry']),
+                                __('lang_v1.product_inquiry'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'products' && request()->segment(2) == 'inquiry']
+                            );
+                        }
+
                         if (auth()->user()->can('product.create')) {
                             $sub->url(
                                 action([\App\Http\Controllers\ProductController::class, 'create']),

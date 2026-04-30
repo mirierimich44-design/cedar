@@ -381,6 +381,14 @@
               @show_tooltip(__('lang_v1.view_profit_tooltip'))
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'view_product_stock', in_array('view_product_stock', $role_permissions), ['class' => 'input-icheck']); !!}
+                {{ __('lang_v1.view_product_stock') }}
+              </label>
+            </div>
+          </div>
         </div>
         </div>
         <hr>

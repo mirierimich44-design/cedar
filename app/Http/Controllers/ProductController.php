@@ -1300,6 +1300,22 @@ class ProductController extends Controller
             return json_encode($result);
         }
     }
+
+    public function inquiry()
+    {
+        if (!auth()->user()->can('product.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $business_locations = BusinessLocation::forDropdown($business_id);
+
+        $can_view_stock = auth()->user()->can('view_product_stock');
+        $can_view_purchase_price = auth()->user()->can('view_purchase_price');
+
+        return view('product.inquiry', compact('business_locations', 'can_view_stock', 'can_view_purchase_price'));
+    }
+
     /**
      * Get multiple variation details in a single request
      *
