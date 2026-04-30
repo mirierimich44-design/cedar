@@ -52,8 +52,8 @@
     </button>
 </div>
 
-{{-- Product Search Bar --}}
-<div class="search-bar">
+{{-- Product Search Bar (desktop) --}}
+<div class="search-bar pos-desktop-search">
     <div class="search-icon">
         <i class="fas fa-search"></i>
     </div>
@@ -64,6 +64,19 @@
         'disabled' => is_null($default_location)? true : false,
         'autofocus' => is_null($default_location)? false : true,
     ]) !!}
+</div>
+
+{{-- Mobile-only product search --}}
+<div id="mob_search_wrap" class="no-print" style="display:none; position:relative;">
+    <div class="search-bar" style="margin-bottom:0; border-radius:12px 12px 0 0;">
+        <div class="search-icon"><i class="fas fa-search"></i></div>
+        <input type="text" id="mob_product_search" class="form-control search-input"
+               placeholder="Search products..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button type="button" id="mob_search_clear" style="display:none; background:none; border:none; padding:0 10px; color:#94a3b8; font-size:18px; cursor:pointer;">
+            <i class="fas fa-times-circle"></i>
+        </button>
+    </div>
+    <div id="mob_search_results" class="mob-search-results"></div>
 </div>
 
 {{-- Cart Items List --}}
