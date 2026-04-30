@@ -20,6 +20,18 @@
             'method' => 'post',
             'id' => 'add_pos_sell_form',
         ]) !!}
+        {{-- Mobile Tab Bar (visible only on phones) --}}
+        <div class="pos-mobile-tabs no-print" id="pos_mobile_tabs">
+            <button type="button" class="pos-mobile-tab active" id="mob_tab_products" data-panel="right">
+                <i class="fas fa-th-large"></i>
+                <span>Products</span>
+            </button>
+            <button type="button" class="pos-mobile-tab" id="mob_tab_cart" data-panel="center">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart&nbsp;<span class="tab-badge" id="mob_cart_count" style="display:none">0</span></span>
+            </button>
+        </div>
+
         <div class="pos-redesign-container no-print">
             {{-- Left Sidebar - Payment Buttons --}}
             <div class="pos-left-sidebar">
@@ -58,6 +70,71 @@
                 @include('sale_pos.partials.pos_sidebar')
             </div>
         </div>
+
+        {{-- Mobile Bottom Bar (visible only on phones) --}}
+        <div class="pos-mobile-bottom-bar no-print" id="pos_mobile_bottom_bar">
+            <div class="pos-mobile-more-drawer" id="pos_mobile_more_drawer">
+                <button type="button" class="pos-action-btn" id="mob_mpesa_btn">
+                    <i class="fas fa-mobile-alt"></i> M-Pesa
+                </button>
+                <button type="button" class="pos-action-btn" data-toggle="modal" data-target="#recent_transactions_modal">
+                    <i class="fas fa-history"></i> Recent
+                </button>
+                @if (!Gate::check('disable_quotation') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                <button type="button" class="pos-action-btn" id="mob_quote_btn">
+                    <i class="fas fa-file-invoice"></i> Quote
+                </button>
+                @endif
+                @if (!Gate::check('disable_draft') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                <button type="button" class="pos-action-btn" id="mob_draft_btn">
+                    <i class="fas fa-save"></i> Draft
+                </button>
+                @endif
+                @if (!Gate::check('disable_suspend_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                    @if(empty($pos_settings['disable_suspend']))
+                    <button type="button" class="pos-action-btn" id="mob_suspend_btn">
+                        <i class="fas fa-pause-circle"></i> Suspend
+                    </button>
+                    @endif
+                @endif
+                @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                    @if(empty($pos_settings['disable_credit_sale_button']))
+                    <button type="button" class="pos-action-btn" data-toggle="modal" data-target="#credit_sale_customer_modal">
+                        <i class="fas fa-handshake"></i> Credit
+                    </button>
+                    @endif
+                @endif
+                @if(auth()->user()->can('sell.payments'))
+                <button type="button" class="pos-action-btn" data-toggle="modal" data-target="#collect_debt_modal">
+                    <i class="fas fa-hand-holding-usd"></i> Collect
+                </button>
+                @endif
+                @if(auth()->user()->can('orders.view') || auth()->user()->can('orders.create'))
+                <button type="button" class="pos-action-btn" data-toggle="modal" data-target="#orders_modal">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </button>
+                @endif
+                <button type="button" class="pos-action-btn" data-toggle="modal" data-target="#lost_sale_modal">
+                    <i class="fas fa-times-circle"></i> Lost Sale
+                </button>
+            </div>
+            <div class="pos-mobile-total-bar">
+                <span class="pos-mobile-total-label">Total</span>
+                <span class="pos-mobile-total-amount" id="mob_total_display">0.00</span>
+            </div>
+            <div class="pos-mobile-actions">
+                <button type="button" class="pos-mobile-pay-btn" id="mob_pay_btn">
+                    <i class="fas fa-credit-card"></i> Pay
+                </button>
+                <button type="button" class="pos-mobile-cash-btn" id="mob_cash_btn">
+                    <i class="fas fa-money-bill-wave"></i> Cash
+                </button>
+                <button type="button" class="pos-mobile-more-btn" id="mob_more_btn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+
         {!! Form::close() !!}
     </section>
 
@@ -268,5 +345,153 @@
                 });
             }
         });
+    </script>
+
+    {{-- Mobile POS Tab & Bottom Bar Logic --}}
+    <script type="text/javascript">
+    (function () {
+        function isMobileView() {
+            return window.innerWidth <= 768;
+        }
+
+        function syncTotal() {
+            var txt = $('#total_payable').text().trim();
+            if (!txt) txt = $('#total_payable').val ? $('#total_payable').val().trim() : '';
+            if (txt) $('#mob_total_display').text(txt);
+        }
+
+        function syncCartCount() {
+            var count = $('#pos_table tbody tr[data-variation_id]').length;
+            if (count > 0) {
+                $('#mob_cart_count').text(count).show();
+            } else {
+                $('#mob_cart_count').hide();
+            }
+        }
+
+        function switchTab(panel) {
+            if (panel === 'right') {
+                $('.pos-center-panel').removeClass('pos-mobile-active');
+                $('.pos-right-panel').addClass('pos-mobile-active');
+                $('#mob_tab_products').addClass('active');
+                $('#mob_tab_cart').removeClass('active');
+            } else {
+                $('.pos-right-panel').removeClass('pos-mobile-active');
+                $('.pos-center-panel').addClass('pos-mobile-active');
+                $('#mob_tab_cart').addClass('active');
+                $('#mob_tab_products').removeClass('active');
+                syncTotal();
+            }
+        }
+
+        function initMobile() {
+            if (!isMobileView()) return;
+
+            // Default: show products panel
+            switchTab('right');
+
+            // Tab click
+            $(document).on('click', '.pos-mobile-tab', function () {
+                var panel = $(this).data('panel');
+                switchTab(panel);
+            });
+
+            // Bottom bar action buttons
+            $('#mob_pay_btn').on('click', function () {
+                $('#pos-finalize').trigger('click');
+            });
+            $('#mob_cash_btn').on('click', function () {
+                $('#cash-finalize').trigger('click');
+            });
+            $('#mob_mpesa_btn').on('click', function () {
+                $('#pos-mpesa-stk').trigger('click');
+                closeDrawer();
+            });
+            $('#mob_quote_btn').on('click', function () {
+                $('#pos-finalize-quotation').trigger('click');
+                closeDrawer();
+            });
+            $('#mob_draft_btn').on('click', function () {
+                $('#pos-draft').trigger('click');
+                closeDrawer();
+            });
+            $('#mob_suspend_btn').on('click', function () {
+                $('.pos-express-finalize[data-pay_method="suspend"]').trigger('click');
+                closeDrawer();
+            });
+
+            // More drawer toggle
+            $('#mob_more_btn').on('click', function (e) {
+                e.stopPropagation();
+                $('#pos_mobile_more_drawer').toggleClass('open');
+            });
+
+            // Close drawer on outside click
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#pos_mobile_more_drawer, #mob_more_btn').length) {
+                    closeDrawer();
+                }
+            });
+            // Close drawer when a drawer button with data-toggle is clicked
+            $('#pos_mobile_more_drawer').on('click', '[data-toggle="modal"]', function () {
+                closeDrawer();
+            });
+
+            // Sync total via MutationObserver
+            var totalEl = document.getElementById('total_payable');
+            if (totalEl) {
+                syncTotal();
+                var observer = new MutationObserver(syncTotal);
+                observer.observe(totalEl, { childList: true, subtree: true, characterData: true });
+            }
+
+            // Sync cart count via MutationObserver on pos_table tbody
+            var cartBody = document.querySelector('#pos_table tbody');
+            if (cartBody) {
+                syncCartCount();
+                var cartObserver = new MutationObserver(syncCartCount);
+                cartObserver.observe(cartBody, { childList: true, subtree: false });
+            }
+
+            // Switch to cart tab when item is added (listen for row additions)
+            var cartBodyEl = document.querySelector('#pos_table tbody');
+            if (cartBodyEl) {
+                var addObserver = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (m) {
+                        if (m.addedNodes.length > 0) {
+                            var activeTab = $('#mob_tab_cart').hasClass('active');
+                            if (!activeTab) {
+                                // Show subtle badge update; don't auto-switch tab (user may want to keep browsing)
+                                syncCartCount();
+                            }
+                        }
+                    });
+                });
+                addObserver.observe(cartBodyEl, { childList: true });
+            }
+        }
+
+        function closeDrawer() {
+            $('#pos_mobile_more_drawer').removeClass('open');
+        }
+
+        $(document).ready(function () {
+            initMobile();
+
+            // Re-init on resize if crossing the breakpoint
+            var wasMobile = isMobileView();
+            $(window).on('resize', function () {
+                var nowMobile = isMobileView();
+                if (nowMobile && !wasMobile) {
+                    initMobile();
+                }
+                if (!nowMobile) {
+                    // Reset panel visibility for desktop
+                    $('.pos-center-panel, .pos-right-panel').removeClass('pos-mobile-active');
+                }
+                wasMobile = nowMobile;
+            });
+        });
+    }());
     </script>
 @endsection

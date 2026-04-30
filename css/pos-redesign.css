@@ -1186,7 +1186,298 @@ body.pos-material {
 
     .pos-right-panel {
         order: 2 !important;
-        max-height: 300px !important;
+        max-height: none !important;
+    }
+}
+
+/* Mobile-only elements: hidden by default, shown inside media query */
+.pos-mobile-tabs,
+.pos-mobile-bottom-bar {
+    display: none;
+}
+
+/* ============================================================
+   MOBILE POS (≤ 768px) — Tab-based layout
+   ============================================================ */
+@media (max-width: 768px) {
+
+    body.pos-material {
+        overflow: auto !important;
+        height: auto !important;
+    }
+
+    #scrollable-container {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    /* Container becomes a simple block, padded for bottom bar */
+    .pos-redesign-container {
+        display: block !important;
+        height: auto !important;
+        min-height: unset !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        overflow: visible !important;
+        padding-bottom: 140px !important;
+    }
+
+    /* Hide desktop left sidebar — actions move to bottom bar */
+    .pos-left-sidebar {
+        display: none !important;
+    }
+
+    /* Both panels hidden by default — tabs reveal them */
+    .pos-center-panel,
+    .pos-right-panel {
+        display: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        min-height: 60vh !important;
+    }
+
+    .pos-center-panel.pos-mobile-active,
+    .pos-right-panel.pos-mobile-active {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Mobile tab bar */
+    .pos-mobile-tabs {
+        display: flex !important;
+        background: white !important;
+        border-bottom: 2px solid var(--pos-border) !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 200 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    }
+
+    .pos-mobile-tab {
+        flex: 1 !important;
+        padding: 13px 8px !important;
+        text-align: center !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: var(--pos-text-secondary) !important;
+        background: none !important;
+        border: none !important;
+        border-bottom: 3px solid transparent !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 7px !important;
+        transition: all 0.2s !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .pos-mobile-tab.active {
+        color: var(--pos-primary) !important;
+        border-bottom-color: var(--pos-primary) !important;
+        background: var(--pos-primary-subtle) !important;
+    }
+
+    .pos-mobile-tab .tab-badge {
+        background: var(--pos-danger) !important;
+        color: white !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        padding: 1px 6px !important;
+        border-radius: 999px !important;
+        min-width: 18px !important;
+        display: inline-block !important;
+        line-height: 16px !important;
+    }
+
+    /* Sticky bottom bar */
+    .pos-mobile-bottom-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: white !important;
+        border-top: 1px solid var(--pos-border) !important;
+        z-index: 500 !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.12) !important;
+    }
+
+    /* More drawer (hidden by default) */
+    .pos-mobile-more-drawer {
+        display: none !important;
+        padding: 10px 12px !important;
+        background: var(--pos-bg) !important;
+        border-top: 1px solid var(--pos-border-light) !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .pos-mobile-more-drawer.open {
+        display: grid !important;
+    }
+
+    .pos-mobile-more-drawer .pos-action-btn {
+        flex: none !important;
+        max-width: none !important;
+        font-size: 11px !important;
+        padding: 10px 8px !important;
+        justify-content: center !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        border-radius: 10px !important;
+        text-align: center !important;
+    }
+
+    .pos-mobile-more-drawer .pos-action-btn i {
+        font-size: 18px !important;
+        width: auto !important;
+    }
+
+    /* Total bar */
+    .pos-mobile-total-bar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 6px 16px !important;
+        background: var(--pos-primary-subtle) !important;
+    }
+
+    .pos-mobile-total-label {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: var(--pos-text-secondary) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .pos-mobile-total-amount {
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        color: var(--pos-primary) !important;
+        font-family: 'Inter', sans-serif !important;
+        letter-spacing: -0.5px !important;
+    }
+
+    /* Action buttons row */
+    .pos-mobile-actions {
+        display: flex !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+    }
+
+    .pos-mobile-pay-btn {
+        flex: 2 !important;
+        padding: 14px !important;
+        background: linear-gradient(135deg, #00C6FB 0%, #005BEA 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        font-family: 'Inter', sans-serif !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    .pos-mobile-cash-btn {
+        flex: 1 !important;
+        padding: 14px !important;
+        background: linear-gradient(135deg, #13547A 0%, #80D0C7 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        font-family: 'Inter', sans-serif !important;
+        cursor: pointer !important;
+    }
+
+    .pos-mobile-more-btn {
+        flex: 0 0 50px !important;
+        padding: 14px 12px !important;
+        background: var(--pos-bg) !important;
+        color: var(--pos-text) !important;
+        border: 2px solid var(--pos-border) !important;
+        border-radius: 12px !important;
+        font-size: 18px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Cart table — horizontal scroll on mobile */
+    .pos_product_div {
+        padding: 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #pos_table {
+        min-width: 480px !important;
+        font-size: 12px !important;
+    }
+
+    /* Products grid — 2 cols on mobile */
+    .products-grid,
+    #product_list_body {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    /* Make product cards slightly larger for touch */
+    .product-card,
+    .product_list {
+        padding: 10px 6px !important;
+    }
+
+    .product-name,
+    .product_list .product-name {
+        font-size: 11px !important;
+    }
+
+    /* Customer bar stacks on small screens */
+    .customer-bar {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        padding: 10px 12px !important;
+    }
+
+    .customer-select-wrapper {
+        order: 2 !important;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    .current-sale-header {
+        padding: 10px 14px !important;
+    }
+
+    /* Right panel products full height */
+    .pos-right-panel.pos-mobile-active .products-panel {
+        min-height: 65vh !important;
+    }
+
+    .products-grid-container {
+        min-height: 50vh !important;
+    }
+
+    /* Quantity controls touch-friendly */
+    .quantity-controls button {
+        width: 36px !important;
+        height: 38px !important;
+    }
+
+    .quantity-controls .pos_quantity,
+    .quantity-controls .input_quantity {
+        height: 38px !important;
+        font-size: 15px !important;
     }
 }
 
