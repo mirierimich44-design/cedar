@@ -20,17 +20,8 @@
             'method' => 'post',
             'id' => 'add_pos_sell_form',
         ]) !!}
-        {{-- Mobile Tab Bar (visible only on phones) --}}
-        <div class="pos-mobile-tabs no-print" id="pos_mobile_tabs">
-            <button type="button" class="pos-mobile-tab active" id="mob_tab_products" data-panel="right">
-                <i class="fas fa-th-large"></i>
-                <span>Products</span>
-            </button>
-            <button type="button" class="pos-mobile-tab" id="mob_tab_cart" data-panel="center">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Cart&nbsp;<span class="tab-badge" id="mob_cart_count" style="display:none">0</span></span>
-            </button>
-        </div>
+        {{-- Cart backdrop (mobile only) --}}
+        <div class="pos-cart-backdrop no-print" id="pos_cart_backdrop"></div>
 
         <div class="pos-redesign-container no-print">
             {{-- Left Sidebar - Payment Buttons --}}
@@ -38,8 +29,9 @@
                 @include('sale_pos.partials.pos_form_actions')
             </div>
 
-            {{-- Center - Current Sale / Cart --}}
+            {{-- Center - Current Sale / Cart (slides up as bottom sheet on mobile) --}}
             <div class="pos-center-panel">
+                <div class="pos-sheet-handle-bar no-print"></div>
                 <script>
                     var current_location_id = "{{ !empty($default_location) ? $default_location->id : '' }}";
                 </script>
@@ -118,8 +110,12 @@
                     <i class="fas fa-times-circle"></i> Lost Sale
                 </button>
             </div>
-            <div class="pos-mobile-total-bar">
-                <span class="pos-mobile-total-label">Total</span>
+            <div class="pos-mobile-cart-row" id="mob_cart_trigger">
+                <div class="pos-mobile-cart-info">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="pos-mobile-cart-badge" id="mob_cart_count" style="display:none">0</span>
+                    <span id="mob_cart_label">View Cart</span>
+                </div>
                 <span class="pos-mobile-total-amount" id="mob_total_display">0.00</span>
             </div>
             <div class="pos-mobile-actions">
@@ -347,92 +343,97 @@
         });
     </script>
 
-    {{-- Mobile POS Tab & Bottom Bar Logic --}}
+    {{-- Mobile POS — Bottom-sheet cart --}}
     <script type="text/javascript">
     (function () {
-        function isMobileView() {
-            return window.innerWidth <= 768;
-        }
+        function isMobileView() { return window.innerWidth <= 768; }
+
+        var cartOpen = false;
 
         function syncTotal() {
             var txt = $('#total_payable').text().trim();
-            if (!txt) txt = $('#total_payable').val ? $('#total_payable').val().trim() : '';
             if (txt) $('#mob_total_display').text(txt);
         }
 
         function syncCartCount() {
-            var count = $('#pos_table tbody tr[data-variation_id]').length;
+            var count = $('#pos_table tbody tr').filter(function () {
+                return $(this).data('variation_id') || $(this).find('[name^="products["]').length;
+            }).length;
             if (count > 0) {
                 $('#mob_cart_count').text(count).show();
+                $('#mob_cart_label').text(count + ' item' + (count > 1 ? 's' : '') + ' in cart');
             } else {
                 $('#mob_cart_count').hide();
+                $('#mob_cart_label').text('View Cart');
             }
         }
 
-        function switchTab(panel) {
-            if (panel === 'right') {
-                $('.pos-center-panel').removeClass('pos-mobile-active');
-                $('.pos-right-panel').addClass('pos-mobile-active');
-                $('#mob_tab_products').addClass('active');
-                $('#mob_tab_cart').removeClass('active');
-            } else {
-                $('.pos-right-panel').removeClass('pos-mobile-active');
-                $('.pos-center-panel').addClass('pos-mobile-active');
-                $('#mob_tab_cart').addClass('active');
-                $('#mob_tab_products').removeClass('active');
-                syncTotal();
-            }
+        function openCart() {
+            cartOpen = true;
+            $('.pos-center-panel').addClass('pos-mobile-active');
+            $('#pos_cart_backdrop').addClass('active');
+            syncTotal();
+        }
+
+        function closeCart() {
+            cartOpen = false;
+            $('.pos-center-panel').removeClass('pos-mobile-active');
+            $('#pos_cart_backdrop').removeClass('active');
+        }
+
+        function closeDrawer() {
+            $('#pos_mobile_more_drawer').removeClass('open');
         }
 
         function initMobile() {
             if (!isMobileView()) return;
 
-            // Default: show products panel
-            switchTab('right');
-
-            // Tab click
-            $(document).on('click', '.pos-mobile-tab', function () {
-                var panel = $(this).data('panel');
-                switchTab(panel);
+            // Cart trigger
+            $('#mob_cart_trigger').off('click.mob').on('click.mob', function () {
+                cartOpen ? closeCart() : openCart();
             });
 
-            // Bottom bar action buttons
-            $('#mob_pay_btn').on('click', function () {
-                $('#pos-finalize').trigger('click');
+            // Backdrop closes cart
+            $('#pos_cart_backdrop').off('click.mob').on('click.mob', function () {
+                closeCart();
             });
-            $('#mob_cash_btn').on('click', function () {
-                $('#cash-finalize').trigger('click');
+
+            // Bottom bar buttons
+            $('#mob_pay_btn').off('click.mob').on('click.mob', function () {
+                closeCart();
+                setTimeout(function () { $('#pos-finalize').trigger('click'); }, 100);
             });
-            $('#mob_mpesa_btn').on('click', function () {
+            $('#mob_cash_btn').off('click.mob').on('click.mob', function () {
+                closeCart();
+                setTimeout(function () { $('#cash-finalize').trigger('click'); }, 100);
+            });
+            $('#mob_mpesa_btn').off('click.mob').on('click.mob', function () {
                 $('#pos-mpesa-stk').trigger('click');
                 closeDrawer();
             });
-            $('#mob_quote_btn').on('click', function () {
+            $('#mob_quote_btn').off('click.mob').on('click.mob', function () {
                 $('#pos-finalize-quotation').trigger('click');
                 closeDrawer();
             });
-            $('#mob_draft_btn').on('click', function () {
+            $('#mob_draft_btn').off('click.mob').on('click.mob', function () {
                 $('#pos-draft').trigger('click');
                 closeDrawer();
             });
-            $('#mob_suspend_btn').on('click', function () {
+            $('#mob_suspend_btn').off('click.mob').on('click.mob', function () {
                 $('.pos-express-finalize[data-pay_method="suspend"]').trigger('click');
                 closeDrawer();
             });
 
-            // More drawer toggle
-            $('#mob_more_btn').on('click', function (e) {
+            // More drawer
+            $('#mob_more_btn').off('click.mob').on('click.mob', function (e) {
                 e.stopPropagation();
                 $('#pos_mobile_more_drawer').toggleClass('open');
             });
-
-            // Close drawer on outside click
-            $(document).on('click', function (e) {
+            $(document).off('click.mobDrawer').on('click.mobDrawer', function (e) {
                 if (!$(e.target).closest('#pos_mobile_more_drawer, #mob_more_btn').length) {
                     closeDrawer();
                 }
             });
-            // Close drawer when a drawer button with data-toggle is clicked
             $('#pos_mobile_more_drawer').on('click', '[data-toggle="modal"]', function () {
                 closeDrawer();
             });
@@ -441,54 +442,31 @@
             var totalEl = document.getElementById('total_payable');
             if (totalEl) {
                 syncTotal();
-                var observer = new MutationObserver(syncTotal);
-                observer.observe(totalEl, { childList: true, subtree: true, characterData: true });
+                new MutationObserver(syncTotal).observe(totalEl, { childList: true, subtree: true, characterData: true });
             }
 
-            // Sync cart count via MutationObserver on pos_table tbody
+            // Sync cart count + auto-open sheet when item added
             var cartBody = document.querySelector('#pos_table tbody');
             if (cartBody) {
                 syncCartCount();
-                var cartObserver = new MutationObserver(syncCartCount);
-                cartObserver.observe(cartBody, { childList: true, subtree: false });
-            }
-
-            // Switch to cart tab when item is added (listen for row additions)
-            var cartBodyEl = document.querySelector('#pos_table tbody');
-            if (cartBodyEl) {
-                var addObserver = new MutationObserver(function (mutations) {
+                new MutationObserver(function (mutations) {
+                    syncCartCount();
                     mutations.forEach(function (m) {
-                        if (m.addedNodes.length > 0) {
-                            var activeTab = $('#mob_tab_cart').hasClass('active');
-                            if (!activeTab) {
-                                // Show subtle badge update; don't auto-switch tab (user may want to keep browsing)
-                                syncCartCount();
-                            }
+                        if (m.addedNodes.length > 0 && !cartOpen) {
+                            openCart();
                         }
                     });
-                });
-                addObserver.observe(cartBodyEl, { childList: true });
+                }).observe(cartBody, { childList: true });
             }
-        }
-
-        function closeDrawer() {
-            $('#pos_mobile_more_drawer').removeClass('open');
         }
 
         $(document).ready(function () {
             initMobile();
-
-            // Re-init on resize if crossing the breakpoint
             var wasMobile = isMobileView();
             $(window).on('resize', function () {
                 var nowMobile = isMobileView();
-                if (nowMobile && !wasMobile) {
-                    initMobile();
-                }
-                if (!nowMobile) {
-                    // Reset panel visibility for desktop
-                    $('.pos-center-panel, .pos-right-panel').removeClass('pos-mobile-active');
-                }
+                if (nowMobile && !wasMobile) { initMobile(); }
+                if (!nowMobile) { closeCart(); closeDrawer(); }
                 wasMobile = nowMobile;
             });
         });
