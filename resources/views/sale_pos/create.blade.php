@@ -396,17 +396,17 @@
                         return $('<li style="display:none;">').appendTo(ul);
                     }
                     var isOutOfStock = item.enable_stock == 1 && (parseFloat(item.qty_available) || 0) <= 0;
+                    if (isOutOfStock) {
+                        return $('<li style="display:none;">').appendTo(ul);
+                    }
                     var name = item.name || '';
                     if (item.type === 'variable' && item.variation && item.variation !== 'DUMMY') {
                         name += ' <span style="color:#94a3b8;font-weight:400;">· ' + item.variation + '</span>';
                     }
                     var html = '<div style="padding:13px 16px;border-bottom:1px solid #f1f5f9;">' +
-                        '<div style="font-size:14px;font-weight:600;color:' + (isOutOfStock ? '#ef4444' : '#1e293b') + ';">' + name + '</div>' +
-                        (isOutOfStock ? '<div style="font-size:11px;color:#ef4444;margin-top:2px;">Out of stock</div>' : '') +
+                        '<div style="font-size:14px;font-weight:600;color:#1e293b;">' + name + '</div>' +
                         '</div>';
-                    var li = $('<li>').append(html);
-                    if (isOutOfStock) li.addClass('ui-state-disabled');
-                    return li.appendTo(ul);
+                    return $('<li>').append(html).appendTo(ul);
                 };
             }
 
