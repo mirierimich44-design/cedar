@@ -1556,20 +1556,36 @@ body.pos-material {
         line-height: 28px !important;
     }
 
-    /* ── Search autocomplete dropdown: name only ── */
+    /* ── Cart rows: hide stock text, fix name wrap ── */
+    .pos-stock-info {
+        display: none !important;
+    }
+
+    .pos-cart-product-name {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        line-height: 1.4 !important;
+    }
+
+    /* ── Search autocomplete dropdown: name + price only ── */
 
     /* Hide out-of-stock rows entirely */
     .ui-autocomplete li.ui-state-disabled {
         display: none !important;
     }
 
-    /* Hide all columns after the name (separators, cost, sell, stock) */
-    .ui-autocomplete .pos-search-item > div:not(:first-child) {
+    /* Hide separators, cost, stock — keep name (1st) and sell price (5th) */
+    .ui-autocomplete .pos-search-item > div:nth-child(2),
+    .ui-autocomplete .pos-search-item > div:nth-child(3),
+    .ui-autocomplete .pos-search-item > div:nth-child(4),
+    .ui-autocomplete .pos-search-item > div:nth-child(6),
+    .ui-autocomplete .pos-search-item > div:nth-child(7) {
         display: none !important;
         width: 0 !important;
     }
 
-    /* Product name: wrap to 2 lines instead of truncating */
+    /* Product name: wrap to 2 lines */
     .ui-autocomplete .pos-search-item > div:first-child > div:first-child {
         white-space: normal !important;
         overflow: visible !important;
@@ -1578,14 +1594,32 @@ body.pos-material {
         line-height: 1.35 !important;
     }
 
-    /* Hide SKU line */
+    /* Hide SKU line under name */
     .ui-autocomplete .pos-search-item > div:first-child > div:nth-child(2) {
         display: none !important;
     }
 
-    /* Tighten item padding */
+    /* Sell price column: show just the number, hide the "SELL" label */
+    .ui-autocomplete .pos-search-item > div:nth-child(5) {
+        width: auto !important;
+        background: transparent !important;
+        padding: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .ui-autocomplete .pos-search-item > div:nth-child(5) > div:first-child {
+        display: none !important;
+    }
+
+    .ui-autocomplete .pos-search-item > div:nth-child(5) > div:last-child {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #16a34a !important;
+    }
+
+    /* Item padding */
     .ui-autocomplete .pos-search-item {
-        padding: 12px 14px !important;
+        padding: 11px 14px !important;
     }
 
     /* ── POS Header: mobile simplification ── */

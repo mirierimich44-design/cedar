@@ -28,15 +28,15 @@
         <div style="display: flex; align-items: center; gap: 4px;">
             <div style="min-width: 0; flex: 1;">
                 @if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
-                    <span class="text-link" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}" style="font-size: 11px !important; font-weight: 700 !important; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pos-text) !important;">
+                    <span class="pos-cart-product-name text-link" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}" style="font-size: 11px !important; font-weight: 700 !important; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pos-text) !important;">
                         {!! $product_name !!}
                     </span>
                 @else
-                    <span style="font-size: 11px !important; font-weight: 700 !important; color: var(--pos-text) !important; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{!! $product_name !!}</span>
+                    <span class="pos-cart-product-name" style="font-size: 11px !important; font-weight: 700 !important; color: var(--pos-text) !important; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{!! $product_name !!}</span>
                 @endif
-                
+
                 @if($product->enable_stock)
-                    <div style="font-size: 9px; color: var(--pos-text-muted); margin-top: 0px;">{{ @num_format($product->qty_available) }} in stock</div>
+                    <div class="pos-stock-info" style="font-size: 9px; color: var(--pos-text-muted); margin-top: 0px;">{{ @num_format($product->qty_available) }} in stock</div>
                 @endif
 
                 {{-- Batch / Lot Tracking for Pharmaceuticals --}}
