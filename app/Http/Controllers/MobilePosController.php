@@ -191,7 +191,10 @@ class MobilePosController extends Controller
             $line_total = $qty * $unit_price;
             $total_before += $line_total;
 
+            $variation  = \App\Variation::find($p['variation_id']);
+
             $sell_lines[] = [
+                'product_id'           => $variation ? $variation->product_id : null,
                 'variation_id'         => $p['variation_id'],
                 'quantity'             => $qty,
                 'unit_price'           => $unit_price,
