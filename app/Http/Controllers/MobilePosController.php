@@ -152,13 +152,107 @@ class MobilePosController extends Controller
 
     public function createSale(Request $request)
     {
-        $user = $request->user();
-        Auth::guard('web')->setUser($user);
-        $request->session()->put('user.business_id', $user->business_id);
-        $request->session()->put('user.id', $user->id);
+        $user        = $request->user();
+        $business_id = $user->business_id;
+        $user_id     = $user->id;
+        $location_id = (int) $request->input('location_id');
+        $products    = $request->input('products', []);
+        $payments    = $request->input('payment', []);
 
-        $controller = app(\App\Http\Controllers\SellPosController::class);
-        return $controller->store($request);
+        if (empty($products)) {
+            return response()->json(['success' => false, 'msg' => 'No products provided.'], 422);
+        }
+
+        // Get walk-in customer for this business
+        $contact = \App\Contact::where('business_id', $business_id)
+            ->where('type', 'customer')
+            ->where('name', 'Walk-In Customer')
+            ->first();
+
+        if (!$contact) {
+            $contact = \App\Contact::where('business_id', $business_id)
+                ->where('type', 'customer')
+                ->first();
+        }
+
+        if (!$contact) {
+            return response()->json(['success' => false, 'msg' => 'No customer found. Please add a walk-in customer in the web app.'], 422);
+        }
+
+        $transactionUtil = app(\App\Utils\TransactionUtil::class);
+
+        // Build sell lines and compute totals
+        $sell_lines   = [];
+        $total_before = 0;
+
+        foreach ($products as $p) {
+            $qty        = (float) ($p['quantity'] ?? 1);
+            $unit_price = (float) ($p['unit_price'] ?? 0);
+            $line_total = $qty * $unit_price;
+            $total_before += $line_total;
+
+            $sell_lines[] = [
+                'variation_id'         => $p['variation_id'],
+                'quantity'             => $qty,
+                'unit_price'           => $unit_price,
+                'unit_price_inc_tax'   => $unit_price,
+                'item_tax'             => 0,
+                'tax_id'               => null,
+                'line_discount_type'   => 'fixed',
+                'line_discount_amount' => 0,
+            ];
+        }
+
+        $invoice_total = [
+            'total_before_tax' => $total_before,
+            'tax'              => 0,
+            'final_total'      => $total_before,
+        ];
+
+        $input = [
+            'location_id'      => $location_id,
+            'contact_id'       => $contact->id,
+            'transaction_date' => $request->input('transaction_date', now()->toDateString()),
+            'status'           => 'final',
+            'is_quotation'     => 0,
+            'discount_type'    => 'fixed',
+            'discount_amount'  => 0,
+            'tax_rate_id'      => null,
+            'sale_note'        => $request->input('sale_note', ''),
+            'final_total'      => $total_before,
+            'is_created_from_api' => 1,
+        ];
+
+        DB::beginTransaction();
+        try {
+            $transaction = $transactionUtil->createSellTransaction(
+                $business_id, $input, $invoice_total, $user_id, false
+            );
+
+            $transactionUtil->createOrUpdateSellLines(
+                $transaction, $sell_lines, $location_id, false, null, [], false
+            );
+
+            if (!empty($payments)) {
+                $transactionUtil->createOrUpdatePaymentLines(
+                    $transaction, $payments, $business_id, $user_id, false
+                );
+            }
+
+            $transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+
+            DB::commit();
+
+            return response()->json([
+                'success'    => true,
+                'msg'        => 'Sale recorded successfully.',
+                'invoice_no' => $transaction->invoice_no,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Mobile sale error: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+            return response()->json(['success' => false, 'msg' => $e->getMessage()], 500);
+        }
     }
 
     public function paymentTypes(Request $request)
