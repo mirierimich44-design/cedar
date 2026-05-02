@@ -116,7 +116,12 @@ class MobilePosController extends Controller
             ->where('p.business_id', $business_id)
             ->where('p.is_inactive', 0)
             ->where('p.not_for_selling', 0)
-            ->where('p.type', '!=', 'modifier');
+            ->where('p.type', '!=', 'modifier')
+            // Only show in-stock items (or products that don't track stock)
+            ->where(function ($q) {
+                $q->where('p.enable_stock', 0)
+                  ->orWhereRaw('COALESCE(vld.qty_available, 0) > 0');
+            });
 
         if ($term !== '') {
             $query->where(function ($q) use ($term) {
