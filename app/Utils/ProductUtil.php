@@ -1714,9 +1714,8 @@ class ProductUtil extends Util
             $query->where('VLD.qty_available', '>', 0);
         }
 
-        if (! empty($location_id)) {
-            $query->ForLocation($location_id);
-        }
+        // ForLocation() uses whereHas('product_locations') which excludes products
+        // not explicitly assigned to a location — skip it so all products are searchable.
 
         $query->select(
                 'products.id as product_id',

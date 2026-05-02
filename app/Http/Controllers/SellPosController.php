@@ -1872,7 +1872,6 @@ class SellPosController extends Controller
             $location_id = $request->get('location_id');
             $term = $request->get('term');
 
-            $check_qty = false;
             $business_id = $request->session()->get('user.business_id');
             $business = $request->session()->get('business');
             $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
@@ -1888,7 +1887,12 @@ class SellPosController extends Controller
                 ->where('p.business_id', $business_id)
                 ->where('p.type', '!=', 'modifier')
                 ->where('p.is_inactive', 0)
-                ->where('p.not_for_selling', 0);
+                ->where('p.not_for_selling', 0)
+                // Show only in-stock items (or products that don't track stock)
+                ->where(function ($q) {
+                    $q->where('p.enable_stock', 0)
+                      ->orWhereRaw('COALESCE(VLD.qty_available, 0) > 0');
+                });
 
             //Include search
             if (!empty($term)) {
@@ -1897,11 +1901,6 @@ class SellPosController extends Controller
                     $query->orWhere('sku', 'like', '%' . $term . '%');
                     $query->orWhere('sub_sku', 'like', '%' . $term . '%');
                 });
-            }
-
-            //Include check for quantity
-            if ($check_qty) {
-                $products->where('VLD.qty_available', '>', 0);
             }
 
             if (!empty($category_id) && ($category_id != 'all')) {
