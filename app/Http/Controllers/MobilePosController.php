@@ -90,49 +90,57 @@ class MobilePosController extends Controller
         ]);
     }
 
+    /**
+     * GET /api/mobile/products?location_id=&term=
+     *
+     * Mirrors the web POS product search exactly:
+     *   - joins product_locations to respect per-location product assignments
+     *   - uses is_inactive=0 (not status='active')
+     *   - no qty gate by default (matches web POS default check_qty=false)
+     */
     public function products(Request $request)
     {
         $user        = $request->user();
         $business_id = $user->business_id;
-        $location_id = $request->get('location_id');
+        $location_id = (int) $request->get('location_id');
         $term        = trim($request->get('term', ''));
 
-        $query = DB::table('products')
-            ->join('variations', 'products.id', '=', 'variations.product_id')
+        $query = \App\Variation::join('products as p', 'variations.product_id', '=', 'p.id')
+            ->join('product_locations as pl', 'pl.product_id', '=', 'p.id')
+            ->join('units as u', 'p.unit_id', '=', 'u.id')
             ->leftJoin('variation_location_details as vld', function ($join) use ($location_id) {
-                $join->on('variations.id', '=', 'vld.variation_id');
-                if ($location_id) {
-                    $join->where('vld.location_id', $location_id);
-                }
+                $join->on('variations.id', '=', 'vld.variation_id')
+                     ->where('vld.location_id', $location_id);
             })
-            ->where('products.business_id', $business_id)
-            ->where('products.not_for_selling', 0)
-            ->where('products.status', 'active')
-            ->select([
-                'products.id as product_id',
-                'variations.id as variation_id',
-                'products.name',
-                'variations.name as variation',
-                'variations.sub_sku',
-                'products.enable_stock',
-                DB::raw('COALESCE(vld.qty_available, 0) as qty_available'),
-                DB::raw('variations.default_sell_price as selling_price'),
-            ]);
+            ->where('p.business_id', $business_id)
+            ->where('p.is_inactive', 0)
+            ->where('p.not_for_selling', 0)
+            ->where('p.type', '!=', 'modifier')
+            ->where('pl.location_id', $location_id);
 
         if ($term !== '') {
             $query->where(function ($q) use ($term) {
-                $q->where('products.name', 'like', "%{$term}%")
-                  ->orWhere('variations.sub_sku', 'like', "%{$term}%");
+                $q->where('p.name', 'like', "%{$term}%")
+                  ->orWhere('variations.sub_sku', 'like', "%{$term}%")
+                  ->orWhere('variations.sku', 'like', "%{$term}%");
             });
         }
 
-        // Only exclude out-of-stock for products that track stock
-        $query->where(function ($q) {
-            $q->where('products.enable_stock', 0)
-              ->orWhereRaw('COALESCE(vld.qty_available, 0) > 0');
-        });
-
-        $products = $query->orderBy('products.name')->limit(150)->get();
+        $products = $query->select(
+                'p.id as product_id',
+                'variations.id as variation_id',
+                'p.name',
+                'variations.name as variation',
+                'variations.sub_sku',
+                'p.enable_stock',
+                DB::raw('COALESCE(vld.qty_available, 0) as qty_available'),
+                DB::raw('variations.default_sell_price as selling_price'),
+                'u.short_name as unit'
+            )
+            ->distinct()
+            ->orderBy('p.name')
+            ->limit(150)
+            ->get();
 
         return response()->json(['products' => $products]);
     }
@@ -198,61 +206,52 @@ class MobilePosController extends Controller
 
     /**
      * GET /api/mobile/till-summary
-     * Today's sales with totals per payment method + optional register info.
      */
     public function tillSummary(Request $request)
     {
         $user        = $request->user();
         $business_id = $user->business_id;
-        $location_id = $request->get('location_id');
+        $location_id = (int) $request->get('location_id');
         $today       = now()->toDateString();
 
-        // Sales count & subtotal for today
-        $salesQuery = DB::table('transactions')
+        $salesInfo = DB::table('transactions')
             ->where('business_id', $business_id)
             ->where('type', 'sell')
             ->where('status', 'final')
-            ->whereDate('transaction_date', $today);
-
-        if ($location_id) {
-            $salesQuery->where('location_id', $location_id);
-        }
-
-        $salesInfo = $salesQuery->selectRaw('COUNT(*) as count, COALESCE(SUM(final_total), 0) as total')
+            ->when($location_id, fn($q) => $q->where('location_id', $location_id))
+            ->whereDate('transaction_date', $today)
+            ->selectRaw('COUNT(*) as count, COALESCE(SUM(final_total), 0) as total')
             ->first();
 
-        // Breakdown by payment method
         $payBreakdown = DB::table('transaction_payments as tp')
             ->join('transactions as t', 't.id', '=', 'tp.transaction_id')
             ->where('t.business_id', $business_id)
             ->where('t.type', 'sell')
             ->where('t.status', 'final')
-            ->whereDate('t.transaction_date', $today)
             ->when($location_id, fn($q) => $q->where('t.location_id', $location_id))
+            ->whereDate('t.transaction_date', $today)
             ->selectRaw('tp.method, COALESCE(SUM(tp.amount), 0) as total')
             ->groupBy('tp.method')
-            ->orderBy('total', 'desc')
+            ->orderByRaw('SUM(tp.amount) DESC')
             ->get();
 
-        // Check if a cash register is open for this user
         $register = \App\CashRegister::where('user_id', $user->id)
             ->where('status', 'open')
             ->when($location_id, fn($q) => $q->where('location_id', $location_id))
             ->first();
 
         return response()->json([
-            'date'          => $today,
-            'sales_count'   => (int) $salesInfo->count,
-            'sales_total'   => (float) $salesInfo->total,
+            'date'              => $today,
+            'sales_count'       => (int) $salesInfo->count,
+            'sales_total'       => (float) $salesInfo->total,
             'payment_breakdown' => $payBreakdown,
-            'register_open' => (bool) $register,
-            'register_id'   => $register?->id,
+            'register_open'     => (bool) $register,
+            'register_id'       => $register?->id,
         ]);
     }
 
     /**
      * POST /api/mobile/close-till
-     * Closes the open cash register for this user.
      */
     public function closeTill(Request $request)
     {
