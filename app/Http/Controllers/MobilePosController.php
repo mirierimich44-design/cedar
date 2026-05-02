@@ -162,11 +162,70 @@ class MobilePosController extends Controller
     {
         $user = $request->user();
 
-        // Prime the web guard and session so the existing store() method works
         Auth::guard('web')->setUser($user);
         $request->session()->put('user.business_id', $user->business_id);
+        $request->session()->put('user.id', $user->id);
 
         $controller = app(\App\Http\Controllers\SellPosController::class);
+        return $controller->store($request);
+    }
+
+    /**
+     * GET /api/mobile/payment-types
+     * Returns enabled payment methods for the business.
+     */
+    public function paymentTypes(Request $request)
+    {
+        $user        = $request->user();
+        $business_id = $user->business_id;
+
+        $types = \App\BusinessPaymentMethod::where('business_id', $business_id)
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'account_id'])
+            ->map(fn($m) => ['id' => $m->name, 'label' => ucfirst(str_replace('_', ' ', $m->name))]);
+
+        // Fallback to defaults if none configured
+        if ($types->isEmpty()) {
+            $types = collect([
+                ['id' => 'cash',  'label' => 'Cash'],
+                ['id' => 'card',  'label' => 'Card'],
+                ['id' => 'mpesa', 'label' => 'M-Pesa'],
+            ]);
+        }
+
+        return response()->json(['payment_types' => $types]);
+    }
+
+    /**
+     * GET /api/mobile/expense-categories
+     * Returns expense categories for the business.
+     */
+    public function expenseCategories(Request $request)
+    {
+        $user        = $request->user();
+        $business_id = $user->business_id;
+
+        $categories = \App\ExpenseCategory::where('business_id', $business_id)
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json(['categories' => $categories]);
+    }
+
+    /**
+     * POST /api/mobile/expense
+     * Creates an expense by delegating to the existing ExpenseController::store().
+     */
+    public function createExpense(Request $request)
+    {
+        $user = $request->user();
+
+        Auth::guard('web')->setUser($user);
+        $request->session()->put('user.business_id', $user->business_id);
+        $request->session()->put('user.id', $user->id);
+
+        $controller = app(\App\Http\Controllers\ExpenseController::class);
         return $controller->store($request);
     }
 }
