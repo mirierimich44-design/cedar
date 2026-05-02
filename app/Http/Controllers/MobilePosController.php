@@ -106,17 +106,17 @@ class MobilePosController extends Controller
         $term        = trim($request->get('term', ''));
 
         $query = \App\Variation::join('products as p', 'variations.product_id', '=', 'p.id')
-            ->join('product_locations as pl', 'pl.product_id', '=', 'p.id')
             ->join('units as u', 'p.unit_id', '=', 'u.id')
             ->leftJoin('variation_location_details as vld', function ($join) use ($location_id) {
-                $join->on('variations.id', '=', 'vld.variation_id')
-                     ->where('vld.location_id', $location_id);
+                $join->on('variations.id', '=', 'vld.variation_id');
+                if ($location_id) {
+                    $join->where('vld.location_id', $location_id);
+                }
             })
             ->where('p.business_id', $business_id)
             ->where('p.is_inactive', 0)
             ->where('p.not_for_selling', 0)
-            ->where('p.type', '!=', 'modifier')
-            ->where('pl.location_id', $location_id);
+            ->where('p.type', '!=', 'modifier');
 
         if ($term !== '') {
             $query->where(function ($q) use ($term) {
