@@ -18,3 +18,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/sync/receive', [\App\Http\Controllers\SyncController::class, 'receiveFromLocal']);
+
+// ─── Mobile POS App ───────────────────────────────────────────────────────────
+Route::prefix('mobile')->group(function () {
+    Route::post('/login', [\App\Http\Controllers\MobilePosController::class, 'login']);
+
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/logout',     [\App\Http\Controllers\MobilePosController::class, 'logout']);
+        Route::get('/pos-details', [\App\Http\Controllers\MobilePosController::class, 'posDetails']);
+        Route::get('/products',    [\App\Http\Controllers\MobilePosController::class, 'products']);
+        Route::post('/sale',       [\App\Http\Controllers\MobilePosController::class, 'createSale']);
+    });
+});
