@@ -1878,32 +1878,17 @@ class SellPosController extends Controller
             $pos_settings = empty($business->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business->pos_settings, true);
 
             $products = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
-                ->join('product_locations as pl', 'pl.product_id', '=', 'p.id')
                 ->join('units as u', 'p.unit_id', '=', 'u.id')
-                ->leftjoin(
-                    'variation_location_details AS VLD',
-                    function ($join) use ($location_id) {
-                        $join->on('variations.id', '=', 'VLD.variation_id');
-
-                        //Include Location
-                        if (!empty($location_id)) {
-                            $join->where(function ($query) use ($location_id) {
-                                $query->where('VLD.location_id', '=', $location_id);
-                                //Check null to show products even if no quantity is available in a location.
-                                //TODO: Maybe add a settings to show product not available at a location or not.
-                                $query->orWhereNull('VLD.location_id');
-                            });
-                        }
+                ->leftJoin('variation_location_details AS VLD', function ($join) use ($location_id) {
+                    $join->on('variations.id', '=', 'VLD.variation_id');
+                    if (!empty($location_id)) {
+                        $join->where('VLD.location_id', '=', $location_id);
                     }
-                )
+                })
                 ->where('p.business_id', $business_id)
                 ->where('p.type', '!=', 'modifier')
                 ->where('p.is_inactive', 0)
-                ->where('p.not_for_selling', 0)
-            //Hide products not available in the selected location
-                ->where(function ($q) use ($location_id) {
-                    $q->where('pl.location_id', $location_id);
-                });
+                ->where('p.not_for_selling', 0);
 
             //Include search
             if (!empty($term)) {
