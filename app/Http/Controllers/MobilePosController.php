@@ -127,7 +127,7 @@ class MobilePosController extends Controller
             $query->where(function ($q) use ($term) {
                 $q->where('p.name', 'like', "%{$term}%")
                   ->orWhere('variations.sub_sku', 'like', "%{$term}%")
-                  ->orWhere('variations.sku', 'like', "%{$term}%");
+                  ->orWhere('p.sku', 'like', "%{$term}%");
             });
         }
 
