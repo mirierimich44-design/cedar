@@ -153,6 +153,51 @@ class SellPosController extends Controller
     }
 
     /**
+     * Mobile React POS – returns location and user info as JSON.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function mobilePosDetails()
+    {
+        $user        = auth()->user();
+        $business_id = request()->session()->get('user.business_id');
+
+        // Resolve the location from the open cash register, falling back to
+        // the first available business location.
+        $register_details = $this->cashRegisterUtil->getCurrentCashRegister($user->id);
+        $default_location = null;
+
+        if (!empty($register_details) && !empty($register_details->location_id)) {
+            $loc = \App\BusinessLocation::find($register_details->location_id);
+            if ($loc) {
+                $default_location = ['id' => $loc->id, 'name' => $loc->name];
+            }
+        }
+
+        if (empty($default_location)) {
+            $first = \App\BusinessLocation::where('business_id', $business_id)->first();
+            if ($first) {
+                $default_location = ['id' => $first->id, 'name' => $first->name];
+            }
+        }
+
+        $all_locations = \App\BusinessLocation::where('business_id', $business_id)
+            ->select('id', 'name')
+            ->get()
+            ->toArray();
+
+        return response()->json([
+            'user' => [
+                'id'       => $user->id,
+                'name'     => trim($user->first_name . ' ' . $user->last_name),
+                'username' => $user->username,
+            ],
+            'default_location'   => $default_location,
+            'business_locations' => $all_locations,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response

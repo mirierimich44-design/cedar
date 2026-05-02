@@ -112,6 +112,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('mark-as-available/{user_id}', [SellPosController::class, 'markAsAvailable']);
     Route::resource('pos', SellPosController::class);
 
+    // Mobile React POS app — returns JSON location + user info
+    Route::get('/mobile-pos-details', [SellPosController::class, 'mobilePosDetails']);
+
     Route::resource('purchase-requisition', PurchaseRequisitionController::class)->except(['edit', 'update']);
     Route::post('/get-requisition-products', [PurchaseRequisitionController::class, 'getRequisitionProducts'])->name('get-requisition-products');
     Route::get('get-purchase-requisitions/{location_id}', [PurchaseRequisitionController::class, 'getPurchaseRequisitions']);

@@ -15,7 +15,20 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // Include all routes the React mobile app needs.
+    // In production the app is served from the same origin so CORS never fires,
+    // but these paths allow cross-origin dev servers (localhost:5173 etc.) to work
+    // if a developer enables VITE_API_URL pointing directly at the backend.
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+        'login',
+        'logout',
+        'mobile-pos-details',
+        'products/list',
+        'pos',
+        'sync/*',
+    ],
 
     'allowed_methods' => ['*'],
 
@@ -29,6 +42,9 @@ return [
 
     'max_age' => 0,
 
+    // Must be true for Sanctum cookie-based auth to work cross-origin.
+    // Note: when this is true, allowed_origins cannot be ['*'] — use specific
+    // origins or allowed_origins_patterns if you need cross-origin credentials.
     'supports_credentials' => false,
 
 ];
