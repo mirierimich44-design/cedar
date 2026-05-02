@@ -277,4 +277,43 @@ class MobilePosController extends Controller
 
         return response()->json(['message' => 'Till closed successfully.']);
     }
+
+    /**
+     * GET /api/mobile/recent-sales?location_id=&limit=
+     */
+    public function recentSales(Request $request)
+    {
+        $user        = $request->user();
+        $business_id = $user->business_id;
+        $location_id = (int) $request->get('location_id');
+        $limit       = min((int) $request->get('limit', 20), 50);
+
+        $sales = DB::table('transactions as t')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->when($location_id, fn($q) => $q->where('t.location_id', $location_id))
+            ->orderBy('t.created_at', 'desc')
+            ->limit($limit)
+            ->select([
+                't.id',
+                't.invoice_no',
+                't.final_total',
+                't.transaction_date',
+                't.created_at',
+            ])
+            ->get()
+            ->map(function ($sale) {
+                $payments = DB::table('transaction_payments')
+                    ->where('transaction_id', $sale->id)
+                    ->selectRaw('method, SUM(amount) as amount')
+                    ->groupBy('method')
+                    ->get();
+
+                $sale->payments = $payments;
+                return $sale;
+            });
+
+        return response()->json(['sales' => $sales]);
+    }
 }

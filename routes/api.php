@@ -33,5 +33,6 @@ Route::prefix('mobile')->group(function () {
         Route::post('/expense',           [\App\Http\Controllers\MobilePosController::class, 'createExpense']);
         Route::get('/till-summary',       [\App\Http\Controllers\MobilePosController::class, 'tillSummary']);
         Route::post('/close-till',        [\App\Http\Controllers\MobilePosController::class, 'closeTill']);
+        Route::get('/recent-sales',       [\App\Http\Controllers\MobilePosController::class, 'recentSales']);
     });
 });
