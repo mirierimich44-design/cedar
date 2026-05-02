@@ -124,6 +124,35 @@ class LoginController extends Controller
         }
     }
 
+    /**
+     * Override to always return JSON for AJAX / React mobile app requests,
+     * preventing Laravel from issuing a redirect that the browser would follow.
+     */
+    protected function sendLoginResponse(\Illuminate\Http\Request $request)
+    {
+        $request->session()->regenerate();
+        $this->clearLoginAttempts($request);
+
+        if ($response = $this->authenticated($request, $this->guard()->user())) {
+            // authenticated() returned a redirect (inactive account etc.).
+            // For AJAX requests return a JSON error instead of a redirect.
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(
+                    ['message' => 'Login not allowed. Please contact your administrator.'],
+                    403
+                );
+            }
+            return $response;
+        }
+
+        // Successful login — return JSON for AJAX (React app), redirect for browser.
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->intended($this->redirectPath());
+    }
+
     protected function redirectTo()
     {
         $user = \Auth::user();
