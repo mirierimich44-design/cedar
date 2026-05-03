@@ -205,8 +205,15 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(overlay);
     }
     
-    // Mobile menu button is now part of #app-header itself (single button with
-    // both .small-view-button and .side-bar-collapse class hooks). No injection.
+    // Inject mobile menu button only on small screens, only if header has no toggle yet
+    var header = document.querySelector('#app-header, .thetop > div:first-child, .main-header');
+    if (header && window.innerWidth < 1024 && !document.querySelector('.mobile-menu-toggle')) {
+        var menuBtn = document.createElement('button');
+        menuBtn.className = 'mobile-menu-toggle';
+        menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        menuBtn.setAttribute('aria-label', 'Toggle menu');
+        header.insertBefore(menuBtn, header.firstChild);
+    }
     
     // Toggle sidebar function
     function toggleMobileSidebar() {

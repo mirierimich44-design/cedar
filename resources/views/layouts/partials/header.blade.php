@@ -128,10 +128,8 @@
 
 <header id="app-header" class="no-print">
 
-    {{-- ONE sidebar toggle — both class hooks on the same button --}}
-    <button class="hb hb-ghost small-view-button side-bar-collapse" type="button" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg>
-    </button>
+    {{-- No desktop collapse toggle — sidebar always visible on lg+. --}}
+    {{-- Mobile menu button is auto-injected by app.blade.php on screens <1024px. --}}
 
     @if(Module::has('Superadmin'))
         @includeIf('superadmin::layouts.partials.active_subscription')
@@ -275,26 +273,6 @@
 </header>
 
 <script>
-// ── Sidebar collapse (works on both desktop + mobile) ───────
-(function() {
-    document.addEventListener('click', function(e) {
-        var btn = e.target.closest('.side-bar-collapse, .small-view-button');
-        if (!btn) return;
-        e.preventDefault();
-        var sidebar = document.querySelector('aside.side-bar');
-        if (!sidebar) return;
-
-        // Toggle: if currently visible (any display), hide it; else show it.
-        var isVisible = sidebar.offsetWidth > 0 && sidebar.offsetHeight > 0;
-        if (isVisible) {
-            sidebar.dataset.prevDisplay = sidebar.style.display || '';
-            sidebar.style.display = 'none';
-        } else {
-            sidebar.style.display = sidebar.dataset.prevDisplay || 'flex';
-        }
-    });
-})();
-
 // Close user menu when clicking outside
 document.addEventListener('click', function(e) {
     var menu = document.getElementById('hb-user-menu');
