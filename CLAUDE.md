@@ -1,9 +1,17 @@
 # Project: Reenson / Apex POS
 
 ## Server
-- **URL:** apexpos.co.ke
-- **App folder:** serengeti (i.e. `/home/.../serengeti` or `/var/www/serengeti` — confirm exact path on first SSH)
-- **Deploy pattern:** `cd /path/to/serengeti && git fetch origin && git checkout origin/dev -- <file> && php artisan cache:clear && php artisan route:clear`
+- **Host:** apexpos.co.ke (Hostinger)
+- **SSH:** `ssh u856697070@apexpos.co.ke -p 65002`
+- **App path:** `/home/u856697070/domains/apexpos.co.ke/public_html/serengeti`
+- **Deploy pattern:**
+  ```bash
+  cd ~/domains/apexpos.co.ke/public_html/serengeti
+  git fetch origin
+  git checkout origin/dev -- <file(s)>
+  php artisan cache:clear && php artisan route:clear
+  ```
+- When the user says "deploy", "push to server", or mentions a folder/domain, always use the path above unless they specify a different folder.
 
 ## Stack
 - **Backend:** Laravel (UltimatePOS), PHP, MySQL
