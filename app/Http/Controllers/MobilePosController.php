@@ -288,13 +288,40 @@ class MobilePosController extends Controller
 
     public function createExpense(Request $request)
     {
-        $user = $request->user();
-        Auth::guard('web')->setUser($user);
-        $request->session()->put('user.business_id', $user->business_id);
-        $request->session()->put('user.id', $user->id);
+        $user        = $request->user();
+        $business_id = $user->business_id;
+        $user_id     = $user->id;
 
-        $controller = app(\App\Http\Controllers\ExpenseController::class);
-        return $controller->store($request);
+        $request->validate([
+            'amount'      => 'required|numeric|min:0.01',
+            'category_id' => 'required|integer',
+            'location_id' => 'required|integer',
+        ]);
+
+        // Merge validated fields into request format expected by TransactionUtil
+        $request->merge([
+            'final_total'         => $request->input('amount'),
+            'expense_category_id' => $request->input('category_id'),
+            'transaction_date'    => $request->input('date', now()->toDateString()),
+            'payment'             => [[
+                'method' => $request->input('payment_method', 'cash'),
+                'amount' => $request->input('amount'),
+                'note'   => $request->input('note', ''),
+            ]],
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $transactionUtil = app(\App\Utils\TransactionUtil::class);
+            $expense = $transactionUtil->createExpense($request, $business_id, $user_id, false);
+
+            DB::commit();
+            return response()->json(['success' => true, 'msg' => 'Expense recorded.', 'ref_no' => $expense->ref_no]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Mobile expense error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'msg' => $e->getMessage()], 500);
+        }
     }
 
     public function tillSummary(Request $request)
