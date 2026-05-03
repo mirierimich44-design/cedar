@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fetch today's profit in the background
     $.ajax({
-        url: '{{ route("report.profit_loss") }}',
+        url: '/reports/profit-loss',
         data: {
             start_date: '{{ now()->toDateString() }}',
             end_date:   '{{ now()->toDateString() }}',
