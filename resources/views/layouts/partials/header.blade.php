@@ -29,26 +29,27 @@
 /* THE button style — all: unset nukes Bootstrap completely */
 #app-header .hb {
     all: unset;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 13px;
-    background: {{ $t['main'] }};
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    text-decoration: none;
-    flex-shrink: 0;
-    transition: opacity .15s;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 36px !important;
+    padding: 0 13px !important;
+    background: {{ $t['main'] }} !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    flex-shrink: 0 !important;
+    transition: opacity .15s !important;
+    line-height: 1 !important;
 }
-#app-header .hb:hover   { opacity: .82; color: #fff; }
-#app-header .hb svg    { width: 15px; height: 15px; color: #fff; flex-shrink: 0; }
+#app-header .hb:hover { opacity: .82 !important; color: #fff !important; }
+#app-header .hb svg   { width: 15px !important; height: 15px !important; color: #fff !important; flex-shrink: 0 !important; }
 
 /* Sidebar toggle: ghost, no fill */
 #app-header .hb-ghost {
@@ -101,28 +102,17 @@
     overflow: hidden; display: none;
 }
 
-/* One toggle shows at a time */
-.hb-mobile { display: inline-flex; }
-.hb-desktop { display: none; }
-@media (min-width: 1024px) {
-    .hb-mobile  { display: none; }
-    .hb-desktop { display: inline-flex; }
-}
-
 /* Responsive: hide labels */
-@media (max-width: 1200px) { #app-header .hb-label { display: none; } }
-@media (max-width: 960px)  { #app-header .hb-hide-md { display: none; } }
-@media (max-width: 700px)  { #app-header .hb-hide-sm { display: none; } }
+@media (max-width: 1200px) { #app-header .hb-label   { display: none !important; } }
+@media (max-width: 960px)  { #app-header .hb-hide-md { display: none !important; } }
+@media (max-width: 700px)  { #app-header .hb-hide-sm { display: none !important; } }
 </style>
 
 <header id="app-header" class="no-print">
 
-    {{-- Sidebar toggle: mobile opens drawer, desktop collapses --}}
-    <button class="hb hb-ghost hb-mobile small-view-button" type="button" aria-label="Menu">
+    {{-- ONE sidebar toggle — both class hooks on the same button --}}
+    <button class="hb hb-ghost small-view-button side-bar-collapse" type="button" aria-label="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg>
-    </button>
-    <button class="hb hb-ghost hb-desktop side-bar-collapse" type="button" aria-label="Collapse sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M15 4v16"/><path d="M10 10l-2 2l2 2"/></svg>
     </button>
 
     @if(Module::has('Superadmin'))
