@@ -23,29 +23,41 @@
 
 /* ── Base header ─────────────────────────────────────────── */
 .app-header {
-    background: linear-gradient(135deg, var(--hdr-bg-from) 0%, var(--hdr-bg-to) 100%);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    height: 56px;
+    /* Same color stop as sidebar, horizontal so it reads as a single band */
+    background: linear-gradient(90deg, var(--hdr-bg-from) 0%, var(--hdr-bg-to) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    height: 64px;
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 20px;
     gap: 8px;
     position: relative;
     z-index: 100;
+    flex-shrink: 0;
 }
 
-/* ── Sidebar toggles ─────────────────────────────────────── */
+/* ── Sidebar toggle buttons ──────────────────────────────── */
 .hdr-sidebar-btn {
-    width: 36px; height: 36px;
+    width: 38px; height: 38px;
     display: inline-flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px; color: #fff; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px; color: #fff; cursor: pointer;
     transition: background .15s;
     flex-shrink: 0;
 }
 .hdr-sidebar-btn:hover { background: rgba(255,255,255,0.2); }
 .hdr-sidebar-btn svg  { width: 18px; height: 18px; }
+
+/* ── Show ONLY ONE toggle at a time ──────────────────────── */
+/* Mobile (<1024px): show hamburger, hide collapse toggle */
+.hdr-btn-hamburger { display: inline-flex; }
+.hdr-btn-collapse  { display: none; }
+/* Desktop (≥1024px): show collapse toggle, hide hamburger */
+@media (min-width: 1024px) {
+    .hdr-btn-hamburger { display: none !important; }
+    .hdr-btn-collapse  { display: inline-flex !important; }
+}
 
 /* ── Spacer ──────────────────────────────────────────────── */
 .hdr-spacer { flex: 1; }
@@ -60,128 +72,140 @@
     margin: 0 4px; flex-shrink: 0;
 }
 
-/* ── Ghost button (Calendar, Calculator, Expense, Purchase, Repair…) */
+/* ── Ghost button (Calendar, Calculator, Expense, Purchase…) */
 .hdr-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    height: 34px; padding: 0 12px;
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 38px; padding: 0 14px;
     background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px; color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px; color: #fff !important;
     font-size: 13px; font-weight: 600;
     cursor: pointer; text-decoration: none !important;
     transition: background .15s, border-color .15s;
     white-space: nowrap;
 }
-.hdr-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); }
-.hdr-btn svg   { width: 15px; height: 15px; color: rgba(255,255,255,.9); flex-shrink:0; }
+.hdr-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.32); }
+.hdr-btn svg   { width: 16px; height: 16px; color: rgba(255,255,255,.9); flex-shrink: 0; }
 
 /* ── Icon-only variant ───────────────────────────────────── */
 .hdr-btn-icon {
-    width: 36px; padding: 0;
+    width: 38px; padding: 0;
     justify-content: center;
 }
 
-/* ── Date chip — glass info style ────────────────────────── */
+/* ── Date chip — subtle glass ────────────────────────────── */
 .hdr-date-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    height: 34px; padding: 0 12px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px; color: rgba(255,255,255,.75) !important;
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 38px; padding: 0 14px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px; color: rgba(255,255,255,.65) !important;
     font-size: 13px; font-weight: 600; font-family: monospace;
     cursor: default; white-space: nowrap;
 }
-.hdr-date-chip svg { width: 14px; height: 14px; opacity: .7; }
+.hdr-date-chip svg { width: 14px; height: 14px; opacity: .6; }
 
 /* ── Today's Profit chip — live stat ─────────────────────── */
 .hdr-profit-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    height: 34px; padding: 0 12px;
-    background: rgba(16,185,129,0.2);
-    border: 1px solid rgba(16,185,129,0.4);
-    border-radius: 8px; color: #6ee7b7 !important;
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 38px; padding: 0 14px;
+    background: rgba(16,185,129,0.18);
+    border: 1px solid rgba(16,185,129,0.35);
+    border-radius: 9px; color: #6ee7b7 !important;
     font-size: 13px; font-weight: 700;
     cursor: pointer; white-space: nowrap;
     transition: background .15s;
 }
-.hdr-profit-chip:hover { background: rgba(16,185,129,0.3); }
-.hdr-profit-chip svg   { width: 15px; height: 15px; color: #6ee7b7; }
-.hdr-profit-chip .profit-amount { color: #fff; font-variant-numeric: tabular-nums; }
-.hdr-profit-chip.loading .profit-amount { opacity: .5; }
+.hdr-profit-chip:hover { background: rgba(16,185,129,0.28); }
+.hdr-profit-chip svg   { width: 16px; height: 16px; color: #6ee7b7; flex-shrink: 0; }
+.hdr-profit-chip .profit-label  { color: rgba(255,255,255,.55); font-weight: 500; font-size: 12px; }
+.hdr-profit-chip .profit-amount { color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* ── POS primary button — stands out ─────────────────────── */
+/* ── POS primary — white pill, most prominent ────────────── */
 .hdr-btn-pos {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid rgba(255,255,255,1);
+    background: #fff;
+    border: 1px solid #fff;
     color: var(--hdr-bg-from) !important;
-    font-weight: 700;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    letter-spacing: .01em;
 }
 .hdr-btn-pos:hover {
-    background: #fff;
-    border-color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .hdr-btn-pos svg { color: var(--hdr-bg-from) !important; }
 
-/* ── Notification bell ────────────────────────────────────── */
+/* ── Divider ─────────────────────────────────────────────── */
+.hdr-divider {
+    width: 1px; height: 26px;
+    background: rgba(255,255,255,0.16);
+    margin: 0 6px; flex-shrink: 0;
+}
+
+/* ── Notification bell ───────────────────────────────────── */
 .hdr-bell-wrap { position: relative; display: inline-flex; }
 .hdr-bell-dot  {
-    position: absolute; top: 3px; right: 3px;
+    position: absolute; top: 4px; right: 4px;
     width: 9px; height: 9px;
     background: #ef4444; border-radius: 50%;
     border: 2px solid var(--hdr-bg-to);
+    pointer-events: none;
 }
-.hdr-bell-dot.pulse {
-    animation: bellPulse 2s infinite;
-}
+.hdr-bell-dot.pulse { animation: bellPulse 2s infinite; }
 @keyframes bellPulse {
     0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
     50%      { box-shadow: 0 0 0 5px rgba(239,68,68,0); }
 }
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 
-/* ── User avatar chip ────────────────────────────────────── */
+/* ── User chip ───────────────────────────────────────────── */
 .hdr-user-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    height: 34px; padding: 0 10px 0 6px;
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 38px; padding: 0 12px 0 7px;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px; color: #fff !important;
+    border-radius: 9px; color: #fff !important;
     font-size: 13px; font-weight: 600;
-    cursor: pointer;
-    transition: background .15s;
+    cursor: pointer; transition: background .15s;
 }
 .hdr-user-btn:hover { background: rgba(255,255,255,0.2); }
 .hdr-user-avatar {
-    width: 24px; height: 24px; border-radius: 6px;
-    background: rgba(255,255,255,0.25);
+    width: 26px; height: 26px; border-radius: 7px;
+    background: rgba(255,255,255,0.22);
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 800; color: #fff;
-    flex-shrink: 0;
+    font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
 }
 
-/* ── Responsive: hide labels on md, show on lg ───────────── */
-@media (max-width: 1199px) {
-    .hdr-btn .hdr-label  { display: none; }
-    .hdr-btn             { padding: 0 10px; }
-    .hdr-profit-chip .hdr-label { display: none; }
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1280px) {
+    .hdr-btn .hdr-label         { display: none; }
+    .hdr-btn                    { padding: 0 10px; }
+    .hdr-profit-chip .profit-label { display: none; }
 }
-@media (max-width: 900px) {
-    .hdr-group.hdr-tools { display: none; }
+@media (max-width: 1024px) {
+    .hdr-group.hdr-tools        { display: none; }
+    .hdr-divider.hdr-tools      { display: none; }
 }
-@media (max-width: 700px) {
-    .hdr-group.hdr-actions { display: none; }
-    .hdr-date-chip        { display: none !important; }
+@media (max-width: 768px) {
+    .hdr-group.hdr-actions      { display: none; }
+    .hdr-divider.hdr-actions    { display: none; }
+    .hdr-date-chip              { display: none !important; }
 }
 </style>
 
 <header class="app-header no-print" id="app-header">
 
-    {{-- ── Left: Sidebar toggles ───────────────────────── --}}
-    <button type="button" class="hdr-sidebar-btn small-view-button lg:tw-hidden" aria-label="Menu">
+    {{-- ── Left: Sidebar toggles (only ONE shows at a time via CSS) ── --}}
+    {{-- Mobile hamburger: visible below 1024px --}}
+    <button type="button" class="hdr-sidebar-btn hdr-btn-hamburger small-view-button" aria-label="Open menu">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg>
     </button>
-    <button type="button" class="hdr-sidebar-btn side-bar-collapse tw-hidden lg:tw-inline-flex" aria-label="Collapse sidebar">
+    {{-- Desktop collapse: visible at 1024px+ --}}
+    <button type="button" class="hdr-sidebar-btn hdr-btn-collapse side-bar-collapse" aria-label="Collapse sidebar">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M15 4v16"/><path d="M10 10l-2 2l2 2"/></svg>
     </button>
 
@@ -212,8 +236,10 @@
         @can('profit_loss_report.view')
         <button type="button" id="view_todays_profit" class="hdr-profit-chip">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
-            <span class="hdr-label" style="color:rgba(255,255,255,.7);font-weight:500;">Profit</span>
-            <span class="profit-amount" id="hdr_profit_val">…</span>
+            <span class="profit-label">Today's Profit</span>
+            <span class="profit-amount" id="hdr_profit_val">
+                <svg style="width:13px;height:13px;animation:spin 1s linear infinite;vertical-align:middle;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
+            </span>
         </button>
         @endcan
 
