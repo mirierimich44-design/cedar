@@ -240,8 +240,8 @@
             border:1px solid #e2e8f0;overflow:hidden;">
 
     {{-- Tab Nav --}}
-    <div style="border-bottom:1px solid #e2e8f0;padding:0 20px;background:#f8fafc;">
-        <ul class="nav" role="tablist" style="display:flex;gap:0;margin:0;padding:0;list-style:none;">
+    <div style="border-bottom:1px solid #e2e8f0;padding:0 20px;background:#f8fafc;overflow-x:auto;">
+        <ul class="nav" role="tablist" style="display:flex;gap:0;margin:0;padding:0;list-style:none;white-space:nowrap;">
             <li style="margin:0;">
                 <a href="#tab-sales" data-toggle="tab" role="tab"
                    style="display:block;padding:13px 18px;font-size:.82rem;font-weight:600;color:#4f46e5;
@@ -266,6 +266,22 @@
                             {{ $purchase->failed }} failed
                         </span>
                     @endif
+                </a>
+            </li>
+            <li style="margin:0;">
+                <a href="#tab-vat" data-toggle="tab" role="tab"
+                   style="display:block;padding:13px 18px;font-size:.82rem;font-weight:600;color:#64748b;
+                          border-bottom:3px solid transparent;text-decoration:none;" class="etims-tab">
+                    <i class="fa fa-percent" style="margin-right:5px;color:#f59e0b;"></i>
+                    VAT Report
+                </a>
+            </li>
+            <li style="margin:0;">
+                <a href="#tab-monthly" data-toggle="tab" role="tab"
+                   style="display:block;padding:13px 18px;font-size:.82rem;font-weight:600;color:#64748b;
+                          border-bottom:3px solid transparent;text-decoration:none;" class="etims-tab">
+                    <i class="fa fa-calendar" style="margin-right:5px;color:#0ea5e9;"></i>
+                    Monthly Compliance
                 </a>
             </li>
         </ul>
@@ -415,6 +431,160 @@
                                 <th style="border-top:none;padding:10px 12px;"></th>
                             </tr>
                         </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── VAT REPORT TAB ── --}}
+        <div role="tabpanel" class="tab-pane" id="tab-vat">
+
+            {{-- Filters --}}
+            <div style="padding:14px 20px;background:#fafafa;border-bottom:1px solid #f1f5f9;">
+                <div class="row" style="margin:0;align-items:flex-end;gap:0;">
+                    <div class="col-md-3 col-sm-4" style="padding:0 6px;">
+                        <label style="font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:4px;display:block;">Location</label>
+                        <select id="vat_location_filter" class="form-control" style="font-size:.8rem;height:34px;">
+                            <option value="">All Locations</option>
+                            @foreach($business_locations as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-4" style="padding:0 6px;">
+                        <label style="font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:4px;display:block;">From</label>
+                        <input type="date" id="vat_start_date" class="form-control" style="font-size:.8rem;height:34px;"
+                               value="{{ now()->startOfMonth()->toDateString() }}">
+                    </div>
+                    <div class="col-md-2 col-sm-4" style="padding:0 6px;">
+                        <label style="font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:4px;display:block;">To</label>
+                        <input type="date" id="vat_end_date" class="form-control" style="font-size:.8rem;height:34px;"
+                               value="{{ now()->toDateString() }}">
+                    </div>
+                    <div class="col-md-2 col-sm-4" style="padding:0 6px;">
+                        <label style="font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:4px;display:block;">&nbsp;</label>
+                        <button id="vat_filter_btn"
+                                style="width:100%;height:34px;background:#f59e0b;color:#fff;border:none;
+                                       border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;">
+                            <i class="fa fa-refresh"></i> Load Report
+                        </button>
+                    </div>
+                    <div class="col-md-3 col-sm-4" style="padding:0 6px;">
+                        <label style="font-size:.72rem;font-weight:600;color:#64748b;margin-bottom:4px;display:block;">&nbsp;</label>
+                        <a id="vat_export_btn" href="#"
+                           style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;
+                                  background:#16a34a;color:#fff;border-radius:6px;font-size:.78rem;
+                                  font-weight:600;text-decoration:none;">
+                            <i class="fa fa-download"></i> Export CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- VAT Summary Table --}}
+            <div style="padding:20px;">
+                <div id="vat_loading" style="text-align:center;padding:40px;color:#94a3b8;display:none;">
+                    <i class="fa fa-spinner fa-spin fa-2x"></i><br>Loading VAT Report…
+                </div>
+                <div id="vat_table_wrap">
+                    <table class="table" id="vat_summary_table" style="font-size:.82rem;">
+                        <thead>
+                            <tr style="background:#fef3c7;">
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;">Tax Category</th>
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;">VAT Rate</th>
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;text-align:right;">Invoices</th>
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;text-align:right;">Taxable Amount (excl. VAT)</th>
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;text-align:right;">VAT Charged</th>
+                                <th style="font-weight:700;color:#92400e;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px;text-align:right;">Gross Amount (incl. VAT)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vat_tbody">
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">
+                                Click <strong>Load Report</strong> to generate the VAT summary.
+                            </td></tr>
+                        </tbody>
+                        <tfoot id="vat_tfoot" style="display:none;">
+                            <tr style="background:#f0fdf4;font-weight:700;">
+                                <td colspan="2" style="padding:10px 14px;color:#065f46;font-size:.82rem;">TOTALS</td>
+                                <td id="vat_total_invoices" style="text-align:right;padding:10px 14px;color:#065f46;"></td>
+                                <td id="vat_total_taxable" style="text-align:right;padding:10px 14px;color:#065f46;"></td>
+                                <td id="vat_total_tax" style="text-align:right;padding:10px 14px;color:#065f46;"></td>
+                                <td id="vat_total_gross" style="text-align:right;padding:10px 14px;color:#065f46;"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    {{-- KRA VAT Return Helper --}}
+                    <div id="vat_return_helper" style="display:none;margin-top:20px;background:#eff6ff;border:1px solid #bfdbfe;
+                                border-radius:10px;padding:16px 20px;">
+                        <h5 style="margin:0 0 12px;font-size:.85rem;font-weight:700;color:#1d4ed8;">
+                            <i class="fa fa-info-circle"></i> KRA VAT Return Reference
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div style="font-size:.75rem;color:#64748b;font-weight:600;margin-bottom:2px;">Box 11 — Standard Rated Sales (16%)</div>
+                                <div id="box11" style="font-size:1.1rem;font-weight:700;color:#1e293b;">—</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div style="font-size:.75rem;color:#64748b;font-weight:600;margin-bottom:2px;">Box 12 — Output VAT (16%)</div>
+                                <div id="box12" style="font-size:1.1rem;font-weight:700;color:#dc2626;">—</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div style="font-size:.75rem;color:#64748b;font-weight:600;margin-bottom:2px;">Box 15 — Zero-Rated / Exempt Sales</div>
+                                <div id="box15" style="font-size:1.1rem;font-weight:700;color:#1e293b;">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── MONTHLY COMPLIANCE TAB ── --}}
+        <div role="tabpanel" class="tab-pane" id="tab-monthly">
+            <div style="padding:20px;">
+
+                {{-- Controls --}}
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                    <h4 style="margin:0;font-size:.9rem;font-weight:700;color:#374151;">
+                        Rolling Monthly Compliance — Sales invoices vs eTIMS sync status
+                    </h4>
+                    <div style="display:flex;gap:6px;">
+                        <button class="monthly-range-btn active" data-months="6"
+                            style="font-size:.72rem;padding:4px 12px;border-radius:6px;border:1px solid #e2e8f0;
+                                   background:#eff6ff;color:#3b82f6;cursor:pointer;font-weight:600;">6 months</button>
+                        <button class="monthly-range-btn" data-months="12"
+                            style="font-size:.72rem;padding:4px 12px;border-radius:6px;border:1px solid #e2e8f0;
+                                   background:#fff;color:#64748b;cursor:pointer;">12 months</button>
+                        <button class="monthly-range-btn" data-months="24"
+                            style="font-size:.72rem;padding:4px 12px;border-radius:6px;border:1px solid #e2e8f0;
+                                   background:#fff;color:#64748b;cursor:pointer;">24 months</button>
+                    </div>
+                </div>
+
+                {{-- Stacked Bar Chart --}}
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <canvas id="monthlyComplianceChart" height="100"></canvas>
+                </div>
+
+                {{-- Monthly Table --}}
+                <div class="table-responsive">
+                    <table class="table table-hover" style="font-size:.8rem;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;">Month</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:right;">Total Invoices</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:right;">Synced ✓</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:right;">Failed ✗</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:right;">Pending ⌛</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:right;">Revenue Synced</th>
+                                <th style="font-weight:600;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;text-align:center;">Compliance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthly_tbody">
+                            <tr><td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">
+                                <i class="fa fa-spinner fa-spin"></i> Loading…
+                            </td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -652,6 +822,169 @@ $(function () {
 
     $('#sync_all_sales_btn').on('click', function () { syncAll($(this), 'sell'); });
     $('#sync_all_purchases_btn').on('click', function () { syncAll($(this), 'purchase'); });
+
+    /* ── VAT Report ──────────────────────────────────────────── */
+    var vatDataUrl   = '{{ route("etims.vat-data") }}';
+    var vatExportUrl = '{{ route("etims.export-vat") }}';
+
+    function fmt(n) {
+        return new Intl.NumberFormat('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
+    }
+
+    function loadVatReport() {
+        var start = $('#vat_start_date').val();
+        var end   = $('#vat_end_date').val();
+        var loc   = $('#vat_location_filter').val();
+
+        $('#vat_loading').show();
+        $('#vat_table_wrap').hide();
+
+        $.getJSON(vatDataUrl, { start_date: start, end_date: end, location_id: loc }, function (res) {
+            var tbody = '';
+            var catColors = { A:'#fef9c3', B:'#fce7f3', C:'#dcfce7', D:'#f1f5f9', E:'#f0f9ff' };
+
+            $.each(res.rows, function (i, r) {
+                var bg = catColors[r.category] || '#fff';
+                tbody += '<tr style="background:' + bg + ';">'
+                    + '<td style="padding:10px 14px;font-weight:600;">' + r.label + '</td>'
+                    + '<td style="padding:10px 14px;"><span style="background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:8px;font-size:.75rem;font-weight:700;">' + r.rate + '</span></td>'
+                    + '<td style="text-align:right;padding:10px 14px;">' + r.invoice_count.toLocaleString() + '</td>'
+                    + '<td style="text-align:right;padding:10px 14px;font-family:monospace;">' + fmt(r.taxable_amount) + '</td>'
+                    + '<td style="text-align:right;padding:10px 14px;font-family:monospace;color:#dc2626;font-weight:600;">' + fmt(r.tax_amount) + '</td>'
+                    + '<td style="text-align:right;padding:10px 14px;font-family:monospace;font-weight:600;">' + fmt(r.gross_amount) + '</td>'
+                    + '</tr>';
+            });
+
+            if (!tbody) {
+                tbody = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;">No synced invoices found for the selected period.</td></tr>';
+            }
+
+            $('#vat_tbody').html(tbody);
+
+            // Totals row
+            var t = res.totals;
+            $('#vat_total_invoices').text(parseInt(t.invoice_count).toLocaleString());
+            $('#vat_total_taxable').text(fmt(t.taxable_amount));
+            $('#vat_total_tax').text(fmt(t.tax_amount));
+            $('#vat_total_gross').text(fmt(t.gross_amount));
+            $('#vat_tfoot').show();
+
+            // KRA VAT Return Helper
+            var stdRow  = $.grep(res.rows, function(r){ return r.category === 'A'; })[0];
+            var zeroRow = $.grep(res.rows, function(r){ return r.category === 'C' || r.category === 'D'; });
+            var zeroTotal = 0;
+            $.each(zeroRow, function(i, r){ zeroTotal += parseFloat(r.gross_amount || 0); });
+            if (stdRow || zeroTotal > 0) {
+                $('#box11').text(fmt(stdRow ? stdRow.taxable_amount : 0));
+                $('#box12').text(fmt(stdRow ? stdRow.tax_amount : 0));
+                $('#box15').text(fmt(zeroTotal));
+                $('#vat_return_helper').show();
+            }
+
+        }).always(function () {
+            $('#vat_loading').hide();
+            $('#vat_table_wrap').show();
+        });
+    }
+
+    $('#vat_filter_btn').on('click', loadVatReport);
+
+    // Update export CSV link dynamically
+    function updateExportLink() {
+        var params = new URLSearchParams({
+            start_date:  $('#vat_start_date').val(),
+            end_date:    $('#vat_end_date').val(),
+            location_id: $('#vat_location_filter').val(),
+        });
+        $('#vat_export_btn').attr('href', vatExportUrl + '?' + params.toString());
+    }
+    $('#vat_start_date, #vat_end_date, #vat_location_filter').on('change', updateExportLink);
+    updateExportLink();
+
+    // Auto-load when tab is opened
+    $('a[href="#tab-vat"]').on('shown.bs.tab click', function() {
+        if ($('#vat_tbody tr td[colspan]').length) { loadVatReport(); }
+    });
+
+    /* ── Monthly Compliance ──────────────────────────────────── */
+    var monthlyUrl = '{{ route("etims.monthly-compliance") }}';
+    var monthlyChart = null;
+
+    function loadMonthlyCompliance(months) {
+        $.getJSON(monthlyUrl, { months: months }, function (rows) {
+            var labels   = rows.map(function(r){ return r.month; });
+            var synced   = rows.map(function(r){ return r.synced; });
+            var failed   = rows.map(function(r){ return r.failed; });
+            var pending  = rows.map(function(r){ return r.pending; });
+            var pcts     = rows.map(function(r){ return r.compliance_pct; });
+
+            // Chart
+            var ctx = document.getElementById('monthlyComplianceChart');
+            if (monthlyChart) monthlyChart.destroy();
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Synced',  data: synced,  backgroundColor: '#22c55e', stack: 's' },
+                        { label: 'Failed',  data: failed,  backgroundColor: '#ef4444', stack: 's' },
+                        { label: 'Pending', data: pending, backgroundColor: '#f59e0b', stack: 's' },
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position:'bottom', labels:{ font:{size:11}, boxWidth:12 } },
+                        tooltip: { callbacks: {
+                            afterBody: function(items) {
+                                var idx = items[0].dataIndex;
+                                return ['Compliance: ' + pcts[idx] + '%'];
+                            }
+                        }}
+                    },
+                    scales: {
+                        x: { stacked:true, grid:{display:false}, ticks:{font:{size:10}} },
+                        y: { stacked:true, grid:{color:'#f1f5f9'}, ticks:{font:{size:10}, precision:0}, beginAtZero:true }
+                    }
+                }
+            });
+
+            // Table
+            var tbody = '';
+            $.each(rows, function(i, r) {
+                var pctColor = r.compliance_pct >= 90 ? '#16a34a' : r.compliance_pct >= 70 ? '#d97706' : '#dc2626';
+                var bar = '<div style="background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;margin-top:4px;">'
+                    + '<div style="width:' + r.compliance_pct + '%;background:' + pctColor + ';height:100%;border-radius:4px;"></div></div>';
+                tbody += '<tr>'
+                    + '<td style="padding:9px 12px;font-weight:600;">' + r.month + '</td>'
+                    + '<td style="text-align:right;padding:9px 12px;">' + parseInt(r.total).toLocaleString() + '</td>'
+                    + '<td style="text-align:right;padding:9px 12px;color:#16a34a;font-weight:600;">' + parseInt(r.synced).toLocaleString() + '</td>'
+                    + '<td style="text-align:right;padding:9px 12px;color:#dc2626;">' + parseInt(r.failed).toLocaleString() + '</td>'
+                    + '<td style="text-align:right;padding:9px 12px;color:#d97706;">' + parseInt(r.pending).toLocaleString() + '</td>'
+                    + '<td style="text-align:right;padding:9px 12px;font-family:monospace;">' + fmt(r.revenue_synced) + '</td>'
+                    + '<td style="text-align:center;padding:9px 12px;min-width:120px;">'
+                    + '<span style="font-weight:700;color:' + pctColor + ';">' + r.compliance_pct + '%</span>' + bar
+                    + '</td>'
+                    + '</tr>';
+            });
+
+            $('#monthly_tbody').html(tbody || '<tr><td colspan="7" style="text-align:center;padding:30px;color:#94a3b8;">No data available.</td></tr>');
+        });
+    }
+
+    // Range buttons
+    $('.monthly-range-btn').on('click', function() {
+        $('.monthly-range-btn').css({'background':'#fff','color':'#64748b','borderColor':'#e2e8f0'});
+        $(this).css({'background':'#eff6ff','color':'#3b82f6','borderColor':'#bfdbfe'});
+        loadMonthlyCompliance($(this).data('months'));
+    });
+
+    // Auto-load when tab opened
+    $('a[href="#tab-monthly"]').on('shown.bs.tab click', function() {
+        if ($('#monthly_tbody tr td[colspan]').length || !monthlyChart) {
+            loadMonthlyCompliance(6);
+        }
+    });
 
 });
 </script>

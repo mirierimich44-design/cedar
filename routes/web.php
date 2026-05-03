@@ -236,6 +236,9 @@ Route::middleware(['setData'])->group(function () {
 
 //Routes for authenticated users only
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
+    Route::get('/global-search', [\App\Http\Controllers\GlobalSearchController::class, 'search'])->name('global.search');
+    Route::get('/smart-alerts', [\App\Http\Controllers\SmartAlertsController::class, 'index'])->name('smart.alerts');
+
     // Moved to very top to avoid any conflict
     Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
     Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
@@ -555,6 +558,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('etims-report/analytics', [EtimsReportController::class, 'analytics'])->name('etims.analytics');
     Route::get('etims-report/sync-invoice/{id}', [EtimsReportController::class, 'syncInvoice'])->name('etims.sync-invoice');
     Route::post('etims-report/sync-all', [EtimsReportController::class, 'syncAll'])->name('etims.sync-all');
+    Route::get('etims-report/vat-data', [EtimsReportController::class, 'vatData'])->name('etims.vat-data');
+    Route::get('etims-report/monthly-compliance', [EtimsReportController::class, 'monthlyCompliance'])->name('etims.monthly-compliance');
+    Route::get('etims-report/export-vat', [EtimsReportController::class, 'exportVat'])->name('etims.export-vat');
     Route::post('products/bulk-etims-sync', [\App\Http\Controllers\ProductController::class, 'bulkEtimsSync']);
     Route::get('etims-settings', [EtimsReportController::class, 'settings'])->name('etims.settings');
     Route::post('etims-settings', [EtimsReportController::class, 'saveSettings'])->name('etims.settings.save');
@@ -866,6 +872,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('notification-templates', NotificationTemplateController::class)->only(['index', 'store']);
     Route::get('notification/get-template/{transaction_id}/{template_for}', [NotificationController::class, 'getTemplate']);
     Route::post('notification/send', [NotificationController::class, 'send']);
+    Route::get('notification/get-notifications', [NotificationController::class, 'getNotifications']);
+    Route::post('notification/mark-all-read', [NotificationController::class, 'markAllRead']);
 
     Route::post('/purchase-return/update', [CombinedPurchaseReturnController::class, 'update']);
     Route::get('/purchase-return/edit/{id}', [CombinedPurchaseReturnController::class, 'edit']);
