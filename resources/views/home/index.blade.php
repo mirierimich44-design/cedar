@@ -77,11 +77,13 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                     @if (auth()->user()->can('dashboard.data'))
                         @if ($is_admin)
                             <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
-                                <div class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl tw-ring-1" style="background:{{ $__hc['bg'] }};border-color:{{ $__hc['ring'] }};overflow:hidden;">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,{{ $__hc['icon_from'] }},{{ $__hc['icon_to'] }});border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                {{-- Total Sell - Theme color --}}
+                                <div class="kpi-card" style="background:linear-gradient(135deg,{{ $__hc['icon_from'] }},{{ $__hc['icon_to'] }});border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                                    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                                    <div style="padding:20px;">
+                                        <div style="display:flex;align-items:center;gap:14px;">
+                                            <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
                                                     <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
@@ -89,40 +91,44 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                                     <path d="M6 5l14 1l-1 7h-13" />
                                                 </svg>
                                             </span>
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p class="tw-text-sm tw-font-medium tw-truncate tw-whitespace-nowrap" style="color:{{ $__hc['text'] }};">
+                                            <div style="flex:1;min-width:0;">
+                                                <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                                     {{ __('home.total_sell') }}
                                                 </p>
-                                                <p class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                                <p class="total_sell" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-green-200" style="background:#f0fdf4; overflow:hidden;">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#059669,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                {{-- Net - Green --}}
+                                <div class="kpi-card" style="background:linear-gradient(135deg,#059669,#10b981);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                                    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                                    <div style="padding:20px;">
+                                        <div style="display:flex;align-items:center;gap:14px;">
+                                            <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                     <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"></path>
                                                     <path d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
                                                     <path d="M12 6v10"></path>
                                                 </svg>
                                             </span>
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p class="tw-text-sm tw-font-medium tw-text-green-700 tw-truncate tw-whitespace-nowrap">
+                                            <div style="flex:1;min-width:0;">
+                                                <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                                     {{ __('lang_v1.net') }} @show_tooltip(__('lang_v1.net_home_tooltip'))
                                                 </p>
-                                                <p class="net tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                                <p class="net" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-yellow-200" style="background:#fffbeb; overflow:hidden;">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#d97706,#fbbf24);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                {{-- Invoice Due - Amber --}}
+                                <div class="kpi-card" style="background:linear-gradient(135deg,#d97706,#f59e0b);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                                    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                                    <div style="padding:20px;">
+                                        <div style="display:flex;align-items:center;gap:14px;">
+                                            <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path d="M14 3v4a1 1 0 0 0 1 1h4" />
                                                     <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
@@ -131,20 +137,22 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                                     <path d="M13 17l2 0" />
                                                 </svg>
                                             </span>
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p class="tw-text-sm tw-font-medium tw-text-yellow-700 tw-truncate tw-whitespace-nowrap">
+                                            <div style="flex:1;min-width:0;">
+                                                <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                                     {{ __('home.invoice_due') }}
                                                 </p>
-                                                <p class="invoice_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                                <p class="invoice_due" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tw-transition-all tw-duration-200 tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                                <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                {{-- Total Sell Return - Red --}}
+                                <div class="kpi-card" style="background:linear-gradient(135deg,#dc2626,#f87171);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                                    <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                                    <div style="padding:20px;">
+                                        <div style="display:flex;align-items:center;gap:14px;">
+                                            <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                     <path d="M21 7l-18 0" />
                                                     <path d="M18 10l3 -3l-3 -3" />
@@ -152,12 +160,12 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                                     <path d="M3 17l18 0" />
                                                 </svg>
                                             </span>
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
+                                            <div style="flex:1;min-width:0;">
+                                                <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                                     {{ __('lang_v1.total_sell_return') }}
-                                                    <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="auto bottom" id="total_srp" data-value="{{ __('lang_v1.total_sell_return') }}-{{ __('lang_v1.total_sell_return_paid') }}" data-content="" data-html="true" data-trigger="hover"></i>
+                                                    <i class="fa fa-info-circle hover-q no-print" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="auto bottom" id="total_srp" data-value="{{ __('lang_v1.total_sell_return') }}-{{ __('lang_v1.total_sell_return_paid') }}" data-content="" data-html="true" data-trigger="hover" style="color:rgba(255,255,255,0.6);"></i>
                                                 </p>
-                                                <p class="total_sell_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                                <p class="total_sell_return" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                             </div>
                                         </div>
                                     </div>
@@ -169,82 +177,90 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
         @if ($is_admin)
             <div class="tw-px-5 tw-pb-6">
                 <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
-                        <div class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1" style="background:var(--theme-subtle);border-color:var(--theme-border);overflow:hidden;">
-                            <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-4">
-                                    <span style="width:44px;height:44px;background:linear-gradient(135deg,var(--theme-dark),var(--theme-light));border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                        <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        {{-- Total Purchase - Blue --}}
+                        <div class="kpi-card" style="background:linear-gradient(135deg,#2563eb,#60a5fa);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                            <div style="padding:20px;">
+                                <div style="display:flex;align-items:center;gap:14px;">
+                                    <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                             <path d="M12 3v12"></path>
                                             <path d="M16 11l-4 4l-4 -4"></path>
                                             <path d="M3 12a9 9 0 0 0 18 0"></path>
                                         </svg>
                                     </span>
-                                    <div class="tw-flex-1 tw-min-w-0">
-                                        <p class="tw-text-sm tw-font-medium tw-truncate tw-whitespace-nowrap" style="color:var(--theme-hover);">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                             {{ __('home.total_purchase') }}
                                         </p>
-                                        <p class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                        <p class="total_purchase" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-yellow-200" style="background:#fffbeb; overflow:hidden;">
-                            <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-4">
-                                    <span style="width:44px;height:44px;background:linear-gradient(135deg,#d97706,#fbbf24);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                        <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        {{-- Purchase Due - Amber --}}
+                        <div class="kpi-card" style="background:linear-gradient(135deg,#d97706,#f59e0b);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                            <div style="padding:20px;">
+                                <div style="display:flex;align-items:center;gap:14px;">
+                                    <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                             <path d="M12 9v4" />
                                             <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
                                             <path d="M12 16h.01" />
                                         </svg>
                                     </span>
-                                    <div class="tw-flex-1 tw-min-w-0">
-                                        <p class="tw-text-sm tw-font-medium tw-text-yellow-700">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;">
                                             {{ __('home.purchase_due') }}
                                         </p>
-                                        <p class="purchase_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                        <p class="purchase_due" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
-                            <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-4">
-                                    <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                        <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        {{-- Total Purchase Return - Purple --}}
+                        <div class="kpi-card" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                            <div style="padding:20px;">
+                                <div style="display:flex;align-items:center;gap:14px;">
+                                    <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                             <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2" />
                                             <path d="M15 14v-2a2 2 0 0 0 -2 -2h-4l2 -2m0 4l-2 -2" />
                                         </svg>
                                     </span>
-                                    <div class="tw-flex-1 tw-min-w-0">
-                                        <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                             {{ __('lang_v1.total_purchase_return') }}
-                                            <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="auto bottom" id="total_prp" data-value="{{ __('lang_v1.total_purchase_return') }}-{{ __('lang_v1.total_purchase_return_paid') }}" data-content="" data-html="true" data-trigger="hover"></i>
+                                            <i class="fa fa-info-circle hover-q no-print" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="auto bottom" id="total_prp" data-value="{{ __('lang_v1.total_purchase_return') }}-{{ __('lang_v1.total_purchase_return_paid') }}" data-content="" data-html="true" data-trigger="hover" style="color:rgba(255,255,255,0.6);"></i>
                                         </p>
-                                        <p class="total_purchase_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                        <p class="total_purchase_return" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="tw-transition-all tw-duration-200 tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-red-200" style="background:#fef2f2; overflow:hidden;">
-                            <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-4">
-                                    <span style="width:44px;height:44px;background:linear-gradient(135deg,#dc2626,#f87171);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                        <svg aria-hidden="true" style="width:22px;height:22px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        {{-- Expense - Rose --}}
+                        <div class="kpi-card" style="background:linear-gradient(135deg,#e11d48,#fb7185);border-radius:14px;overflow:hidden;position:relative;transition:all .2s;">
+                            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+                            <div style="padding:20px;">
+                                <div style="display:flex;align-items:center;gap:14px;">
+                                    <span style="width:48px;height:48px;background:rgba(255,255,255,0.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <svg aria-hidden="true" style="width:24px;height:24px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                             <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"></path>
                                             <path d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
                                             <path d="M12 6v10"></path>
                                         </svg>
                                     </span>
-                                    <div class="tw-flex-1 tw-min-w-0">
-                                        <p class="tw-text-sm tw-font-medium tw-text-red-700 tw-truncate tw-whitespace-nowrap">
+                                    <div style="flex:1;min-width:0;">
+                                        <p style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                             {{ __('lang_v1.expense') }}
                                         </p>
-                                        <p class="total_expense tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono"></p>
+                                        <p class="total_expense" style="margin:4px 0 0;font-size:22px;font-weight:700;color:#fff;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;"></p>
                                     </div>
                                 </div>
                             </div>
@@ -826,6 +842,13 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
     <style>
         .select2-container {
             width: 100% !important;
+        }
+        .kpi-card {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
         }
 
     </style>
