@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, TextInput, ScrollView, RefreshControl,
+  ActivityIndicator, TextInput, ScrollView, RefreshControl, Modal,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import api, { clearToken, setUnauthorizedHandler } from '../api/client'
@@ -16,7 +16,9 @@ const CARD_COLORS = ['#eff6ff', '#f0fdf4']
 
 export default function POSScreen({ navigation }) {
   const [location, setLocation]           = useState(null)
+  const [locations, setLocations]         = useState([])
   const [isAdmin, setIsAdmin]             = useState(false)
+  const [locPickerOpen, setLocPickerOpen] = useState(false)
   const [products, setProducts]           = useState([])
   const [loadingInit, setLoadingInit]     = useState(true)
   const [refreshing, setRefreshing]       = useState(false)
@@ -45,12 +47,17 @@ export default function POSScreen({ navigation }) {
     ;(async () => {
       try {
         const res = await api.get('/api/mobile/pos-details')
-        const loc = res.data.default_location
-        setLocation(loc)
+        const loc  = res.data.default_location
+        const locs = res.data.locations || []
         setIsAdmin(!!res.data.user?.is_admin)
+        setLocations(locs)
         if (loc?.id) {
+          setLocation(loc)
           setLocationId(loc.id)
           await loadProducts('', loc.id)
+        } else if (locs.length > 0) {
+          // Admin with no open register — show location picker
+          setLocPickerOpen(true)
         }
       } catch {
         await clearToken()
@@ -91,6 +98,13 @@ export default function POSScreen({ navigation }) {
     }, 300)
     return () => clearTimeout(t)
   }, [search, location?.id])
+
+  async function pickLocation(loc) {
+    setLocPickerOpen(false)
+    setLocation(loc)
+    setLocationId(loc.id)
+    await loadProducts('', loc.id)
+  }
 
   function openProduct(p) {
     setSaleProduct(p)
@@ -295,6 +309,24 @@ export default function POSScreen({ navigation }) {
         </View>
       )}
 
+      {/* Location picker for admins with no open register */}
+      <Modal visible={locPickerOpen} transparent animationType="slide" onRequestClose={() => {}}>
+        <View style={styles.locOverlay}>
+          <View style={styles.locSheet}>
+            <Text style={styles.locTitle}>Select Branch</Text>
+            <Text style={styles.locSubtitle}>Choose the branch you're working at</Text>
+            <ScrollView>
+              {locations.map(loc => (
+                <TouchableOpacity key={loc.id} style={styles.locItem} onPress={() => pickLocation(loc)} activeOpacity={0.75}>
+                  <Text style={styles.locItemText}>{loc.name}</Text>
+                  <Text style={styles.locItemArrow}>→</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   )
 }
@@ -378,4 +410,12 @@ const styles = StyleSheet.create({
     borderRadius: 24, elevation: 10,
   },
   toastText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+
+  locOverlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  locSheet:     { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 16, paddingBottom: 40, maxHeight: '70%' },
+  locTitle:     { fontSize: 18, fontWeight: '800', color: '#1e293b', textAlign: 'center', paddingBottom: 4 },
+  locSubtitle:  { fontSize: 13, color: '#94a3b8', textAlign: 'center', marginBottom: 16 },
+  locItem:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  locItemText:  { fontSize: 15, fontWeight: '600', color: '#1e293b' },
+  locItemArrow: { fontSize: 18, color: '#2563eb' },
 })

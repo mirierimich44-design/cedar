@@ -80,7 +80,8 @@ class MobilePosController extends Controller
         }
 
         // 2. Fall back to the user's first permitted location
-        if (!$default_location) {
+        // Admins with access_all_locations get null — app will show a location picker
+        if (!$default_location && !$is_admin) {
             $permitted = $user->permitted_locations($business_id);
             if ($permitted === 'all') {
                 $first = \App\BusinessLocation::where('business_id', $business_id)->first();
