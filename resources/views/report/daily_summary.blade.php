@@ -72,10 +72,18 @@
     }
     .report-card-header {
         display:flex; align-items:center; gap:8px;
-        padding:12px 18px; border-bottom:1px solid #f3f4f6; background:#fafafa;
-        font-size:13px; font-weight:700; color:#374151;
+        padding:12px 18px; border-bottom:1px solid rgba(255,255,255,.15);
+        font-size:13px; font-weight:700; color:#fff;
+        background:linear-gradient(135deg,#475569,#334155); /* default – overridden below */
     }
-    .report-card-header i { color:#6b7280; }
+    .report-card-header i { color:rgba(255,255,255,.85); }
+
+    /* Per-section header colours */
+    .rch-payments  { background:linear-gradient(135deg,#059669,#047857); }
+    .rch-products  { background:linear-gradient(135deg,#2563eb,#1d4ed8); }
+    .rch-lost      { background:linear-gradient(135deg,#ef4444,#b91c1c); }
+    .rch-followup  { background:linear-gradient(135deg,#7c3aed,#5b21b6); }
+    .rch-txns      { background:linear-gradient(135deg,var(--theme-solid),var(--theme-dark)); }
 
     /* Tables inside report cards */
     .report-card table { width:100%; border-collapse:collapse; }
@@ -276,7 +284,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="report-card">
-                    <div class="report-card-header"><i class="fa fa-credit-card"></i> Payment Collections</div>
+                    <div class="report-card-header rch-payments"><i class="fa fa-credit-card"></i> Payment Collections</div>
                     <table>
                         <thead><tr><th>Method</th><th style="text-align:right;">Amount</th></tr></thead>
                         <tbody id="payment_methods_body"></tbody>
@@ -286,7 +294,7 @@
             </div>
             <div class="col-md-8">
                 <div class="report-card">
-                    <div class="report-card-header"><i class="fa fa-star"></i> Top 10 Products Sold Today</div>
+                    <div class="report-card-header rch-products"><i class="fa fa-star"></i> Top 10 Products Sold Today</div>
                     <table>
                         <thead><tr><th>#</th><th>Product</th><th>SKU</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Revenue</th></tr></thead>
                         <tbody id="top_products_body"></tbody>
@@ -299,7 +307,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="report-card">
-                    <div class="report-card-header"><i class="fa fa-times-circle" style="color:#dc2626;"></i> Top Lost Sales Today</div>
+                    <div class="report-card-header rch-lost"><i class="fa fa-times-circle"></i> Top Lost Sales Today</div>
                     <table>
                         <thead><tr><th>Product</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Pot. Revenue</th><th style="text-align:center;">Times</th></tr></thead>
                         <tbody id="lost_sales_body"></tbody>
@@ -308,7 +316,7 @@
             </div>
             <div class="col-md-6">
                 <div class="report-card">
-                    <div class="report-card-header"><i class="fa fa-users" style="color:#7c3aed;"></i> Follow-ups Created Today</div>
+                    <div class="report-card-header rch-followup"><i class="fa fa-users"></i> Follow-ups Created Today</div>
                     <table>
                         <thead><tr><th>Customer</th><th>Product</th><th>Qty</th><th>Status</th><th>Comment</th></tr></thead>
                         <tbody id="followups_body"></tbody>
@@ -319,7 +327,7 @@
 
         {{-- All Transactions --}}
         <div class="report-card">
-            <div class="report-card-header"><i class="fa fa-list"></i> All Transactions for the Day</div>
+            <div class="report-card-header rch-txns"><i class="fa fa-list"></i> All Transactions for the Day</div>
             <div class="table-responsive">
                 <table class="table-transactions">
                     <thead>

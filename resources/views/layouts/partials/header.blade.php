@@ -1,247 +1,397 @@
 @inject('request', 'Illuminate\Http\Request')
+@php
+    /* Use same accent map as the sidebar so header & sidebar always match */
+    $__hdrAccentMap = [
+        'primary' => ['from' => '#3730a3', 'to' => '#1e1b4b'],
+        'purple'  => ['from' => '#5b21b6', 'to' => '#2e1065'],
+        'green'   => ['from' => '#065f46', 'to' => '#022c22'],
+        'red'     => ['from' => '#991b1b', 'to' => '#450a0a'],
+        'yellow'  => ['from' => '#92400e', 'to' => '#451a03'],
+        'orange'  => ['from' => '#9a3412', 'to' => '#431407'],
+        'sky'     => ['from' => '#075985', 'to' => '#082f49'],
+    ];
+    $__hdrTheme  = session('business.theme_color', 'primary');
+    $__hdrColors = $__hdrAccentMap[$__hdrTheme] ?? $__hdrAccentMap['primary'];
+@endphp
 <!-- Main Header -->
 <style>
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 button,
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 a,
-    .header-action-btn {
-        background-color: var(--theme-dark) !important;
-        color: white !important;
-        border: none !important;
-        height: 38px !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        padding-left: 0.875rem !important;
-        padding-right: 0.875rem !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-sizing: border-box !important;
-        font-size: 0.875rem !important;
-        font-weight: 600 !important;
-        border-radius: 0.375rem !important;
-    }
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 button:hover,
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 a:hover,
-    .header-action-btn:hover {
-        background-color: var(--theme-main) !important;
-    }
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 svg,
-    .header-action-btn svg {
-        color: white !important;
-        width: 1.125rem !important;
-        height: 1.125rem !important;
-    }
-    /* Exception for the Date Display span so it matches perfectly */
-    .thetop .tw-flex.tw-flex-wrap.tw-items-center.tw-justify-end.tw-gap-2 span.header-action-btn {
-        height: 38px !important;
-    }
-    .header-theme-btn {
-        background-color: var(--theme-dark) !important;
-        color: white !important;
-        border: none !important;
-    }
-    .header-theme-btn:hover {
-        background-color: var(--theme-main) !important;
-    }
-    .header-theme-btn svg {
-        color: white !important;
-    }
+/* ── CSS variables resolved from PHP theme ──────────────── */
+:root {
+    --hdr-bg-from: {{ $__hdrColors['from'] }};
+    --hdr-bg-to:   {{ $__hdrColors['to'] }};
+}
+
+/* ── Base header ─────────────────────────────────────────── */
+.app-header {
+    background: linear-gradient(135deg, var(--hdr-bg-from) 0%, var(--hdr-bg-to) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+    position: relative;
+    z-index: 100;
+}
+
+/* ── Sidebar toggles ─────────────────────────────────────── */
+.hdr-sidebar-btn {
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: #fff; cursor: pointer;
+    transition: background .15s;
+    flex-shrink: 0;
+}
+.hdr-sidebar-btn:hover { background: rgba(255,255,255,0.2); }
+.hdr-sidebar-btn svg  { width: 18px; height: 18px; }
+
+/* ── Spacer ──────────────────────────────────────────────── */
+.hdr-spacer { flex: 1; }
+
+/* ── Button groups ───────────────────────────────────────── */
+.hdr-group {
+    display: flex; align-items: center; gap: 4px;
+}
+.hdr-divider {
+    width: 1px; height: 22px;
+    background: rgba(255,255,255,0.18);
+    margin: 0 4px; flex-shrink: 0;
+}
+
+/* ── Ghost button (Calendar, Calculator, Expense, Purchase, Repair…) */
+.hdr-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 12px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; color: #fff !important;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; text-decoration: none !important;
+    transition: background .15s, border-color .15s;
+    white-space: nowrap;
+}
+.hdr-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); }
+.hdr-btn svg   { width: 15px; height: 15px; color: rgba(255,255,255,.9); flex-shrink:0; }
+
+/* ── Icon-only variant ───────────────────────────────────── */
+.hdr-btn-icon {
+    width: 36px; padding: 0;
+    justify-content: center;
+}
+
+/* ── Date chip — glass info style ────────────────────────── */
+.hdr-date-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; color: rgba(255,255,255,.75) !important;
+    font-size: 13px; font-weight: 600; font-family: monospace;
+    cursor: default; white-space: nowrap;
+}
+.hdr-date-chip svg { width: 14px; height: 14px; opacity: .7; }
+
+/* ── Today's Profit chip — live stat ─────────────────────── */
+.hdr-profit-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 12px;
+    background: rgba(16,185,129,0.2);
+    border: 1px solid rgba(16,185,129,0.4);
+    border-radius: 8px; color: #6ee7b7 !important;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    transition: background .15s;
+}
+.hdr-profit-chip:hover { background: rgba(16,185,129,0.3); }
+.hdr-profit-chip svg   { width: 15px; height: 15px; color: #6ee7b7; }
+.hdr-profit-chip .profit-amount { color: #fff; font-variant-numeric: tabular-nums; }
+.hdr-profit-chip.loading .profit-amount { opacity: .5; }
+
+/* ── POS primary button — stands out ─────────────────────── */
+.hdr-btn-pos {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(255,255,255,1);
+    color: var(--hdr-bg-from) !important;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.hdr-btn-pos:hover {
+    background: #fff;
+    border-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.hdr-btn-pos svg { color: var(--hdr-bg-from) !important; }
+
+/* ── Notification bell ────────────────────────────────────── */
+.hdr-bell-wrap { position: relative; display: inline-flex; }
+.hdr-bell-dot  {
+    position: absolute; top: 3px; right: 3px;
+    width: 9px; height: 9px;
+    background: #ef4444; border-radius: 50%;
+    border: 2px solid var(--hdr-bg-to);
+}
+.hdr-bell-dot.pulse {
+    animation: bellPulse 2s infinite;
+}
+@keyframes bellPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
+    50%      { box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+}
+
+/* ── User avatar chip ────────────────────────────────────── */
+.hdr-user-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 34px; padding: 0 10px 0 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; color: #fff !important;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.hdr-user-btn:hover { background: rgba(255,255,255,0.2); }
+.hdr-user-avatar {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff;
+    flex-shrink: 0;
+}
+
+/* ── Responsive: hide labels on md, show on lg ───────────── */
+@media (max-width: 1199px) {
+    .hdr-btn .hdr-label  { display: none; }
+    .hdr-btn             { padding: 0 10px; }
+    .hdr-profit-chip .hdr-label { display: none; }
+}
+@media (max-width: 900px) {
+    .hdr-group.hdr-tools { display: none; }
+}
+@media (max-width: 700px) {
+    .hdr-group.hdr-actions { display: none; }
+    .hdr-date-chip        { display: none !important; }
+}
 </style>
 
-<div
-    class="tw-transition-all tw-duration-5000 tw-border-b tw-shrink-0 lg:tw-h-15 no-print"
-    style="background: linear-gradient(to right, var(--theme-dark), var(--theme-main)); border-bottom-color: rgba(255,255,255,0.15);">
-    <div class="tw-px-5 tw-py-3">
-        <div class="tw-flex tw-items-start tw-justify-between tw-gap-6 lg:tw-items-center">
-            <div class="tw-flex tw-items-center tw-gap-3">
-                <button type="button"
-                    class="small-view-button xl:tw-w-20 lg:tw-hidden tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-text-white tw-transition-all tw-duration-200 header-theme-btn tw-p-1.5 tw-rounded-lg tw-ring-1 tw-ring-white/10">
-                    <span class="tw-sr-only">
-                        Sidebar Menu
-                    </span>
-                    <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M4 6l16 0" />
-                        <path d="M4 12l16 0" />
-                        <path d="M4 18l16 0" />
-                    </svg>
-                </button>
+<header class="app-header no-print" id="app-header">
 
-                <button type="button"
-                    class="side-bar-collapse tw-hidden lg:tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-text-white tw-transition-all tw-duration-200 header-theme-btn tw-p-1.5 tw-rounded-lg tw-ring-1 tw-ring-white/10">
-                    <span class="tw-sr-only">
-                        Collapse Sidebar
-                    </span>
-                    <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-                        <path d="M15 4v16" />
-                        <path d="M10 10l-2 2l2 2" />
-                    </svg>
-                </button>
-            </div>
+    {{-- ── Left: Sidebar toggles ───────────────────────── --}}
+    <button type="button" class="hdr-sidebar-btn small-view-button lg:tw-hidden" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg>
+    </button>
+    <button type="button" class="hdr-sidebar-btn side-bar-collapse tw-hidden lg:tw-inline-flex" aria-label="Collapse sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M15 4v16"/><path d="M10 10l-2 2l2 2"/></svg>
+    </button>
 
+    {{-- SaaS active subscription --}}
+    @if(Module::has('Superadmin'))
+        @includeIf('superadmin::layouts.partials.active_subscription')
+    @endif
+    @if(!empty(session('previous_user_id')) && !empty(session('previous_username')))
+        <a href="{{ route('sign-in-as-user', session('previous_user_id')) }}" class="btn btn-flat btn-danger btn-sm" style="margin:0 4px;">
+            <i class="fas fa-undo"></i> @lang('lang_v1.back_to_username', ['username' => session('previous_username')])
+        </a>
+    @endif
 
-            {{-- Showing active package for SaaS Superadmin --}}
-            @if(Module::has('Superadmin'))
-                @includeIf('superadmin::layouts.partials.active_subscription')
-            @endif
+    <div class="hdr-spacer"></div>
 
-            {{-- When using superadmin, this button is used to switch users --}}
-            @if(!empty(session('previous_user_id')) && !empty(session('previous_username')))
-                <a href="{{route('sign-in-as-user', session('previous_user_id'))}}" class="btn btn-flat btn-danger m-8 btn-sm mt-10"><i class="fas fa-undo"></i> @lang('lang_v1.back_to_username', ['username' => session('previous_username')] )</a>
-            @endif
+    {{-- ── Right: action groups ────────────────────────── --}}
 
+    {{-- GROUP 1 — Date + Profit (info) --}}
+    <div class="hdr-group">
 
-            @php
-                $__hdrBtn = 'tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-text-white tw-transition-all tw-duration-200 tw-ring-1 tw-ring-white/20 hover:tw-ring-white/40 header-action-btn shadow-sm';
-            @endphp
-            <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-                @if (Module::has('Essentials'))
-                    @includeIf('essentials::layouts.partials.header_part')
-                @endif
+        {{-- Date chip --}}
+        <span class="hdr-date-chip tw-hidden sm:tw-inline-flex">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/></svg>
+            {{ @format_date('now') }}
+        </span>
 
-                {{-- Date Display --}}
-                <span class="{{ $__hdrBtn }} tw-hidden sm:tw-inline-flex tw-font-mono tw-opacity-80" style="cursor:default;">
-                    <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/>
-                    </svg>
-                    {{ @format_date('now') }}
-                </span>
+        {{-- Today's Profit live chip --}}
+        @can('profit_loss_report.view')
+        <button type="button" id="view_todays_profit" class="hdr-profit-chip">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
+            <span class="hdr-label" style="color:rgba(255,255,255,.7);font-weight:500;">Profit</span>
+            <span class="profit-amount" id="hdr_profit_val">…</span>
+        </button>
+        @endcan
 
-                {{-- Calendar --}}
-                <a href="{{ route('calendar') }}" class="{{ $__hdrBtn }}">
-                    <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M7 14h.013"/><path d="M10.01 14h.005"/><path d="M13.01 14h.005"/>
-                    </svg>
-                    @lang('lang_v1.calendar')
-                </a>
+    </div>
 
-                {{-- Calculator --}}
-                <button id="btnCalculator" title="@lang('lang_v1.calculator')" data-content='@include('layouts.partials.calculator')'
-                    type="button" data-trigger="click" data-html="true" data-placement="bottom"
-                    class="{{ $__hdrBtn }}">
-                    <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 3m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 7m0 1a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z"/><path d="M8 14l0 .01"/><path d="M12 14l0 .01"/><path d="M16 14l0 .01"/><path d="M8 17l0 .01"/><path d="M12 17l0 .01"/><path d="M16 17l0 .01"/>
-                    </svg>
-                    @lang('lang_v1.calculator')
-                </button>
+    <div class="hdr-divider"></div>
 
-                {{-- Today's Profit --}}
-                @can('profit_loss_report.view')
-                    <button type="button" id="view_todays_profit" title="{{ __('home.todays_profit') }}" data-toggle="tooltip" data-placement="bottom"
-                        class="{{ $__hdrBtn }}">
-                        <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M3 6m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/><path d="M18 12l.01 0"/><path d="M6 12l.01 0"/>
-                        </svg>
-                        {{ __('home.todays_profit') }}
-                    </button>
-                @endcan
+    {{-- GROUP 2 — Tools (Calendar, Calculator) --}}
+    <div class="hdr-group hdr-tools">
 
-                {{-- Add Expense --}}
-                @can('expense.access')
-                    <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}" class="{{ $__hdrBtn }}">
-                        <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/>
-                        </svg>
-                        Expense
-                    </a>
-                @endcan
+        <a href="{{ route('calendar') }}" class="hdr-btn" title="@lang('lang_v1.calendar')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M7 14h.013"/><path d="M10.01 14h.005"/><path d="M13.01 14h.005"/></svg>
+            <span class="hdr-label">@lang('lang_v1.calendar')</span>
+        </a>
 
-                {{-- Add Purchase --}}
-                @can('purchase.create')
-                    <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="{{ $__hdrBtn }}">
-                        <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/>
-                        </svg>
-                        Purchase
-                    </a>
-                @endcan
+        <button id="btnCalculator" type="button" class="hdr-btn" title="@lang('lang_v1.calculator')"
+            data-content='@include('layouts.partials.calculator')' data-trigger="click" data-html="true" data-placement="bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 3m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 7m0 1a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z"/><path d="M8 14l0 .01"/><path d="M12 14l0 .01"/><path d="M16 14l0 .01"/><path d="M8 17l0 .01"/><path d="M12 17l0 .01"/><path d="M16 17l0 .01"/></svg>
+            <span class="hdr-label">@lang('lang_v1.calculator')</span>
+        </button>
 
-                {{-- POS Sale --}}
-                @if (in_array('pos_sale', $enabled_modules))
-                    @can('sell.create')
-                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="{{ $__hdrBtn }}">
-                            <svg aria-hidden="true" class="tw-size-4 !tw-text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
-                            </svg>
-                            @lang('sale.pos_sale')
-                        </a>
-                    @endcan
-                @endif
+    </div>
 
-                @if (Module::has('Repair'))
-                    @includeIf('repair::layouts.partials.header')
-                @endif
+    <div class="hdr-divider hdr-tools"></div>
 
-                @include('layouts.partials.header-notifications')
+    {{-- GROUP 3 — Quick Actions (Expense, Purchase) --}}
+    <div class="hdr-group hdr-actions">
 
+        @can('expense.access')
+        <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}" class="hdr-btn" title="Add Expense">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
+            <span class="hdr-label">Expense</span>
+        </a>
+        @endcan
 
+        @can('purchase.create')
+        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="hdr-btn" title="New Purchase">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
+            <span class="hdr-label">Purchase</span>
+        </a>
+        @endcan
 
-                <details class="tw-dw-dropdown tw-relative tw-inline-block tw-text-left">
-                    <summary data-toggle="popover"
-                        class="tw-dw-m-1 tw-inline-flex tw-transition-all tw-ring-1 tw-ring-white/20 tw-cursor-pointer tw-duration-200 header-action-btn tw-items-center tw-justify-center tw-text-white hover:tw-text-white tw-gap-1 shadow-sm">
-                        <span class="tw-hidden md:tw-block">{{ Auth::User()->first_name }} {{ Auth::User()->last_name }}</span>
+    </div>
 
-                        <svg  xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="tw-size-4"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" /></svg>
+    <div class="hdr-divider hdr-actions"></div>
 
-                        
-                        
-                    </summary>
+    {{-- GROUP 4 — Primary: POS --}}
+    @if(in_array('pos_sale', $enabled_modules))
+        @can('sell.create')
+        <div class="hdr-group">
+            <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="hdr-btn hdr-btn-pos" title="@lang('sale.pos_sale')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
+                @lang('sale.pos_sale')
+            </a>
+        </div>
+        <div class="hdr-divider"></div>
+        @endcan
+    @endif
 
-                    <ul class="tw-p-2 tw-w-48 tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-origin-top-right tw-bg-white tw-rounded-lg tw-shadow-lg tw-ring-1 tw-ring-gray-200 focus:tw-outline-none"
-                        role="menu" tabindex="-1">
-                        <div class="tw-px-4 tw-pt-3 tw-pb-1" role="none">
-                            <p class="tw-text-sm" role="none">
-                                @lang('lang_v1.signed_in_as')
-                            </p>
-                            <p class="tw-text-sm tw-font-medium tw-text-gray-900 tw-truncate" role="none">
-                                {{ Auth::User()->first_name }} {{ Auth::User()->last_name }}
-                            </p>
+    {{-- MODULE: Essentials header items --}}
+    @if(Module::has('Essentials'))
+        @includeIf('essentials::layouts.partials.header_part')
+    @endif
+
+    {{-- MODULE: Repair --}}
+    @if(Module::has('Repair'))
+        @includeIf('repair::layouts.partials.header')
+    @endif
+
+    {{-- GROUP 5 — Utilities: Search + Bell + User --}}
+    <div class="hdr-group">
+
+        {{-- Search --}}
+        <button type="button" id="global-search-trigger" class="hdr-btn" title="Search (Ctrl+K)" style="min-width:110px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+            <span class="hdr-label">Search</span>
+            <kbd style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace;line-height:1.4;">⌘K</kbd>
+        </button>
+
+        {{-- Notifications bell --}}
+        @include('layouts.partials.header-notifications')
+
+        {{-- User dropdown --}}
+        <details class="tw-dw-dropdown tw-relative tw-inline-block">
+            <summary class="hdr-user-btn" style="list-style:none;">
+                <div class="hdr-user-avatar">
+                    {{ strtoupper(substr(Auth::user()->first_name ?? 'U', 0, 1)) }}
+                </div>
+                <span class="tw-hidden md:tw-inline hdr-label">{{ Auth::user()->first_name }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;opacity:.7;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6"/></svg>
+            </summary>
+            <ul class="tw-p-2 tw-w-52 tw-absolute tw-right-0 tw-z-50 tw-mt-2 tw-origin-top-right tw-bg-white tw-rounded-xl tw-shadow-xl tw-ring-1 tw-ring-gray-200 focus:tw-outline-none" style="top:100%;">
+                <div style="padding:12px 14px 10px;border-bottom:1px solid #f1f5f9;margin-bottom:4px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--hdr-bg-from),var(--hdr-bg-to));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">
+                            {{ strtoupper(substr(Auth::user()->first_name ?? 'U', 0, 1)) }}
                         </div>
+                        <div style="min-width:0;">
+                            <div style="font-size:13px;font-weight:700;color:#111827;truncate">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
+                            <div style="font-size:11px;color:#6b7280;">@lang('lang_v1.signed_in_as')</div>
+                        </div>
+                    </div>
+                </div>
+                <li>
+                    <a href="{{ action([\App\Http\Controllers\UserController::class, 'getProfile']) }}"
+                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-600 tw-rounded-lg hover:tw-text-gray-900 hover:tw-bg-gray-100">
+                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855"/></svg>
+                        @lang('lang_v1.profile')
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'logout']) }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red-600 tw-rounded-lg hover:tw-bg-red-50">
+                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/><path d="M9 12h12l-3 -3"/><path d="M18 15l3 -3"/></svg>
+                        @lang('lang_v1.sign_out')
+                    </a>
+                    <form id="logout-form" action="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'logout']) }}" method="POST" style="display:none;">@csrf</form>
+                </li>
+            </ul>
+        </details>
 
-                        <li>
-                            <a href="{{ action([\App\Http\Controllers\UserController::class, 'getProfile']) }}"
-                                class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-600 tw-transition-all tw-duration-200 tw-rounded-lg hover:tw-text-gray-900 hover:tw-bg-gray-100"
-                                role="menuitem" tabindex="-1">
-                                <svg aria-hidden="true" class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" fill="none"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                                    <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-                                    <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
-                                </svg>
-                                @lang('lang_v1.profile')
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'logout']) }}"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-600 tw-transition-all tw-duration-200 tw-rounded-lg hover:tw-text-gray-900 hover:tw-bg-gray-100"
-                                role="menuitem" tabindex="-1">
-                                <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" fill="none"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path
-                                        d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-                                    <path d="M9 12h12l-3 -3" />
-                                    <path d="M18 15l3 -3" />
-                                </svg>
-                                @lang('lang_v1.sign_out')
-                            </a>
-                            <form id="logout-form" action="{{ action([\App\Http\Controllers\Auth\LoginController::class, 'logout']) }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </details>
+    </div>
+
+</header>
+
+{{-- ── Global Search Overlay ───────────────────────────── --}}
+<div id="global-search-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.7);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeGlobalSearch()">
+    <div style="max-width:640px;margin:80px auto 0;background:#fff;border-radius:14px;box-shadow:0 25px 50px rgba(0,0,0,0.25);overflow:hidden;">
+        <div style="display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0;">
+            <svg style="width:20px;height:20px;color:#94a3b8;flex-shrink:0;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+            <input type="text" id="global-search-input" placeholder="Search transactions, contacts, products, parcels…"
+                style="flex:1;border:none;outline:none;padding:16px 12px;font-size:16px;color:#1e293b;background:transparent;">
+            <kbd onclick="closeGlobalSearch()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer;color:#64748b;">Esc</kbd>
+        </div>
+        <div id="global-search-results" style="max-height:400px;overflow-y:auto;padding:8px;">
+            <div class="search-empty-state" style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                <svg style="width:40px;height:40px;margin:0 auto 12px;display:block;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+                <p style="font-size:14px;margin:0;">Type to search across your system</p>
+                <p style="font-size:12px;margin:4px 0 0;color:#cbd5e1;">Transactions · Contacts · Products · Parcels</p>
             </div>
+        </div>
+        <div style="padding:8px 16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:16px;font-size:11px;color:#94a3b8;">
+            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↵</kbd> Open</span>
+            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↑↓</kbd> Navigate</span>
+            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">Esc</kbd> Close</span>
         </div>
     </div>
 </div>
+
+{{-- ── Today's Profit fetch on load ───────────────────── --}}
+@can('profit_loss_report.view')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var chip = document.getElementById('view_todays_profit');
+    var val  = document.getElementById('hdr_profit_val');
+    if (!chip || !val) return;
+
+    // Fetch today's profit in the background
+    $.ajax({
+        url: '{{ route("report.profit_loss") }}',
+        data: {
+            start_date: '{{ now()->toDateString() }}',
+            end_date:   '{{ now()->toDateString() }}',
+            type:       'product'
+        },
+        success: function(html) {
+            // parse gross_profit from returned HTML
+            var match = html ? html.match(/id="gross_profit"[^>]*>([^<]+)</) : null;
+            if (match && match[1]) {
+                val.textContent = match[1].trim();
+            } else {
+                // fallback: just show "View"
+                val.textContent = 'View';
+            }
+        },
+        error: function() { val.textContent = 'View'; }
+    });
+});
+</script>
+@endcan
