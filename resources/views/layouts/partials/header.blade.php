@@ -26,8 +26,10 @@
     z-index: 100;
 }
 
-/* THE button style — all: unset nukes Bootstrap completely */
-#app-header .hb {
+/* Universal button rule — covers .hb AND any module's <a>/<button> in the header */
+#app-header .hb,
+#app-header > a,
+#app-header > button {
     all: unset;
     box-sizing: border-box !important;
     display: inline-flex !important;
@@ -36,8 +38,10 @@
     gap: 6px !important;
     height: 36px !important;
     padding: 0 13px !important;
-    background: {{ $t['main'] }} !important;
+    /* Subtle glass over the dark header — picks up theme color via transparency */
+    background: rgba(255,255,255,0.1) !important;
     color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
     border-radius: 8px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
@@ -45,30 +49,44 @@
     cursor: pointer !important;
     text-decoration: none !important;
     flex-shrink: 0 !important;
-    transition: opacity .15s !important;
+    transition: background .15s !important;
     line-height: 1 !important;
+    box-shadow: none !important;
 }
-#app-header .hb:hover { opacity: .82 !important; color: #fff !important; }
-#app-header .hb svg   { width: 15px !important; height: 15px !important; color: #fff !important; flex-shrink: 0 !important; }
+#app-header .hb:hover,
+#app-header > a:hover,
+#app-header > button:hover {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+}
+#app-header .hb svg,
+#app-header > a svg,
+#app-header > button svg {
+    width: 15px !important;
+    height: 15px !important;
+    color: #fff !important;
+    flex-shrink: 0 !important;
+}
 
-/* Sidebar toggle: ghost, no fill */
+/* Sidebar toggle: square 36×36 icon-only */
 #app-header .hb-ghost {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    width: 36px;
-    padding: 0;
+    width: 36px !important;
+    padding: 0 !important;
 }
-#app-header .hb-ghost:hover { background: rgba(255,255,255,0.22); opacity: 1; }
 
-/* POS: white — the one standout */
+/* POS: solid white — the one standout primary */
 #app-header .hb-primary {
-    background: #fff;
-    color: {{ $t['dark'] }};
-    font-weight: 800;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background: #fff !important;
+    color: {{ $t['dark'] }} !important;
+    border: 1px solid #fff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
 }
-#app-header .hb-primary:hover { opacity: .92; }
-#app-header .hb-primary svg  { color: {{ $t['dark'] }}; }
+#app-header .hb-primary:hover {
+    background: #f3f4f6 !important;
+    color: {{ $t['dark'] }} !important;
+}
+#app-header .hb-primary svg { color: {{ $t['dark'] }} !important; }
 
 /* Divider */
 #app-header .hb-sep {
@@ -130,7 +148,7 @@
     {{-- Today's Profit --}}
     @can('profit_loss_report.view')
     <button type="button" id="view_todays_profit" class="hb hb-hide-sm"
-            style="background:rgba(16,185,129,0.3);border:1px solid rgba(16,185,129,0.5);">
+            style="background:rgba(16,185,129,0.18) !important;border:1px solid rgba(16,185,129,0.35) !important;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
         <span class="hb-label" style="opacity:.75;font-size:12px;">Profit</span>
         <span id="hdr_profit_val" style="font-weight:700;">
@@ -257,6 +275,26 @@
 </header>
 
 <script>
+// ── Sidebar collapse (works on both desktop + mobile) ───────
+(function() {
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.side-bar-collapse, .small-view-button');
+        if (!btn) return;
+        e.preventDefault();
+        var sidebar = document.querySelector('aside.side-bar');
+        if (!sidebar) return;
+
+        // Toggle: if currently visible (any display), hide it; else show it.
+        var isVisible = sidebar.offsetWidth > 0 && sidebar.offsetHeight > 0;
+        if (isVisible) {
+            sidebar.dataset.prevDisplay = sidebar.style.display || '';
+            sidebar.style.display = 'none';
+        } else {
+            sidebar.style.display = sidebar.dataset.prevDisplay || 'flex';
+        }
+    });
+})();
+
 // Close user menu when clicking outside
 document.addEventListener('click', function(e) {
     var menu = document.getElementById('hb-user-menu');
