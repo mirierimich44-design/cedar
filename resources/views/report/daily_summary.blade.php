@@ -1,8 +1,29 @@
 @extends('layouts.app')
 @section('title', 'Daily Summary Report')
 
+@php
+    $themeAccentMap = [
+        'primary' => ['solid' => '#4f46e5', 'light' => '#ede9fe', 'text' => '#3730a3'],
+        'purple'  => ['solid' => '#7c3aed', 'light' => '#ede9fe', 'text' => '#5b21b6'],
+        'green'   => ['solid' => '#059669', 'light' => '#d1fae5', 'text' => '#065f46'],
+        'red'     => ['solid' => '#dc2626', 'light' => '#fee2e2', 'text' => '#991b1b'],
+        'yellow'  => ['solid' => '#d97706', 'light' => '#fef3c7', 'text' => '#92400e'],
+        'orange'  => ['solid' => '#ea580c', 'light' => '#ffedd5', 'text' => '#9a3412'],
+        'sky'     => ['solid' => '#0284c7', 'light' => '#e0f2fe', 'text' => '#075985'],
+    ];
+    $theme       = session('business.theme_color', 'primary');
+    $themeColors = $themeAccentMap[$theme] ?? $themeAccentMap['primary'];
+    $themeSolid  = $themeColors['solid'];
+    $themeLight  = $themeColors['light'];
+    $themeText   = $themeColors['text'];
+@endphp
 @section('css')
 <style>
+    :root {
+        --theme-solid: {{ $themeSolid }};
+        --theme-light: {{ $themeLight }};
+        --theme-text:  {{ $themeText }};
+    }
     .page-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
     .page-toolbar h1 { margin:0; font-size:22px; font-weight:700; color:#111827; }
 
@@ -11,16 +32,27 @@
     @media(min-width:768px){ .kpi-grid{ grid-template-columns:repeat(6,1fr); } }
     .kpi-card {
         background:#fff; border-radius:12px; border:1px solid #e5e7eb;
-        padding:14px 16px; display:flex; flex-direction:column; gap:6px;
-        box-shadow:0 1px 3px rgba(0,0,0,.05);
+        padding:16px; display:flex; flex-direction:column; gap:8px;
+        box-shadow:0 1px 4px rgba(0,0,0,.07);
+        border-top: 3px solid transparent;
+        transition: box-shadow .15s, transform .15s;
     }
+    .kpi-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.10); transform:translateY(-1px); }
+    .kpi-card.kpi-primary {
+        background: linear-gradient(135deg, var(--theme-solid) 0%, var(--theme-text) 100%);
+        border-top-color: transparent;
+        color: #fff;
+    }
+    .kpi-card.kpi-primary .kpi-value { color:#fff; }
+    .kpi-card.kpi-primary .kpi-label { color:rgba(255,255,255,.8); }
+    .kpi-card.kpi-primary .kpi-icon  { background:rgba(255,255,255,.2); color:#fff; }
     .kpi-card .kpi-icon {
-        width:34px; height:34px; border-radius:8px;
+        width:36px; height:36px; border-radius:9px;
         display:flex; align-items:center; justify-content:center; font-size:16px;
-        margin-bottom:4px;
+        margin-bottom:2px; flex-shrink:0;
     }
-    .kpi-card .kpi-value { font-size:20px; font-weight:700; color:#111827; line-height:1; }
-    .kpi-card .kpi-label { font-size:11px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.4px; }
+    .kpi-card .kpi-value { font-size:20px; font-weight:800; color:#111827; line-height:1.1; }
+    .kpi-card .kpi-label { font-size:10.5px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px; }
 
     /* Section cards */
     .report-card {
@@ -99,17 +131,47 @@
 
     {{-- Filter bar --}}
     <div class="filter-bar no-print">
-        <div class="form-group">
+
+        {{-- Quick date presets --}}
+        <div class="form-group" style="min-width:auto;flex:none;">
+            <label>Quick Select</label>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                @foreach([
+                    'today'        => 'Today',
+                    'yesterday'    => 'Yesterday',
+                    'this_week'    => 'This Week',
+                    'last_week'    => 'Last Week',
+                    'this_month'   => 'This Month',
+                    'last_month'   => 'Last Month',
+                ] as $key => $label)
+                <button type="button" class="date-preset-btn"
+                    data-preset="{{ $key }}"
+                    style="padding:5px 11px;font-size:12px;font-weight:600;border-radius:7px;
+                           border:1px solid #d1d5db;background:#fff;color:#374151;cursor:pointer;
+                           white-space:nowrap;line-height:1.4;transition:all .15s;">
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Date picker --}}
+        <div class="form-group" style="min-width:140px;max-width:180px;">
             <label>Date</label>
             <input type="date" class="form-control" id="summary_date" value="{{ date('Y-m-d') }}">
         </div>
+
+        {{-- Location --}}
         <div class="form-group">
             <label>Location</label>
             {!! Form::select('location_id', $business_locations, null, ['class' => 'form-control select2', 'id' => 'summary_location', 'placeholder' => 'All Locations']) !!}
         </div>
-        <div>
+
+        {{-- Load button --}}
+        <div style="padding-top:1px;">
+            <label style="visibility:hidden;display:block;font-size:11px;">Go</label>
             <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-border-none" id="load_summary"
-                    style="border-radius:8px;white-space:nowrap;">
+                    style="border-radius:8px;white-space:nowrap;background:var(--theme-solid);">
                 <i class="fa fa-search"></i> Load Report
             </button>
         </div>
@@ -126,59 +188,80 @@
 
         {{-- KPI Row 1 --}}
         <div class="kpi-grid" id="kpi_row">
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#dcfce7;color:#16a34a;"><i class="fa fa-shopping-cart"></i></div>
+
+            {{-- Sales Total — theme gradient (hero card) --}}
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:18px;height:18px;" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
+                </div>
                 <div class="kpi-value" id="kpi_sales_total">0.00</div>
                 <div class="kpi-label">Sales Total</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#dbeafe;color:#2563eb;"><i class="fa fa-ticket"></i></div>
-                <div class="kpi-value" id="kpi_sales_count">0</div>
+
+            {{-- Sales Count — blue --}}
+            <div class="kpi-card" style="border-top-color:#3b82f6;">
+                <div class="kpi-icon" style="background:#dbeafe;color:#1d4ed8;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:18px;height:18px;" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 5l0 2"/><path d="M15 11l0 2"/><path d="M15 17l0 2"/><path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2"/></svg>
+                </div>
+                <div class="kpi-value" style="color:#1d4ed8;" id="kpi_sales_count">0</div>
                 <div class="kpi-label">Sales Count</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#fee2e2;color:#dc2626;"><i class="fa fa-undo"></i></div>
-                <div class="kpi-value" id="kpi_returns_total">0.00</div>
+
+            {{-- Returns — red --}}
+            <div class="kpi-card" style="border-top-color:#ef4444;">
+                <div class="kpi-icon" style="background:#fee2e2;color:#b91c1c;"><i class="fa fa-undo"></i></div>
+                <div class="kpi-value" style="color:#b91c1c;" id="kpi_returns_total">0.00</div>
                 <div class="kpi-label">Returns</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#fef3c7;color:#d97706;"><i class="fa fa-money"></i></div>
-                <div class="kpi-value" id="kpi_expenses_total">0.00</div>
+
+            {{-- Expenses — amber --}}
+            <div class="kpi-card" style="border-top-color:#f59e0b;">
+                <div class="kpi-icon" style="background:#fef3c7;color:#b45309;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:18px;height:18px;" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M3 6m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/></svg>
+                </div>
+                <div class="kpi-value" style="color:#b45309;" id="kpi_expenses_total">0.00</div>
                 <div class="kpi-label">Expenses</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fa fa-truck"></i></div>
-                <div class="kpi-value" id="kpi_purchases_total">0.00</div>
+
+            {{-- Purchases — purple --}}
+            <div class="kpi-card" style="border-top-color:#8b5cf6;">
+                <div class="kpi-icon" style="background:#ede9fe;color:#6d28d9;"><i class="fa fa-truck"></i></div>
+                <div class="kpi-value" style="color:#6d28d9;" id="kpi_purchases_total">0.00</div>
                 <div class="kpi-label">Purchases</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background:#e0f2fe;color:#0284c7;"><i class="fa fa-line-chart"></i></div>
-                <div class="kpi-value" id="kpi_net">0.00</div>
+
+            {{-- Net — emerald --}}
+            <div class="kpi-card" style="border-top-color:#10b981;">
+                <div class="kpi-icon" style="background:#d1fae5;color:#047857;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:18px;height:18px;" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
+                </div>
+                <div class="kpi-value" style="color:#047857;" id="kpi_net">0.00</div>
                 <div class="kpi-label">Net (Sales−Exp)</div>
             </div>
+
         </div>
 
         {{-- KPI Row 2: Lost Sales + Follow-ups --}}
         <div class="kpi-grid" id="kpi_row2" style="grid-template-columns:repeat(2,1fr);">
-            <div class="kpi-card" style="flex-direction:row;align-items:center;gap:14px;">
-                <div class="kpi-icon" style="background:#fee2e2;color:#dc2626;flex-shrink:0;"><i class="fa fa-times-circle"></i></div>
+            <div class="kpi-card" style="flex-direction:row;align-items:center;gap:14px;border-top-color:#ef4444;">
+                <div class="kpi-icon" style="background:#fee2e2;color:#b91c1c;flex-shrink:0;"><i class="fa fa-times-circle"></i></div>
                 <div>
-                    <div class="kpi-value" id="kpi_lost_count">0</div>
+                    <div class="kpi-value" style="color:#b91c1c;" id="kpi_lost_count">0</div>
                     <div class="kpi-label">Lost Sales</div>
                 </div>
                 <div style="margin-left:auto;text-align:right;">
-                    <div class="kpi-value" id="kpi_lost_revenue" style="font-size:15px;color:#dc2626;">0.00</div>
+                    <div class="kpi-value" id="kpi_lost_revenue" style="font-size:15px;color:#b91c1c;">0.00</div>
                     <div class="kpi-label">Pot. Revenue Lost</div>
                 </div>
             </div>
-            <div class="kpi-card" style="flex-direction:row;align-items:center;gap:14px;">
-                <div class="kpi-icon" style="background:#ede9fe;color:#7c3aed;flex-shrink:0;"><i class="fa fa-users"></i></div>
+            <div class="kpi-card" style="flex-direction:row;align-items:center;gap:14px;border-top-color:#8b5cf6;">
+                <div class="kpi-icon" style="background:#ede9fe;color:#6d28d9;flex-shrink:0;"><i class="fa fa-users"></i></div>
                 <div>
-                    <div class="kpi-value" id="kpi_followup_count">0</div>
+                    <div class="kpi-value" style="color:#6d28d9;" id="kpi_followup_count">0</div>
                     <div class="kpi-label">Follow-ups Created</div>
                 </div>
                 <div style="margin-left:auto;text-align:right;">
-                    <div class="kpi-value" id="kpi_followup_resolved" style="font-size:15px;color:#16a34a;">0</div>
+                    <div class="kpi-value" id="kpi_followup_resolved" style="font-size:15px;color:#047857;">0</div>
                     <div class="kpi-label">Resolved</div>
                 </div>
             </div>
@@ -259,8 +342,45 @@
 @section('javascript')
 <script>
 $(document).ready(function() {
-    loadSummary();
+
+    /* ── Date preset buttons ───────────────────────────── */
+    function getPresetDate(preset) {
+        var today = new Date();
+        var fmt = function(d) { return d.toISOString().slice(0,10); };
+        switch(preset) {
+            case 'today':      return fmt(today);
+            case 'yesterday':
+                var y = new Date(today); y.setDate(y.getDate()-1); return fmt(y);
+            case 'this_week':
+                var dow = today.getDay(); // 0=Sun
+                var mon = new Date(today); mon.setDate(today.getDate() - ((dow+6)%7));
+                return fmt(mon);
+            case 'last_week':
+                var dow2 = today.getDay();
+                var lmon = new Date(today); lmon.setDate(today.getDate() - ((dow2+6)%7) - 7);
+                return fmt(lmon);
+            case 'this_month':
+                return fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+            case 'last_month':
+                return fmt(new Date(today.getFullYear(), today.getMonth()-1, 1));
+        }
+    }
+
+    $('.date-preset-btn').on('click', function() {
+        $('.date-preset-btn').css({'background':'#fff','color':'#374151','border-color':'#d1d5db'});
+        $(this).css({'background':'var(--theme-solid)','color':'#fff','border-color':'var(--theme-solid)'});
+        var date = getPresetDate($(this).data('preset'));
+        $('#summary_date').val(date);
+        loadSummary();
+    });
+
+    // Highlight Today preset on load
+    $('[data-preset="today"]').trigger('click');
+
     $('#load_summary').click(function() { loadSummary(); });
+    $('#summary_date').on('change', function() {
+        $('.date-preset-btn').css({'background':'#fff','color':'#374151','border-color':'#d1d5db'});
+    });
     $('#summary_date').on('keypress', function(e) { if (e.which === 13) loadSummary(); });
 
     function loadSummary() {
