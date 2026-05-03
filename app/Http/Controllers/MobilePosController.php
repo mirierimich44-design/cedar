@@ -60,6 +60,12 @@ class MobilePosController extends Controller
         $user        = $request->user();
         $business_id = $user->business_id;
 
+        // Admin check — UltimatePOS stores role as "Admin#<business_id>"
+        $is_admin = $user->hasRole('Admin#' . $business_id)
+                 || $user->can('superadmin')
+                 || $user->can('access_all_locations');
+
+        // 1. Prefer the user's open cash register location
         $register = \App\CashRegister::where('user_id', $user->id)
             ->where('status', 'open')
             ->first();
@@ -73,17 +79,22 @@ class MobilePosController extends Controller
             }
         }
 
+        // 2. Fall back to the user's first permitted location
         if (!$default_location) {
-            $first = \App\BusinessLocation::where('business_id', $business_id)->first();
+            $permitted = $user->permitted_locations($business_id);
+            if ($permitted === 'all') {
+                $first = \App\BusinessLocation::where('business_id', $business_id)->first();
+            } else {
+                $first = \App\BusinessLocation::whereIn('id', $permitted)->first();
+            }
             if ($first) {
                 $default_location = ['id' => $first->id, 'name' => $first->name];
             }
         }
 
+        // All locations (for admin stock transfer etc.)
         $locations = \App\BusinessLocation::where('business_id', $business_id)
             ->get(['id', 'name']);
-
-        $is_admin = $user->hasRole('Admin') || $user->hasRole('Superadmin') || $user->is_admin ?? false;
 
         return response()->json([
             'user'             => [
