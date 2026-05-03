@@ -5,15 +5,27 @@ namespace App\Http\Controllers;
 use App\MpesaSetting;
 use App\MpesaTransaction;
 use App\MpesaC2bPayment;
+use App\Transaction;
+use App\TransactionPayment;
+use App\Events\TransactionPaymentAdded;
 use App\Utils\MpesaService;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
 class MpesaController extends Controller
 {
+    protected $transactionUtil;
+
+    public function __construct(TransactionUtil $transactionUtil)
+    {
+        $this->transactionUtil = $transactionUtil;
+    }
+
     /**
      * Display M-Pesa settings form.
      */
@@ -629,8 +641,46 @@ class MpesaController extends Controller
                 ]);
             }
 
+            DB::beginTransaction();
+
+            $transaction = Transaction::where('id', $request->transaction_id)
+                ->where('business_id', $business_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$transaction) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => __('lang_v1.transaction_not_found'),
+                ]);
+            }
+
             $payment->matchTo('transaction', $request->transaction_id);
             $payment->markAsUsed();
+
+            $prefix_type = $transaction->type == 'purchase' ? 'purchase_payment' : 'sell_payment';
+            $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type, $business_id);
+            $payment_ref_no = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count, $business_id);
+
+            $tp = TransactionPayment::create([
+                'transaction_id'   => $transaction->id,
+                'business_id'      => $business_id,
+                'method'           => 'mpesa',
+                'amount'           => $payment->amount,
+                'transaction_no'   => $payment->trans_id,
+                'payment_ref_no'   => $payment_ref_no,
+                'paid_on'          => now()->toDateTimeString(),
+                'created_by'       => auth()->id(),
+                'payment_for'      => $transaction->contact_id,
+                'note'             => 'M-Pesa C2B — ' . $payment->trans_id,
+            ]);
+
+            $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+
+            event(new TransactionPaymentAdded($tp, $transaction->toArray()));
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -640,6 +690,10 @@ class MpesaController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('MpesaC2B matchPayment error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
