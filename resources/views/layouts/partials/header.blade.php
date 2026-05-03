@@ -72,38 +72,30 @@
     margin: 0 4px; flex-shrink: 0;
 }
 
-/* ── Ghost button (Calendar, Calculator, Expense, Purchase…) */
+/* ── Action buttons — theme-accent fill ──────────────────── */
 .hdr-btn {
     display: inline-flex; align-items: center; gap: 7px;
     height: 38px; padding: 0 14px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.18);
+    background: var(--theme-main);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 9px; color: #fff !important;
     font-size: 13px; font-weight: 600;
     cursor: pointer; text-decoration: none !important;
-    transition: background .15s, border-color .15s;
+    transition: background .15s, box-shadow .15s;
     white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-.hdr-btn:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.32); }
-.hdr-btn svg   { width: 16px; height: 16px; color: rgba(255,255,255,.9); flex-shrink: 0; }
+.hdr-btn:hover {
+    background: var(--theme-hover);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.hdr-btn svg { width: 16px; height: 16px; color: #fff; flex-shrink: 0; }
 
 /* ── Icon-only variant ───────────────────────────────────── */
 .hdr-btn-icon {
     width: 38px; padding: 0;
     justify-content: center;
 }
-
-/* ── Date chip — subtle glass ────────────────────────────── */
-.hdr-date-chip {
-    display: inline-flex; align-items: center; gap: 7px;
-    height: 38px; padding: 0 14px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 9px; color: rgba(255,255,255,.65) !important;
-    font-size: 13px; font-weight: 600; font-family: monospace;
-    cursor: default; white-space: nowrap;
-}
-.hdr-date-chip svg { width: 14px; height: 14px; opacity: .6; }
 
 /* ── Today's Profit chip — live stat ─────────────────────── */
 .hdr-profit-chip {
@@ -182,18 +174,18 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1280px) {
-    .hdr-btn .hdr-label         { display: none; }
-    .hdr-btn                    { padding: 0 10px; }
+    .hdr-btn .hdr-label            { display: none; }
+    .hdr-btn                       { padding: 0 10px; }
     .hdr-profit-chip .profit-label { display: none; }
 }
-@media (max-width: 1024px) {
-    .hdr-group.hdr-tools        { display: none; }
-    .hdr-divider.hdr-tools      { display: none; }
+@media (max-width: 900px) {
+    /* Hide Calendar on small screens */
+    .hdr-btn-calendar { display: none; }
 }
 @media (max-width: 768px) {
-    .hdr-group.hdr-actions      { display: none; }
-    .hdr-divider.hdr-actions    { display: none; }
-    .hdr-date-chip              { display: none !important; }
+    /* Hide Expense + Purchase on mobile */
+    .hdr-btn-expense,
+    .hdr-btn-purchase { display: none; }
 }
 </style>
 
@@ -223,83 +215,51 @@
 
     {{-- ── Right: action groups ────────────────────────── --}}
 
-    {{-- GROUP 1 — Date + Profit (info) --}}
-    <div class="hdr-group">
-
-        {{-- Date chip --}}
-        <span class="hdr-date-chip tw-hidden sm:tw-inline-flex">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/></svg>
-            {{ @format_date('now') }}
+    {{-- Profit live chip --}}
+    @can('profit_loss_report.view')
+    <button type="button" id="view_todays_profit" class="hdr-profit-chip">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
+        <span class="profit-label">Today's Profit</span>
+        <span class="profit-amount" id="hdr_profit_val">
+            <svg style="width:13px;height:13px;animation:spin 1s linear infinite;vertical-align:middle;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
         </span>
-
-        {{-- Today's Profit live chip --}}
-        @can('profit_loss_report.view')
-        <button type="button" id="view_todays_profit" class="hdr-profit-chip">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
-            <span class="profit-label">Today's Profit</span>
-            <span class="profit-amount" id="hdr_profit_val">
-                <svg style="width:13px;height:13px;animation:spin 1s linear infinite;vertical-align:middle;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
-            </span>
-        </button>
-        @endcan
-
-    </div>
-
+    </button>
     <div class="hdr-divider"></div>
+    @endcan
 
-    {{-- GROUP 2 — Tools (Calendar, Calculator) --}}
-    <div class="hdr-group hdr-tools">
+    {{-- Calendar --}}
+    <a href="{{ route('calendar') }}" class="hdr-btn hdr-btn-calendar" title="@lang('lang_v1.calendar')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M7 14h.013"/><path d="M10.01 14h.005"/><path d="M13.01 14h.005"/></svg>
+        <span class="hdr-label">@lang('lang_v1.calendar')</span>
+    </a>
 
-        <a href="{{ route('calendar') }}" class="hdr-btn" title="@lang('lang_v1.calendar')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M7 14h.013"/><path d="M10.01 14h.005"/><path d="M13.01 14h.005"/></svg>
-            <span class="hdr-label">@lang('lang_v1.calendar')</span>
-        </a>
+    {{-- Expense --}}
+    @can('expense.access')
+    <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}" class="hdr-btn hdr-btn-expense" title="Add Expense">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
+        <span class="hdr-label">Expense</span>
+    </a>
+    @endcan
 
-        <button id="btnCalculator" type="button" class="hdr-btn" title="@lang('lang_v1.calculator')"
-            data-content='@include('layouts.partials.calculator')' data-trigger="click" data-html="true" data-placement="bottom">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 3m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 7m0 1a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z"/><path d="M8 14l0 .01"/><path d="M12 14l0 .01"/><path d="M16 14l0 .01"/><path d="M8 17l0 .01"/><path d="M12 17l0 .01"/><path d="M16 17l0 .01"/></svg>
-            <span class="hdr-label">@lang('lang_v1.calculator')</span>
-        </button>
+    {{-- Purchase --}}
+    @can('purchase.create')
+    <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="hdr-btn hdr-btn-purchase" title="New Purchase">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
+        <span class="hdr-label">Purchase</span>
+    </a>
+    @endcan
 
-    </div>
-
-    <div class="hdr-divider hdr-tools"></div>
-
-    {{-- GROUP 3 — Quick Actions (Expense, Purchase) --}}
-    <div class="hdr-group hdr-actions">
-
-        @can('expense.access')
-        <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}" class="hdr-btn" title="Add Expense">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
-            <span class="hdr-label">Expense</span>
-        </a>
-        @endcan
-
-        @can('purchase.create')
-        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="hdr-btn" title="New Purchase">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
-            <span class="hdr-label">Purchase</span>
-        </a>
-        @endcan
-
-    </div>
-
-    <div class="hdr-divider hdr-actions"></div>
-
-    {{-- GROUP 4 — Primary: POS --}}
+    {{-- POS — primary white button --}}
     @if(in_array('pos_sale', $enabled_modules))
         @can('sell.create')
-        <div class="hdr-group">
-            <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="hdr-btn hdr-btn-pos" title="@lang('sale.pos_sale')">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
-                @lang('sale.pos_sale')
-            </a>
-        </div>
-        <div class="hdr-divider"></div>
+        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="hdr-btn hdr-btn-pos" title="@lang('sale.pos_sale')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
+            @lang('sale.pos_sale')
+        </a>
         @endcan
     @endif
 
-    {{-- MODULE: Essentials header items --}}
+    {{-- MODULE: Essentials --}}
     @if(Module::has('Essentials'))
         @includeIf('essentials::layouts.partials.header_part')
     @endif
@@ -309,15 +269,10 @@
         @includeIf('repair::layouts.partials.header')
     @endif
 
-    {{-- GROUP 5 — Utilities: Search + Bell + User --}}
-    <div class="hdr-group">
+    <div class="hdr-divider"></div>
 
-        {{-- Search --}}
-        <button type="button" id="global-search-trigger" class="hdr-btn" title="Search (Ctrl+K)" style="min-width:110px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
-            <span class="hdr-label">Search</span>
-            <kbd style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace;line-height:1.4;">⌘K</kbd>
-        </button>
+    {{-- Notifications + User --}}
+    <div class="hdr-group">
 
         {{-- Notifications bell --}}
         @include('layouts.partials.header-notifications')
@@ -366,29 +321,6 @@
 
 </header>
 
-{{-- ── Global Search Overlay ───────────────────────────── --}}
-<div id="global-search-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.7);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeGlobalSearch()">
-    <div style="max-width:640px;margin:80px auto 0;background:#fff;border-radius:14px;box-shadow:0 25px 50px rgba(0,0,0,0.25);overflow:hidden;">
-        <div style="display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0;">
-            <svg style="width:20px;height:20px;color:#94a3b8;flex-shrink:0;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
-            <input type="text" id="global-search-input" placeholder="Search transactions, contacts, products, parcels…"
-                style="flex:1;border:none;outline:none;padding:16px 12px;font-size:16px;color:#1e293b;background:transparent;">
-            <kbd onclick="closeGlobalSearch()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer;color:#64748b;">Esc</kbd>
-        </div>
-        <div id="global-search-results" style="max-height:400px;overflow-y:auto;padding:8px;">
-            <div class="search-empty-state" style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                <svg style="width:40px;height:40px;margin:0 auto 12px;display:block;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
-                <p style="font-size:14px;margin:0;">Type to search across your system</p>
-                <p style="font-size:12px;margin:4px 0 0;color:#cbd5e1;">Transactions · Contacts · Products · Parcels</p>
-            </div>
-        </div>
-        <div style="padding:8px 16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:16px;font-size:11px;color:#94a3b8;">
-            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↵</kbd> Open</span>
-            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↑↓</kbd> Navigate</span>
-            <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">Esc</kbd> Close</span>
-        </div>
-    </div>
-</div>
 
 {{-- ── Today's Profit fetch on load ───────────────────── --}}
 @can('profit_loss_report.view')
