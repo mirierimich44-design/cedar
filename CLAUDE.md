@@ -18,6 +18,11 @@
 - **APK builds:** `eas build -p android --profile preview`
 - **API base URL:** configured in `pos-app/src/api/client.js`
 
+## Hard rules — always follow
+- **NEVER create a new GitHub repository.** The repo already exists at `https://github.com/mirierimich44-design/cedar`. Always push to `origin` on the `dev` branch. Never run `gh repo create` or `git init` + new remote.
+- **NEVER use a git worktree** unless explicitly asked. Work directly in `C:\laragon\www\reenson`.
+- Deploy to server by SSHing in and running `git fetch origin && git checkout origin/dev -- <file>` — not by pushing to a separate branch or creating PRs.
+
 ## Key facts
 - `variation_location_details.qty_available` is the stock field — decremented via `ProductUtil::decreaseProductQuantity()`
 - `TransactionUtil::createOrUpdateSellLines()` does NOT deduct stock — must call `decreaseProductQuantity()` separately after
