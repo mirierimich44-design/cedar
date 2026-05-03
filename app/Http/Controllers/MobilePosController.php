@@ -65,31 +65,33 @@ class MobilePosController extends Controller
                  || $user->can('superadmin')
                  || $user->can('access_all_locations');
 
-        // 1. Prefer the user's open cash register location
-        $register = \App\CashRegister::where('user_id', $user->id)
-            ->where('status', 'open')
-            ->first();
-
         $default_location = null;
 
-        if ($register && $register->location_id) {
-            $loc = \App\BusinessLocation::find($register->location_id);
-            if ($loc) {
-                $default_location = ['id' => $loc->id, 'name' => $loc->name];
-            }
-        }
+        if ($is_admin) {
+            // Admins always get the location picker — ignore any open register
+            // so they are never silently assigned the wrong branch
+        } else {
+            // 1. Prefer the user's open cash register location
+            $register = \App\CashRegister::where('user_id', $user->id)
+                ->where('status', 'open')
+                ->first();
 
-        // 2. Fall back to the user's first permitted location
-        // Admins with access_all_locations get null — app will show a location picker
-        if (!$default_location && !$is_admin) {
-            $permitted = $user->permitted_locations($business_id);
-            if ($permitted === 'all') {
-                $first = \App\BusinessLocation::where('business_id', $business_id)->first();
-            } else {
-                $first = \App\BusinessLocation::whereIn('id', $permitted)->first();
+            if ($register && $register->location_id) {
+                $loc = \App\BusinessLocation::find($register->location_id);
+                if ($loc) {
+                    $default_location = ['id' => $loc->id, 'name' => $loc->name];
+                }
             }
-            if ($first) {
-                $default_location = ['id' => $first->id, 'name' => $first->name];
+
+            // 2. Fall back to the user's first permitted location
+            if (!$default_location) {
+                $permitted = $user->permitted_locations($business_id);
+                $first = ($permitted === 'all')
+                    ? \App\BusinessLocation::where('business_id', $business_id)->first()
+                    : \App\BusinessLocation::whereIn('id', $permitted)->first();
+                if ($first) {
+                    $default_location = ['id' => $first->id, 'name' => $first->name];
+                }
             }
         }
 
