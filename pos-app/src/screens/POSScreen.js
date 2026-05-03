@@ -16,6 +16,7 @@ const CARD_COLORS = ['#eff6ff', '#f0fdf4']
 
 export default function POSScreen({ navigation }) {
   const [location, setLocation]           = useState(null)
+  const [isAdmin, setIsAdmin]             = useState(false)
   const [products, setProducts]           = useState([])
   const [loadingInit, setLoadingInit]     = useState(true)
   const [refreshing, setRefreshing]       = useState(false)
@@ -46,6 +47,7 @@ export default function POSScreen({ navigation }) {
         const res = await api.get('/api/mobile/pos-details')
         const loc = res.data.default_location
         setLocation(loc)
+        setIsAdmin(!!res.data.user?.is_admin)
         if (loc?.id) {
           setLocationId(loc.id)
           await loadProducts('', loc.id)
@@ -156,6 +158,11 @@ export default function POSScreen({ navigation }) {
           <TouchableOpacity style={styles.headerPill} onPress={() => setRecentOpen(true)}>
             <Text style={styles.headerPillText}>Sales</Text>
           </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity style={[styles.headerPill, styles.headerPillAdmin]} onPress={() => navigation.navigate('Admin')}>
+              <Text style={styles.headerPillText}>Admin</Text>
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Point of Sale</Text>
@@ -303,8 +310,9 @@ const styles = StyleSheet.create({
   headerCenter:   { alignItems: 'center', flex: 1 },
   headerTitle:    { color: '#fff', fontWeight: '800', fontSize: 16 },
   headerLoc:      { color: 'rgba(255,255,255,0.75)', fontSize: 11, marginTop: 1 },
-  headerPill:     { backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
-  headerPillText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  headerPill:      { backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
+  headerPillAdmin: { backgroundColor: 'rgba(234,179,8,0.3)' },
+  headerPillText:  { color: '#fff', fontSize: 12, fontWeight: '600' },
 
   searchContainer: { zIndex: 100, marginHorizontal: 12, marginTop: 10, marginBottom: 4 },
   searchWrap: {

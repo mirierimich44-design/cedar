@@ -80,13 +80,20 @@ class MobilePosController extends Controller
             }
         }
 
+        $locations = \App\BusinessLocation::where('business_id', $business_id)
+            ->get(['id', 'name']);
+
+        $is_admin = $user->hasRole('Admin') || $user->hasRole('Superadmin') || $user->is_admin ?? false;
+
         return response()->json([
             'user'             => [
                 'id'       => $user->id,
                 'name'     => trim($user->first_name . ' ' . $user->last_name),
                 'username' => $user->username,
+                'is_admin' => $is_admin,
             ],
             'default_location' => $default_location,
+            'locations'        => $locations,
         ]);
     }
 
@@ -421,5 +428,337 @@ class MobilePosController extends Controller
             });
 
         return response()->json(['sales' => $sales]);
+    }
+
+    // ─── ADMIN ENDPOINTS ─────────────────────────────────────────────────────
+
+    /**
+     * GET /api/mobile/admin/dashboard
+     * Cross-branch sales summary for today + yesterday comparison
+     */
+    public function adminDashboard(Request $request)
+    {
+        $business_id = $request->user()->business_id;
+        $today       = now()->toDateString();
+        $yesterday   = now()->subDay()->toDateString();
+
+        // Per-branch sales today
+        $branches = DB::table('transactions as t')
+            ->join('business_locations as bl', 'bl.id', '=', 't.location_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->whereDate('t.transaction_date', $today)
+            ->selectRaw('bl.id, bl.name, COUNT(*) as sales_count, COALESCE(SUM(t.final_total),0) as revenue')
+            ->groupBy('bl.id', 'bl.name')
+            ->orderByRaw('SUM(t.final_total) DESC')
+            ->get();
+
+        // Payment method breakdown today (all branches)
+        $payments = DB::table('transaction_payments as tp')
+            ->join('transactions as t', 't.id', '=', 'tp.transaction_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->whereDate('t.transaction_date', $today)
+            ->selectRaw('tp.method, COALESCE(SUM(tp.amount),0) as total')
+            ->groupBy('tp.method')
+            ->orderByRaw('SUM(tp.amount) DESC')
+            ->get();
+
+        // Yesterday totals for comparison
+        $yesterday_total = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereDate('transaction_date', $yesterday)
+            ->sum('final_total');
+
+        $today_total = $branches->sum('revenue');
+
+        return response()->json([
+            'today'           => $today,
+            'today_total'     => (float) $today_total,
+            'yesterday_total' => (float) $yesterday_total,
+            'change_pct'      => $yesterday_total > 0
+                ? round((($today_total - $yesterday_total) / $yesterday_total) * 100, 1)
+                : null,
+            'branches'        => $branches,
+            'payment_methods' => $payments,
+        ]);
+    }
+
+    /**
+     * GET /api/mobile/admin/stock-alerts?location_id=
+     */
+    public function adminStockAlerts(Request $request)
+    {
+        $business_id = $request->user()->business_id;
+        $location_id = (int) $request->get('location_id');
+
+        $query = DB::table('variation_location_details as vld')
+            ->join('products as p', 'p.id', '=', 'vld.product_id')
+            ->join('variations as v', 'v.id', '=', 'vld.variation_id')
+            ->join('business_locations as bl', 'bl.id', '=', 'vld.location_id')
+            ->where('p.business_id', $business_id)
+            ->where('p.enable_stock', 1)
+            ->where('p.is_inactive', 0)
+            ->where(function ($q) {
+                $q->whereRaw('vld.qty_available <= p.alert_quantity')
+                  ->orWhere('vld.qty_available', '<=', 0);
+            });
+
+        if ($location_id) $query->where('vld.location_id', $location_id);
+
+        $alerts = $query->selectRaw('
+                p.id as product_id, p.name, v.sub_sku as sku,
+                vld.qty_available, p.alert_quantity,
+                bl.id as location_id, bl.name as location
+            ')
+            ->orderBy('vld.qty_available')
+            ->orderBy('p.name')
+            ->get();
+
+        return response()->json(['alerts' => $alerts]);
+    }
+
+    /**
+     * GET /api/mobile/admin/staff-activity
+     */
+    public function adminStaffActivity(Request $request)
+    {
+        $business_id = $request->user()->business_id;
+        $today       = now()->toDateString();
+
+        $staff = DB::table('users as u')
+            ->leftJoin('transactions as t', function ($j) use ($today) {
+                $j->on('t.created_by', '=', 'u.id')
+                  ->where('t.type', 'sell')
+                  ->where('t.status', 'final')
+                  ->whereDate('t.transaction_date', $today);
+            })
+            ->leftJoin('cash_registers as cr', function ($j) {
+                $j->on('cr.user_id', '=', 'u.id')
+                  ->where('cr.status', 'open');
+            })
+            ->leftJoin('business_locations as bl', 'bl.id', '=', 'cr.location_id')
+            ->where('u.business_id', $business_id)
+            ->where('u.status', 'active')
+            ->selectRaw('
+                u.id, CONCAT(u.first_name, " ", u.last_name) as name, u.username,
+                COUNT(t.id) as sales_count,
+                COALESCE(SUM(t.final_total), 0) as sales_total,
+                cr.status as register_status,
+                bl.name as location,
+                cr.opening_amount,
+                cr.created_at as till_opened_at
+            ')
+            ->groupBy('u.id', 'u.first_name', 'u.last_name', 'u.username',
+                      'cr.status', 'bl.name', 'cr.opening_amount', 'cr.created_at')
+            ->orderByRaw('SUM(t.final_total) DESC')
+            ->get();
+
+        return response()->json(['staff' => $staff, 'date' => $today]);
+    }
+
+    /**
+     * GET /api/mobile/admin/sales-report?location_id=&period=today
+     */
+    public function adminSalesReport(Request $request)
+    {
+        $business_id = $request->user()->business_id;
+        $location_id = (int) $request->get('location_id');
+        $period      = $request->get('period', 'today');
+
+        $dateFrom = match($period) {
+            'week'  => now()->startOfWeek()->toDateString(),
+            'month' => now()->startOfMonth()->toDateString(),
+            default => now()->toDateString(),
+        };
+        $dateTo = now()->toDateString();
+
+        $baseQuery = fn() => DB::table('transaction_sell_lines as tsl')
+            ->join('transactions as t', 't.id', '=', 'tsl.transaction_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->when($location_id, fn($q) => $q->where('t.location_id', $location_id))
+            ->whereBetween(DB::raw('DATE(t.transaction_date)'), [$dateFrom, $dateTo]);
+
+        // Top 10 products
+        $top_products = $baseQuery()
+            ->join('products as p', 'p.id', '=', 'tsl.product_id')
+            ->selectRaw('p.name, SUM(tsl.quantity) as qty_sold, SUM(tsl.quantity * tsl.unit_price_inc_tax) as revenue')
+            ->groupBy('p.id', 'p.name')
+            ->orderByRaw('SUM(tsl.quantity * tsl.unit_price_inc_tax) DESC')
+            ->limit(10)
+            ->get();
+
+        // Hourly sales (today only)
+        $hourly = DB::table('transactions as t')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->when($location_id, fn($q) => $q->where('t.location_id', $location_id))
+            ->whereDate('t.transaction_date', now()->toDateString())
+            ->selectRaw('HOUR(t.created_at) as hour, COUNT(*) as count, COALESCE(SUM(t.final_total),0) as total')
+            ->groupBy(DB::raw('HOUR(t.created_at)'))
+            ->orderBy('hour')
+            ->get();
+
+        // Slow movers — products with no sales in last 7 days at this business
+        $slow = DB::table('products as p')
+            ->join('variations as v', 'v.product_id', '=', 'p.id')
+            ->join('variation_location_details as vld', 'vld.variation_id', '=', 'v.id')
+            ->leftJoin(DB::raw('(SELECT tsl.variation_id, MAX(t.transaction_date) as last_sold
+                FROM transaction_sell_lines tsl
+                JOIN transactions t ON t.id = tsl.transaction_id
+                WHERE t.type = "sell" AND t.status = "final"
+                GROUP BY tsl.variation_id) as ls'), 'ls.variation_id', '=', 'v.id')
+            ->where('p.business_id', $business_id)
+            ->where('p.is_inactive', 0)
+            ->where('p.enable_stock', 1)
+            ->when($location_id, fn($q) => $q->where('vld.location_id', $location_id))
+            ->where('vld.qty_available', '>', 0)
+            ->where(function ($q) {
+                $q->whereNull('ls.last_sold')
+                  ->orWhereRaw('ls.last_sold < DATE_SUB(NOW(), INTERVAL 7 DAY)');
+            })
+            ->selectRaw('p.name, v.sub_sku as sku, vld.qty_available, ls.last_sold')
+            ->orderBy('vld.qty_available', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'period'       => $period,
+            'date_from'    => $dateFrom,
+            'date_to'      => $dateTo,
+            'top_products' => $top_products,
+            'hourly'       => $hourly,
+            'slow_movers'  => $slow,
+        ]);
+    }
+
+    /**
+     * GET /api/mobile/admin/expenses-summary?period=today
+     */
+    public function adminExpensesSummary(Request $request)
+    {
+        $business_id = $request->user()->business_id;
+        $period      = $request->get('period', 'today');
+
+        $dateFrom = match($period) {
+            'week'  => now()->startOfWeek()->toDateString(),
+            'month' => now()->startOfMonth()->toDateString(),
+            default => now()->toDateString(),
+        };
+
+        // Per branch totals
+        $by_branch = DB::table('transactions as t')
+            ->join('business_locations as bl', 'bl.id', '=', 't.location_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'expense')
+            ->whereBetween(DB::raw('DATE(t.transaction_date)'), [$dateFrom, now()->toDateString()])
+            ->selectRaw('bl.id, bl.name as location, COUNT(*) as count, COALESCE(SUM(t.final_total),0) as total')
+            ->groupBy('bl.id', 'bl.name')
+            ->orderByRaw('SUM(t.final_total) DESC')
+            ->get();
+
+        // Per category
+        $by_category = DB::table('transactions as t')
+            ->join('expense_categories as ec', 'ec.id', '=', 't.expense_category_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'expense')
+            ->whereBetween(DB::raw('DATE(t.transaction_date)'), [$dateFrom, now()->toDateString()])
+            ->selectRaw('ec.name as category, COUNT(*) as count, COALESCE(SUM(t.final_total),0) as total')
+            ->groupBy('ec.id', 'ec.name')
+            ->orderByRaw('SUM(t.final_total) DESC')
+            ->get();
+
+        return response()->json([
+            'period'      => $period,
+            'grand_total' => (float) $by_branch->sum('total'),
+            'by_branch'   => $by_branch,
+            'by_category' => $by_category,
+        ]);
+    }
+
+    /**
+     * POST /api/mobile/admin/stock-transfer
+     */
+    public function adminStockTransfer(Request $request)
+    {
+        $user        = $request->user();
+        $business_id = $user->business_id;
+
+        $request->validate([
+            'from_location_id' => 'required|integer',
+            'to_location_id'   => 'required|integer|different:from_location_id',
+            'items'            => 'required|array|min:1',
+            'items.*.variation_id' => 'required|integer',
+            'items.*.product_id'   => 'required|integer',
+            'items.*.quantity'     => 'required|numeric|min:0.01',
+        ]);
+
+        $from = (int) $request->input('from_location_id');
+        $to   = (int) $request->input('to_location_id');
+        $items = $request->input('items');
+
+        DB::beginTransaction();
+        try {
+            foreach ($items as $item) {
+                $vid = (int) $item['variation_id'];
+                $pid = (int) $item['product_id'];
+                $qty = (float) $item['quantity'];
+
+                // Check available stock at source
+                $src = DB::table('variation_location_details')
+                    ->where('variation_id', $vid)
+                    ->where('location_id', $from)
+                    ->first();
+
+                if (!$src || $src->qty_available < $qty) {
+                    DB::rollBack();
+                    $product = \App\Product::find($pid);
+                    return response()->json([
+                        'success' => false,
+                        'msg'     => "Insufficient stock for {$product->name} at source location.",
+                    ], 422);
+                }
+
+                // Decrement source
+                DB::table('variation_location_details')
+                    ->where('variation_id', $vid)->where('location_id', $from)
+                    ->decrement('qty_available', $qty);
+
+                // Increment destination (create row if not exists)
+                $dest = DB::table('variation_location_details')
+                    ->where('variation_id', $vid)->where('location_id', $to)->first();
+
+                if ($dest) {
+                    DB::table('variation_location_details')
+                        ->where('variation_id', $vid)->where('location_id', $to)
+                        ->increment('qty_available', $qty);
+                } else {
+                    $variation = \App\Variation::find($vid);
+                    DB::table('variation_location_details')->insert([
+                        'product_id'          => $pid,
+                        'variation_id'        => $vid,
+                        'product_variation_id'=> $variation->product_variation_id,
+                        'location_id'         => $to,
+                        'qty_available'       => $qty,
+                        'created_at'          => now(),
+                        'updated_at'          => now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'msg' => 'Stock transferred successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Mobile stock transfer error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'msg' => $e->getMessage()], 500);
+        }
     }
 }

@@ -31,12 +31,15 @@
 		@endcan
 
 		{{-- Selling Price --}}
+		@cannot('hide_selling_price')
 		<div style="padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
 			<span style="font-size: 9px; color: #22c55e; font-weight: 600;">SELL</span>
 			<span style="font-size: 12px; font-weight: 800; color: #16a34a;">@format_currency($product->selling_price)</span>
 		</div>
+		@endcannot
 
 		{{-- Quantity --}}
+		@cannot('hide_stock_quantity')
 		@if($product->enable_stock)
 		<div style="padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;">
 			<span style="font-size: 9px; color: #94a3b8; font-weight: 600;">QTY</span>
@@ -49,6 +52,7 @@
 			<span style="font-size: 9px; color: #94a3b8;">Service Item</span>
 		</div>
 		@endif
+		@endcannot
 	</div>
 @empty
 	<input type="hidden" id="no_products_found">

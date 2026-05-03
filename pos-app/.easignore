@@ -1,0 +1,6 @@
+dist/
+.expo/
+web-build/
+node_modules/
+generate-logo.js
+*.log

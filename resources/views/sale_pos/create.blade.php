@@ -140,6 +140,79 @@
             @endif
         @endforeach
     @endif
+    <style>
+        /* ====== POS Mobile Responsive ====== */
+        @media (max-width: 768px) {
+
+            /* Stack the 3-panel layout vertically */
+            .pos-redesign-container {
+                flex-direction: column !important;
+                height: auto !important;
+                padding-bottom: 60px; /* room for bottom tab bar */
+            }
+
+            /* Hide all panels by default on mobile; JS will show active one */
+            .pos-left-sidebar,
+            .pos-center-panel,
+            .pos-right-panel {
+                width: 100% !important;
+                min-width: unset !important;
+                max-width: unset !important;
+                height: auto !important;
+                display: none !important;
+                flex: unset !important;
+            }
+
+            /* Active panel is shown */
+            .pos-left-sidebar.mobile-active,
+            .pos-center-panel.mobile-active,
+            .pos-right-panel.mobile-active {
+                display: flex !important;
+                flex-direction: column;
+            }
+
+            /* Bottom Tab Bar */
+            #pos-mobile-tabs {
+                display: flex !important;
+            }
+        }
+
+        /* Bottom tab bar — hidden on desktop */
+        #pos-mobile-tabs {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #1e293b;
+            height: 56px;
+            border-top: 2px solid #334155;
+        }
+        #pos-mobile-tabs .pos-tab-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: color 0.15s;
+        }
+        #pos-mobile-tabs .pos-tab-btn i {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        #pos-mobile-tabs .pos-tab-btn.active {
+            color: #22c55e;
+            border-top: 2px solid #22c55e;
+        }
+    </style>
 @stop
 @section('javascript')
     <script src="{{ asset('js/pos.js?v=' . $asset_v) }}"></script>
