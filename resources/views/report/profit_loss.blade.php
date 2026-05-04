@@ -3,159 +3,113 @@
 
 @section('content')
 
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('report.profit_loss')
-        </h1>
-    </section>
-
-    <!-- Main content -->
-    <section class="content">
-        <div class="print_section">
-            <h2>{{ session()->get('business.name') }} - @lang('report.profit_loss')</h2>
-        </div>
-
-        <div class="row no-print">
-            <div class="col-md-4 col-xs-12">
-                <div class="input-group">
-                    <span class="input-group-addon bg-light-blue"><i class="fa fa-map-marker"></i></span>
-                    <select class="form-control select2" id="profit_loss_location_filter">
-                        @foreach ($business_locations as $key => $value)
-                            <option value="{{ $key }}">{{ $value }}</option>
-                        @endforeach
-                    </select>
+<div class="report-page-modern">
+    {{-- Page Header Banner --}}
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-chart-line"></i></span>
+                <div>
+                    <h1>@lang('report.profit_loss')</h1>
+                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
                 </div>
             </div>
-        
-            <div class="col-md-4 col-xs-12">
-                <div class="form-group">
-                    <div class="input-group">
-                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="profit_loss_date_filter">
-                            <span>
-                                <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}
-                            </span>
-                            <i class="fa fa-caret-down"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-xs-12">
-                <div id="ai-analysis-container" class="ai-analysis-content"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div id="pl_data_div">
-            </div>
-        </div>
-
-
-        <div class="row no-print">
-            <div class="col-sm-12 tw-mb-2">
-                <button class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right" aria-label="Print"
-                    onclick="window.print();">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-printer">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
-                        <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
-                        <path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" />
-                    </svg> @lang('messages.print')
+            <div class="rpt-banner-actions no-print">
+                <select class="form-control select2" id="profit_loss_location_filter" style="min-width:180px;border-radius:8px;font-size:13px;height:36px;">
+                    @foreach ($business_locations as $key => $value)
+                        <option value="{{ $key }}">{{ $value }}</option>
+                    @endforeach
+                </select>
+                <button type="button" id="profit_loss_date_filter" class="rpt-glass-btn">
+                    <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }} <i class="fa fa-caret-down"></i>
+                </button>
+                <button class="rpt-glass-btn" onclick="window.print();" aria-label="Print">
+                    <i class="fas fa-print"></i> @lang('messages.print')
                 </button>
             </div>
         </div>
-        <div class="row no-print">
-            <div class="col-md-12">
-                <!-- Custom Tabs -->
-                <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs">
-                        <li class="active">
-                            <a href="#profit_by_products" data-toggle="tab" aria-expanded="true"><i class="fa fa-cubes"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_products')</a>
-                        </li>
+    </div>
 
-                        <li>
-                            <a href="#profit_by_categories" data-toggle="tab" aria-expanded="true"><i class="fa fa-tags"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_categories')</a>
-                        </li>
+    {{-- Print-only header --}}
+    <div class="print_section">
+        <h2>{{ session()->get('business.name') }} - @lang('report.profit_loss')</h2>
+    </div>
 
-                        <li>
-                            <a href="#profit_by_brands" data-toggle="tab" aria-expanded="true"><i class="fa fa-diamond"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_brands')</a>
-                        </li>
+    {{-- P&L Data (loaded via AJAX) --}}
+    <div style="padding:0 12px;">
+        <div class="row" id="pl_data_div">
+        </div>
+    </div>
 
-                        <li>
-                            <a href="#profit_by_locations" data-toggle="tab" aria-expanded="true"><i
-                                    class="fa fa-map-marker" aria-hidden="true"></i> @lang('lang_v1.profit_by_locations')</a>
-                        </li>
+    {{-- AI Analysis --}}
+    <div class="no-print" style="padding:0 12px;margin-bottom:16px;">
+        <div id="ai-analysis-container" class="ai-analysis-content"></div>
+    </div>
 
-                        <li>
-                            <a href="#profit_by_invoice" data-toggle="tab" aria-expanded="true"><i class="fa fa-file-alt"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_invoice')</a>
-                        </li>
+    {{-- Tabs Section --}}
+    <div style="padding:0 12px;" class="no-print">
+        <div style="background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,0.06);overflow:hidden;">
+            {{-- Tab Header --}}
+            <div style="background:linear-gradient(135deg,#475569,#334155);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-layer-group" style="color:white;font-size:14px;"></i>
+                </span>
+                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.profit_by_categories_heading', ['default' => 'Profit Breakdown'])</h3>
+            </div>
 
-                        <li>
-                            <a href="#profit_by_date" data-toggle="tab" aria-expanded="true"><i class="fa fa-calendar"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_date')</a>
-                        </li>
-                        <li>
-                            <a href="#profit_by_customer" data-toggle="tab" aria-expanded="true"><i class="fa fa-user"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_customer')</a>
-                        </li>
-                        <li>
-                            <a href="#profit_by_day" data-toggle="tab" aria-expanded="true"><i class="fa fa-calendar"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_day')</a>
-                        </li>
-                        <li>
-                            <a href="#profit_by_service_staff" data-toggle="tab" aria-expanded="true"><i class="fa fa-user-secret"
-                                    aria-hidden="true"></i> @lang('lang_v1.profit_by_service_staff')</a>
-                        </li>
-                    </ul>
+            {{-- Tabs Nav --}}
+            <div style="border-bottom:2px solid #f1f5f9;overflow-x:auto;">
+                <ul class="nav nav-tabs rpt-tabs" style="border:none;margin:0;padding:0 12px;display:flex;flex-wrap:nowrap;gap:0;">
+                    <li class="active"><a href="#profit_by_products" data-toggle="tab"><i class="fa fa-cubes"></i> @lang('lang_v1.profit_by_products')</a></li>
+                    <li><a href="#profit_by_categories" data-toggle="tab"><i class="fa fa-tags"></i> @lang('lang_v1.profit_by_categories')</a></li>
+                    <li><a href="#profit_by_brands" data-toggle="tab"><i class="fa fa-diamond"></i> @lang('lang_v1.profit_by_brands')</a></li>
+                    <li><a href="#profit_by_locations" data-toggle="tab"><i class="fa fa-map-marker"></i> @lang('lang_v1.profit_by_locations')</a></li>
+                    <li><a href="#profit_by_invoice" data-toggle="tab"><i class="fa fa-file-alt"></i> @lang('lang_v1.profit_by_invoice')</a></li>
+                    <li><a href="#profit_by_date" data-toggle="tab"><i class="fa fa-calendar"></i> @lang('lang_v1.profit_by_date')</a></li>
+                    <li><a href="#profit_by_customer" data-toggle="tab"><i class="fa fa-user"></i> @lang('lang_v1.profit_by_customer')</a></li>
+                    <li><a href="#profit_by_day" data-toggle="tab"><i class="fa fa-calendar-day"></i> @lang('lang_v1.profit_by_day')</a></li>
+                    <li><a href="#profit_by_service_staff" data-toggle="tab"><i class="fa fa-user-secret"></i> @lang('lang_v1.profit_by_service_staff')</a></li>
+                </ul>
+            </div>
 
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="profit_by_products">
-                            @include('report.partials.profit_by_products')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_categories">
-                            @include('report.partials.profit_by_categories')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_brands">
-                            @include('report.partials.profit_by_brands')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_locations">
-                            @include('report.partials.profit_by_locations')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_invoice">
-                            @include('report.partials.profit_by_invoice')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_date">
-                            @include('report.partials.profit_by_date')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_customer">
-                            @include('report.partials.profit_by_customer')
-                        </div>
-                        <div class="tab-pane" id="profit_by_service_staff">
-                            @include('report.partials.profit_by_service_staff')
-                        </div>
-
-                        <div class="tab-pane" id="profit_by_day">
-
-                        </div>
-                    </div>
+            {{-- Tab Content --}}
+            <div class="tab-content" style="padding:16px;">
+                <div class="tab-pane active" id="profit_by_products">
+                    @include('report.partials.profit_by_products')
+                </div>
+                <div class="tab-pane" id="profit_by_categories">
+                    @include('report.partials.profit_by_categories')
+                </div>
+                <div class="tab-pane" id="profit_by_brands">
+                    @include('report.partials.profit_by_brands')
+                </div>
+                <div class="tab-pane" id="profit_by_locations">
+                    @include('report.partials.profit_by_locations')
+                </div>
+                <div class="tab-pane" id="profit_by_invoice">
+                    @include('report.partials.profit_by_invoice')
+                </div>
+                <div class="tab-pane" id="profit_by_date">
+                    @include('report.partials.profit_by_date')
+                </div>
+                <div class="tab-pane" id="profit_by_customer">
+                    @include('report.partials.profit_by_customer')
+                </div>
+                <div class="tab-pane" id="profit_by_day">
+                </div>
+                <div class="tab-pane" id="profit_by_service_staff">
+                    @include('report.partials.profit_by_service_staff')
                 </div>
             </div>
         </div>
-
-
-    </section>
-    <!-- /.content -->
+    </div>
+</div>
 @stop
+
+@section('css')
+@include('report.partials.report_modern_css')
+@endsection
+
 @section('javascript')
     <script src="{{ asset('js/report.js?v=' . $asset_v) }}"></script>
 
@@ -454,7 +408,7 @@
                     }
                 } else if (target == '#profit_by_service_staff') {
                     if (typeof profit_by_service_staffs_table == 'undefined') {
-                        
+
                         profit_by_service_staffs_table = $('#profit_by_service_staff_table').DataTable({
                             processing: true,
                             serverSide: true,

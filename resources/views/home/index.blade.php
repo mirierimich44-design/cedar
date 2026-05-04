@@ -584,71 +584,53 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
 
                 {{-- Quick Actions Widget --}}
                 <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200" style="overflow:hidden;">
-                    <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%); padding:16px 18px; display:flex; align-items:center; gap:10px;">
-                        <span style="width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas fa-bolt" style="color:white;font-size:15px;"></i>
+                    <div style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                        <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-bolt" style="color:white;font-size:14px;"></i>
                         </span>
-                        <h4 style="color:white;font-weight:700;font-size:16px;margin:0;">{{ __('home.quick_actions') }}</h4>
+                        <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.quick_actions') }}</h3>
                     </div>
-                    <div style="padding:14px 12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
 
                         @if(auth()->user()->can('sell.create') || auth()->user()->can('direct_sell.access'))
-                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" style="padding:12px 14px; background:#f0fdf4; border:2px solid #059669; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
-                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#059669,#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fas fa-shopping-cart" style="color:white;font-size:14px;"></i>
-                            </span>
-                            <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">New Sale</strong>
-                                <small style="color:#64748b;font-size:11px;">Open the point of sale screen</small>
-                            </span>
+                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="qa-tile" style="--qa-color:#059669;--qa-from:#059669;--qa-to:#10b981;">
+                            <span class="qa-icon"><i class="fas fa-shopping-cart"></i></span>
+                            <span class="qa-label">New Sale</span>
                         </a>
                         @endif
 
                         @if(auth()->user()->can('purchase.create'))
-                        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" style="padding:12px 14px; background:#eff6ff; border:2px solid #2563eb; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
-                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#60a5fa);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fas fa-truck" style="color:white;font-size:14px;"></i>
-                            </span>
-                            <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Purchase</strong>
-                                <small style="color:#64748b;font-size:11px;">Record a new supplier purchase</small>
-                            </span>
+                        <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="qa-tile" style="--qa-color:#2563eb;--qa-from:#2563eb;--qa-to:#60a5fa;">
+                            <span class="qa-icon"><i class="fas fa-truck"></i></span>
+                            <span class="qa-label">Add Purchase</span>
                         </a>
                         @endif
 
                         @if(auth()->user()->can('customer.create'))
-                        <a href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}" style="padding:12px 14px; background:#f5f3ff; border:2px solid #7c3aed; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
-                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fas fa-user-plus" style="color:white;font-size:14px;"></i>
-                            </span>
-                            <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Customer</strong>
-                                <small style="color:#64748b;font-size:11px;">Create a new customer profile</small>
-                            </span>
+                        <a href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}" class="qa-tile" style="--qa-color:#7c3aed;--qa-from:#7c3aed;--qa-to:#a855f7;">
+                            <span class="qa-icon"><i class="fas fa-user-plus"></i></span>
+                            <span class="qa-label">Add Customer</span>
                         </a>
                         @endif
 
                         @if(auth()->user()->can('product.create'))
-                        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}" style="padding:12px 14px; background:#fff7ed; border:2px solid #ea580c; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
-                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#ea580c,#fb923c);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fas fa-box" style="color:white;font-size:14px;"></i>
-                            </span>
-                            <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">Add Product</strong>
-                                <small style="color:#64748b;font-size:11px;">Add a product to your catalogue</small>
-                            </span>
+                        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}" class="qa-tile" style="--qa-color:#ea580c;--qa-from:#ea580c;--qa-to:#fb923c;">
+                            <span class="qa-icon"><i class="fas fa-box"></i></span>
+                            <span class="qa-label">Add Product</span>
                         </a>
                         @endif
 
                         @if(auth()->user()->can('profit_loss_report.view'))
-                        <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getProfitLoss']) }}" style="padding:12px 14px; background:#fdf4ff; border:2px solid #a21caf; border-radius:10px; display:flex; align-items:center; gap:12px; text-decoration:none;">
-                            <span style="width:34px;height:34px;background:linear-gradient(135deg,#a21caf,#e879f9);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fas fa-chart-line" style="color:white;font-size:14px;"></i>
-                            </span>
-                            <span>
-                                <strong style="display:block;color:#1e293b;font-size:13px;">Profit &amp; Loss</strong>
-                                <small style="color:#64748b;font-size:11px;">View profit &amp; loss report</small>
-                            </span>
+                        <a href="{{ action([\App\Http\Controllers\ReportController::class, 'getProfitLoss']) }}" class="qa-tile" style="--qa-color:#a21caf;--qa-from:#a21caf;--qa-to:#e879f9;">
+                            <span class="qa-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="qa-label">Profit & Loss</span>
+                        </a>
+                        @endif
+
+                        @if(auth()->user()->can('expense.access'))
+                        <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'index']) }}" class="qa-tile" style="--qa-color:#e11d48;--qa-from:#e11d48;--qa-to:#fb7185;">
+                            <span class="qa-icon"><i class="fas fa-receipt"></i></span>
+                            <span class="qa-label">Expenses</span>
                         </a>
                         @endif
 
@@ -843,12 +825,94 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
         .select2-container {
             width: 100% !important;
         }
+        /* ── KPI Cards ── */
         .kpi-card {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .kpi-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        /* ── Quick Action Tiles ── */
+        .qa-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px 8px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .qa-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border-color: var(--qa-color);
+            background: linear-gradient(135deg, color-mix(in srgb, var(--qa-color) 6%, white), white);
+        }
+        .qa-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--qa-from), var(--qa-to));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+        .qa-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.3;
+        }
+        .qa-tile:hover .qa-label {
+            color: var(--qa-color);
+        }
+
+        /* ── Dashboard Table Improvements ── */
+        .dashboard-fortypos .table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .dashboard-fortypos .table thead th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 10px 14px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .dashboard-fortypos .table tbody td {
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .dashboard-fortypos .table.table-striped > tbody > tr:nth-of-type(odd) > td {
+            background: #fff;
+        }
+        .dashboard-fortypos .table.table-striped > tbody > tr:nth-of-type(even) > td {
+            background: #f8fafc;
+        }
+        .dashboard-fortypos .table tbody tr:hover > td {
+            background: #f0f9ff !important;
+        }
+        .dashboard-fortypos .table.table-bordered,
+        .dashboard-fortypos .table.table-bordered th,
+        .dashboard-fortypos .table.table-bordered td {
+            border-color: #f1f5f9;
         }
 
     </style>

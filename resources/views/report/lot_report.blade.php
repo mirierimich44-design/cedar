@@ -3,13 +3,19 @@
 
 @section('content')
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">{{ __('lang_v1.lot_report')}}</h1>
-</section>
-
-<!-- Main content -->
-<section class="content">
+<div class="report-page-modern">
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-barcode"></i></span>
+                <div>
+                    <h1>{{ __("lang_v1.lot_report") }}</h1>
+                    <p class="rpt-subtitle">{{ session()->get("business.name") }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+<section class="content" style="padding:0 12px;">
     <div class="row">
         <div class="col-md-12">
             @component('components.filters', ['title' => __('report.filters')])
@@ -92,7 +98,12 @@
     </div>
 </section>
 <!-- /.content -->
+</div>
 
+@endsection
+
+@section("css")
+@include("report.partials.report_modern_css")
 @endsection
 
 @section('javascript')
