@@ -321,7 +321,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/search-drugs', [\App\Http\Controllers\Hospital\HospitalController::class, 'searchDrugs'])->name('hospital.searchDrugs');
 
     //Lab routes
-    Route::get('/hospital/lab', [\App\Http\Controllers\Hospital\LabController::class, 'index'])->name('hospital.lab.index');
+    Route::get('/hospital/lab', [\App\Http\Controllers\Hospital\LabController::class, 'index'])->name('hospital.lab.list');
     Route::get('/hospital/lab/create-test', [\App\Http\Controllers\Hospital\LabController::class, 'createTest'])->name('hospital.lab.createTest');
     Route::post('/hospital/lab/store-test', [\App\Http\Controllers\Hospital\LabController::class, 'storeTest'])->name('hospital.lab.storeTest');
     Route::get('/hospital/lab/enter-result/{id}', [\App\Http\Controllers\Hospital\LabController::class, 'enterResult'])->name('hospital.lab.enterResult');
@@ -348,11 +348,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/hospital/physio/add-session/{plan_id}', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'addSession'])->name('hospital.physio.addSession');
     Route::post('/hospital/physio/store-session', [\App\Http\Controllers\Hospital\PhysiotherapyController::class, 'storeSession'])->name('hospital.physio.storeSession');
 
-    //Mortuary routes
-    Route::get('/hospital/mortuary', [\App\Http\Controllers\Hospital\MortuaryController::class, 'index'])->name('hospital.mortuary.index');
-    Route::get('/hospital/mortuary/create', [\App\Http\Controllers\Hospital\MortuaryController::class, 'create'])->name('hospital.mortuary.create');
-    Route::post('/hospital/mortuary/store', [\App\Http\Controllers\Hospital\MortuaryController::class, 'store'])->name('hospital.mortuary.store');
-    Route::get('/hospital/mortuary/release/{id}', [\App\Http\Controllers\Hospital\MortuaryController::class, 'release'])->name('hospital.mortuary.release');
 
     //Inpatient Nursing & Fluid Balance
     Route::get('/hospital/inpatient', [\App\Http\Controllers\Hospital\InpatientController::class, 'index'])->name('hospital.inpatient.index');
@@ -651,6 +646,18 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('roles', RoleController::class);
 
     Route::resource('users', ManageUserController::class);
+
+    // ── IP Access Control ────────────────────────────────────────────────
+    Route::prefix('ip-access')->name('ip-access.')->group(function () {
+        Route::get('settings',              [\App\Http\Controllers\IpAccessController::class, 'settings'])->name('settings');
+        Route::post('add-ip',               [\App\Http\Controllers\IpAccessController::class, 'addIp'])->name('add-ip');
+        Route::patch('toggle-ip/{ip}',      [\App\Http\Controllers\IpAccessController::class, 'toggleIp'])->name('toggle-ip');
+        Route::delete('delete-ip/{ip}',     [\App\Http\Controllers\IpAccessController::class, 'deleteIp'])->name('delete-ip');
+        Route::post('save-schedules',       [\App\Http\Controllers\IpAccessController::class, 'saveSchedules'])->name('save-schedules');
+        Route::get('logs',                  [\App\Http\Controllers\IpAccessController::class, 'logs'])->name('logs');
+        Route::post('block-ip',             [\App\Http\Controllers\IpAccessController::class, 'blockIpFromLog'])->name('block-ip');
+        Route::post('user-settings/{userId}', [\App\Http\Controllers\IpAccessController::class, 'saveUserSettings'])->name('user-settings');
+    });
 
     Route::resource('group-taxes', GroupTaxController::class);
 
