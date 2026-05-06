@@ -2,38 +2,36 @@
 @section('title', __('purchase.purchases'))
 
 @section('css')
-<style>
-    .page-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
-    .page-toolbar h1 { margin:0; font-size:22px; font-weight:700; color:#111827; }
-    table.dataTable thead th {
-        background:#f9fafb !important; color:#374151 !important; font-size:11px !important;
-        font-weight:700 !important; text-transform:uppercase !important; letter-spacing:.4px !important;
-        border-bottom:2px solid #e5e7eb !important; padding:10px 12px !important; white-space:nowrap;
-    }
-    table.dataTable tbody tr:hover td { background:#f0f4ff !important; }
-    table.dataTable tbody td { font-size:13px; color:#374151; padding:10px 12px !important; vertical-align:middle !important; border-bottom:1px solid #f3f4f6 !important; }
-    table.dataTable tfoot td { background:#f9fafb; font-size:12px; font-weight:700; padding:10px 12px !important; border-top:2px solid #e5e7eb !important; }
-</style>
+@parent
+@include('layouts.partials.page_modern_css')
 @endsection
 
 @section('content')
+<div class="page-modern">
 
-<section class="content-header no-print">
-    <div class="page-toolbar">
-        <h1>@lang('purchase.purchases')</h1>
-        @can('purchase.create')
-            <a class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-lg"
-               href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M12 5l0 14"/><path d="M5 12l14 0"/>
-                </svg>
-                @lang('messages.add')
-            </a>
-        @endcan
+<section class="content-header no-print"></section>
+
+<div class="pg-banner no-print">
+    <div class="pg-banner-inner">
+        <div class="pg-banner-title">
+            <div class="pg-banner-icon">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div>
+                <h1>@lang('purchase.purchases')</h1>
+                <p class="pg-subtitle">@lang('purchase.all_purchases') &middot; {{ session('business.name') }}</p>
+            </div>
+        </div>
+        <div class="pg-banner-actions">
+            @can('purchase.create')
+                <a class="pg-add-btn"
+                    href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}">
+                    <i class="fas fa-plus"></i> @lang('messages.add')
+                </a>
+            @endcan
+        </div>
     </div>
-</section>
+</div>
 
 <section class="content no-print">
 
@@ -82,6 +80,8 @@
 </section>
 
 <section id="receipt_section" class="print_section"></section>
+
+</div>{{-- .page-modern --}}
 @stop
 
 @section('javascript')

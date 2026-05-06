@@ -1,56 +1,44 @@
 @extends('layouts.app')
 @section('title', __('sale.products'))
 
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
+<div class="page-modern">
 
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('sale.products')
-            <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.manage_products')</small>
-        </h1>
-        <!-- <ol class="breadcrumb">
-                    <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-                    <li class="active">Here</li>
-                </ol> -->
-    </section>
+    <section class="content-header"></section>
 
-    <style>
-        #product_table_wrapper {
-            background: #fff;
-            padding: 1px;
-        }
-        #product_table {
-            border-collapse: collapse !important;
-            border: 1px solid #d1d5db !important;
-            width: 100% !important;
-        }
-        #product_table thead th {
-            background-color: #f3f4f6 !important;
-            color: #374151 !important;
-            font-weight: 700 !important;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.025em;
-            border: 1px solid #d1d5db !important;
-            padding: 12px 15px !important;
-            vertical-align: middle !important;
-            white-space: nowrap;
-        }
-        #product_table tbody td {
-            border: 1px solid #e5e7eb !important;
-            padding: 10px 15px !important;
-            vertical-align: middle !important;
-            color: #4b5563 !important;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-        #product_table tbody tr:nth-child(even) {
-            background-color: #f9fafb !important;
-        }
-        #product_table tbody tr:hover {
-            background-color: #f3f4f6 !important;
-        }
-    </style>
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div>
+                    <h1>@lang('sale.products')</h1>
+                    <p class="pg-subtitle">@lang('lang_v1.manage_products') &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions">
+                @can('product.create')
+                    <a class="pg-add-btn"
+                        href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}">
+                        <i class="fas fa-plus"></i> @lang('messages.add')
+                    </a>
+                @endcan
+                @if ($is_admin)
+                    <a class="pg-glass-btn"
+                        href="{{ action([\App\Http\Controllers\ProductController::class, 'downloadExcel']) }}">
+                        <i class="fas fa-download"></i> @lang('lang_v1.download_excel')
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <!-- Main content -->
     <section class="content">
         <div class="row">
@@ -195,35 +183,6 @@
 
                         <div class="tab-content">
                             <div class="tab-pane active " id="product_list_tab">
-                                @if ($is_admin)
-
-                                    <a class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full pull-right tw-m-2"
-                                        href="{{ action([\App\Http\Controllers\ProductController::class, 'downloadExcel']) }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="icon icon-tabler icons-tabler-outline icon-tabler-download">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-                                            <path d="M7 11l5 5l5 -5" />
-                                            <path d="M12 4l0 12" />
-                                        </svg> @lang('lang_v1.download_excel')
-                                    </a>
-                                @endif
-                                @can('product.create')
-
-                                    <a class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full pull-right tw-m-2"
-                                        href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                            <path d="M12 5l0 14" />
-                                            <path d="M5 12l14 0" />
-                                        </svg> @lang('messages.add')
-                                    </a>
-                                    <br><br>
-                                @endcan
                                 @can('product.update')
                                     <button type="button" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-info tw-m-2" id="bulk_etims_sync">
                                         <i class="fas fa-sync"></i> Sync Selected to eTIMS
@@ -262,6 +221,7 @@
     </section>
     <!-- /.content -->
 
+</div>{{-- .page-modern --}}
 @endsection
 
 @section('javascript')

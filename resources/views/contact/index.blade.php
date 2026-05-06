@@ -9,179 +9,180 @@
 
 @section('css')
 @parent
-<style>
-    .page-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
-    .page-toolbar h1 { margin:0; font-size:22px; font-weight:700; color:#111827; }
-    table.dataTable thead th {
-        background:#f9fafb !important; color:#374151 !important; font-size:11px !important;
-        font-weight:700 !important; text-transform:uppercase !important; letter-spacing:.4px !important;
-        border-bottom:2px solid #e5e7eb !important; padding:10px 12px !important; white-space:nowrap;
-    }
-    table.dataTable tbody tr:hover td { background:#f0f4ff !important; }
-    table.dataTable tbody td { font-size:13px; color:#374151; padding:10px 12px !important; vertical-align:middle !important; border-bottom:1px solid #f3f4f6 !important; }
-    table.dataTable tfoot td { background:#f9fafb; font-size:12px; font-weight:700; padding:10px 12px !important; border-top:2px solid #e5e7eb !important; }
-</style>
+@include('layouts.partials.page_modern_css')
 @endsection
 
 @section('content')
-<section class="content-header">
-    <div class="page-toolbar">
-        <div>
-            <h1>@lang('lang_v1.' . $type . 's')</h1>
-            <small class="tw-text-sm tw-text-gray-500">@lang('contact.manage_your_contact', ['contacts' => __('lang_v1.' . $type . 's')])</small>
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    @if($type == 'supplier')
+                        <i class="fas fa-truck"></i>
+                    @else
+                        <i class="fas fa-user-friends"></i>
+                    @endif
+                </div>
+                <div>
+                    <h1>@lang('lang_v1.' . $type . 's')</h1>
+                    <p class="pg-subtitle">@lang('contact.manage_your_contact', ['contacts' => __('lang_v1.' . $type . 's')]) &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions">
+                @if (auth()->user()->can('supplier.create') || auth()->user()->can('customer.create') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own'))
+                    <a class="pg-add-btn btn-modal"
+                       data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => $type]) }}"
+                       data-container=".contact_modal">
+                        <i class="fas fa-plus"></i> @lang('messages.add')
+                    </a>
+                @endif
+            </div>
         </div>
-        @if (auth()->user()->can('supplier.create') || auth()->user()->can('customer.create') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own'))
-            <a class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-lg btn-modal"
-               data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => $type]) }}"
-               data-container=".contact_modal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M12 5l0 14"/><path d="M5 12l14 0"/>
-                </svg>
-                @lang('messages.add')
-            </a>
-        @endif
     </div>
-</section>
 
-<section class="content">
-    @component('components.filters', ['title' => __('report.filters')])
-        @if ($type == 'customer')
+    <section class="content">
+        @component('components.filters', ['title' => __('report.filters')])
+            @if ($type == 'customer')
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>{!! Form::checkbox('has_sell_due', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_due']) !!} <strong>@lang('lang_v1.sell_due')</strong></label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>{!! Form::checkbox('has_sell_return', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_return']) !!} <strong>@lang('lang_v1.sell_return')</strong></label>
+                    </div>
+                </div>
+            @elseif($type == 'supplier')
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>{!! Form::checkbox('has_purchase_due', 1, false, ['class' => 'input-icheck', 'id' => 'has_purchase_due']) !!} <strong>@lang('report.purchase_due')</strong></label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>{!! Form::checkbox('has_purchase_return', 1, false, ['class' => 'input-icheck', 'id' => 'has_purchase_return']) !!} <strong>@lang('lang_v1.purchase_return')</strong></label>
+                    </div>
+                </div>
+            @endif
             <div class="col-md-3">
                 <div class="form-group">
-                    <label>{!! Form::checkbox('has_sell_due', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_due']) !!} <strong>@lang('lang_v1.sell_due')</strong></label>
+                    <label>{!! Form::checkbox('has_advance_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_advance_balance']) !!} <strong>@lang('lang_v1.advance_balance')</strong></label>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
-                    <label>{!! Form::checkbox('has_sell_return', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_return']) !!} <strong>@lang('lang_v1.sell_return')</strong></label>
+                    <label>{!! Form::checkbox('has_opening_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_opening_balance']) !!} <strong>@lang('lang_v1.opening_balance')</strong></label>
                 </div>
             </div>
-        @elseif($type == 'supplier')
+            @if ($type == 'customer')
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {!! Form::label('has_no_sell_from', __('lang_v1.has_no_sell_from') . ':') !!}
+                        {!! Form::select('has_no_sell_from', ['one_month' => __('lang_v1.one_month'), 'three_months' => __('lang_v1.three_months'), 'six_months' => __('lang_v1.six_months'), 'one_year' => __('lang_v1.one_year')], null, ['class' => 'form-control', 'id' => 'has_no_sell_from', 'placeholder' => __('messages.please_select')]) !!}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {!! Form::label('cg_filter', __('lang_v1.customer_group') . ':') !!}
+                        {!! Form::select('cg_filter', $customer_groups, null, ['class' => 'form-control', 'id' => 'cg_filter']) !!}
+                    </div>
+                </div>
+            @endif
+            @if (config('constants.enable_contact_assign') === true)
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {!! Form::label('assigned_to', __('lang_v1.assigned_to') . ':') !!}
+                        {!! Form::select('assigned_to', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']) !!}
+                    </div>
+                </div>
+            @endif
             <div class="col-md-3">
                 <div class="form-group">
-                    <label>{!! Form::checkbox('has_purchase_due', 1, false, ['class' => 'input-icheck', 'id' => 'has_purchase_due']) !!} <strong>@lang('report.purchase_due')</strong></label>
+                    {!! Form::label('status_filter', __('sale.status') . ':') !!}
+                    {!! Form::select('status_filter', ['active' => __('business.is_active'), 'inactive' => __('lang_v1.inactive')], null, ['class' => 'form-control', 'id' => 'status_filter', 'placeholder' => __('lang_v1.none')]) !!}
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label>{!! Form::checkbox('has_purchase_return', 1, false, ['class' => 'input-icheck', 'id' => 'has_purchase_return']) !!} <strong>@lang('lang_v1.purchase_return')</strong></label>
-                </div>
-            </div>
-        @endif
-        <div class="col-md-3">
-            <div class="form-group">
-                <label>{!! Form::checkbox('has_advance_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_advance_balance']) !!} <strong>@lang('lang_v1.advance_balance')</strong></label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label>{!! Form::checkbox('has_opening_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_opening_balance']) !!} <strong>@lang('lang_v1.opening_balance')</strong></label>
-            </div>
-        </div>
-        @if ($type == 'customer')
-            <div class="col-md-3">
-                <div class="form-group">
-                    {!! Form::label('has_no_sell_from', __('lang_v1.has_no_sell_from') . ':') !!}
-                    {!! Form::select('has_no_sell_from', ['one_month' => __('lang_v1.one_month'), 'three_months' => __('lang_v1.three_months'), 'six_months' => __('lang_v1.six_months'), 'one_year' => __('lang_v1.one_year')], null, ['class' => 'form-control', 'id' => 'has_no_sell_from', 'placeholder' => __('messages.please_select')]) !!}
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    {!! Form::label('cg_filter', __('lang_v1.customer_group') . ':') !!}
-                    {!! Form::select('cg_filter', $customer_groups, null, ['class' => 'form-control', 'id' => 'cg_filter']) !!}
-                </div>
-            </div>
-        @endif
-        @if (config('constants.enable_contact_assign') === true)
-            <div class="col-md-3">
-                <div class="form-group">
-                    {!! Form::label('assigned_to', __('lang_v1.assigned_to') . ':') !!}
-                    {!! Form::select('assigned_to', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']) !!}
-                </div>
-            </div>
-        @endif
-        <div class="col-md-3">
-            <div class="form-group">
-                {!! Form::label('status_filter', __('sale.status') . ':') !!}
-                {!! Form::select('status_filter', ['active' => __('business.is_active'), 'inactive' => __('lang_v1.inactive')], null, ['class' => 'form-control', 'id' => 'status_filter', 'placeholder' => __('lang_v1.none')]) !!}
-            </div>
-        </div>
-    @endcomponent
+        @endcomponent
 
-    <input type="hidden" value="{{ $type }}" id="contact_type">
+        <input type="hidden" value="{{ $type }}" id="contact_type">
 
-    @component('components.widget', ['class' => 'box-primary', 'title' => __('contact.all_your_contact', ['contacts' => __('lang_v1.' . $type . 's')])])
-        @if (auth()->user()->can('supplier.view') || auth()->user()->can('customer.view') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own'))
-            <div class="table-responsive">
-                <table class="table table-hover" id="contact_table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>@lang('messages.action')</th>
-                            <th>@lang('lang_v1.contact_id')</th>
-                            @if ($type == 'supplier')
-                                <th>@lang('business.business_name')</th>
-                                <th>@lang('contact.name')</th>
-                                <th>@lang('business.email')</th>
-                                <th>@lang('contact.tax_no')</th>
-                                <th>@lang('contact.pay_term')</th>
-                                <th>@lang('account.opening_balance')</th>
-                                <th>@lang('lang_v1.advance_balance')</th>
-                                <th>@lang('lang_v1.added_on')</th>
-                                <th>@lang('business.address')</th>
-                                <th>@lang('contact.mobile')</th>
-                                <th>@lang('contact.total_purchase_due')</th>
-                                <th>@lang('lang_v1.total_purchase_return_due')</th>
-                            @elseif($type == 'customer')
-                                <th>@lang('business.business_name')</th>
-                                <th>@lang('user.name')</th>
-                                <th>@lang('business.email')</th>
-                                <th>@lang('contact.tax_no')</th>
-                                <th>@lang('lang_v1.credit_limit')</th>
-                                <th>@lang('contact.pay_term')</th>
-                                <th>@lang('account.opening_balance')</th>
-                                <th>@lang('lang_v1.advance_balance')</th>
-                                <th>@lang('lang_v1.added_on')</th>
-                                @if ($reward_enabled)<th id="rp_col">{{ session('business.rp_name') }}</th>@endif
-                                <th>@lang('lang_v1.customer_group')</th>
-                                <th>@lang('business.address')</th>
-                                <th>@lang('contact.mobile')</th>
-                                <th>@lang('contact.total_sale_due')</th>
-                                <th>@lang('lang_v1.total_sell_return_due')</th>
-                            @endif
-                            @php $custom_labels = json_decode(session('business.custom_labels'), true); @endphp
-                            <th>{{ $custom_labels['contact']['custom_field_1']  ?? __('lang_v1.contact_custom_field1') }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_2']  ?? __('lang_v1.contact_custom_field2') }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_3']  ?? __('lang_v1.contact_custom_field3') }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_4']  ?? __('lang_v1.contact_custom_field4') }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_5']  ?? __('lang_v1.custom_field', ['number' => 5]) }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_6']  ?? __('lang_v1.custom_field', ['number' => 6]) }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_7']  ?? __('lang_v1.custom_field', ['number' => 7]) }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_8']  ?? __('lang_v1.custom_field', ['number' => 8]) }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_9']  ?? __('lang_v1.custom_field', ['number' => 9]) }}</th>
-                            <th>{{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr class="text-center">
-                            <td></td><td></td><td></td><td></td><td></td><td></td>
-                            <td @if($type=='supplier') colspan="6" @elseif($type=='customer') colspan="{{ $reward_enabled ? 9 : 8 }}" @endif>
-                                <strong>@lang('sale.total'):</strong>
-                            </td>
-                            <td class="footer_contact_due"></td>
-                            <td class="footer_contact_return_due"></td>
-                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        @endif
-    @endcomponent
+        @component('components.widget', ['class' => 'box-primary', 'title' => __('contact.all_your_contact', ['contacts' => __('lang_v1.' . $type . 's')])])
+            @if (auth()->user()->can('supplier.view') || auth()->user()->can('customer.view') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own'))
+                <div class="table-responsive">
+                    <table class="table table-hover" id="contact_table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>@lang('messages.action')</th>
+                                <th>@lang('lang_v1.contact_id')</th>
+                                @if ($type == 'supplier')
+                                    <th>@lang('business.business_name')</th>
+                                    <th>@lang('contact.name')</th>
+                                    <th>@lang('business.email')</th>
+                                    <th>@lang('contact.tax_no')</th>
+                                    <th>@lang('contact.pay_term')</th>
+                                    <th>@lang('account.opening_balance')</th>
+                                    <th>@lang('lang_v1.advance_balance')</th>
+                                    <th>@lang('lang_v1.added_on')</th>
+                                    <th>@lang('business.address')</th>
+                                    <th>@lang('contact.mobile')</th>
+                                    <th>@lang('contact.total_purchase_due')</th>
+                                    <th>@lang('lang_v1.total_purchase_return_due')</th>
+                                @elseif($type == 'customer')
+                                    <th>@lang('business.business_name')</th>
+                                    <th>@lang('user.name')</th>
+                                    <th>@lang('business.email')</th>
+                                    <th>@lang('contact.tax_no')</th>
+                                    <th>@lang('lang_v1.credit_limit')</th>
+                                    <th>@lang('contact.pay_term')</th>
+                                    <th>@lang('account.opening_balance')</th>
+                                    <th>@lang('lang_v1.advance_balance')</th>
+                                    <th>@lang('lang_v1.added_on')</th>
+                                    @if ($reward_enabled)<th id="rp_col">{{ session('business.rp_name') }}</th>@endif
+                                    <th>@lang('lang_v1.customer_group')</th>
+                                    <th>@lang('business.address')</th>
+                                    <th>@lang('contact.mobile')</th>
+                                    <th>@lang('contact.total_sale_due')</th>
+                                    <th>@lang('lang_v1.total_sell_return_due')</th>
+                                @endif
+                                @php $custom_labels = json_decode(session('business.custom_labels'), true); @endphp
+                                <th>{{ $custom_labels['contact']['custom_field_1']  ?? __('lang_v1.contact_custom_field1') }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_2']  ?? __('lang_v1.contact_custom_field2') }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_3']  ?? __('lang_v1.contact_custom_field3') }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_4']  ?? __('lang_v1.contact_custom_field4') }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_5']  ?? __('lang_v1.custom_field', ['number' => 5]) }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_6']  ?? __('lang_v1.custom_field', ['number' => 6]) }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_7']  ?? __('lang_v1.custom_field', ['number' => 7]) }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_8']  ?? __('lang_v1.custom_field', ['number' => 8]) }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_9']  ?? __('lang_v1.custom_field', ['number' => 9]) }}</th>
+                                <th>{{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr class="text-center">
+                                <td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td @if($type=='supplier') colspan="6" @elseif($type=='customer') colspan="{{ $reward_enabled ? 9 : 8 }}" @endif>
+                                    <strong>@lang('sale.total'):</strong>
+                                </td>
+                                <td class="footer_contact_due"></td>
+                                <td class="footer_contact_return_due"></td>
+                                <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            @endif
+        @endcomponent
 
-    <div class="modal fade contact_modal" tabindex="-1" role="dialog"></div>
-    <div class="modal fade pay_contact_due_modal" tabindex="-1" role="dialog"></div>
-</section>
+        <div class="modal fade contact_modal" tabindex="-1" role="dialog"></div>
+        <div class="modal fade pay_contact_due_modal" tabindex="-1" role="dialog"></div>
+    </section>
+
+</div>
 @stop
 
 @section('javascript')
