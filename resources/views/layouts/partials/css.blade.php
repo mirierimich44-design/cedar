@@ -42,6 +42,7 @@ $__fontStack = $__fontCfg[1];
 @endif
 
 <!-- Dynamic Theme Color CSS Variables -->
+@php
 $__themeVars = [
     'primary' => [
         'main'   => '#4f46e5', 'hover'  => '#4338ca',
