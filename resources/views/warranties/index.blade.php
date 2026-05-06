@@ -1,15 +1,35 @@
 @extends('layouts.app')
 @section('title', __('lang_v1.warranties'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.warranties')
-        </h1>
-    </section>
+    
+<div class="page-modern">
 
-    <!-- Main content -->
+    <section class="content-header no-print"></section>
+
+    <div class="pg-banner no-print">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <h1>@lang('lang_v1.warranties')</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
+<!-- Main content -->
     <section class="content">
         @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.all_warranties')])
             @slot('tool')
@@ -99,4 +119,6 @@
             });
         });
     </script>
+
+</div>{{-- .page-modern --}}
 @endsection

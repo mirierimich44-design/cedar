@@ -1,19 +1,34 @@
 @extends('layouts.app')
 @section('title', __('printer.printers'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('printer.printers')
-        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('printer.manage_your_printers')</small>
-    </h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
-</section>
 
+<div class="page-modern">
+
+    <section class="content-header no-print"></section>
+
+    <div class="pg-banner no-print">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-print"></i>
+                </div>
+                <div>
+                    <h1>@lang('printer.printers')</h1>
+                    <p class="pg-subtitle">@lang('printer.manage_your_printers') &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary', 'title' => __('printer.all_your_printer')])
@@ -118,4 +133,6 @@
         });
     });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

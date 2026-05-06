@@ -14,16 +14,31 @@
     table.dataTable tbody td { font-size:13px; color:#374151; padding:10px 12px !important; vertical-align:middle !important; border-bottom:1px solid #f3f4f6 !important; }
     table.dataTable tfoot td { background:#f9fafb; font-size:12px; font-weight:700; padding:10px 12px !important; border-top:2px solid #e5e7eb !important; }
 </style>
+
+@include('layouts.partials.page_modern_css')
 @endsection
 
 @section('content')
 
-<section class="content-header no-print">
-    <div class="page-toolbar">
-        <h1>@lang('lang_v1.sell_return')</h1>
-    </div>
-</section>
 
+<div class="page-modern">
+
+    <section class="content-header no-print"></section>
+
+    <div class="pg-banner no-print">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div>
+                    <h1>@lang('lang_v1.sell_return')</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 <section class="content no-print">
 
     @component('components.filters', ['title' => __('report.filters')])
@@ -136,4 +151,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

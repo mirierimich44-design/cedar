@@ -1,15 +1,34 @@
 @extends('layouts.app')
 @section('title', __('expense.expense_categories'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'expense.expense_categories' )
-        <small  class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'expense.manage_your_expense_categories' )</small>
-    </h1>
-</section>
 
+<div class="page-modern">
+
+    <section class="content-header no-print"></section>
+
+    <div class="pg-banner no-print">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <div>
+                    <h1>@lang( 'expense.expense_categories' )</h1>
+                    <p class="pg-subtitle">@lang( 'expense.manage_your_expense_categories' ) &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary', 'title' => __( 'expense.all_your_expense_categories' )])
@@ -49,4 +68,6 @@
 </section>
 <!-- /.content -->
 
+
+</div>{{-- .page-modern --}}
 @endsection
