@@ -1,12 +1,32 @@
 @extends('layouts.app')
 @section('title', __('lang_v1.orders'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.orders')
-        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.manage_orders')</small>
-    </h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    <h1>@lang('lang_v1.orders')</h1>
+                    <p class="pg-subtitle">@lang('lang_v1.manage_orders') &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
     @component('components.filters', ['title' => __('report.filters')])
@@ -199,4 +219,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

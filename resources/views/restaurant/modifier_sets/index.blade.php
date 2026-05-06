@@ -1,18 +1,34 @@
 @extends('layouts.app')
 @section('title', __('restaurant.modifiers'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'restaurant.modifier_sets' )
-        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'restaurant.manage_your_modifiers' )</small>
-    </h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div>
+                    <h1>@lang( 'restaurant.modifier_sets' )</h1>
+                    <p class="pg-subtitle">@lang( 'restaurant.manage_your_modifiers' ) &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <!-- Main content -->
 <section class="content">
@@ -188,4 +204,6 @@
             
         });
     </script>
+
+</div>{{-- .page-modern --}}
 @endsection

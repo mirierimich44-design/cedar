@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Cloud Sync')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 <div class="tw-pb-10 tw-bg-gradient-to-r tw-from-primary-800 tw-to-primary-900">
     <div class="tw-px-5 tw-pt-5">
@@ -192,4 +198,6 @@
         });
     });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

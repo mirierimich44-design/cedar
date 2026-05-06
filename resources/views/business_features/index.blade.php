@@ -1,12 +1,32 @@
 @extends('layouts.app')
 @section('title', 'Business Feature Management')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1>Business Feature Management
-        <small>Enable or disable features per business/client</small>
-    </h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-toggle-on"></i>
+                </div>
+                <div>
+                    <h1>Business Feature Management</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
 <div class="box box-primary">
@@ -226,4 +246,6 @@ input:checked + .slider { background: #27ae60; }
 input:checked + .slider:before { transform: translateX(20px); }
 input:disabled + .slider { opacity: .5; }
 </style>
+
+</div>{{-- .page-modern --}}
 @endsection

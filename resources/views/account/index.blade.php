@@ -1,15 +1,35 @@
 @extends('layouts.app')
 @section('title', __('lang_v1.payment_accounts'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.payment_accounts')
-            <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('account.manage_your_account')</small>
-        </h1>
-    </section>
+    
+<div class="page-modern">
 
-    <!-- Main content -->
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <h1>@lang('lang_v1.payment_accounts')</h1>
+                    <p class="pg-subtitle">@lang('account.manage_your_account') &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
+
+<!-- Main content -->
     <section class="content">
         @if (!empty($not_linked_payments))
             <div class="row">
@@ -465,4 +485,6 @@
             });
         });
     </script>
+
+</div>{{-- .page-modern --}}
 @endsection

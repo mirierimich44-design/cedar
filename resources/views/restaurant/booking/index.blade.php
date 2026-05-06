@@ -1,16 +1,34 @@
 @extends('layouts.app')
 @section('title', __('restaurant.bookings'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1>@lang( 'restaurant.bookings' )</h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h1>@lang( 'restaurant.bookings' )</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <!-- Main content -->
 <section class="content">
@@ -411,4 +429,6 @@
         });
 
     </script>
+
+</div>{{-- .page-modern --}}
 @endsection

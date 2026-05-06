@@ -1,16 +1,30 @@
 @extends('layouts.app')
 @section('title', __('messages.business_location_settings'))
 
-@section('content')
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'messages.business_location_settings' ) - {{$location->name}}</h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
-</section>
+@section('content')
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div>
+                    <h1>@lang('messages.business_location_settings')</h1>
+                    <p class="pg-subtitle">{{ $location->name }} &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <!-- Main content -->
 <section class="content">
@@ -132,4 +146,6 @@
 </section>
 <!-- /.content -->
 
+
+</div>{{-- .page-modern --}}
 @endsection

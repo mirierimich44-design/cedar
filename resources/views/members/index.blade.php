@@ -2,6 +2,7 @@
 @section('title', __('Members'))
 
 @section('css')
+@parent
 <style>
     .coming-soon-container {
         min-height: 70vh;
