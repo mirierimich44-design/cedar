@@ -295,7 +295,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                 <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.sells_last_30_days') }}</h3>
                             </div>
                             <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                <div class="tw-w-full" style="min-height: 280px;">
                                     {!! $sells_chart_1->container() !!}
                                 </div>
                             </div>
@@ -325,7 +325,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                 <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.sells_current_fy') }}</h3>
                             </div>
                             <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                                <div class="tw-w-full" style="min-height: 280px;">
                                     {!! $sells_chart_2->container() !!}
                                 </div>
                             </div>
@@ -343,7 +343,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Staff Performance (Last 30 Days)</h3>
                         </div>
                         <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                            <div class="tw-w-full" style="min-height: 280px;">
                                 {!! $staff_performance_chart->container() !!}
                             </div>
                         </div>
@@ -357,7 +357,7 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                             <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Monthly Gross Profit (Current FY)</h3>
                         </div>
                         <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50" style="min-height: 250px;">
+                            <div class="tw-w-full" style="min-height: 280px;">
                                 {!! $profit_margin_chart->container() !!}
                             </div>
                         </div>
@@ -433,30 +433,30 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-6">
                                     <div class="tw-flex tw-flex-col tw-justify-center tw-gap-3 lg:tw-w-2/5">
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #4CAF50;"></span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-full tw-flex-shrink-0" style="background:#059669;"></span>
                                             <div>
-                                                <div class="tw-text-xs tw-text-gray-500">Purchase</div>
+                                                <div class="tw-text-xs tw-text-gray-500">@lang('lang_v1.purchase')</div>
                                                 <div class="tw-font-semibold tw-text-sm" id="pie_purchase">{{ session('currency')['symbol'] }}0</div>
                                             </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #2196F3;"></span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-full tw-flex-shrink-0" style="background:#2563eb;"></span>
                                             <div>
-                                                <div class="tw-text-xs tw-text-gray-500">Sales</div>
+                                                <div class="tw-text-xs tw-text-gray-500">@lang('lang_v1.total_sales')</div>
                                                 <div class="tw-font-semibold tw-text-sm" id="pie_sales">{{ session('currency')['symbol'] }}0</div>
                                             </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #FF9800;"></span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-full tw-flex-shrink-0" style="background:#d97706;"></span>
                                             <div>
-                                                <div class="tw-text-xs tw-text-gray-500">Income</div>
+                                                <div class="tw-text-xs tw-text-gray-500">{{ __('lang_v1.total_income', [], null) ?: 'Income' }}</div>
                                                 <div class="tw-font-semibold tw-text-sm" id="pie_income">{{ session('currency')['symbol'] }}0</div>
                                             </div>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-gap-2">
-                                            <span class="tw-w-3 tw-h-3 tw-rounded-sm tw-flex-shrink-0" style="background: #f44336;"></span>
+                                            <span class="tw-w-3 tw-h-3 tw-rounded-full tw-flex-shrink-0" style="background:#dc2626;"></span>
                                             <div>
-                                                <div class="tw-text-xs tw-text-gray-500">Expense</div>
+                                                <div class="tw-text-xs tw-text-gray-500">@lang('lang_v1.expense')</div>
                                                 <div class="tw-font-semibold tw-text-sm" id="pie_expense">{{ session('currency')['symbol'] }}0</div>
                                             </div>
                                         </div>
@@ -508,79 +508,123 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                         </div>
                     @endif
                 @endcan
-                {{-- New Widgets Phase 1 --}}
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                    <div style="background:linear-gradient(135deg,#b45309 0%,#fbbf24 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
-                        <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fa fa-trophy" style="color:white;font-size:14px;"></i>
-                        </span>
-                        <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Best Sellers (Weekly)</h3>
-                    </div>
-                    <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flow-root">
-                            <table class="table table-bordered table-striped" id="best_sellers_table" style="width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Qty Sold</th>
-                                        <th>Total Revenue</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                    <div style="background:linear-gradient(135deg,#dc2626 0%,#f87171 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fa fa-hourglass-end" style="color:white;font-size:13px;"></i>
-                            </span>
-                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Expiring Soon</h3>
-                        </div>
-                        <span style="color:rgba(255,255,255,0.7);font-size:12px;">Next 30 days</span>
-                    </div>
-                    <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flow-root">
-                            <table class="table table-bordered table-striped" id="expiring_soon_table" style="width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Expiry</th>
-                                        <th>Stock</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                {{-- ── Compact paired table widgets (always 2-per-row) ── --}}
+                <div class="lg:tw-col-span-2">
+                    <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4 sm:tw-gap-5">
 
-                <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200" style="overflow:hidden;">
-                    <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="fa fa-shopping-cart" style="color:white;font-size:13px;"></i>
-                            </span>
-                            <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Reorder Suggestions</h3>
+                        {{-- Stock Expiry Alert (moved here from inside @can so it always pairs) --}}
+                        @can('stock_report.view')
+                        @if (session('business.enable_product_expiry') == 1)
+                        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-overflow-hidden tw-transition-all hover:tw-shadow-md hover:tw--translate-y-0.5 tw-duration-200">
+                            <div style="background:linear-gradient(135deg,#ea580c 0%,#fb923c 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg aria-hidden="true" style="width:16px;height:16px;color:white;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M12 9v4"></path>
+                                        <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+                                        <path d="M12 16h.01"></path>
+                                    </svg>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">{{ __('home.stock_expiry_alert') }} @show_tooltip(__('tooltip.stock_expiry_alert', ['days'=>session('business.stock_expiry_alert_days', 30)]))</h3>
+                            </div>
+                            <div class="tw-p-4">
+                                <input type="hidden" id="stock_expiry_alert_days" value="{{ \Carbon::now()->addDays(session('business.stock_expiry_alert_days', 30))->format('Y-m-d') }}">
+                                <div class="tw-overflow-x-auto">
+                                    <table class="table table-bordered table-striped" id="stock_expiry_alert_table" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>@lang('business.product')</th>
+                                                <th>@lang('business.location')</th>
+                                                <th>@lang('report.stock_left')</th>
+                                                <th>@lang('product.expires_in')</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                        <span style="color:rgba(255,255,255,0.7);font-size:12px;">Based on sales velocity</span>
-                    </div>
-                    <div class="tw-p-4 sm:tw-p-5">
-                        <div class="tw-flow-root">
-                            <table class="table table-bordered table-striped" id="reorder_suggestions_table" style="width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>In Stock</th>
-                                        <th>Avg Daily</th>
-                                        <th>Suggestion</th>
-                                    </tr>
-                                </thead>
-                            </table>
+                        @endif
+                        @endcan
+
+                        {{-- Best Sellers --}}
+                        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-overflow-hidden tw-transition-all hover:tw-shadow-md hover:tw--translate-y-0.5 tw-duration-200">
+                            <div style="background:linear-gradient(135deg,#b45309 0%,#fbbf24 100%); padding:14px 16px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fa fa-trophy" style="color:white;font-size:14px;"></i>
+                                </span>
+                                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Best Sellers (Weekly)</h3>
+                            </div>
+                            <div class="tw-p-4">
+                                <div class="tw-overflow-x-auto">
+                                    <table class="table table-bordered table-striped" id="best_sellers_table" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Qty Sold</th>
+                                                <th>Total Revenue</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+
+                        {{-- Expiring Soon --}}
+                        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-overflow-hidden tw-transition-all hover:tw-shadow-md hover:tw--translate-y-0.5 tw-duration-200">
+                            <div style="background:linear-gradient(135deg,#dc2626 0%,#f87171 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i class="fa fa-hourglass-end" style="color:white;font-size:13px;"></i>
+                                    </span>
+                                    <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Expiring Soon</h3>
+                                </div>
+                                <span style="color:rgba(255,255,255,0.7);font-size:12px;">Next 30 days</span>
+                            </div>
+                            <div class="tw-p-4">
+                                <div class="tw-overflow-x-auto">
+                                    <table class="table table-bordered table-striped" id="expiring_soon_table" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Expiry</th>
+                                                <th>Stock</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Reorder Suggestions --}}
+                        <div class="tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200 tw-overflow-hidden tw-transition-all hover:tw-shadow-md hover:tw--translate-y-0.5 tw-duration-200">
+                            <div style="background:linear-gradient(135deg,var(--theme-dark) 0%,var(--theme-light) 100%); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i class="fa fa-shopping-cart" style="color:white;font-size:13px;"></i>
+                                    </span>
+                                    <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Reorder Suggestions</h3>
+                                </div>
+                                <span style="color:rgba(255,255,255,0.7);font-size:12px;">Based on sales velocity</span>
+                            </div>
+                            <div class="tw-p-4">
+                                <div class="tw-overflow-x-auto">
+                                    <table class="table table-bordered table-striped" id="reorder_suggestions_table" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>In Stock</th>
+                                                <th>Avg Daily</th>
+                                                <th>Suggestion</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>{{-- /.inner 2-col grid --}}
+                </div>{{-- /.lg:col-span-2 --}}
 
                 {{-- Quick Actions Widget --}}
                 <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md tw-ring-gray-200" style="overflow:hidden;">
@@ -955,8 +999,12 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                 labels: ['Purchase', 'Sales', 'Income', 'Expense'],
                                 datasets: [{
                                     data: [data.purchase || 0, data.sales || 0, data.income || 0, data.expense || 0],
-                                    backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#f44336'],
-                                    borderWidth: 0
+                                    backgroundColor: ['#059669', '#2563eb', '#d97706', '#dc2626'],
+                                    hoverBackgroundColor: ['#047857', '#1d4ed8', '#b45309', '#b91c1c'],
+                                    borderWidth: 3,
+                                    borderColor: '#ffffff',
+                                    borderRadius: 4,
+                                    hoverOffset: 8
                                 }]
                             },
                             options: {
@@ -965,9 +1013,31 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
                                 plugins: {
                                     legend: {
                                         display: false
+                                    },
+                                    tooltip: {
+                                        backgroundColor: '#1e293b',
+                                        titleColor: '#f8fafc',
+                                        bodyColor: '#e2e8f0',
+                                        borderColor: '#334155',
+                                        borderWidth: 1,
+                                        cornerRadius: 8,
+                                        padding: 12,
+                                        bodyFont: { size: 13 },
+                                        titleFont: { size: 13, weight: '600' },
+                                        callbacks: {
+                                            label: function(context) {
+                                                var value = Number(context.raw || 0).toLocaleString();
+                                                return ' ' + context.label + ': ' + currencySymbol + value;
+                                            }
+                                        }
                                     }
                                 },
-                                cutout: '60%'
+                                cutout: '65%',
+                                animation: {
+                                    animateRotate: true,
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
+                                }
                             }
                         });
                     }
@@ -1557,6 +1627,49 @@ $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
         });
     </script>
     @if (!empty($all_locations))
+    <script>
+    /* ── Highcharts global theme override ── */
+    if (typeof Highcharts !== 'undefined') {
+        Highcharts.setOptions({
+            chart: {
+                style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                backgroundColor: 'transparent',
+                animation: { duration: 600, easing: 'easeOutQuart' }
+            },
+            title: { text: null },
+            subtitle: { text: null },
+            credits: { enabled: false },
+            colors: ['#059669','#2563eb','#7c3aed','#d97706','#dc2626','#0ea5e9','#ec4899','#14b8a6'],
+            xAxis: {
+                lineColor: '#e2e8f0', tickColor: '#e2e8f0',
+                labels: { style: { color: '#64748b', fontSize: '11px' } }
+            },
+            yAxis: {
+                gridLineColor: '#f1f5f9', gridLineDashStyle: 'Dash',
+                labels: { style: { color: '#94a3b8', fontSize: '11px' } },
+                title: { style: { color: '#64748b', fontSize: '12px', fontWeight: '500' } }
+            },
+            legend: {
+                itemStyle: { color: '#475569', fontSize: '12px', fontWeight: '500' },
+                itemHoverStyle: { color: '#1e293b' }
+            },
+            tooltip: {
+                backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: 8,
+                style: { color: '#fff', fontSize: '12px' }
+            },
+            plotOptions: {
+                line: {
+                    lineWidth: 2.5,
+                    marker: { radius: 4, symbol: 'circle' },
+                    states: { hover: { lineWidth: 3 } }
+                },
+                bar:    { borderRadius: 4, borderWidth: 0 },
+                column: { borderRadius: 4, borderWidth: 0 },
+                series: { animation: { duration: 700 } }
+            }
+        });
+    }
+    </script>
         {!! $sells_chart_1->script() !!}
         {!! $sells_chart_2->script() !!}
         {!! $staff_performance_chart->script() !!}
