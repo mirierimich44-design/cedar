@@ -769,3 +769,114 @@ body.sidebar-open::after {
     body.sidebar-open .content-wrapper,
     body.sidebar-open .main-header { opacity: 1 !important; pointer-events: auto !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   #app-header — extracted from header.blade.php
+   All colour values use CSS variables from :root {}
+   ═══════════════════════════════════════════════════════════ */
+#app-header {
+    background: linear-gradient(90deg, var(--theme-dark), var(--theme-deeper));
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 6px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+#app-header .hb,
+#app-header > a,
+#app-header > button {
+    all: unset;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 36px !important;
+    padding: 0 13px !important;
+    background: rgba(255,255,255,0.1) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    flex-shrink: 0 !important;
+    transition: background .15s !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+#app-header .hb:hover,
+#app-header > a:hover,
+#app-header > button:hover {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+}
+#app-header .hb svg,
+#app-header > a svg,
+#app-header > button svg {
+    width: 15px !important;
+    height: 15px !important;
+    color: #fff !important;
+    flex-shrink: 0 !important;
+}
+#app-header .hb-ghost {
+    width: 36px !important;
+    padding: 0 !important;
+}
+#app-header .hb-primary {
+    background: #fff !important;
+    color: var(--theme-dark) !important;
+    border: 1px solid #fff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+}
+#app-header .hb-primary:hover {
+    background: #f3f4f6 !important;
+    color: var(--theme-dark) !important;
+}
+#app-header .hb-primary svg { color: var(--theme-dark) !important; }
+#app-header .hb-sep {
+    width: 1px; height: 22px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+}
+#app-header .hb-bell-wrap { position: relative; display: inline-flex; }
+#app-header .hb-bell-dot {
+    position: absolute; top: 3px; right: 3px;
+    width: 8px; height: 8px;
+    background: #ef4444; border-radius: 50%;
+    border: 2px solid var(--theme-dark);
+    pointer-events: none;
+    animation: hbPulse 2s infinite;
+}
+@keyframes hbPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
+    50%      { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+}
+@keyframes hbSpin { to { transform: rotate(360deg); } }
+#hb-user-menu {
+    position: absolute; right: 0; top: calc(100% + 6px);
+    width: 210px; background: #fff;
+    border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 1px solid #e5e7eb; z-index: 9999;
+    overflow: hidden; display: none;
+}
+@media (max-width: 1200px) { #app-header .hb-label   { display: none !important; } }
+@media (max-width: 960px)  { #app-header .hb-hide-md { display: none !important; } }
+@media (max-width: 700px)  { #app-header .hb-hide-sm { display: none !important; } }
+
+/* ═══════════════════════════════════════════════════════════
+   Sidebar gradient — extracted from sidebar.blade.php
+   ═══════════════════════════════════════════════════════════ */
+.side-bar {
+    background: linear-gradient(180deg, var(--theme-dark) 0%, var(--theme-deeper) 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+}
+.side-bar .logo-icon-gradient {
+    background: linear-gradient(135deg, var(--theme-main), var(--theme-light)) !important;
+}

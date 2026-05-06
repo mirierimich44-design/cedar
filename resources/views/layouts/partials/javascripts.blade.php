@@ -24,13 +24,13 @@
 
 <script src="{{ asset('js/vendor.js?v=' . $asset_v) }}"></script>
 
-@if (file_exists(public_path('js/lang/' . session()->get('user.language', config('app.locale')) . '.js')))
-    <script src="{{ asset('js/lang/' . session()->get('user.language', config('app.locale')) . '.js?v=' . $asset_v) }}">
-    </script>
-@else
-    <script src="{{ asset('js/lang/en.js?v=' . $asset_v) }}"></script>
-@endif
 @php
+    // Cache file_exists results once to avoid repeated disk I/O
+    $__ul = session()->get('user.language', config('app.locale'));
+    $__lang_js_exists   = file_exists(public_path('js/lang/' . $__ul . '.js'));
+    $__select2_lang_exists = file_exists(public_path('AdminLTE/plugins/select2/lang/' . $__ul . '.js'));
+    $__validation_lang_file = 'messages_' . $__ul . '.js';
+    $__validation_lang_exists = file_exists(public_path('js/jquery-validation-1.16.0/src/localization/' . $__validation_lang_file));
     $business_date_format = session('business.date_format', config('constants.default_date_format'));
     $datepicker_date_format = str_replace('d', 'dd', $business_date_format);
     $datepicker_date_format = str_replace('m', 'mm', $datepicker_date_format);
@@ -72,9 +72,9 @@
         start: moment('{{ Session::get('financial_year.start') }}'),
         end: moment('{{ Session::get('financial_year.end') }}'),
     }
-    @if (file_exists(public_path('AdminLTE/plugins/select2/lang/' . session()->get('user.language', config('app.locale')) . '.js')))
+    @if ($__select2_lang_exists)
         //Default setting for select2
-        $.fn.select2.defaults.set("language", "{{ session()->get('user.language', config('app.locale')) }}");
+        $.fn.select2.defaults.set("language", "{{ $__ul }}");
     @endif
 
     var datepicker_date_format = "{{ $datepicker_date_format }}";
@@ -94,9 +94,8 @@
     var __new_notification_count_interval = "{{ config('constants.new_notification_count_interval', 60) }}000";
 </script>
 
-@if (file_exists(public_path('js/lang/' . session()->get('user.language', config('app.locale')) . '.js')))
-    <script src="{{ asset('js/lang/' . session()->get('user.language', config('app.locale')) . '.js?v=' . $asset_v) }}">
-    </script>
+@if ($__lang_js_exists)
+    <script src="{{ asset('js/lang/' . $__ul . '.js?v=' . $asset_v) }}"></script>
 @else
     <script src="{{ asset('js/lang/en.js?v=' . $asset_v) }}"></script>
 @endif
@@ -108,18 +107,11 @@
 <script src="{{ asset('js/documents_and_note.js?v=' . $asset_v) }}"></script>
 <script src="{{ asset('js/admin-actions.js?v=' . $asset_v) }}"></script>
 
-<!-- TODO -->
-@if (file_exists(public_path('AdminLTE/plugins/select2/lang/' . session()->get('user.language', config('app.locale')) . '.js')))
-    <script
-        src="{{ asset('AdminLTE/plugins/select2/lang/' . session()->get('user.language', config('app.locale')) . '.js?v=' . $asset_v) }}">
-    </script>
+@if ($__select2_lang_exists)
+    <script src="{{ asset('AdminLTE/plugins/select2/lang/' . $__ul . '.js?v=' . $asset_v) }}"></script>
 @endif
-@php
-    $validation_lang_file = 'messages_' . session()->get('user.language', config('app.locale')) . '.js';
-@endphp
-@if (file_exists(public_path() . '/js/jquery-validation-1.16.0/src/localization/' . $validation_lang_file))
-    <script src="{{ asset('js/jquery-validation-1.16.0/src/localization/' . $validation_lang_file . '?v=' . $asset_v) }}">
-    </script>
+@if ($__validation_lang_exists)
+    <script src="{{ asset('js/jquery-validation-1.16.0/src/localization/' . $__validation_lang_file . '?v=' . $asset_v) }}"></script>
 @endif
 
 @if (!empty($__system_settings['additional_js']))

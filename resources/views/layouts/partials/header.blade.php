@@ -1,130 +1,5 @@
 @inject('request', 'Illuminate\Http\Request')
-@php
-    $themeMap = [
-        'primary' => ['grad' => 'linear-gradient(90deg,#3730a3,#1e1b4b)', 'main' => '#4f46e5', 'dark' => '#3730a3'],
-        'green'   => ['grad' => 'linear-gradient(90deg,#065f46,#022c22)', 'main' => '#059669', 'dark' => '#065f46'],
-        'purple'  => ['grad' => 'linear-gradient(90deg,#5b21b6,#2e1065)', 'main' => '#7c3aed', 'dark' => '#5b21b6'],
-        'red'     => ['grad' => 'linear-gradient(90deg,#991b1b,#450a0a)', 'main' => '#dc2626', 'dark' => '#991b1b'],
-        'yellow'  => ['grad' => 'linear-gradient(90deg,#92400e,#451a03)', 'main' => '#d97706', 'dark' => '#92400e'],
-        'orange'  => ['grad' => 'linear-gradient(90deg,#9a3412,#431407)', 'main' => '#ea580c', 'dark' => '#9a3412'],
-        'sky'     => ['grad' => 'linear-gradient(90deg,#075985,#082f49)', 'main' => '#0284c7', 'dark' => '#075985'],
-    ];
-    $t = $themeMap[session('business.theme_color','primary')] ?? $themeMap['primary'];
-@endphp
-
-<style>
-/* Scoped to #app-header so specificity beats everything */
-#app-header {
-    background: {{ $t['grad'] }};
-    height: 64px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 6px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 100;
-}
-
-/* Universal button rule — covers .hb AND any module's <a>/<button> in the header */
-#app-header .hb,
-#app-header > a,
-#app-header > button {
-    all: unset;
-    box-sizing: border-box !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    height: 36px !important;
-    padding: 0 13px !important;
-    /* Subtle glass over the dark header — picks up theme color via transparency */
-    background: rgba(255,255,255,0.1) !important;
-    color: #fff !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    border-radius: 8px !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    white-space: nowrap !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    flex-shrink: 0 !important;
-    transition: background .15s !important;
-    line-height: 1 !important;
-    box-shadow: none !important;
-}
-#app-header .hb:hover,
-#app-header > a:hover,
-#app-header > button:hover {
-    background: rgba(255,255,255,0.2) !important;
-    color: #fff !important;
-}
-#app-header .hb svg,
-#app-header > a svg,
-#app-header > button svg {
-    width: 15px !important;
-    height: 15px !important;
-    color: #fff !important;
-    flex-shrink: 0 !important;
-}
-
-/* Sidebar toggle: square 36×36 icon-only */
-#app-header .hb-ghost {
-    width: 36px !important;
-    padding: 0 !important;
-}
-
-/* POS: solid white — the one standout primary */
-#app-header .hb-primary {
-    background: #fff !important;
-    color: {{ $t['dark'] }} !important;
-    border: 1px solid #fff !important;
-    font-weight: 800 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
-}
-#app-header .hb-primary:hover {
-    background: #f3f4f6 !important;
-    color: {{ $t['dark'] }} !important;
-}
-#app-header .hb-primary svg { color: {{ $t['dark'] }} !important; }
-
-/* Divider */
-#app-header .hb-sep {
-    width: 1px; height: 22px;
-    background: rgba(255,255,255,0.2);
-    flex-shrink: 0;
-}
-
-/* Bell dot */
-#app-header .hb-bell-wrap { position: relative; display: inline-flex; }
-#app-header .hb-bell-dot  {
-    position: absolute; top: 3px; right: 3px;
-    width: 8px; height: 8px;
-    background: #ef4444; border-radius: 50%;
-    border: 2px solid {{ $t['dark'] }};
-    pointer-events: none;
-    animation: hbPulse 2s infinite;
-}
-@keyframes hbPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
-    50%      { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
-}
-@keyframes hbSpin { to { transform: rotate(360deg); } }
-
-/* User dropdown */
-#hb-user-menu {
-    position: absolute; right: 0; top: calc(100% + 6px);
-    width: 210px; background: #fff;
-    border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    border: 1px solid #e5e7eb; z-index: 9999;
-    overflow: hidden; display: none;
-}
-
-/* Responsive: hide labels */
-@media (max-width: 1200px) { #app-header .hb-label   { display: none !important; } }
-@media (max-width: 960px)  { #app-header .hb-hide-md { display: none !important; } }
-@media (max-width: 700px)  { #app-header .hb-hide-sm { display: none !important; } }
-</style>
+{{-- Header CSS is now in public/css/apex-overrides.css — no inline style needed --}}
 
 <header id="app-header" class="no-print">
 
@@ -195,6 +70,43 @@
     @if(Module::has('Repair'))
         @includeIf('repair::layouts.partials.header')
     @endif
+
+    {{-- Dark Mode Toggle --}}
+    <button type="button" id="dark-mode-toggle" title="Toggle dark mode" class="hb" style="width:36px;padding:0;" onclick="toggleDarkMode()">
+        <svg class="dm-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></svg>
+        <svg class="dm-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/></svg>
+    </button>
+
+    {{-- Global Search --}}
+    <button type="button" id="global-search-trigger" title="Search (Ctrl+K)" class="hb hb-hide-sm"
+        style="min-width:110px;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:15px;height:15px;" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+        <span class="hb-label" style="opacity:.75;">Search</span>
+        <kbd style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace;line-height:1.4;">⌘K</kbd>
+    </button>
+
+    {{-- Global Search Overlay --}}
+    <div id="global-search-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.7);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeGlobalSearch()">
+        <div style="max-width:640px;margin:80px auto 0;background:#fff;border-radius:12px;box-shadow:0 25px 50px rgba(0,0,0,0.25);overflow:hidden;">
+            <div style="display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #e2e8f0;">
+                <svg style="width:20px;height:20px;color:#94a3b8;flex-shrink:0;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg>
+                <input type="text" id="global-search-input" placeholder="Search transactions, contacts, products, parcels..."
+                    style="flex:1;border:none;outline:none;padding:16px 12px;font-size:16px;color:#1e293b;background:transparent;">
+                <kbd onclick="closeGlobalSearch()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer;color:#64748b;">Esc</kbd>
+            </div>
+            <div id="global-search-results" style="max-height:400px;overflow-y:auto;padding:8px;">
+                <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+                    <p style="font-size:14px;margin:0;">Type to search across your system</p>
+                    <p style="font-size:12px;margin:4px 0 0;color:#cbd5e1;">Transactions · Contacts · Products · Parcels</p>
+                </div>
+            </div>
+            <div style="padding:8px 16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:16px;font-size:11px;color:#94a3b8;">
+                <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↵</kbd> Open</span>
+                <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">↑↓</kbd> Navigate</span>
+                <span><kbd style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:3px;padding:1px 5px;">Esc</kbd> Close</span>
+            </div>
+        </div>
+    </div>
 
     <div class="hb-sep"></div>
 

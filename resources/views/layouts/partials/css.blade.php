@@ -48,43 +48,43 @@ $__themeVars = [
         'main'   => '#4f46e5', 'hover'  => '#4338ca',
         'light'  => '#818cf8', 'dark'   => '#3730a3',
         'subtle' => '#eef2ff', 'border' => '#c7d2fe',
-        'ring'   => '#a5b4fc',
+        'ring'   => '#a5b4fc', 'deeper' => '#1e1b4b',
     ],
     'purple' => [
         'main'   => '#9333ea', 'hover'  => '#7c3aed',
         'light'  => '#c084fc', 'dark'   => '#6d28d9',
         'subtle' => '#faf5ff', 'border' => '#ddd6fe',
-        'ring'   => '#d8b4fe',
+        'ring'   => '#d8b4fe', 'deeper' => '#2e1065',
     ],
     'green' => [
         'main'   => '#059669', 'hover'  => '#047857',
         'light'  => '#34d399', 'dark'   => '#065f46',
         'subtle' => '#ecfdf5', 'border' => '#a7f3d0',
-        'ring'   => '#6ee7b7',
+        'ring'   => '#6ee7b7', 'deeper' => '#022c22',
     ],
     'red' => [
         'main'   => '#dc2626', 'hover'  => '#b91c1c',
         'light'  => '#f87171', 'dark'   => '#991b1b',
         'subtle' => '#fef2f2', 'border' => '#fecaca',
-        'ring'   => '#fca5a5',
+        'ring'   => '#fca5a5', 'deeper' => '#450a0a',
     ],
     'yellow' => [
         'main'   => '#d97706', 'hover'  => '#b45309',
         'light'  => '#fbbf24', 'dark'   => '#92400e',
         'subtle' => '#fffbeb', 'border' => '#fde68a',
-        'ring'   => '#fcd34d',
+        'ring'   => '#fcd34d', 'deeper' => '#451a03',
     ],
     'orange' => [
         'main'   => '#ea580c', 'hover'  => '#c2410c',
         'light'  => '#fb923c', 'dark'   => '#9a3412',
         'subtle' => '#fff7ed', 'border' => '#fed7aa',
-        'ring'   => '#fdba74',
+        'ring'   => '#fdba74', 'deeper' => '#431407',
     ],
     'sky' => [
         'main'   => '#0284c7', 'hover'  => '#0369a1',
         'light'  => '#38bdf8', 'dark'   => '#075985',
         'subtle' => '#f0f9ff', 'border' => '#bae6fd',
-        'ring'   => '#7dd3fc',
+        'ring'   => '#7dd3fc', 'deeper' => '#082f49',
     ],
 ];
 $__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
@@ -111,6 +111,8 @@ $__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
     --theme-subtle: {{ $__cv['subtle'] }};
     --theme-border: {{ $__cv['border'] }};
     --theme-ring:   {{ $__cv['ring'] }};
+    /* Sidebar / header gradient */
+    --theme-deeper: {{ $__cv['deeper'] }};
     /* Font */
     --apex-font: {{ $__fontStack }};
 }
