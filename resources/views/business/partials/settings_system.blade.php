@@ -43,6 +43,55 @@
                 </div>
             </div>
         </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                @php
+                    $__currentFont = $business->font_family ?? 'system';
+                    $__fontOptions = [
+                        'system'       => ['label' => 'System Default', 'sample' => 'The quick brown fox',  'stack' => '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'],
+                        'inter'        => ['label' => 'Inter',          'sample' => 'The quick brown fox',  'stack' => '"Inter", sans-serif',            'gf' => 'Inter:wght@400;600'],
+                        'poppins'      => ['label' => 'Poppins',        'sample' => 'The quick brown fox',  'stack' => '"Poppins", sans-serif',           'gf' => 'Poppins:wght@400;600'],
+                        'roboto'       => ['label' => 'Roboto',         'sample' => 'The quick brown fox',  'stack' => '"Roboto", sans-serif',            'gf' => 'Roboto:wght@400;700'],
+                        'dm_sans'      => ['label' => 'DM Sans',        'sample' => 'The quick brown fox',  'stack' => '"DM Sans", sans-serif',           'gf' => 'DM+Sans:wght@400;600'],
+                        'plus_jakarta' => ['label' => 'Plus Jakarta',   'sample' => 'The quick brown fox',  'stack' => '"Plus Jakarta Sans", sans-serif', 'gf' => 'Plus+Jakarta+Sans:wght@400;600'],
+                        'nunito'       => ['label' => 'Nunito',         'sample' => 'The quick brown fox',  'stack' => '"Nunito", sans-serif',            'gf' => 'Nunito:wght@400;600'],
+                        'lato'         => ['label' => 'Lato',           'sample' => 'The quick brown fox',  'stack' => '"Lato", sans-serif',              'gf' => 'Lato:wght@400;700'],
+                    ];
+                @endphp
+                <label style="font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.04em;">System Font</label>
+
+                {{-- Preload Google Fonts for preview --}}
+                @foreach($__fontOptions as $fk => $fd)
+                    @if(!empty($fd['gf']))
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{ $fd['gf'] }}&display=swap">
+                    @endif
+                @endforeach
+
+                {{-- Hidden select for form submit --}}
+                <select name="font_family" id="font_family_select" style="display:none;">
+                    @foreach($__fontOptions as $fk => $fd)
+                        <option value="{{ $fk }}" {{ $__currentFont === $fk ? 'selected' : '' }}>{{ $fd['label'] }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Visual font cards --}}
+                <div class="font-picker-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:8px;">
+                    @foreach($__fontOptions as $fk => $fd)
+                    <label class="font-card {{ $__currentFont === $fk ? 'font-card-active' : '' }}"
+                           style="cursor:pointer;border-radius:10px;border:2px solid {{ $__currentFont === $fk ? 'var(--theme-main,#059669)' : '#e2e8f0' }};
+                                  padding:10px 12px;background:{{ $__currentFont === $fk ? 'var(--theme-subtle,#ecfdf5)' : '#fff' }};
+                                  transition:all .15s;">
+                        <input type="radio" name="_font_swatch" value="{{ $fk }}" {{ $__currentFont === $fk ? 'checked' : '' }}
+                               style="display:none;"
+                               onchange="apexFontPick(this)">
+                        <span class="font-card-name" style="display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">{{ $fd['label'] }}</span>
+                        <span class="font-card-sample" style="display:block;font-size:14px;font-family:{{ $fd['stack'] }};color:#1e293b;line-height:1.3;">Abc 123</span>
+                    </label>
+                    @endforeach
+                </div>
+                <p style="margin-top:6px;font-size:11px;color:#94a3b8;">Takes effect after saving and refreshing the page.</p>
+            </div>
+        </div>
         <div class="col-sm-3">
             <div class="form-group">
                 @php
@@ -71,17 +120,27 @@
     var swatches = document.querySelectorAll('.theme-swatch-label input[type=radio]');
     swatches.forEach(function(radio) {
         radio.addEventListener('change', function() {
-            // Reset all circles
             document.querySelectorAll('.theme-swatch-circle').forEach(function(circle) {
                 circle.style.border = '3px solid transparent';
                 circle.style.boxShadow = '0 2px 4px rgba(0,0,0,0.15)';
             });
-            // Highlight selected
             var selected = this.closest('label').querySelector('.theme-swatch-circle');
-            var bg = window.getComputedStyle(selected).backgroundImage;
             selected.style.border = '3px solid #fff';
             selected.style.boxShadow = '0 0 0 2px currentColor, 0 2px 8px rgba(0,0,0,0.2)';
         });
     });
 })();
+
+function apexFontPick(radio) {
+    // Update hidden select
+    document.getElementById('font_family_select').value = radio.value;
+    // Update card styles
+    document.querySelectorAll('.font-card').forEach(function(card) {
+        card.style.borderColor = '#e2e8f0';
+        card.style.background  = '#fff';
+    });
+    var activeCard = radio.closest('label');
+    activeCard.style.borderColor = 'var(--theme-main, #059669)';
+    activeCard.style.background  = 'var(--theme-subtle, #ecfdf5)';
+}
 </script>

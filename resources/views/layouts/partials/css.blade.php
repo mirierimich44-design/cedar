@@ -16,9 +16,32 @@
 <link rel="stylesheet" href="{{ asset('css/modern-minimal.css?v='.$asset_v) }}">
 <link rel="stylesheet" href="{{ asset('css/backend-material.css?v='.$asset_v) }}">
 
-<!-- Dynamic Theme Color CSS Variables -->
+<!-- Dynamic Theme + Font -->
 @php
-$__tc = session('business.theme_color', 'primary');
+$__tc  = session('business.theme_color', 'primary');
+$__ff  = session('business.font_family', 'system');
+// Font map: key => [Google Fonts URL param, CSS stack]
+$__fontMap = [
+    'system'       => [null, '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'],
+    'inter'        => ['Inter:wght@400;500;600;700', '"Inter",sans-serif'],
+    'poppins'      => ['Poppins:wght@400;500;600;700', '"Poppins",sans-serif'],
+    'roboto'       => ['Roboto:wght@400;500;700', '"Roboto",sans-serif'],
+    'dm_sans'      => ['DM+Sans:wght@400;500;600;700', '"DM Sans",sans-serif'],
+    'plus_jakarta' => ['Plus+Jakarta+Sans:wght@400;500;600;700', '"Plus Jakarta Sans",sans-serif'],
+    'nunito'       => ['Nunito:wght@400;500;600;700', '"Nunito",sans-serif'],
+    'lato'         => ['Lato:wght@400;700', '"Lato",sans-serif'],
+];
+$__fontCfg   = $__fontMap[$__ff] ?? $__fontMap['system'];
+$__fontUrl   = $__fontCfg[0];
+$__fontStack = $__fontCfg[1];
+@endphp
+@if($__fontUrl)
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family={{ $__fontUrl }}&display=swap" rel="stylesheet">
+@endif
+
+<!-- Dynamic Theme Color CSS Variables -->
 $__themeVars = [
     'primary' => [
         'main'   => '#4f46e5', 'hover'  => '#4338ca',
@@ -87,6 +110,13 @@ $__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
     --theme-subtle: {{ $__cv['subtle'] }};
     --theme-border: {{ $__cv['border'] }};
     --theme-ring:   {{ $__cv['ring'] }};
+    /* Font */
+    --apex-font: {{ $__fontStack }};
+}
+body, .content-wrapper, .main-header, .sidebar-menu,
+input, select, textarea, button, .form-control, .select2-selection,
+.modal-body, .modal-header, .modal-footer, .box, .box-body {
+    font-family: var(--apex-font) !important;
 }
 </style>
 
