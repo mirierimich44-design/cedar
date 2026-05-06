@@ -1,19 +1,5 @@
-{{-- Shared modern report styling - include in @section('css') of any report --}}
-@php
-    $themeMap = [
-        'green'=>['dark'=>'#065f46','main'=>'#059669','light'=>'#10b981'],
-        'green-light'=>['dark'=>'#065f46','main'=>'#059669','light'=>'#34d399'],
-        'blue'=>['dark'=>'#1e3a5f','main'=>'#2563eb','light'=>'#60a5fa'],
-        'blue-light'=>['dark'=>'#1e40af','main'=>'#3b82f6','light'=>'#93c5fd'],
-        'red'=>['dark'=>'#991b1b','main'=>'#dc2626','light'=>'#f87171'],
-        'purple'=>['dark'=>'#581c87','main'=>'#7c3aed','light'=>'#a78bfa'],
-        'primary'=>['dark'=>'#312e81','main'=>'#4f46e5','light'=>'#818cf8'],
-        'yellow'=>['dark'=>'#92400e','main'=>'#d97706','light'=>'#fbbf24'],
-        'orange'=>['dark'=>'#9a3412','main'=>'#ea580c','light'=>'#fb923c'],
-        'sky'=>['dark'=>'#075985','main'=>'#0284c7','light'=>'#38bdf8'],
-    ];
-    $rpt = $themeMap[session('business.theme_color','primary')] ?? $themeMap['primary'];
-@endphp
+{{-- Shared modern report styling - include in @section('css') of any report.
+     Uses CSS variables from layouts/partials/css.blade.php — no PHP computation. --}}
 <style>
     /* ── Hide old content-header ── */
     .report-page-modern .content-header,
@@ -21,7 +7,7 @@
 
     /* ── Page Header Banner ── */
     .rpt-banner {
-        background:linear-gradient(135deg,{{ $rpt['dark'] }},{{ $rpt['main'] }});
+        background:linear-gradient(135deg,var(--theme-dark,#312e81),var(--theme-main,#4f46e5));
         padding:28px 28px 22px;border-radius:0 0 18px 18px;margin:-15px -15px 24px;
     }
     .rpt-banner-inner {
@@ -62,7 +48,7 @@
     .rpt-card-header.rch-red    { background:linear-gradient(135deg,#dc2626,#b91c1c); }
     .rpt-card-header.rch-purple { background:linear-gradient(135deg,#7c3aed,#6d28d9); }
     .rpt-card-header.rch-amber  { background:linear-gradient(135deg,#d97706,#b45309); }
-    .rpt-card-header.rch-theme  { background:linear-gradient(135deg,{{ $rpt['dark'] }},{{ $rpt['main'] }}); }
+    .rpt-card-header.rch-theme  { background:linear-gradient(135deg,var(--theme-dark,#312e81),var(--theme-main,#4f46e5)); }
     .rpt-card-header-icon {
         width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;
         display:flex;align-items:center;justify-content:center;flex-shrink:0;
@@ -119,8 +105,8 @@
     .rpt-tabs > li.active > a,
     .rpt-tabs > li.active > a:hover,
     .rpt-tabs > li.active > a:focus {
-        color:{{ $rpt['main'] }} !important;background:#fff !important;
-        border-bottom:3px solid {{ $rpt['main'] }} !important;
+        color:var(--theme-main,#4f46e5) !important;background:#fff !important;
+        border-bottom:3px solid var(--theme-main,#4f46e5) !important;
     }
 
     /* ── Filters Card ── */
@@ -134,7 +120,7 @@
     .report-page-modern .nav-tabs-custom > .nav-tabs { border:none; }
 
     @media print {
-        .rpt-banner { background:{{ $rpt['main'] }} !important;-webkit-print-color-adjust:exact;print-color-adjust:exact; }
+        .rpt-banner { background:var(--theme-main,#4f46e5) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact; }
         .no-print { display:none !important; }
     }
 </style>
