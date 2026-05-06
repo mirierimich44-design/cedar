@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('gym_attendances', function (Blueprint $table) {
+        if (Schema::hasTable('gym_attendances')) { return; } Schema::create('gym_attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contact_id');  // Foreign key for contact table
             $table->date('date');           // Date of attendance

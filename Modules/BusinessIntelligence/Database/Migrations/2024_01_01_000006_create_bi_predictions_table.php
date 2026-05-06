@@ -13,7 +13,7 @@ class CreateBiPredictionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('bi_predictions', function (Blueprint $table) {
+        if (Schema::hasTable('bi_predictions')) { return; } Schema::create('bi_predictions', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('business_id');
             $table->string('prediction_type', 50)->index(); // 'sales_forecast', 'inventory_demand', 'cash_flow'

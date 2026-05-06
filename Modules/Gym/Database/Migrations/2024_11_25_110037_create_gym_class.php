@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('gym_classes', function (Blueprint $table) {
+        if (Schema::hasTable('gym_classes')) { return; } Schema::create('gym_classes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('business_id')->unsigned();
             $table->foreign('business_id')->references('id')->on('business')->onDelete('cascade');

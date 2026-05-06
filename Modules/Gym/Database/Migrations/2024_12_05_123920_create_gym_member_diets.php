@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('gym_member_diets', function (Blueprint $table) {
+        if (Schema::hasTable('gym_member_diets')) { return; } Schema::create('gym_member_diets', function (Blueprint $table) {
             $table->id();
             $table->integer('contact_id')->unsigned();
             $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('cascade');

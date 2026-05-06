@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('business_feature_settings', function (Blueprint $table) {
+        if (Schema::hasTable('business_feature_settings')) { return; } Schema::create('business_feature_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('business_id')->index();
             $table->string('feature_key', 100);

@@ -13,7 +13,7 @@ class CreateBiMetricsCacheTable extends Migration
      */
     public function up()
     {
-        Schema::create('bi_metrics_cache', function (Blueprint $table) {
+        if (Schema::hasTable('bi_metrics_cache')) { return; } Schema::create('bi_metrics_cache', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('business_id');
             $table->string('metric_key', 100)->index(); // 'daily_sales', 'monthly_revenue', 'inventory_value'
