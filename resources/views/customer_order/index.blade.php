@@ -1,13 +1,32 @@
 @extends('layouts.app')
 @section('title', 'Customer Order Links')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1>
-        <i class="fas fa-link" style="color:#17a2b8;"></i> Customer Order Links
-        <small>Generate and share order links with your customers</small>
-    </h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div>
+                    <h1>Customer Order Links</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
     {{-- Info banner --}}
@@ -226,4 +245,6 @@ function showToast(msg, type) {
     setTimeout(function(){ $('#toast_msg').fadeOut(400); }, 3000);
 }
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

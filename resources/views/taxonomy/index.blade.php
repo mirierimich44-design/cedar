@@ -5,27 +5,38 @@
 @endphp
 @section('title', $heading)
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
     @if (!empty($navbar))
         @include($navbar)
     @endif
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >{{ $heading }}
-            <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold" >
-                {{ $module_category_data['sub_heading'] ?? __('category.manage_your_categories') }}
-            </small>
-            @if (isset($module_category_data['heading_tooltip']))
-                @show_tooltip($module_category_data['heading_tooltip'])
-            @endif
-        </h1>
-        <!-- <ol class="breadcrumb">
-            <li><a href="#"><i class="fas fa-tachometer-alt"></i> Level</a></li>
-            <li class="active">Here</li>
-        </ol> -->
-    </section>
+    
+<div class="page-modern">
 
-    <!-- Main content -->
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div>
+                    <h1>{{ $heading }}</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
+
+<!-- Main content -->
     <section class="content">
         @php
             $cat_code_enabled =
@@ -93,4 +104,6 @@
 @stop
 @section('javascript')
     @includeIf('taxonomy.taxonomies_js')
+
+</div>{{-- .page-modern --}}
 @endsection

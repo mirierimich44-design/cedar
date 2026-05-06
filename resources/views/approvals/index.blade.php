@@ -1,14 +1,32 @@
 @extends('layouts.app')
 @section('title', 'Approvals')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1>Approvals <small>Workflow Inbox</small></h1>
-    <ol class="breadcrumb">
-        <li><a href="{{ url('/home') }}"><i class="fa fa-home"></i> Home</a></li>
-        <li class="active">Approvals</li>
-    </ol>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h1>Approvals</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
     <div class="row">
@@ -96,4 +114,6 @@
         </div>
     </div>
 </section>
+
+</div>{{-- .page-modern --}}
 @endsection

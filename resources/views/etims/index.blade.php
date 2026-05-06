@@ -1,51 +1,34 @@
 @extends('layouts.app')
 @section('title', 'eTIMS Reports & Analytics')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 {{-- ── Page Header ────────────────────────────────────────────────── --}}
-<section class="content-header" style="padding-bottom:0;">
-    <div style="background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%);
-                border-radius:14px;padding:20px 24px 18px;margin-bottom:20px;
-                box-shadow:0 4px 20px rgba(6,78,59,.25);">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-            <div style="display:flex;align-items:center;gap:14px;">
-                <div style="width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:12px;
-                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="fa fa-bar-chart" style="color:#fff;font-size:20px;"></i>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
                 </div>
                 <div>
-                    <h1 style="color:#fff;font-size:1.35rem;font-weight:700;margin:0;line-height:1.2;">
-                        eTIMS Reports &amp; Analytics
-                    </h1>
-                    <p style="color:rgba(255,255,255,.75);margin:2px 0 0;font-size:.8rem;">
-                        Kenya Revenue Authority · Electronic Tax Invoice Management System
-                    </p>
+                    <h1>eTIMS Reports &amp; Analytics</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <a href="{{ route('etims.settings') }}"
-                   style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
-                          border-radius:8px;padding:7px 14px;font-size:.8rem;text-decoration:none;
-                          display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fa fa-cog"></i> Settings
-                </a>
-                <button id="sync_all_sales_btn" data-type="sell"
-                        style="background:#fff;color:#065f46;border:none;border-radius:8px;
-                               padding:7px 14px;font-size:.8rem;font-weight:600;cursor:pointer;
-                               display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fa fa-refresh"></i> Sync Pending Sales
-                </button>
-                <button id="sync_all_purchases_btn" data-type="purchase"
-                        style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);
-                               border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:600;cursor:pointer;
-                               display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fa fa-refresh"></i> Sync Pending Purchases
-                </button>
-            </div>
+            <div class="pg-banner-actions"></div>
         </div>
     </div>
-</section>
 
 <section class="content">
 
@@ -988,4 +971,6 @@ $(function () {
 
 });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

@@ -1,12 +1,32 @@
 @extends('layouts.app')
 @section('title', __('Stocktake'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1>@lang('Stocktake')
-        <small>@lang('Physical Inventory Count')</small>
-    </h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div>
+                    <h1>@lang('Stocktake')</h1>
+                    <p class="pg-subtitle">@lang('Physical Inventory Count') &middot; {{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
     <div class="box">
@@ -73,4 +93,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

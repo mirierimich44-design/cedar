@@ -1,12 +1,32 @@
 @extends('layouts.app')
 @section('title', 'Parcel Management')
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">Parcel Management
-        <small class="tw-text-sm tw-text-gray-600">Kenyan Long Distance Courier</small>
-    </h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div>
+                    <h1>Parcel Management</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <section class="content">
     <!-- Stats Cards -->
@@ -216,4 +236,6 @@ $(function() {
     });
 });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

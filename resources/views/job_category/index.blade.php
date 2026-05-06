@@ -1,12 +1,34 @@
 @extends('layouts.app')
 @section('title', __('job.category'))
 
+
+@section('css')
+@parent
+@include('layouts.partials.page_modern_css')
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('job.category')</h1>
-</section>
+
+<div class="page-modern">
+
+    <section class="content-header"></section>
+
+    <div class="pg-banner">
+        <div class="pg-banner-inner">
+            <div class="pg-banner-title">
+                <div class="pg-banner-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div>
+                    <h1>@lang('job.category')</h1>
+                    <p class="pg-subtitle">{{ session('business.name') }}</p>
+                </div>
+            </div>
+            <div class="pg-banner-actions"></div>
+        </div>
+    </div>
 
 <!-- Main content -->
 <section class="content">
@@ -140,4 +162,6 @@
         });
     });
 </script>
+
+</div>{{-- .page-modern --}}
 @endsection

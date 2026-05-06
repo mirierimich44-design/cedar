@@ -22,7 +22,7 @@
                     <i class="fas fa-bell"></i>
                 </div>
                 <div>
-                    <h1>@lang('...')</h1>
+                    <h1>@lang('lang_v1.notification_templates')</h1>
                     <p class="pg-subtitle">{{ session('business.name') }}</p>
                 </div>
             </div>
