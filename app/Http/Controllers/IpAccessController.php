@@ -17,7 +17,11 @@ class IpAccessController extends Controller
     {
         $this->middleware('auth');
         $this->middleware(function ($request, $next) {
-            if (! auth()->user()->can('superadmin') && ! auth()->user()->hasRole('Superadmin')) {
+            $user = auth()->user();
+            $isSuperadmin = $user->can('superadmin') || $user->hasRole('Superadmin');
+            $isAdmin      = $user->hasRole('Admin#' . session('business.id'));
+
+            if (! $isSuperadmin && ! $isAdmin) {
                 abort(403);
             }
             return $next($request);
