@@ -263,6 +263,15 @@ class LoginController extends Controller
             if ($agent->isMobile()) $deviceType = 'mobile';
             elseif ($agent->isTablet()) $deviceType = 'tablet';
 
+            // Resolve business_id — use authenticated user if available,
+            // otherwise look up by username so failed/blocked attempts are still logged
+            $businessId = $user?->business_id;
+            if (! $businessId) {
+                $attempted = \App\User::where('username', $request->input($this->username()))
+                    ->first();
+                $businessId = $attempted?->business_id;
+            }
+
             // Resolve the user's primary location (first permitted location)
             $locationId = null;
             if ($user && $user->business_id) {
@@ -275,7 +284,7 @@ class LoginController extends Controller
             // Write the log immediately (no geo yet — keeps login fast)
             $log = IpAccessLog::create([
                 'user_id'              => $user?->id,
-                'business_id'          => $user?->business_id,
+                'business_id'          => $businessId,
                 'business_location_id' => $locationId,
                 'username_attempted'   => $request->input($this->username()),
                 'ip_address'           => $request->ip(),
