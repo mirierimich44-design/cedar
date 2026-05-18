@@ -181,7 +181,7 @@ class LoginController extends Controller
             \Auth::logout();
             return redirect('/login')->with('status', [
                 'success' => 0,
-                'msg'     => 'Access denied: your IP address (' . $clientIp . ') has been banned. Contact your administrator.',
+                'msg'     => 'You cannot log in at this time. Please try again later.',
             ]);
         }
 
@@ -200,7 +200,7 @@ class LoginController extends Controller
                     \Auth::logout();
                     return redirect('/login')->with('status', [
                         'success' => 0,
-                        'msg'     => 'Access denied: your location (' . $clientIp . ') is not on the approved network list. Contact your administrator.',
+                        'msg'     => 'You cannot log in at this time. Please try again later.',
                     ]);
                 }
             }
