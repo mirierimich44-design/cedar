@@ -729,7 +729,7 @@ class AdminSidebarMenu
             // IP Access Control — admin only, and only if the module is enabled
             $businessId = session('business.id');
             $ipModuleEnabled = $businessId && \App\Models\BusinessFeatureSetting::isEnabled('ip_restriction', $businessId);
-            if ($is_admin && $ipModuleEnabled) {
+            if ($ipModuleEnabled && ($is_admin || auth()->user()->can('ip_access.access'))) {
                 $menu->dropdown(
                     'IP Access Control',
                     function ($sub) {

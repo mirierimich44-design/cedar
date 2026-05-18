@@ -1890,6 +1890,14 @@
               </label>
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'ip_access.access', in_array('ip_access.access', $role_permissions), ['class' => 'input-icheck']); !!}
+                <i class="fa fa-shield"></i> IP Access Control
+              </label>
+            </div>
+          </div>
         </div>
         </div>
         @if(in_array('expenses', $enabled_modules))
