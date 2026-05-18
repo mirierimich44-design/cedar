@@ -13,7 +13,7 @@ class IpLookupService
         return array_merge($this->geo($ip), $this->device());
     }
 
-    private function geo(string $ip): array
+    public function geo(string $ip): array
     {
         // Local / private IPs — no lookup needed
         if ($this->isPrivate($ip)) {

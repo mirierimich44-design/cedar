@@ -257,7 +257,11 @@ class LoginController extends Controller
     private function logAttempt(Request $request, $user, string $outcome): void
     {
         try {
-            $lookup = app(IpLookupService::class)->lookup($request->ip());
+            // Device info is local — fast, no external call
+            $agent      = new \Jenssegers\Agent\Agent();
+            $deviceType = 'desktop';
+            if ($agent->isMobile()) $deviceType = 'mobile';
+            elseif ($agent->isTablet()) $deviceType = 'tablet';
 
             // Resolve the user's primary location (first permitted location)
             $locationId = null;
@@ -268,20 +272,22 @@ class LoginController extends Controller
                 }
             }
 
-            IpAccessLog::create([
+            // Write the log immediately (no geo yet — keeps login fast)
+            $log = IpAccessLog::create([
                 'user_id'              => $user?->id,
                 'business_id'          => $user?->business_id,
                 'business_location_id' => $locationId,
                 'username_attempted'   => $request->input($this->username()),
                 'ip_address'           => $request->ip(),
-                'isp'                  => $lookup['isp'] ?? null,
-                'country'              => $lookup['country'] ?? null,
-                'city'                 => $lookup['city'] ?? null,
-                'browser'              => $lookup['browser'] ?? null,
-                'os'                   => $lookup['os'] ?? null,
-                'device_type'          => $lookup['device_type'] ?? null,
+                'browser'              => $agent->browser() ?: null,
+                'os'                   => $agent->platform() ?: null,
+                'device_type'          => $deviceType,
                 'outcome'              => $outcome,
             ]);
+
+            // Geo lookup in the background — fills isp/country/city without blocking login
+            \App\Jobs\LookupGeoForLog::dispatch($log->id, $request->ip());
+
         } catch (\Throwable $e) {
             // never break login because of logging failure
         }
