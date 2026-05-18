@@ -2,12 +2,19 @@
 @section('title', __('Seller Daily Report'))
 
 @section('content')
-<section class="content-header">
-    <h1>Seller Daily Report
-        <small>Products sold by each seller per day</small>
-    </h1>
-</section>
 
+<div class="report-page-modern">
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-calendar-day"></i></span>
+                <div>
+                    <h1>{{ 'Seller Daily Report' }}</h1>
+                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 <section class="content">
     <div class="row">
         <div class="col-md-12">
@@ -87,6 +94,10 @@
         </div>
     </div>
 </section>
+</div>
+
+
+
 @endsection
 
 @section('javascript')
@@ -156,4 +167,10 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+
+@section('css')
+@include('report.partials.report_modern_css')
+@endsection
 @endsection

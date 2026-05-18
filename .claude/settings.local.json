@@ -8,7 +8,11 @@
       "Bash(git commit -m ':*)",
       "Bash(git push:*)",
       "Bash(rm /c/Users/MICH/Desktop/reenson/reenson/.git/index.lock)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(php artisan *)",
+      "Bash(git commit -m 'Header: ONE sidebar button, !important everywhere *)",
+      "Bash(rm -rf storage/framework/views/*)",
+      "Bash(git commit -m 'Header: remove broken collapse button, restore mobile menu injection *)"
     ]
   }
 }

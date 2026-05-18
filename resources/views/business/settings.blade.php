@@ -131,6 +131,10 @@
                     <span class="stg-nav-icon"><i class="fas fa-sign-in-alt"></i></span>
                     <span class="stg-nav-label">Login Screen</span>
                 </a>
+                <a href="#" class="list-group-item stg-nav-item">
+                    <span class="stg-nav-icon"><i class="fas fa-robot"></i></span>
+                    <span class="stg-nav-label">AI Integrations</span>
+                </a>
 
             </div>
         </div>{{-- /.stg-sidebar --}}
@@ -157,6 +161,7 @@
             @include('business.partials.settings_custom_labels')
             @include('business.partials.settings_etims')
             @include('business.partials.settings_login_screen')
+            @include('business.partials.settings_integrations')
         </div>{{-- /.stg-content --}}
 
     </div>{{-- /.stg-layout --}}
@@ -303,7 +308,7 @@ $stgBorder= 'var(--theme-border, #a7f3d0)';
     border-color: rgba(255,255,255,0.7) transparent transparent !important;
 }
 .stg-save-text { white-space: nowrap; }
-@media (max-width: 600px) {
+@@media (max-width: 600px) {
     .stg-banner-inner { flex-direction: column; align-items: flex-start; }
     .stg-banner-actions { width: 100%; }
     .stg-search-wrap { flex: 1; max-width: none; }
@@ -436,7 +441,7 @@ $stgBorder= 'var(--theme-border, #a7f3d0)';
 .stg-content .pos-tab-content.active {
     display: block;
 }
-@keyframes stgFadeIn {
+@@keyframes stgFadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
@@ -516,7 +521,7 @@ $stgBorder= 'var(--theme-border, #a7f3d0)';
 }
 
 /* ── Mobile: collapse sidebar ── */
-@media (max-width: 768px) {
+@@media (max-width: 768px) {
     .stg-layout { flex-direction: column; padding: 12px 10px !important; }
     .stg-sidebar { width: 100% !important; min-width: unset !important; position: static; max-height: none; }
     .stg-content { padding: 12px 0 0 !important; }
@@ -911,7 +916,7 @@ $stgBorder= 'var(--theme-border, #a7f3d0)';
 }
 
 /* ── Mobile responsiveness ── */
-@media (max-width: 768px) {
+@@media (max-width: 768px) {
     .stg-content .pos-tab-content > .row {
         padding: 14px 14px 6px !important;
     }

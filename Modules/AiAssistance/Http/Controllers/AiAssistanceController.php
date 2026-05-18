@@ -256,7 +256,7 @@ class AiAssistanceController extends Controller
             ];
         }
 
-        //send response
+        return $output;
     }
 
     /**

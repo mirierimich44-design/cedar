@@ -22,5 +22,7 @@
     "ZatcaIntegrationKsa": true,
     "Parcel": true,
     "Pesapal": true,
-    "KcbBuni": true
+    "KcbBuni": true,
+    "Hospital": true,
+    "BusinessIntelligence": true
 }

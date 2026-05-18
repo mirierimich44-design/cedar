@@ -307,10 +307,20 @@ class SaasAdminController extends Controller
                 ->addColumn('action', function ($row) {
                     $featuresUrl    = route('saas.admin.business.features', $row->id);
                     $loginScreenUrl = route('saas.admin.business.login-screen', $row->id);
+                    $disableIpUrl   = route('saas.admin.business.disable-ip-restriction', $row->id);
+                    $ipBadge = $row->enable_ip_restriction
+                        ? '<span class="label label-danger" style="margin-left:4px;" title="IP Restriction ON">IP</span>'
+                        : '';
+                    $disableIpBtn = $row->enable_ip_restriction
+                        ? '<form method="POST" action="' . $disableIpUrl . '" style="display:inline;" onsubmit="return confirm(\'Disable IP restriction for ' . addslashes($row->name) . '?\')">
+                               <input type="hidden" name="_token" value="' . csrf_token() . '">
+                               <button class="btn btn-xs btn-warning" title="Emergency: disable IP restriction"><i class="fa fa-unlock"></i> Unlock</button>
+                           </form>'
+                        : '';
                     return '
                         <a href="' . $featuresUrl . '" class="btn btn-xs btn-primary"><i class="fa fa-toggle-on"></i> Features</a>
                         <a href="' . $loginScreenUrl . '" class="btn btn-xs btn-default"><i class="fa fa-tv"></i> Login Screen</a>
-                    ';
+                        ' . $disableIpBtn . $ipBadge;
                 })
                 ->addColumn('owner_name', fn($r) => optional($r->owner)->first_name . ' ' . optional($r->owner)->last_name)
                 ->addColumn('modules_count', fn($r) => count($r->enabled_modules ?? []) . ' modules')
@@ -343,6 +353,19 @@ class SaasAdminController extends Controller
         $business->update(['enabled_modules' => $enabled]);
         return redirect()->route('saas.admin.business.features', $business_id)
             ->with('status', ['success' => 1, 'msg' => 'Features updated for ' . $business->name]);
+    }
+
+    /**
+     * Emergency: superadmin can forcibly disable IP restriction for any business
+     * (use when the business owner has locked themselves out)
+     */
+    public function disableIpRestriction($business_id)
+    {
+        $business = Business::findOrFail($business_id);
+        $business->update(['enable_ip_restriction' => false]);
+
+        return redirect()->route('saas.admin.business')
+            ->with('status', ['success' => 1, 'msg' => 'IP restriction disabled for ' . $business->name . '. The business can now log in from any IP.']);
     }
 
     public function businessLoginScreen($business_id)

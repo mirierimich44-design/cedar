@@ -246,9 +246,27 @@ $(document).ready(function () {
                 },
             })
             .autocomplete('instance')._renderItem = function (ul, item) {
-                return $('<li>')
-                    .append('<div>' + escapeHtml(item.text) + '</div>')
-                    .appendTo(ul);
+                // text format: "Product Name - SKU" or "Product Name (Variation) - SKU"
+                var dashIdx = item.text.lastIndexOf(' - ');
+                var name = dashIdx !== -1 ? item.text.substring(0, dashIdx) : item.text;
+                var sku  = dashIdx !== -1 ? item.text.substring(dashIdx + 3) : '';
+
+                var $row = $('<div>').css({
+                    display: 'flex', alignItems: 'center',
+                    borderBottom: '1px solid #f1f5f9', cursor: 'pointer', background: '#fff',
+                });
+                var $left = $('<div>').css({ flex: '1', minWidth: '0', overflow: 'hidden', padding: '9px 16px 9px 24px' });
+                $('<div>').css({ fontWeight: '700', fontSize: '13px', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' })
+                    .text(name).appendTo($left);
+                if (sku) {
+                    $('<div>').css({ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }).text('SKU: ' + sku).appendTo($left);
+                }
+                $row.append($left);
+                $row.on('mouseenter', function () { $(this).css('background', '#f8fafc'); })
+                    .on('mouseleave', function () { $(this).css('background', '#fff'); });
+
+                return $('<li>').css({ margin: 0, padding: 0, border: 'none', listStyle: 'none' })
+                    .append($row).appendTo(ul);
             };
     }
 

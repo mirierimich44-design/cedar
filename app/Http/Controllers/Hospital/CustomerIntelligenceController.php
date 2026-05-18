@@ -60,13 +60,46 @@ class CustomerIntelligenceController extends Controller
 
     private function callGemini($prompt, $isJson = false)
     {
-        $apiKey = config('services.gemini.key');
         try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=" . $apiKey, [
-                'contents' => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
-            ]);
-            return $response->json('candidates.0.content.parts.0.text');
+            $business = \App\Business::find(session('user.business_id'));
+            $settings = $business->common_settings ?? [];
+
+            $anthropicKey = $settings['anthropic_api_key'] ?? null;
+            $openaiKey    = $settings['openai_api_key'] ?? config('openai.api_key');
+            $geminiKey    = $settings['gemini_api_key'] ?? config('services.gemini.key');
+
+            if (!empty($anthropicKey)) {
+                $response = Http::timeout(60)->withHeaders([
+                    'x-api-key' => $anthropicKey,
+                    'anthropic-version' => '2023-06-01',
+                    'content-type' => 'application/json',
+                ])->post('https://api.anthropic.com/v1/messages', [
+                    'model' => 'claude-sonnet-4-20250514',
+                    'max_tokens' => 2048,
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                ]);
+                return $response->json('content.0.text') ?? '[]';
+            } elseif (!empty($openaiKey)) {
+                $response = Http::timeout(60)->withHeaders([
+                    'Authorization' => 'Bearer ' . $openaiKey,
+                    'Content-Type' => 'application/json',
+                ])->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => 'gpt-4o-mini',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'max_tokens' => 2048,
+                    'temperature' => 0.5,
+                ]);
+                return $response->json('choices.0.message.content') ?? '[]';
+            } elseif (!empty($geminiKey)) {
+                $response = Http::timeout(30)->withHeaders(['Content-Type' => 'application/json'])
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $geminiKey, [
+                        'contents' => [['parts' => [['text' => $prompt]]]],
+                        'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
+                    ]);
+                return $response->json('candidates.0.content.parts.0.text') ?? '[]';
+            }
+
+            return '[]';
         } catch (\Exception $e) { return '[]'; }
     }
 }

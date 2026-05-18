@@ -43,18 +43,26 @@ class BusinessFeatureSetting extends Model
             'connector'         => ['label' => 'Connector / API',   'icon' => '🔌', 'category' => 'Modules', 'description' => 'REST API and third-party integrations'],
             'cms'               => ['label' => 'CMS',               'icon' => '📝', 'category' => 'Modules', 'description' => 'Content management for the customer-facing portal'],
             'inbox_report'      => ['label' => 'Inbox / Reports',   'icon' => '📬', 'category' => 'Modules', 'description' => 'Scheduled reports delivered to inbox'],
+            // ── Security ───────────────────────────────────────────────────────
+            'ip_restriction'    => ['label' => 'IP Access Control', 'icon' => '🛡️', 'category' => 'Security', 'description' => 'Restrict system access to whitelisted IP addresses and network locations', 'default_enabled' => false],
         ];
     }
 
     /**
      * Check if a feature is enabled for a business (cached 5 min).
-     * Defaults to TRUE if no row exists (backward compatible).
+     * Defaults to TRUE if no row exists (backward compatible),
+     * UNLESS the feature definition specifies 'default_enabled' => false.
      */
     public static function isEnabled(string $feature, int $businessId): bool
     {
         return Cache::remember("bfs_{$businessId}_{$feature}", 300, function () use ($feature, $businessId) {
             $row = self::where('business_id', $businessId)->where('feature_key', $feature)->first();
-            return $row === null ? true : (bool) $row->is_enabled;
+            if ($row !== null) {
+                return (bool) $row->is_enabled;
+            }
+            // Use the feature's declared default, falling back to true for backward compatibility
+            $list = self::featureList();
+            return isset($list[$feature]['default_enabled']) ? (bool) $list[$feature]['default_enabled'] : true;
         });
     }
 

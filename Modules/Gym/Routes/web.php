@@ -19,7 +19,7 @@ Route::get('/member-details/{id}', [Modules\Gym\Http\Controllers\MemberControlle
 Route::get('/member-details/{id}', [Modules\Gym\Http\Controllers\MemberController::class, 'show_member_details'])->name('show_member_details')->middleware('signed');
 
 Route::middleware('web', 'auth', 'language', 'AdminSidebarMenu')->prefix('gym')->name('gym.')->group(function () {
-    Route::get('dashboard', [Modules\Gym\Http\Controllers\DashBoardController::class, 'index']);
+    Route::get('dashboard', [Modules\Gym\Http\Controllers\DashBoardController::class, 'index'])->name('dashboard');
 
     Route::resource('members', Modules\Gym\Http\Controllers\MemberController::class);
 

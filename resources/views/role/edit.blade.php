@@ -56,8 +56,26 @@
               <div class="col-md-12">
                 <div class="checkbox">
                   <label>
-                    {!! Form::checkbox('permissions[]', 'view_export_buttons', in_array('view_export_buttons', $role_permissions), 
+                    {!! Form::checkbox('permissions[]', 'view_export_buttons', in_array('view_export_buttons', $role_permissions),
                     [ 'class' => 'input-icheck']); !!} {{ __( 'lang_v1.view_export_buttons' ) }}
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <div class="checkbox">
+                  <label>
+                    {!! Form::checkbox('permissions[]', 'hide_selling_price', in_array('hide_selling_price', $role_permissions),
+                    [ 'class' => 'input-icheck']); !!} Hide Selling Price (POS &amp; product list)
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <div class="checkbox">
+                  <label>
+                    {!! Form::checkbox('permissions[]', 'hide_stock_quantity', in_array('hide_stock_quantity', $role_permissions),
+                    [ 'class' => 'input-icheck']); !!} Hide Stock Quantity (POS &amp; product list)
                   </label>
                 </div>
               </div>

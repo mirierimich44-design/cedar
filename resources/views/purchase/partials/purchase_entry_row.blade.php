@@ -88,44 +88,46 @@
                 required>
             @endif
         </td>
-        <td class="hide">
-            @php
-                $pp_without_discount = !empty($purchase_order_line) ? $purchase_order_line->pp_without_discount/$purchase_order->exchange_rate : $variation->default_purchase_price;
+        @php
+            $pp_without_discount = !empty($purchase_order_line) ? $purchase_order_line->pp_without_discount/$purchase_order->exchange_rate : $variation->default_purchase_price;
 
-                $discount_percent = !empty($purchase_order_line) ? $purchase_order_line->discount_percent : 0;
+            $discount_percent = !empty($purchase_order_line) ? $purchase_order_line->discount_percent : 0;
 
-                $purchase_price = !empty($purchase_order_line) ? $purchase_order_line->purchase_price/$purchase_order->exchange_rate : $variation->default_purchase_price;
+            $purchase_price = !empty($purchase_order_line) ? $purchase_order_line->purchase_price/$purchase_order->exchange_rate : $variation->default_purchase_price;
 
-                $tax_id = !empty($purchase_order_line) ? $purchase_order_line->tax_id : $product->tax;
+            $tax_id = !empty($purchase_order_line) ? $purchase_order_line->tax_id : $product->tax;
 
-                $tax_id = !empty($imported_data['tax_id']) ? $imported_data['tax_id'] : $tax_id;
+            $tax_id = !empty($imported_data['tax_id']) ? $imported_data['tax_id'] : $tax_id;
 
-                $pp_without_discount = !empty($imported_data['unit_cost_before_discount']) ? $imported_data['unit_cost_before_discount'] : $pp_without_discount;
+            $pp_without_discount = !empty($imported_data['unit_cost_before_discount']) ? $imported_data['unit_cost_before_discount'] : $pp_without_discount;
 
-                $discount_percent = !empty($imported_data['discount_percent']) ? $imported_data['discount_percent'] : $discount_percent;
-            @endphp
-            {!! Form::text('purchases[' . $row_count . '][pp_without_discount]',
-            number_format($pp_without_discount, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
-
+            $discount_percent = !empty($imported_data['discount_percent']) ? $imported_data['discount_percent'] : $discount_percent;
+        @endphp
+        {{-- Hidden tds keep header/column alignment for the two hidden <th> columns --}}
+        <td class="hide"></td>
+        <td class="hide"></td>
+        <td>
+            <div style="display:flex;gap:4px;align-items:center;">
+                {{-- Unit cost before discount --}}
+                <div style="flex:1;min-width:0;">
+                    {!! Form::text('purchases[' . $row_count . '][pp_without_discount]',
+                    number_format($pp_without_discount, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
+                </div>
+                {{-- Disc% inline --}}
+                <div class="input-group input-sm" style="width:120px;flex-shrink:0;">
+                    <span class="input-group-addon" style="padding:4px 5px;font-size:11px;">Disc%</span>
+                    {!! Form::text('purchases[' . $row_count . '][discount_percent]', number_format($discount_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!}
+                </div>
+            </div>
             @if(!empty($last_purchase_line))
-                <br>
-                <small class="text-muted">@lang('lang_v1.prev_unit_price'): @format_currency($last_purchase_line->pp_without_discount)</small>
-            @endif
-        </td>
-        <td class="hide">
-            {!! Form::text('purchases[' . $row_count . '][discount_percent]', number_format($discount_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!}
-
-            @if(!empty($last_purchase_line))
-                <br>
-                <small class="text-muted">
-                    @lang('lang_v1.prev_discount'): 
-                    {{@num_format($last_purchase_line->discount_percent)}}%
+                <small class="text-muted" style="font-size:10px;">
+                    Prev: @format_currency($last_purchase_line->pp_without_discount)
+                    &nbsp;|&nbsp;Disc: {{@num_format($last_purchase_line->discount_percent)}}%
                 </small>
             @endif
-        </td>
-        <td>
-            {!! Form::text('purchases[' . $row_count . '][purchase_price]',
-            number_format($purchase_price, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost input_number', 'required']); !!}
+            {{-- Computed unit cost after discount — hidden, updated by JS, submitted with form --}}
+            {!! Form::hidden('purchases[' . $row_count . '][purchase_price]',
+            number_format($purchase_price, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'purchase_unit_cost input_number']); !!}
         </td>
         <td>
             <span class="row_subtotal_before_tax display_currency">0</span>

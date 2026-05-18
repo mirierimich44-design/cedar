@@ -1,5 +1,20 @@
 @inject('request', 'Illuminate\Http\Request')
-{{-- Header CSS is now in public/css/apex-overrides.css — no inline style needed --}}
+<style>
+#app-header{background:linear-gradient(90deg,var(--theme-dark),var(--theme-deeper));height:64px;display:flex;align-items:center;padding:0 16px;gap:6px;flex-shrink:0;position:relative;z-index:100;}
+#app-header .hb,#app-header>a,#app-header>button{all:unset;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;height:36px!important;padding:0 13px!important;background:rgba(255,255,255,.1)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:8px!important;font-size:13px!important;font-weight:600!important;white-space:nowrap!important;cursor:pointer!important;text-decoration:none!important;flex-shrink:0!important;transition:background .15s!important;line-height:1!important;box-shadow:none!important;}
+#app-header .hb:hover,#app-header>a:hover,#app-header>button:hover{background:rgba(255,255,255,.2)!important;color:#fff!important;}
+#app-header .hb svg,#app-header>a svg,#app-header>button svg{width:18px!important;height:18px!important;color:#fff!important;flex-shrink:0!important;}
+#app-header .hb-primary{background:#fff!important;color:var(--theme-dark)!important;border:1px solid #fff!important;font-weight:800!important;box-shadow:0 2px 8px rgba(0,0,0,.25)!important;}
+#app-header .hb-primary:hover{background:#f3f4f6!important;color:var(--theme-dark)!important;}
+#app-header .hb-primary svg{color:var(--theme-dark)!important;}
+#app-header .hb-sep{width:1px;height:22px;background:rgba(255,255,255,.2);flex-shrink:0;}
+#app-header .hb-bell-wrap{position:relative;display:inline-flex;}
+#app-header .hb-bell-dot{position:absolute;top:3px;right:3px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid var(--theme-dark);pointer-events:none;}
+#hb-user-menu{position:absolute;right:0;top:calc(100% + 6px);width:210px;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);border:1px solid #e5e7eb;z-index:9999;overflow:hidden;display:none;}
+@media(max-width:1200px){#app-header .hb-label{display:none!important;}}
+@media(max-width:960px){#app-header .hb-hide-md{display:none!important;}}
+@media(max-width:700px){#app-header .hb-hide-sm{display:none!important;}}
+</style>
 
 <header id="app-header" class="no-print">
 
@@ -22,7 +37,7 @@
     @can('profit_loss_report.view')
     <button type="button" id="view_todays_profit" class="hb hb-hide-sm"
             style="background:rgba(16,185,129,0.18) !important;border:1px solid rgba(16,185,129,0.35) !important;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19l4 -4l4 4l4 -6l4 2"/></svg>
         <span class="hb-label" style="opacity:.75;font-size:12px;">Profit</span>
         <span id="hdr_profit_val" style="font-weight:700;">
             <svg style="width:12px;height:12px;animation:hbSpin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
@@ -33,14 +48,14 @@
 
     {{-- Calendar --}}
     <a href="{{ route('calendar') }}" class="hb hb-hide-md">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>
         <span class="hb-label">@lang('lang_v1.calendar')</span>
     </a>
 
     {{-- Expense --}}
     @can('expense.access')
     <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}" class="hb hb-hide-sm">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 9m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z"/><path d="M14 3v4h-6"/><path d="M3 14h4v-6"/><path d="M12 11v4"/><path d="M10 13h4"/></svg>
         <span class="hb-label">Expense</span>
     </a>
     @endcan
@@ -48,7 +63,7 @@
     {{-- Purchase --}}
     @can('purchase.create')
     <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}" class="hb hb-hide-sm">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17h-11v-14h-2"/><path d="M6 5l14 1l-1 7h-13"/></svg>
         <span class="hb-label">Purchase</span>
     </a>
     @endcan
@@ -57,7 +72,7 @@
     @if(in_array('pos_sale', $enabled_modules))
         @can('sell.create')
         <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}" class="hb hb-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
             @lang('sale.pos_sale')
         </a>
         @endcan
@@ -118,7 +133,7 @@
         <button type="button" class="hb" id="smart-notif-btn"
                 onclick="toggleSmartNotif()"
                 style="width:36px;padding:0;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+            <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
         </button>
         @if($__unread > 0)
             <span class="hb-bell-dot" id="notif-badge"></span>
@@ -156,7 +171,7 @@
 
         <div id="hb-user-menu">
             <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;border-radius:9px;background:{{ $t['grad'] }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">
+                <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,{{ $__hc['icon_from'] ?? '#4f46e5' }},{{ $__hc['icon_to'] ?? '#818cf8' }});display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;">
                     {{ strtoupper(substr(Auth::user()->first_name ?? 'U', 0, 1)) }}
                 </div>
                 <div>

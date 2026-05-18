@@ -71,25 +71,17 @@
                         
                         <div class="form-group">
                             <label>AI Provider</label>
-                            <select class="form-control" name="ai_provider">
+                            <select class="form-control" name="ai_provider" id="ai_provider_select">
                                 <option value="rule-based">Rule-Based (Default - No API Key)</option>
                                 <option value="openai">OpenAI (Requires API Key)</option>
+                                <option value="anthropic">Anthropic Claude (Requires API Key)</option>
                             </select>
                         </div>
-                        
-                        <div class="form-group" id="openai_settings" style="display: none;">
-                            <label>OpenAI API Key</label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   name="openai_api_key" 
-                                   placeholder="sk-...">
-                            <span class="help-block">Your OpenAI API key for advanced AI insights</span>
-                        </div>
-                        
+
                         <div class="callout callout-info">
                             <h4><i class="fa fa-info-circle"></i> About AI Providers</h4>
                             <p><strong>Rule-Based:</strong> Uses pattern recognition and threshold analysis. No API key required.</p>
-                            <p><strong>OpenAI:</strong> Advanced natural language insights using GPT-4. Requires API key from OpenAI.</p>
+                            <p><strong>OpenAI / Anthropic / Gemini:</strong> API keys are managed centrally in <a href="{{ action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']) }}">Business Settings &rarr; AI Integrations</a>.</p>
                         </div>
                         
                         <button type="submit" class="btn btn-primary">
@@ -198,15 +190,6 @@
 @push('bi_scripts')
 <script>
 $(document).ready(function() {
-    // Show/hide OpenAI settings based on provider
-    $('select[name="ai_provider"]').change(function() {
-        if ($(this).val() === 'openai') {
-            $('#openai_settings').slideDown();
-        } else {
-            $('#openai_settings').slideUp();
-        }
-    }).trigger('change');
-
     // Save dashboard settings
     $('#dashboard_settings_form').submit(function(e) {
         e.preventDefault();

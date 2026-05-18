@@ -18,6 +18,8 @@
                         <input type="hidden" name="total_discount" id="total_discount">
                         <input type="hidden" name="coupon_id" id="coupon_id">
                         <input type="hidden" name="discount_type" id="discount_type">
+                        {{-- Prevent double-submission --}}
+                        <input type="hidden" name="submission_token" value="{{ \Illuminate\Support\Str::uuid() }}">
 
                         <div class="col-md-6">
                             <div class="form-group">

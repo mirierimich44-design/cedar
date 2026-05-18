@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('kcb_buni_transactions', function (Blueprint $table) {
+        if (Schema::hasTable('kcb_buni_transactions')) { return; } Schema::create('kcb_buni_transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('business_id');
             $table->unsignedInteger('transaction_id')->nullable();  // FK to sales transaction if applicable

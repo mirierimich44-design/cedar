@@ -1,6 +1,12 @@
 <?php
 
 return [
+    // Settings nav group labels
+    'purchasing'      => 'Purchasing',
+    'communications'  => 'Communications',
+    'advanced'        => 'Advanced',
+    'unsaved_changes' => 'You have unsaved changes',
+
     'enable_editing_product_from_purchase' => 'Enable editing product price from purchase screen',
     'followup_reminder_message' => 'Internal Reminder: Follow up with :customer regarding their inquiry for :product.',
     'followup_notifications' => 'Follow-up Notifications',

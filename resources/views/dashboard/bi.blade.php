@@ -605,14 +605,15 @@
                                 <div class="box box-default">
                                     <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-gears"></i> AI Connectivity</h3></div>
                                     <div class="box-body">
-                                        {!! Form::open(['url' => route('dashboard.bi.settings.save'), 'method' => 'post']) !!}
-                                        <div class="form-group">
-                                            <label>Gemini API Key:</label>
-                                            <input type="password" name="gemini_api_key" class="form-control" placeholder="Paste your Gemini API Key here…" value="{{ session('business.common_settings.gemini_api_key') ?? '' }}">
-                                            <p class="help-block" style="font-size:11px;">Required for AI features. Get one free from Google AI Studio.</p>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-sm btn-block">Save API Key</button>
-                                        {!! Form::close() !!}
+                                        @php $hasKey = !empty(session('business.common_settings.gemini_api_key')); @endphp
+                                        @if($hasKey)
+                                            <p class="text-success"><i class="fa fa-check-circle"></i> Gemini API key is configured.</p>
+                                        @else
+                                            <p class="text-warning"><i class="fa fa-warning"></i> No Gemini API key found. AI features will not work.</p>
+                                        @endif
+                                        <a href="{{ action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']) }}#integrations" class="btn btn-default btn-sm btn-block">
+                                            <i class="fa fa-cog"></i> Manage API Keys in Settings
+                                        </a>
                                     </div>
                                 </div>
                             </div>

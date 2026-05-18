@@ -12,6 +12,7 @@ return [
     */
 
     'reports' => 'Reports',
+    'sales'   => 'Sales',
     'purchase_sell_report' => 'Purchase & Sale',
     'purchase_sell' => 'Purchase & Sale Report',
     'purchase_sell_msg' => 'Purchase & sale details for the selected date range',

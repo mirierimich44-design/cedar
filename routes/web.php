@@ -188,6 +188,8 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
     Route::post('/business/{business_id}/features',      [SaasAdminController::class, 'updateBusinessFeatures'])->name('business.features.update');
     Route::get('/business/{business_id}/login-screen',   [SaasAdminController::class, 'businessLoginScreen'])->name('business.login-screen');
     Route::post('/business/{business_id}/login-screen',  [SaasAdminController::class, 'saveBusinessLoginScreen'])->name('business.login-screen.save');
+    // Emergency: disable IP restriction for a locked-out business
+    Route::post('/business/{business_id}/disable-ip-restriction', [SaasAdminController::class, 'disableIpRestriction'])->name('business.disable-ip-restriction');
 
     // Global SaaS settings (trial, campaign, payment)
     Route::get('/saas-settings',  [SaasAdminController::class, 'settingsIndex'])->name('saas_settings');
@@ -605,6 +607,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/import-purchase-products', [PurchaseController::class, 'importPurchaseProducts']);
     Route::post('/purchases/update-status', [PurchaseController::class, 'updateStatus']);
     Route::get('/purchases/get_products', [PurchaseController::class, 'getProducts']);
+    Route::get('/purchases/drafts', [PurchaseController::class, 'drafts'])->name('purchases.drafts');
     Route::get('/purchases/get_suppliers', [PurchaseController::class, 'getSuppliers']);
     Route::post('/purchases/get_purchase_entry_row', [PurchaseController::class, 'getPurchaseEntryRow']);
     Route::post('/purchases/check_ref_number', [PurchaseController::class, 'checkRefNumber']);
@@ -656,7 +659,12 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::post('save-schedules',       [\App\Http\Controllers\IpAccessController::class, 'saveSchedules'])->name('save-schedules');
         Route::get('logs',                  [\App\Http\Controllers\IpAccessController::class, 'logs'])->name('logs');
         Route::post('block-ip',             [\App\Http\Controllers\IpAccessController::class, 'blockIpFromLog'])->name('block-ip');
+        Route::post('ban-ip',               [\App\Http\Controllers\IpAccessController::class, 'banIp'])->name('ban-ip');
+        Route::post('unban-ip',             [\App\Http\Controllers\IpAccessController::class, 'unbanIp'])->name('unban-ip');
+        Route::post('whitelist-from-log',   [\App\Http\Controllers\IpAccessController::class, 'whitelistFromLog'])->name('whitelist-from-log');
         Route::post('user-settings/{userId}', [\App\Http\Controllers\IpAccessController::class, 'saveUserSettings'])->name('user-settings');
+        Route::post('toggle-restriction',   [\App\Http\Controllers\IpAccessController::class, 'toggleRestriction'])->name('toggle-restriction');
+        Route::post('toggle-module',         [\App\Http\Controllers\IpAccessController::class, 'toggleModule'])->name('toggle-module');
     });
 
     Route::resource('group-taxes', GroupTaxController::class);

@@ -786,13 +786,11 @@ class CloudSyncController extends Controller
 
     private function pullTransactions(int $businessId, $since): array
     {
-        $cutoff = $since ?? now()->subDays(30);
-
         $rows = DB::table('transactions')
             ->where('business_id', $businessId)
             ->whereIn('type', ['sell', 'purchase'])
-            ->where('updated_at', '>', $cutoff)
-            ->limit(500)
+            ->when($since, fn($q) => $q->where('updated_at', '>', $since))
+            ->limit(2000)
             ->get();
 
         return $rows->map(function($t) {

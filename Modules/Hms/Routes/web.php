@@ -66,4 +66,6 @@ Route::middleware('web', 'auth', 'language', 'AdminSidebarMenu')->prefix('hms')-
     Route::get('install/uninstall', [\Modules\Hms\Http\Controllers\InstallController::class, 'uninstall']);
     Route::get('install/update', [\Modules\Hms\Http\Controllers\InstallController::class, 'update']);
 
-}); 
+    Route::get('room-occupancy-grid', [Modules\Hms\Http\Controllers\HmsController::class, 'roomOccupancyGrid'])->name('room_occupancy_grid');
+
+});

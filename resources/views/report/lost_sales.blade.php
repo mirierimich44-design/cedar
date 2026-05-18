@@ -2,12 +2,19 @@
 @section('title', __('Lost Sales Report'))
 
 @section('content')
-<section class="content-header">
-    <h1>Lost Sales Report
-        <small>Products enquired but not sold</small>
-    </h1>
-</section>
 
+<div class="report-page-modern">
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-times-circle"></i></span>
+                <div>
+                    <h1>{{ 'Lost Sales Report' }}</h1>
+                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 <section class="content">
     {{-- Filters --}}
     <div class="box box-primary">
@@ -121,6 +128,10 @@
         </div>
     </div>
 </section>
+</div>
+
+
+
 @endsection
 
 @section('javascript')
@@ -235,4 +246,10 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+
+@section('css')
+@include('report.partials.report_modern_css')
+@endsection
 @endsection

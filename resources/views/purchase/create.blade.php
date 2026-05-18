@@ -223,7 +223,16 @@
 	@endcomponent
 
 	@component('components.widget', ['class' => 'box-primary'])
-		<div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] tw-bg-white tw-shadow-md tw-py-4 tw-mb-4">
+		{{-- Draft restore banner (shown when returning from Drafts page) --}}
+		<div id="purchase-draft-banner" style="display:none;background:var(--theme-subtle,#eef2ff);border:1px solid var(--theme-border,#c7d2fe);border-radius:8px;padding:9px 16px;margin-bottom:10px;align-items:center;gap:10px;font-size:13px;">
+			<i class="fa fa-clock-o" style="color:var(--theme-main);"></i>
+			<span id="draft-banner-text" style="flex:1;color:#374151;"></span>
+			<a href="#" id="draft-restore-btn" style="color:var(--theme-main);font-weight:600;text-decoration:none;margin-left:8px;">Restore it</a>
+			<span style="color:#9ca3af;margin:0 6px;">|</span>
+			<a href="{{ route('purchases.drafts') }}" id="draft-discard-btn" style="color:#9ca3af;font-weight:500;text-decoration:none;">View Drafts</a>
+		</div>
+
+<div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] tw-bg-white tw-shadow-md tw-py-4 tw-mb-4">
 			<div class="col-sm-12 missing-product-warning">
 			</div>
 			<div class="col-sm-2 text-center">
@@ -260,30 +269,25 @@
 							<tr>
 								<th>#</th>
 								<th>@lang( 'product.product_name' )</th>
-								<th>@lang( 'purchase.purchase_quantity' )</th>
+								<th>Qty</th>
 								<th class="hide">@lang( 'lang_v1.unit_cost_before_discount' )</th>
 								<th class="hide">@lang( 'lang_v1.discount_percent' )</th>
-								<th>Unit Cost</th>
-								<th>Total Cost</th>
-								<th>Tax % / Amt</th>
+								<th>Unit Cost / Disc%</th>
+								<th>Sub Total</th>
+								<th>Tax</th>
 								<th class="hide">@lang( 'purchase.net_cost' )</th>
-								<th>@lang( 'purchase.line_total' )</th>
+								<th>Line Total</th>
 								<th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
-									@lang( 'lang_v1.profit_margin' )
+									Margin %
 								</th>
-								<th>
-									@lang( 'purchase.unit_selling_price' )
-									<small>(@lang('product.inc_of_tax'))</small>
-								</th>
+								<th>Sell Price</th>
 								@if(session('business.enable_lot_number'))
 									<th>
 										@lang('lang_v1.lot_number')
 									</th>
 								@endif
 								@if(true || session('business.enable_product_expiry'))
-									<th>
-										@lang('product.mfg_date') / @lang('product.exp_date')
-									</th>
+									<th>MFG / EXP</th>
 								@endif
 								<th><i class="fa fa-trash" aria-hidden="true"></i></th>
 							</tr>
@@ -737,46 +741,99 @@
 				var draft = JSON.parse(raw);
 				if (!draft || !draft.saved_at) return;
 
-				var banner = $('<div id="purchase_draft_banner" class="alert alert-warning alert-dismissible" style="margin:10px 0;border-left:4px solid #f0ad4e;">' +
-					'<button type="button" class="close" data-dismiss="alert">&times;</button>' +
-					'<i class="fa fa-floppy-o"></i> <strong>Unsaved draft found</strong> from <em>' + draft.saved_at + '</em>. ' +
-					'<a href="#" id="restore_purchase_draft" class="alert-link">Restore it</a> &nbsp;|&nbsp; ' +
-					'<a href="#" id="discard_purchase_draft" class="alert-link text-danger">Discard</a>' +
-				'</div>');
+				var $banner = $('#purchase-draft-banner');
+				$('#draft-banner-text').html(
+					'<strong>Unsaved draft</strong> found from <em>' + draft.saved_at + '</em>.'
+					+ (draft.rows && draft.rows.length ? ' (' + draft.rows.length + ' product' + (draft.rows.length > 1 ? 's' : '') + ')' : '')
+				);
+				$banner.css('display', 'flex');
 
-				$('.content-header').after(banner);
-
-				$('#restore_purchase_draft').on('click', function(e) {
+				$('#draft-restore-btn').off('click').on('click', function(e) {
 					e.preventDefault();
 					restoreDraft(draft);
-					$('#purchase_draft_banner').remove();
+					$banner.hide();
 				});
 
-				$('#discard_purchase_draft').on('click', function(e) {
+				$('#draft-discard-btn').off('click').on('click', function(e) {
 					e.preventDefault();
 					localStorage.removeItem(DRAFT_KEY);
-					$('#purchase_draft_banner').remove();
+					$banner.hide();
 				});
 			} catch(e) {}
+		}
+
+		// ── Restore rows sequentially (each waits for AJAX to finish) ────────────
+		function restoreRowsSequentially(rows, index) {
+			if (index >= rows.length) {
+				toastr.success('Draft fully restored!', '', {timeOut: 3000});
+				return;
+			}
+			var rowData = rows[index];
+			var product_id = null, variation_id = null;
+			$.each(rowData, function(key) {
+				if (key.indexOf('[product_id]') !== -1)   product_id   = rowData[key];
+				if (key.indexOf('[variation_id]') !== -1) variation_id = rowData[key];
+			});
+
+			if (!product_id || !variation_id) {
+				restoreRowsSequentially(rows, index + 1);
+				return;
+			}
+
+			var prevCount = $('#purchase_entry_table tbody tr').length;
+			get_purchase_entry_row(product_id, variation_id);
+
+			// Poll until the new row appears (AJAX appends it)
+			var attempts = 0;
+			var poll = setInterval(function() {
+				attempts++;
+				var newCount = $('#purchase_entry_table tbody tr').length;
+				if (newCount > prevCount || attempts > 60) {
+					clearInterval(poll);
+					if (newCount > prevCount) {
+						var $row = $('#purchase_entry_table tbody tr').last();
+						// Set all saved field values onto the new row
+						$.each(rowData, function(key, val) {
+							var m = key.match(/\[([^\]]+)\]$/);
+							if (!m) return;
+							var field = m[1];
+							var $el = $row.find('[name$="[' + field + ']"]');
+							if ($el.length) $el.val(val);
+						});
+						// Trigger recalculation chain
+						$row.find('.purchase_unit_cost_without_discount').trigger('change');
+					}
+					setTimeout(function() { restoreRowsSequentially(rows, index + 1); }, 150);
+				}
+			}, 100);
 		}
 
 		// ── Restore draft values ─────────────────────────────────────────────────
 		function restoreDraft(draft) {
 			try {
+				// Header fields
+				if (draft.location_id) {
+					$('select[name="location_id"]').val(draft.location_id).trigger('change');
+				}
 				if (draft.supplier_id) {
-					var opt = new Option('Saved Supplier', draft.supplier_id, true, true);
+					var opt = new Option('(Saved supplier)', draft.supplier_id, true, true);
 					$('#supplier_id').append(opt).trigger('change');
 				}
 				if (draft.ref_no)           $('input[name="ref_no"]').val(draft.ref_no);
 				if (draft.status)           $('select[name="status"]').val(draft.status).trigger('change');
-				if (draft.location_id)      $('select[name="location_id"]').val(draft.location_id).trigger('change');
 				if (draft.discount_type)    $('select[name="discount_type"]').val(draft.discount_type).trigger('change');
 				if (draft.discount_amount)  $('input[name="discount_amount"]').val(draft.discount_amount);
 				if (draft.shipping_details) $('input[name="shipping_details"]').val(draft.shipping_details);
 				if (draft.shipping_charges) $('input[name="shipping_charges"]').val(draft.shipping_charges);
 				if (draft.additional_notes) $('textarea[name="additional_notes"]').val(draft.additional_notes);
 
-				toastr.success('Draft restored. Product rows must be re-added manually.', 'Draft Restored', {timeOut: 5000});
+				// Product rows — restore one by one
+				if (draft.rows && draft.rows.length) {
+					toastr.info('Restoring ' + draft.rows.length + ' product row(s)…', '', {timeOut: 3000});
+					setTimeout(function() { restoreRowsSequentially(draft.rows, 0); }, 400);
+				} else {
+					toastr.success('Draft restored!', '', {timeOut: 3000});
+				}
 			} catch(e) {
 				toastr.error('Could not restore draft.');
 			}

@@ -983,37 +983,101 @@ Data: " . json_encode($context);
 
     private function callGemini($prompt, $isJson = false)
     {
+        return $this->callAI($prompt, $isJson);
+    }
+
+    private function callAI($prompt, $isJson = false)
+    {
         try {
             $business = \App\Business::where('id', request()->session()->get('user.business_id'))->first();
-            $apiKey = ($business->common_settings ?? [])['gemini_api_key'] ?? config('services.gemini.key');
+            $settings = $business->common_settings ?? [];
 
-            if (empty($apiKey)) {
-                return $isJson ? json_encode(['error' => 'Gemini API key not configured. Go to AI Analytics → Settings tab to add your key.']) : "Please set your Gemini API Key in the Settings tab.";
+            $anthropicKey = $settings['anthropic_api_key'] ?? null;
+            $openaiKey    = $settings['openai_api_key'] ?? config('openai.api_key');
+            $geminiKey    = $settings['gemini_api_key'] ?? config('services.gemini.key');
+
+            if (!empty($anthropicKey)) {
+                return $this->callAnthropic($anthropicKey, $prompt, $isJson);
+            } elseif (!empty($openaiKey)) {
+                return $this->callOpenAI($openaiKey, $prompt, $isJson);
+            } elseif (!empty($geminiKey)) {
+                return $this->callGeminiAPI($geminiKey, $prompt, $isJson);
             }
 
-            $response = Http::timeout(30)->withHeaders(['Content-Type' => 'application/json'])
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
-                    'contents' => [['parts' => [['text' => $prompt]]]],
-                    'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
-                ]);
-
-            if (!$response->successful()) {
-                $err = $response->json('error.message') ?? $response->status();
-                return $isJson ? json_encode(['error' => "Gemini API error: $err"]) : "Gemini API error: $err";
-            }
-
-            $text = $response->json('candidates.0.content.parts.0.text');
-
-            if ($text === null) {
-                // Might be blocked or finish reason non-STOP
-                $reason = $response->json('candidates.0.finishReason') ?? 'unknown';
-                return $isJson ? json_encode(['error' => "Gemini returned no content (reason: $reason). Check your API key or try again."]) : "AI returned no content (reason: $reason).";
-            }
-
-            return $text;
+            $msg = 'No AI API key configured. Go to Business Settings → AI Integrations to add one.';
+            return $isJson ? json_encode(['error' => $msg]) : $msg;
 
         } catch (\Exception $e) {
             return $isJson ? json_encode(['error' => 'AI Offline: ' . $e->getMessage()]) : "AI Offline: " . $e->getMessage();
         }
+    }
+
+    private function callAnthropic($apiKey, $prompt, $isJson = false)
+    {
+        $response = Http::timeout(60)->withHeaders([
+            'x-api-key' => $apiKey,
+            'anthropic-version' => '2023-06-01',
+            'content-type' => 'application/json',
+        ])->post('https://api.anthropic.com/v1/messages', [
+            'model' => 'claude-sonnet-4-20250514',
+            'max_tokens' => 2048,
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+        ]);
+
+        if (!$response->successful()) {
+            $err = $response->json('error.message') ?? $response->status();
+            return $isJson ? json_encode(['error' => "Claude API error: $err"]) : "Claude API error: $err";
+        }
+
+        $text = $response->json('content.0.text');
+        if ($text === null) {
+            return $isJson ? json_encode(['error' => 'Claude returned no content.']) : 'Claude returned no content.';
+        }
+        return $text;
+    }
+
+    private function callOpenAI($apiKey, $prompt, $isJson = false)
+    {
+        $response = Http::timeout(60)->withHeaders([
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-4o-mini',
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+            'max_tokens' => 2048,
+            'temperature' => 0.5,
+        ]);
+
+        if (!$response->successful()) {
+            $err = $response->json('error.message') ?? $response->status();
+            return $isJson ? json_encode(['error' => "OpenAI API error: $err"]) : "OpenAI API error: $err";
+        }
+
+        $text = $response->json('choices.0.message.content');
+        if ($text === null) {
+            return $isJson ? json_encode(['error' => 'OpenAI returned no content.']) : 'OpenAI returned no content.';
+        }
+        return $text;
+    }
+
+    private function callGeminiAPI($apiKey, $prompt, $isJson = false)
+    {
+        $response = Http::timeout(30)->withHeaders(['Content-Type' => 'application/json'])
+            ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" . $apiKey, [
+                'contents' => [['parts' => [['text' => $prompt]]]],
+                'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 2048, 'responseMimeType' => $isJson ? "application/json" : "text/plain"]
+            ]);
+
+        if (!$response->successful()) {
+            $err = $response->json('error.message') ?? $response->status();
+            return $isJson ? json_encode(['error' => "Gemini API error: $err"]) : "Gemini API error: $err";
+        }
+
+        $text = $response->json('candidates.0.content.parts.0.text');
+        if ($text === null) {
+            $reason = $response->json('candidates.0.finishReason') ?? 'unknown';
+            return $isJson ? json_encode(['error' => "Gemini returned no content (reason: $reason)."]) : "AI returned no content (reason: $reason).";
+        }
+        return $text;
     }
 }

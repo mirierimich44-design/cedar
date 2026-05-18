@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('kcb_buni_settings', function (Blueprint $table) {
+        if (Schema::hasTable('kcb_buni_settings')) { return; } Schema::create('kcb_buni_settings', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('business_id');
             $table->text('app_key')->nullable();

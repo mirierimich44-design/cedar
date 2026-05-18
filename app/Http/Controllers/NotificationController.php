@@ -210,4 +210,47 @@ class NotificationController extends Controller
 
         return $output;
     }
+
+    public function getNotifications(Request $request)
+    {
+        $user = auth()->user();
+        $page = $request->input('page', 1);
+        $perPage = 10;
+
+        $notifications = $user->notifications()
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        $html = '';
+        foreach ($notifications as $notification) {
+            $data = $notification->data;
+            $isUnread = is_null($notification->read_at);
+            $msg = $data['message'] ?? ($data['msg'] ?? 'Notification');
+            $time = $notification->created_at->diffForHumans();
+
+            $html .= '<li style="border-bottom:1px solid #f1f5f9;">'
+                . '<a href="#" onclick="markRead(\'' . $notification->id . '\', this)" style="display:flex;align-items:flex-start;gap:10px;padding:10px 16px;text-decoration:none;color:#1e293b;' . ($isUnread ? 'background:#f0f9ff;' : '') . '"'
+                . ' onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'' . ($isUnread ? '#f0f9ff' : '') . '\'">'
+                . '<div style="flex:1;min-width:0;">'
+                . '<div style="font-size:13px;font-weight:' . ($isUnread ? '600' : '400') . ';color:#1e293b;">' . e($msg) . '</div>'
+                . '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">' . $time . '</div>'
+                . '</div>'
+                . ($isUnread ? '<span style="width:8px;height:8px;background:#3b82f6;border-radius:50%;flex-shrink:0;margin-top:4px;"></span>' : '')
+                . '</a></li>';
+        }
+
+        if (empty($html)) {
+            $html = '<li style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;">No notifications</li>';
+        }
+
+        return $html;
+    }
+
+    public function markAllRead(Request $request)
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return response()->json(['success' => true]);
+    }
 }

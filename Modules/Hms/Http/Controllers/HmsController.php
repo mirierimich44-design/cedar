@@ -283,4 +283,82 @@ class HmsController extends Controller
             ->count();
     }
 
+    /**
+     * Return 14-day room occupancy grid for the calendar view.
+     */
+    public function roomOccupancyGrid(Request $request)
+    {
+        $business_id = $request->session()->get('user.business_id');
+        $today = \Carbon\Carbon::today();
+        $end   = $today->copy()->addDays(13);
+
+        // Build dates array
+        $dates = [];
+        for ($i = 0; $i < 14; $i++) {
+            $d = $today->copy()->addDays($i);
+            $dates[] = ['date' => $d->format('Y-m-d'), 'label' => $d->format('d/M')];
+        }
+
+        // All rooms for this business
+        $rooms = HmsRoom::where('business_id', $business_id)
+            ->with('roomType')
+            ->orderBy('room_no')
+            ->get();
+
+        // Bookings overlapping the window — join directly on hms_booking_lines
+        $bookings = \DB::table('transactions')
+            ->join('hms_booking_lines', 'transactions.id', '=', 'hms_booking_lines.transaction_id')
+            ->where('transactions.business_id', $business_id)
+            ->where('transactions.type', 'hms_booking')
+            ->where('transactions.status', '!=', 'cancelled')
+            ->whereDate('transactions.hms_booking_arrival_date_time', '<=', $end->format('Y-m-d'))
+            ->whereDate('transactions.hms_booking_departure_date_time', '>=', $today->format('Y-m-d'))
+            ->select(
+                'transactions.id',
+                'transactions.hms_booking_arrival_date_time',
+                'transactions.hms_booking_departure_date_time',
+                'hms_booking_lines.hms_room_id'
+            )
+            ->get();
+
+        // Build room→date occupancy map
+        $occupancy = [];
+        foreach ($bookings as $booking) {
+            $arrival   = \Carbon\Carbon::parse($booking->hms_booking_arrival_date_time)->startOfDay();
+            $departure = \Carbon\Carbon::parse($booking->hms_booking_departure_date_time)->startOfDay();
+
+            $roomId = $booking->hms_room_id;
+            for ($i = 0; $i < 14; $i++) {
+                $dt = $today->copy()->addDays($i);
+                $dateStr = $dt->format('Y-m-d');
+                if ($dt->lt($arrival) || $dt->gt($departure)) continue;
+
+                $status = 'occupied';
+                if ($dt->isSameDay($arrival))   $status = 'checkin';
+                if ($dt->isSameDay($departure))  $status = 'checkout';
+                $occupancy[$roomId][$dateStr] = $status;
+            }
+        }
+
+        $roomsData = $rooms->map(function ($room) use ($occupancy, $dates) {
+            $occ = [];
+            foreach ($dates as $d) {
+                $occ[$d['date']] = $occupancy[$room->id][$d['date']] ?? 'available';
+            }
+            return [
+                'id'        => $room->id,
+                'number'    => $room->room_no,
+                'type'      => optional($room->roomType)->type ?? 'N/A',
+                'occupancy' => $occ,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'rooms'   => $roomsData,
+            'dates'   => $dates,
+            'today'   => $today->format('Y-m-d'),
+        ]);
+    }
+
 }

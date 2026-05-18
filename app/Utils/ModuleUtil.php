@@ -528,6 +528,8 @@ class ModuleUtil extends Util
             'parcel'           => ['name' => 'Parcel Management', 'tooltip' => 'Long-distance parcel system for Kenya with M-Pesa integration.'],
             // Healthcare
             'hospital_billing' => ['name' => 'Hospital / Clinic Billing', 'tooltip' => 'Patient bills, NHIF, OPD/IPD, pharmacy charges'],
+            // Sync
+            'cloud_sync'       => ['name' => 'Cloud Sync', 'tooltip' => 'Enable two-way cloud sync between local and live installations.'],
         ];
     }
 

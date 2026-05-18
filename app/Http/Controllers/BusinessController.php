@@ -339,7 +339,10 @@ class BusinessController extends Controller
             ? json_decode($business->login_settings, true)
             : [];
 
-        return view('business.settings', compact('business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'whatsapp_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types', 'enabled_modules', 'login_settings'));
+        // Custom feature toggles (BusinessFeatureSetting)
+        $ip_restriction_enabled = \App\Models\BusinessFeatureSetting::isEnabled('ip_restriction', $business_id);
+
+        return view('business.settings', compact('business', 'currencies', 'tax_rates', 'timezone_list', 'months', 'accounting_methods', 'commission_agent_dropdown', 'units_dropdown', 'date_formats', 'shortcuts', 'pos_settings', 'modules', 'theme_colors', 'email_settings', 'sms_settings', 'whatsapp_settings', 'mail_drivers', 'allow_superadmin_email_settings', 'custom_labels', 'common_settings', 'weighing_scale_setting', 'payment_types', 'enabled_modules', 'login_settings', 'ip_restriction_enabled'));
     }
 
     /**

@@ -25,6 +25,7 @@ use App\Variation;
 use App\Warranty;
 use DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Models\Activity;
@@ -896,43 +897,49 @@ class SellController extends Controller
                         ->leftjoin('units as u', 'p.secondary_unit_id', '=', 'u.id')
                         ->where('transaction_sell_lines.transaction_id', $id)
                         ->with(['warranties', 'so_line'])
-                        ->select(
-                            DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
-                            'p.id as product_id',
-                            'p.image as product_image',
-                            'p.enable_stock',
-                            'p.name as product_actual_name',
-                            'p.type as product_type',
-                            'pv.name as product_variation_name',
-                            'pv.is_dummy as is_dummy',
-                            'variations.name as variation_name',
-                            'variations.sub_sku',
-                            'p.barcode_type',
-                            'p.enable_sr_no',
-                            'variations.id as variation_id',
-                            'units.short_name as unit',
-                            'units.allow_decimal as unit_allow_decimal',
-                            'u.short_name as second_unit',
-                            'transaction_sell_lines.secondary_unit_quantity',
-                            'transaction_sell_lines.tax_id as tax_id',
-                            'transaction_sell_lines.item_tax as item_tax',
-                            'transaction_sell_lines.unit_price as default_sell_price',
-                            'transaction_sell_lines.unit_price_inc_tax as sell_price_inc_tax',
-                            'transaction_sell_lines.unit_price_before_discount as unit_price_before_discount',
-                            'transaction_sell_lines.id as transaction_sell_lines_id',
-                            'transaction_sell_lines.id',
-                            'transaction_sell_lines.quantity as quantity_ordered',
-                            'transaction_sell_lines.sell_line_note as sell_line_note',
-                            'transaction_sell_lines.parent_sell_line_id',
-                            'transaction_sell_lines.lot_no_line_id',
-                            'transaction_sell_lines.line_discount_type',
-                            'transaction_sell_lines.line_discount_amount',
-                            'transaction_sell_lines.res_service_staff_id',
-                            'units.id as unit_id',
-                            'transaction_sell_lines.sub_unit_id',
-                            'transaction_sell_lines.so_line_id',
-                            DB::raw('vld.qty_available + transaction_sell_lines.quantity AS qty_available')
-                        )
+                        ->select(array_merge(
+                            [
+                                DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
+                                'p.id as product_id',
+                                'p.image as product_image',
+                                'p.enable_stock',
+                                'p.name as product_actual_name',
+                                'p.type as product_type',
+                                'pv.name as product_variation_name',
+                                'pv.is_dummy as is_dummy',
+                                'variations.name as variation_name',
+                                'variations.sub_sku',
+                                'p.barcode_type',
+                                'p.enable_sr_no',
+                                'variations.id as variation_id',
+                                'units.short_name as unit',
+                                'units.allow_decimal as unit_allow_decimal',
+                                'u.short_name as second_unit',
+                            ],
+                            Schema::hasColumn('transaction_sell_lines', 'secondary_unit_quantity')
+                                ? ['transaction_sell_lines.secondary_unit_quantity']
+                                : [],
+                            [
+                                'transaction_sell_lines.tax_id as tax_id',
+                                'transaction_sell_lines.item_tax as item_tax',
+                                'transaction_sell_lines.unit_price as default_sell_price',
+                                'transaction_sell_lines.unit_price_inc_tax as sell_price_inc_tax',
+                                'transaction_sell_lines.unit_price_before_discount as unit_price_before_discount',
+                                'transaction_sell_lines.id as transaction_sell_lines_id',
+                                'transaction_sell_lines.id',
+                                'transaction_sell_lines.quantity as quantity_ordered',
+                                'transaction_sell_lines.sell_line_note as sell_line_note',
+                                'transaction_sell_lines.parent_sell_line_id',
+                                'transaction_sell_lines.lot_no_line_id',
+                                'transaction_sell_lines.line_discount_type',
+                                'transaction_sell_lines.line_discount_amount',
+                                'transaction_sell_lines.res_service_staff_id',
+                                'units.id as unit_id',
+                                'transaction_sell_lines.sub_unit_id',
+                                'transaction_sell_lines.so_line_id',
+                                DB::raw('vld.qty_available + transaction_sell_lines.quantity AS qty_available'),
+                            ]
+                        ))
                         ->get();
 
         if (! empty($sell_details)) {

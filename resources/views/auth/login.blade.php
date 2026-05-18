@@ -185,10 +185,13 @@
         position: absolute; right: 13px; top: 50%;
         transform: translateY(-50%);
         background: none; border: none; cursor: pointer;
-        color: #94a3b8; padding: 0; line-height: 1;
+        color: #94a3b8; padding: 4px; line-height: 1;
         display: flex; align-items: center;
+        z-index: 10;
+        pointer-events: all;
     }
     .sp-eye:hover { color: #475569; }
+    .sp-input-wrap input { position: relative; z-index: 1; }
     .sp-remember {
         display: flex; align-items: center; gap: 8px;
         font-size: 0.875rem; color: #475569;
@@ -350,16 +353,30 @@ $(document).ready(function() {
         $('#password').val("{{ $password }}");
         $('form#login-form').submit();
     });
-    $('#show_hide_icon').on('click', function(e) {
-        e.preventDefault();
-        var pw = $('#password');
-        var isHidden = pw.attr('type') === 'password';
-        pw.attr('type', isHidden ? 'text' : 'password');
-        $(this).html(isHidden
-            ? '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673a8.717 8.717 0 0 1-4.681 1.327c-3.6 0-6.6-2-9-6c1.272-2.12 2.712-3.678 4.32-4.674m2.86-1.146a9.055 9.055 0 0 1 1.82-.18c3.6 0 6.6 2 9 6c-.666 1.11-1.379 2.067-2.138 2.87"/><path d="M3 3l18 18"/></svg>'
-            : '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0-4 0"/><path d="M21 12c-2.4 4-5.4 6-9 6c-3.6 0-6.6-2-9-6c2.4-4 5.4-6 9-6c3.6 0 6.6 2 9 6"/></svg>'
-        );
-    });
+    // Eye button — vanilla JS so it works regardless of jQuery load timing
+    (function() {
+        var eyeEyeSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0-4 0"/><path d="M21 12c-2.4 4-5.4 6-9 6c-3.6 0-6.6-2-9-6c2.4-4 5.4-6 9-6c3.6 0 6.6 2 9 6"/></svg>';
+        var eyeOffSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673a8.717 8.717 0 0 1-4.681 1.327c-3.6 0-6.6-2-9-6c1.272-2.12 2.712-3.678 4.32-4.674m2.86-1.146a9.055 9.055 0 0 1 1.82-.18c3.6 0 6.6 2 9 6c-.666 1.11-1.379 2.067-2.138 2.87"/><path d="M3 3l18 18"/></svg>';
+
+        function initEye() {
+            var btn = document.getElementById('show_hide_icon');
+            var pw  = document.getElementById('password');
+            if (!btn || !pw) return;
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var isHidden = pw.type === 'password';
+                pw.type = isHidden ? 'text' : 'password';
+                btn.innerHTML = isHidden ? eyeOffSvg : eyeEyeSvg;
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initEye);
+        } else {
+            initEye();
+        }
+    })();
 });
 </script>
 @endsection

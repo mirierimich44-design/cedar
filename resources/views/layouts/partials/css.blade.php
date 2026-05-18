@@ -115,11 +115,36 @@ $__cv = $__themeVars[$__tc] ?? $__themeVars['primary'];
     --theme-deeper: {{ $__cv['deeper'] }};
     /* Font */
     --apex-font: {{ $__fontStack }};
+    /* DaisyUI primary override — override the hardcoded --fallback-p with theme colour */
+    --fallback-p: {{ $__cv['main'] }};
+    --p:  {{ $__cv['main'] }};
+    --pf: {{ $__cv['hover'] }};
+    /* Bootstrap btn-primary override */
+    --bs-primary: {{ $__cv['main'] }};
 }
 body, .content-wrapper, .main-header, .sidebar-menu,
 input, select, textarea, button, .form-control, .select2-selection,
 .modal-body, .modal-header, .modal-footer, .box, .box-body {
     font-family: var(--apex-font) !important;
+}
+/* ── DaisyUI btn-primary: inject actual hex so oklch() isn't used ── */
+.tw-dw-btn.tw-dw-btn-primary,
+button.tw-dw-btn.tw-dw-btn-primary,
+a.tw-dw-btn.tw-dw-btn-primary {
+    background: {{ $__cv['main'] }} !important;
+    background-color: {{ $__cv['main'] }} !important;
+    background-image: none !important;
+    border-color: {{ $__cv['main'] }} !important;
+    color: #fff !important;
+}
+.tw-dw-btn.tw-dw-btn-primary:hover,
+.tw-dw-btn.tw-dw-btn-primary:focus,
+button.tw-dw-btn.tw-dw-btn-primary:hover {
+    background: {{ $__cv['hover'] }} !important;
+    background-color: {{ $__cv['hover'] }} !important;
+    background-image: none !important;
+    border-color: {{ $__cv['hover'] }} !important;
+    color: #fff !important;
 }
 </style>
 

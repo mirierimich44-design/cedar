@@ -1408,18 +1408,19 @@ class CoaController extends Controller
             $start_date = request()->input('start_date');
             $end_date = request()->input('end_date');
 
-            // $before_bal_query = AccountingAccountsTransaction::where('accounting_account_id', $account->id)
-            //                     ->leftjoin('accounting_acc_trans_mappings as ATM', 'accounting_accounts_transactions.acc_trans_mapping_id', '=', 'ATM.id')
-            //         ->select([
-            //             DB::raw('SUM(IF(accounting_accounts_transactions.type="credit", accounting_accounts_transactions.amount, -1 * accounting_accounts_transactions.amount)) as prev_bal')])
-            //         ->where('accounting_accounts_transactions.operation_date', '<', $start_date);
-            // $bal_before_start_date = $before_bal_query->first()->prev_bal;
+            // Balance before the start date (opening balance for this range)
+            $before_bal_query = AccountingAccountsTransaction::where('accounting_account_id', $account->id)
+                                ->select([
+                                    DB::raw('SUM(IF(type="credit", amount, -1 * amount)) as prev_bal')])
+                                ->where('operation_date', '<', $start_date);
+            $bal_before_start_date = (float) ($before_bal_query->first()->prev_bal ?? 0);
 
             $transactions = AccountingAccountsTransaction::where('accounting_account_id', $account->id)
                             ->leftjoin('accounting_acc_trans_mappings as ATM', 'accounting_accounts_transactions.acc_trans_mapping_id', '=', 'ATM.id')
                             ->leftjoin('transactions as T', 'accounting_accounts_transactions.transaction_id', '=', 'T.id')
                             ->leftjoin('users AS U', 'accounting_accounts_transactions.created_by', 'U.id')
-                            ->select('accounting_accounts_transactions.operation_date',
+                            ->select('accounting_accounts_transactions.id',
+                                'accounting_accounts_transactions.operation_date',
                                 'accounting_accounts_transactions.sub_type',
                                 'accounting_accounts_transactions.type',
                                 'accounting_accounts_transactions.note as aat_note',
@@ -1479,17 +1480,21 @@ class CoaController extends Controller
 
                         return '';
                     })
-                    // ->addColumn('balance', function ($row) use ($bal_before_start_date, $start_date) {
-                    //     //TODO:: Need to fix same balance showing for transactions having same operation date
-                    //     $current_bal = AccountingAccountsTransaction::where('accounting_account_id',
-                    //                         $row->account_id)
-                    //                     ->where('operation_date', '>=', $start_date)
-                    //                     ->where('operation_date', '<=', $row->operation_date)
-                    //                     ->select(DB::raw("SUM(IF(type='credit', amount, -1 * amount)) as balance"))
-                    //                     ->first()->balance;
-                    //     $bal = $bal_before_start_date + $current_bal;
-                    //     return '<span class="balance" data-orig-value="' . $bal . '">' . $this->accountingUtil->num_f($bal, true) . '</span>';
-                    // })
+                    ->addColumn('balance', function ($row) use ($bal_before_start_date, $account) {
+                        // Use id as tiebreaker so same-date rows get incremental balances
+                        $current_bal = AccountingAccountsTransaction::where('accounting_account_id', $account->id)
+                                        ->where(function ($q) use ($row) {
+                                            $q->where('operation_date', '<', $row->operation_date)
+                                              ->orWhere(function ($q2) use ($row) {
+                                                  $q2->where('operation_date', '=', $row->operation_date)
+                                                     ->where('id', '<=', $row->id);
+                                              });
+                                        })
+                                        ->select(DB::raw("SUM(IF(type='credit', amount, -1 * amount)) as balance"))
+                                        ->first()->balance ?? 0;
+                        $bal = $bal_before_start_date + (float) $current_bal;
+                        return '<span class="balance" data-orig-value="' . $bal . '">' . $this->accountingUtil->num_f($bal, true) . '</span>';
+                    })
                     ->editColumn('action', function ($row) {
                         $action = '';
 

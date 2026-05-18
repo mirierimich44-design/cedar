@@ -3,12 +3,20 @@
 
 @section('content')
 
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'lang_v1.followup_report' )
-        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'lang_v1.followup_report_description' )</small>
-    </h1>
-</section>
+<div class="report-page-modern">
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-phone-alt"></i></span>
+                <div>
+                    <h1>{{ __('lang_v1.followup_report') }}</h1>
+                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 <!-- Main content -->
 <section class="content">
@@ -87,6 +95,10 @@
     </div>
 </div>
 <!-- /.content -->
+
+</div>
+
+
 
 @endsection
 
@@ -204,4 +216,10 @@
             });
         });
     </script>
+
+
+
+@section('css')
+@include('report.partials.report_modern_css')
+@endsection
 @endsection

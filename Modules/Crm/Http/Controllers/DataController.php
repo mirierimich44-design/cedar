@@ -150,13 +150,9 @@ class DataController extends Controller
                 }
             );
 
-            //TODO: uncomment this query in 3-4 months and comment below queries.
-            // $crm_settings = Business::where('id', auth()->user()->business_id)
-            //                     ->value('crm_settings');
-            // $crm_settings = !empty($crm_settings) ? json_decode($crm_settings, true) : [];
-
-            $business = Business::find(auth()->user()->business_id);
-            $crm_settings = !empty($business->crm_settings) ? json_decode($business->crm_settings, true) : [];
+            $raw_crm_settings = Business::where('id', auth()->user()->business_id)
+                                    ->value('crm_settings');
+            $crm_settings = !empty($raw_crm_settings) ? json_decode($raw_crm_settings, true) : [];
 
             if (!empty($crm_settings['enable_order_request'])) {
                 $menu = Menu::instance('admin-sidebar-menu');

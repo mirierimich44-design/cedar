@@ -18,7 +18,17 @@ class DataController extends Controller
         $business_id = session()->get('user.business_id');
         $module_util = new \App\Utils\ModuleUtil();
         
-        $is_parcel_enabled = (bool)$module_util->isModuleEnabled('parcel', $business_id);
+        // FIX: do a case-insensitive check so both 'Parcel' and 'parcel' in enabled_modules work
+        $enabled_modules = array_map('strtolower', (array) $module_util->allModulesEnabled($business_id));
+        $is_parcel_enabled = in_array('parcel', $enabled_modules);
+
+        // Secondary gate: respect modules_statuses.json (framework-level enable/disable)
+        if ($is_parcel_enabled) {
+            $modules_statuses = json_decode(@file_get_contents(base_path('modules_statuses.json')), true) ?? [];
+            if (isset($modules_statuses['Parcel']) && !$modules_statuses['Parcel']) {
+                $is_parcel_enabled = false;
+            }
+        }
 
         if ($is_parcel_enabled) {
             Menu::modify(
@@ -38,9 +48,9 @@ class DataController extends Controller
                                 ['icon' => 'fa fa-list', 'active' => request()->segment(1) == 'parcel' && request()->segment(2) == null]
                             );
                             $sub->url(
-                                action([\Modules\Parcel\Http\Controllers\ParcelController::class, 'index']), // TODO: StationController
-                                'Stations',
-                                ['icon' => 'fa fa-building', 'active' => request()->segment(1) == 'parcel' && request()->segment(2) == 'stations']
+                                action([\Modules\Parcel\Http\Controllers\RouteController::class, 'index']),
+                                'Stations & Routes',
+                                ['icon' => 'fa fa-building', 'active' => request()->segment(1) == 'parcel' && in_array(request()->segment(2), ['stations', 'routes'])]
                             );
                         },
                         ['icon' => 'fa fa-box', 'style' => 'background-color: #f3f4f6; color: #1e293b;']

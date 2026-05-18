@@ -259,8 +259,6 @@ class HmsBookingController extends Controller
      */
     public function store(Request $request)
     {
-
-        // return $request;
         $business_id = request()->session()->get('user.business_id');
 
         if (!(auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'hms_module'))) {
@@ -269,6 +267,15 @@ class HmsBookingController extends Controller
 
         if (!auth()->user()->can('hms.add_booking')) {
             abort(403, 'Unauthorized action.');
+        }
+
+        // Idempotency: prevent double-submission via session token
+        $submission_token = $request->input('submission_token');
+        if ($submission_token && \Illuminate\Support\Facades\Cache::has("hms_submit_{$business_id}_{$submission_token}")) {
+            return back()->with('status', ['success' => 0, 'msg' => __('messages.duplicate_request')]);
+        }
+        if ($submission_token) {
+            \Illuminate\Support\Facades\Cache::put("hms_submit_{$business_id}_{$submission_token}", true, 30);
         }
 
         DB::beginTransaction();
@@ -288,7 +295,10 @@ class HmsBookingController extends Controller
             //Generate reference number
             $ref_no = $this->commonUtil->generateReferenceNumber('hms_booking', $ref_count, $business_id, $prefix);
 
-            // store in transsaction discount_amount
+            $total_discount = is_null($request->total_discount) ? 0 : $this->transactionUtil->num_uf($request->total_discount);
+            $total_booking_amount = is_null($request->total_booking_amount) ? 0 : $this->transactionUtil->num_uf($request->total_booking_amount);
+
+            // store in transaction — fix: discount_amount only goes in discount_amount, NOT tax_amount
             $transaction = new HmsTransactionClass();
             $transaction->business_id = $business_id;
             $transaction->type = 'hms_booking';
@@ -296,12 +306,13 @@ class HmsBookingController extends Controller
             $transaction->contact_id = $request->contact_id;
             $transaction->created_by = auth()->user()->id;
             $transaction->ref_no = $ref_no;
-            $transaction->total_before_tax = (is_null($request->total_booking_amount) ? 0 : $request->total_booking_amount) + (is_null($request->total_discount) ? 0 : $request->total_discount);
-            $transaction->final_total = is_null($request->total_booking_amount) ? 0 : $request->total_booking_amount;
+            $transaction->total_before_tax = $total_booking_amount + $total_discount;
+            $transaction->final_total = $total_booking_amount;
 
-            $transaction->tax_amount = is_null($request->total_discount) ? 0 : $request->total_discount;
+            // FIX: tax_amount should store actual tax, not discount. Discount goes in discount_amount only.
+            $transaction->tax_amount = 0;
 
-            $transaction->discount_amount = is_null($request->total_discount) ? 0 : $request->total_discount;
+            $transaction->discount_amount = $total_discount;
 
             $transaction->hms_coupon_id = $request->coupon_id;
             $transaction->discount_type = $request->discount_type;
@@ -563,20 +574,23 @@ class HmsBookingController extends Controller
 
             $business_id = request()->session()->get('user.business_id');
 
-            // store in transsaction
+            // store in transaction
             $transaction = HmsTransactionClass::findOrFail($id);
 
-            $transaction->status = $request->status;
+            $upd_total_discount = is_null($request->total_discount) ? 0 : $this->transactionUtil->num_uf($request->total_discount);
+            $upd_total_booking_amount = is_null($request->total_booking_amount) ? 0 : $this->transactionUtil->num_uf($request->total_booking_amount);
+
             $transaction->status = $request->status;
             $transaction->contact_id = $request->contact_id;
 
-            $transaction->total_before_tax = (is_null($request->total_booking_amount) ? 0 : $request->total_booking_amount) + (is_null($request->total_discount) ? 0 : $request->total_discount);
+            $transaction->total_before_tax = $upd_total_booking_amount + $upd_total_discount;
 
-            $transaction->tax_amount = is_null($request->total_discount) ? 0 : $request->total_discount;
+            // FIX: tax_amount must NOT store the discount (prevents double-counting in payment due calculations)
+            $transaction->tax_amount = 0;
 
-            $transaction->final_total = is_null($request->total_booking_amount) ? 0 : $request->total_booking_amount;
+            $transaction->final_total = $upd_total_booking_amount;
 
-            $transaction->discount_amount = is_null($request->total_discount) ? 0 : $request->total_discount;
+            $transaction->discount_amount = $upd_total_discount;
             $transaction->hms_coupon_id = $request->coupon_id;
             $transaction->discount_type = $request->discount_type;
 

@@ -15,7 +15,7 @@ class KcbBuniServiceProvider extends ServiceProvider
     /**
      * @var string $moduleNameLower
      */
-    protected $moduleNameLower = 'kcbbuni';
+    protected $moduleNameLower = 'kcb_buni';
 
     /**
      * Boot the application events.

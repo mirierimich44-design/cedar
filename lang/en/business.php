@@ -41,6 +41,8 @@ return [
     'logo_help' => 'Previous logo (if exists) will be replaced',
     'update_settings' => 'Update Settings',
     'business_settings' => 'Business Settings',
+    'general'   => 'General',
+    'analytics' => 'Analytics',
     'settings_updated_success' => 'Settings updated successfully',
     'default_profit_percent' => 'Default profit percent',
     'default_sales_tax' => 'Default Sale Tax',

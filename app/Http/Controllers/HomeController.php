@@ -368,8 +368,8 @@ class HomeController extends Controller
 
         $staff_performance_chart = new CommonChart;
         $staff_performance_chart->labels($staff_labels)
-            ->options($this->__chartOptions(__('report.staff_performance')))
-            ->dataset(__('sale.total_sales'), 'bar', $staff_values);
+            ->options($this->__chartOptions(__('lang_v1.total_sales')))
+            ->dataset(__('lang_v1.total_sales'), 'bar', $staff_values);
 
         // Profit Margins Chart
         $labels = [];
@@ -393,8 +393,8 @@ class HomeController extends Controller
 
         $profit_margin_chart = new CommonChart;
         $profit_margin_chart->labels($labels)
-            ->options($this->__chartOptions(__('report.gross_profit')))
-            ->dataset(__('report.gross_profit'), 'line', $profit_values);
+            ->options($this->__chartOptions(__('lang_v1.gross_profit')))
+            ->dataset(__('lang_v1.gross_profit'), 'line', $profit_values);
 
         return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin', 'staff_performance_chart', 'profit_margin_chart'));
     }
@@ -739,9 +739,42 @@ class HomeController extends Controller
     private function __chartOptions($title)
     {
         return [
+            'chart' => [
+                'style' => [
+                    'fontFamily' => '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                ],
+                'backgroundColor' => 'transparent',
+                'spacing' => [10, 10, 15, 10],
+            ],
+            'title' => [
+                'text' => null,
+            ],
             'yAxis' => [
                 'title' => [
                     'text' => $title,
+                    'style' => [
+                        'color' => '#64748b',
+                        'fontSize' => '12px',
+                        'fontWeight' => '500',
+                    ],
+                ],
+                'gridLineColor' => '#f1f5f9',
+                'gridLineDashStyle' => 'Dash',
+                'labels' => [
+                    'style' => [
+                        'color' => '#94a3b8',
+                        'fontSize' => '11px',
+                    ],
+                ],
+            ],
+            'xAxis' => [
+                'lineColor' => '#e2e8f0',
+                'tickColor' => '#e2e8f0',
+                'labels' => [
+                    'style' => [
+                        'color' => '#64748b',
+                        'fontSize' => '11px',
+                    ],
                 ],
             ],
             'legend' => [
@@ -749,7 +782,52 @@ class HomeController extends Controller
                 'verticalAlign' => 'top',
                 'floating' => true,
                 'layout' => 'vertical',
-                'padding' => 20,
+                'padding' => 12,
+                'itemStyle' => [
+                    'color' => '#475569',
+                    'fontSize' => '12px',
+                    'fontWeight' => '500',
+                ],
+                'itemHoverStyle' => [
+                    'color' => '#1e293b',
+                ],
+            ],
+            'tooltip' => [
+                'backgroundColor' => '#1e293b',
+                'borderColor' => '#334155',
+                'borderRadius' => 8,
+                'shadow' => true,
+                'style' => [
+                    'color' => '#fff',
+                    'fontSize' => '12px',
+                ],
+            ],
+            'plotOptions' => [
+                'line' => [
+                    'lineWidth' => 2.5,
+                    'marker' => [
+                        'radius' => 4,
+                        'symbol' => 'circle',
+                    ],
+                    'states' => [
+                        'hover' => [
+                            'lineWidth' => 3,
+                        ],
+                    ],
+                ],
+                'bar' => [
+                    'borderRadius' => 4,
+                    'borderWidth' => 0,
+                    'groupPadding' => 0.15,
+                ],
+                'column' => [
+                    'borderRadius' => 4,
+                    'borderWidth' => 0,
+                ],
+            ],
+            'colors' => ['#059669', '#2563eb', '#7c3aed', '#d97706', '#dc2626', '#0ea5e9', '#ec4899', '#14b8a6'],
+            'credits' => [
+                'enabled' => false,
             ],
         ];
     }

@@ -301,62 +301,62 @@
 <!-- M-PESA Payment Modal - Styled -->
 <div class="modal fade" tabindex="-1" role="dialog" id="mpesa_details_modal">
     <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none;">
-            {{-- Header --}}
-            <div style="background: linear-gradient(135deg, #00B09B 0%, #96C93D 100%); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; color: white; font-weight: 700; font-size: 18px;">
-                    <i class="fas fa-mobile-alt" style="margin-right: 10px;"></i> M-Pesa Payment
+        <div class="modal-content">
+            {{-- Header — keep Mpesa green, but add .modal-header so global close/title styles apply --}}
+            <div class="modal-header" style="background: linear-gradient(135deg, #00875a 0%, #00c378 100%);">
+                <h4 class="modal-title">
+                    <i class="fas fa-mobile-alt"></i> M-Pesa Payment
                 </h4>
-                <button type="button" class="close" data-dismiss="modal" style="color: white; opacity: 1; font-size: 28px; text-shadow: none;">&times;</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
 
-            <div class="modal-body" style="padding: 24px; background: #f8fafc;">
+            <div class="modal-body" style="background: #f8fafc; padding: 14px 16px;">
                 {{-- Summary Card --}}
-                <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-weight: 700; color: #00B09B; font-size: 11px; letter-spacing: 0.5px;">
+                <div style="background: white; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-weight: 700; color: #00875a; font-size: 10px; letter-spacing: 0.5px;">
                             <i class="fas fa-chart-line"></i> TODAY'S SUMMARY
                         </span>
-                        <button type="button" id="refresh_mpesa_summary" style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 10px; font-size: 10px; cursor: pointer;">
+                        <button type="button" id="refresh_mpesa_summary" style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 5px; padding: 2px 8px; font-size: 10px; cursor: pointer;">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center;">
-                        <div style="padding: 8px;">
-                            <div id="mpesa_today_count" style="font-size: 20px; font-weight: 800; color: #1e293b;">0</div>
+                        <div style="padding: 4px;">
+                            <div id="mpesa_today_count" style="font-size: 16px; font-weight: 800; color: #1e293b;">0</div>
                             <div style="font-size: 9px; color: #64748b; font-weight: 600;">PAID</div>
                         </div>
-                        <div style="padding: 8px; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
-                            <div id="mpesa_today_total" style="font-size: 20px; font-weight: 800; color: #10b981;">KES 0</div>
+                        <div style="padding: 4px; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                            <div id="mpesa_today_total" style="font-size: 16px; font-weight: 800; color: #10b981;">KES 0</div>
                             <div style="font-size: 9px; color: #64748b; font-weight: 600;">TOTAL</div>
                         </div>
-                        <div style="padding: 8px;">
-                            <div id="mpesa_today_pending" style="font-size: 20px; font-weight: 800; color: #f59e0b;">0</div>
+                        <div style="padding: 4px;">
+                            <div id="mpesa_today_pending" style="font-size: 16px; font-weight: 800; color: #f59e0b;">0</div>
                             <div style="font-size: 9px; color: #64748b; font-weight: 600;">PENDING</div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Input Section --}}
-                <div id="mpesa_input_section" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">PHONE NUMBER</label>
-                        <div style="display: flex; border: 2px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
-                            <span style="background: #f1f5f9; padding: 12px 14px; font-weight: 700; color: #64748b; border-right: 2px solid #e2e8f0;">+254</span>
-                            <input type="tel" id="mpesa_phone_input" placeholder="712345678" maxlength="9" style="flex: 1; border: none; padding: 12px 14px; font-size: 16px; font-weight: 600; outline: none;">
+                <div id="mpesa_input_section" style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">PHONE NUMBER</label>
+                        <div style="display: flex; border: 1.5px solid #e2e8f0; border-radius: 7px; overflow: hidden;">
+                            <span style="background: #f1f5f9; padding: 7px 10px; font-weight: 700; color: #64748b; font-size: 13px; border-right: 1.5px solid #e2e8f0;">+254</span>
+                            <input type="tel" id="mpesa_phone_input" placeholder="712345678" maxlength="9" style="flex: 1; border: none; padding: 7px 10px; font-size: 14px; font-weight: 600; outline: none;">
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">AMOUNT (KES)</label>
-                        <div style="display: flex; border: 2px solid #e2e8f0; border-radius: 10px; overflow: hidden; background: #f8fafc;">
-                            <span style="background: #f1f5f9; padding: 12px 14px; font-weight: 700; color: #64748b; border-right: 2px solid #e2e8f0;">KES</span>
-                            <input type="text" id="mpesa_amount_display" readonly style="flex: 1; border: none; padding: 12px 14px; font-size: 18px; font-weight: 800; color: #00B09B; background: transparent; outline: none;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">AMOUNT (KES)</label>
+                        <div style="display: flex; border: 1.5px solid #e2e8f0; border-radius: 7px; overflow: hidden; background: #f8fafc;">
+                            <span style="background: #f1f5f9; padding: 7px 10px; font-weight: 700; color: #64748b; font-size: 13px; border-right: 1.5px solid #e2e8f0;">KES</span>
+                            <input type="text" id="mpesa_amount_display" readonly style="flex: 1; border: none; padding: 7px 10px; font-size: 16px; font-weight: 800; color: #00875a; background: transparent; outline: none;">
                         </div>
                     </div>
 
-                    <button type="button" id="send_stk_push_btn" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #00B09B 0%, #96C93D 100%); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0,176,155,0.3);">
-                        <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> SEND STK PUSH
+                    <button type="button" id="send_stk_push_btn" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #00875a 0%, #00c378 100%); color: white; border: none; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px;">
+                        <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> SEND STK PUSH
                     </button>
                 </div>
 
@@ -393,18 +393,18 @@
                 </div>
 
                 {{-- Manual Entry (Optional) --}}
-                <div id="mpesa_manual_section" style="margin-top: 20px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                    <div style="text-align: center; margin-bottom: 12px;">
-                        <span style="font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">RECEIPT CODE (OPTIONAL)</span>
+                <div id="mpesa_manual_section" style="margin-top: 10px; background: white; border-radius: 8px; padding: 10px 12px; border: 1px solid #e2e8f0;">
+                    <div style="text-align: center; margin-bottom: 6px;">
+                        <span style="font-size: 9px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">RECEIPT CODE (OPTIONAL)</span>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="mpesa_manual_receipt" placeholder="e.g. QZK92PX..." style="flex: 1; border: 2px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 14px; font-weight: 700; text-transform: uppercase; outline: none;">
-                        <button type="button" id="mpesa_manual_submit" style="background: #f1f5f9; border: 2px solid #e2e8f0; padding: 10px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; color: #64748b;">USE</button>
+                    <div style="display: flex; gap: 6px;">
+                        <input type="text" id="mpesa_manual_receipt" placeholder="e.g. QZK92PX..." style="flex: 1; border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 7px 10px; font-family: monospace; font-size: 13px; font-weight: 700; text-transform: uppercase; outline: none;">
+                        <button type="button" id="mpesa_manual_submit" style="background: #f1f5f9; border: 1.5px solid #e2e8f0; padding: 7px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; color: #64748b; font-size: 13px;">USE</button>
                     </div>
                 </div>
 
                 {{-- Auto-Match --}}
-                <div id="mpesa_auto_match_section" style="margin-top: 16px; padding: 12px; border-radius: 10px; background: #fffbeb; border: 1px dashed #f59e0b;">
+                <div id="mpesa_auto_match_section" style="margin-top: 8px; padding: 8px 10px; border-radius: 7px; background: #fffbeb; border: 1px dashed #f59e0b;">
                     <div id="auto_match_status_waiting" style="text-align: center;">
                         <i class="fas fa-sync fa-spin" style="color: #f59e0b;"></i>
                         <span style="font-size: 11px; font-weight: 700; color: #d97706; margin-left: 6px;">Auto-detecting...</span>
@@ -425,9 +425,9 @@
             </div>
 
             {{-- Footer --}}
-            <div style="padding: 16px 24px; background: #f1f5f9; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
-                <button type="button" data-dismiss="modal" style="background: white; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
-                <button type="button" id="pos-save-mpesa" style="background: linear-gradient(135deg, #00B09B 0%, #96C93D 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" id="pos-save-mpesa" class="btn" style="background: linear-gradient(135deg, #00875a 0%, #00c378 100%); color: white; border: none;">
                     <i class="fas fa-check"></i> Complete Sale
                 </button>
             </div>

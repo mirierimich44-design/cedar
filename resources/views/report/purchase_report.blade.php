@@ -3,11 +3,20 @@
 
 @section('content')
 
-<!-- Content Header (Page header) -->
-<section class="content-header no-print">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">Report 606 (@lang('lang_v1.purchase'))
-    </h1>
-</section>
+<div class="report-page-modern">
+    <div class="rpt-banner">
+        <div class="rpt-banner-inner">
+            <div class="rpt-banner-title">
+                <span class="rpt-banner-icon"><i class="fas fa-truck"></i></span>
+                <div>
+                    <h1>{{ __('lang_v1.purchase') . ' ' . __('report.reports') }}</h1>
+                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 <!-- Main content -->
 <section class="content no-print">
@@ -224,4 +233,12 @@
     });
 </script>
 	
+</div>
+
+
+
+
+@section('css')
+@include('report.partials.report_modern_css')
+@endsection
 @endsection

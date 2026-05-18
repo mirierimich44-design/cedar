@@ -392,6 +392,11 @@ class AdminSidebarMenu
                                 __('purchase.add_purchase'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'purchases' && request()->segment(2) == 'create']
                             );
+                            $sub->url(
+                                route('purchases.drafts'),
+                                'Drafts',
+                                ['icon' => '', 'active' => request()->segment(1) == 'purchases' && request()->segment(2) == 'drafts']
+                            );
                         }
                         if (auth()->user()->can('purchase.update')) {
                             $sub->url(
@@ -719,6 +724,33 @@ class AdminSidebarMenu
                     <path d="M11 15l2 0"></path>
                   </svg>']
                 )->order(25);
+            }
+
+            // IP Access Control — admin only, and only if the module is enabled
+            $businessId = session('business.id');
+            $ipModuleEnabled = $businessId && \App\Models\BusinessFeatureSetting::isEnabled('ip_restriction', $businessId);
+            if ($is_admin && $ipModuleEnabled) {
+                $menu->dropdown(
+                    'IP Access Control',
+                    function ($sub) {
+                        $sub->url(
+                            route('ip-access.settings'),
+                            'Whitelist & Toggle',
+                            ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'settings']
+                        );
+                        $sub->url(
+                            route('ip-access.logs'),
+                            'Access Logs',
+                            ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'logs']
+                        );
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 18a12 12 0 0 1 -8.5 -18a12 12 0 0 0 8.5 -3"></path>
+                    <path d="M12 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                    <path d="M12 12l0 2.5"></path>
+                    </svg>', 'active' => request()->segment(1) == 'ip-access']
+                );
             }
 
             // M-Pesa Payments menu
@@ -1262,6 +1294,7 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'types-of-service']
                             );
                         }
+
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>

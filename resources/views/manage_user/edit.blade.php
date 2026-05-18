@@ -201,12 +201,52 @@
         {!! $partial !!}
       @endforeach
     @endif
-    <div class="row">
+
+    {{-- ── IP Access Bypass (Superadmin only) ─────────────────────────── --}}
+    @if(auth()->user()->hasRole('Superadmin') || auth()->user()->username === 'saas_admin')
+    @php $ipSetting = \App\Models\UserIpSetting::where('user_id', $user->id)->first(); @endphp
+    <div class="row" style="margin-top:16px;">
+        <div class="col-md-12">
+            <div class="box box-info" style="margin-bottom:0;">
+                <div class="box-header with-border" style="padding:10px 15px;">
+                    <h4 class="box-title" style="font-size:14px;"><i class="fa fa-shield"></i> IP Access Settings</h4>
+                </div>
+                <div class="box-body" style="padding:12px 15px;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label style="font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="bypass_ip_check" {{ $ipSetting && $ipSetting->bypass_ip_check ? 'checked' : '' }}>
+                                Bypass IP restriction — this user can log in from any network
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label style="font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" id="bypass_schedule" {{ $ipSetting && $ipSetting->bypass_schedule ? 'checked' : '' }}>
+                                Bypass schedule — this user can log in at any time
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <div class="row" style="margin-top:16px;">
         <div class="col-md-12 text-center">
             <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white" id="submit_user_button">@lang( 'messages.update' )</button>
         </div>
     </div>
     {!! Form::close() !!}
+
+    {{-- Save IP settings separately (outside main form) --}}
+    @if(auth()->user()->hasRole('Superadmin') || auth()->user()->username === 'saas_admin')
+    <form id="ip_settings_form" method="POST" action="{{ route('ip-access.user-settings', $user->id) }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="bypass_ip_check" id="bypass_ip_check_val" value="0">
+        <input type="hidden" name="bypass_schedule" id="bypass_schedule_val" value="0">
+    </form>
+    @endif
   @stop
 @section('javascript')
 <script type="text/javascript">
@@ -325,5 +365,14 @@
                     }
                 }
             });
+
+// Submit IP settings form alongside main form
+@if(auth()->user()->hasRole('Superadmin') || auth()->user()->username === 'saas_admin')
+$('#user_edit_form').on('submit', function() {
+    $('#bypass_ip_check_val').val($('#bypass_ip_check').is(':checked') ? 1 : 0);
+    $('#bypass_schedule_val').val($('#bypass_schedule').is(':checked') ? 1 : 0);
+    $.post($('#ip_settings_form').attr('action'), $('#ip_settings_form').serialize());
+});
+@endif
 </script>
 @endsection

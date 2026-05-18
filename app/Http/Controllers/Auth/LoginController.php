@@ -9,6 +9,11 @@ use App\Utils\ModuleUtil;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Rules\ReCaptcha;
+use App\Models\IpAllowed;
+use App\Models\IpAccessLog;
+use App\Models\UserIpSetting;
+use App\Models\AccessSchedule;
+use App\Services\IpLookupService;
 
 
 class LoginController extends Controller
@@ -122,12 +127,17 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
-        $this->businessUtil->activityLog($user, 'login', null, [], false, $user->business_id);
+        // ── Superadmin — always let through, no restrictions ──────────────
+        $isSuperadmin = $user->username === 'saas_admin'
+            || $user->email === 'admin@apexpos.co.ke'
+            || $user->hasRole('Superadmin');
 
-        if ($user->username === 'saas_admin' || $user->email === 'admin@apexpos.co.ke' || $user->hasRole('Superadmin')) {
+        if ($isSuperadmin) {
+            $this->logAttempt($request, $user, 'success');
             return redirect('/saas-admin');
         }
 
+        // ── Standard account checks ───────────────────────────────────────
         if (! $user->business || ! $user->business->is_active) {
             \Auth::logout();
 
@@ -161,6 +171,43 @@ class LoginController extends Controller
                     ['success' => 0, 'msg' => __('lang_v1.business_dont_have_crm_subscription')]
                 );
         }
+
+        $clientIp   = $request->ip();
+        $businessId = $user->business_id;
+
+        // ── Banned IP check — always enforced regardless of restriction setting ──
+        if (IpAllowed::isBanned($clientIp, $businessId)) {
+            $this->logAttempt($request, $user, 'blocked_ip');
+            \Auth::logout();
+            return redirect('/login')->with('status', [
+                'success' => 0,
+                'msg'     => 'Access denied: your IP address (' . $clientIp . ') has been banned. Contact your administrator.',
+            ]);
+        }
+
+        // ── IP Whitelist check — only when restriction is enabled ─────────────
+        // Business owner (Admin role) is always exempt — can never be locked out.
+        if (! empty($user->business->enable_ip_restriction)) {
+
+            $isOwner = ($user->id === $user->business->owner_id);
+
+            $userSetting = UserIpSetting::where('user_id', $user->id)->first();
+            $hasBypass   = $userSetting && $userSetting->bypass_ip_check;
+
+            if (! $isOwner && ! $hasBypass) {
+                if (! IpAllowed::isWhitelisted($clientIp, $businessId)) {
+                    $this->logAttempt($request, $user, 'blocked_ip');
+                    \Auth::logout();
+                    return redirect('/login')->with('status', [
+                        'success' => 0,
+                        'msg'     => 'Access denied: your location (' . $clientIp . ') is not on the approved network list. Contact your administrator.',
+                    ]);
+                }
+            }
+        }
+
+        // ── All checks passed — log success ──────────────────────────────────
+        $this->logAttempt($request, $user, 'success');
     }
 
     protected function redirectTo()
@@ -196,7 +243,48 @@ class LoginController extends Controller
                 'password' => 'required|string',
             ]);
         }
-       
+    }
+
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        $this->logAttempt($request, null, 'wrong_password');
+
+        return redirect()->back()
+            ->withInput($request->only($this->username(), 'remember'))
+            ->withErrors([$this->username() => trans('auth.failed')]);
+    }
+
+    private function logAttempt(Request $request, $user, string $outcome): void
+    {
+        try {
+            $lookup = app(IpLookupService::class)->lookup($request->ip());
+
+            // Resolve the user's primary location (first permitted location)
+            $locationId = null;
+            if ($user && $user->business_id) {
+                $permitted = $user->permitted_locations($user->business_id);
+                if (is_array($permitted) && count($permitted)) {
+                    $locationId = $permitted[0];
+                }
+            }
+
+            IpAccessLog::create([
+                'user_id'              => $user?->id,
+                'business_id'          => $user?->business_id,
+                'business_location_id' => $locationId,
+                'username_attempted'   => $request->input($this->username()),
+                'ip_address'           => $request->ip(),
+                'isp'                  => $lookup['isp'] ?? null,
+                'country'              => $lookup['country'] ?? null,
+                'city'                 => $lookup['city'] ?? null,
+                'browser'              => $lookup['browser'] ?? null,
+                'os'                   => $lookup['os'] ?? null,
+                'device_type'          => $lookup['device_type'] ?? null,
+                'outcome'              => $outcome,
+            ]);
+        } catch (\Throwable $e) {
+            // never break login because of logging failure
+        }
     }
 
 }

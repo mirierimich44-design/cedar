@@ -28,16 +28,31 @@ class AdminlteCustomPresenter extends Presenter
     protected function getThemeAccentColor(): string
     {
         $accentMap = [
-            'primary' => '#818cf8',
-            'purple'  => '#c4b5fd',
-            'green'   => '#6ee7b7',
-            'red'     => '#fca5a5',
-            'yellow'  => '#fcd34d',
-            'orange'  => '#fdba74',
-            'sky'     => '#7dd3fc',
+            'primary' => '#4f46e5',
+            'purple'  => '#9333ea',
+            'green'   => '#059669',
+            'red'     => '#dc2626',
+            'yellow'  => '#d97706',
+            'orange'  => '#ea580c',
+            'sky'     => '#0284c7',
         ];
         $theme = session('business.theme_color', 'primary');
         return $accentMap[$theme] ?? $accentMap['primary'];
+    }
+
+    protected function getThemeLightColor(): string
+    {
+        $lightMap = [
+            'primary' => '#818cf8',
+            'purple'  => '#c084fc',
+            'green'   => '#34d399',
+            'red'     => '#f87171',
+            'yellow'  => '#fbbf24',
+            'orange'  => '#fb923c',
+            'sky'     => '#38bdf8',
+        ];
+        $theme = session('business.theme_color', 'primary');
+        return $lightMap[$theme] ?? $lightMap['primary'];
     }
 
     /**
@@ -47,12 +62,19 @@ class AdminlteCustomPresenter extends Presenter
     {
         $isActive = $item->isActive();
         $accent = $this->getThemeAccentColor();
-        $style = $isActive
-            ? 'color:white;background:rgba(255,255,255,0.1);border-left:3px solid ' . $accent . ';padding-left:13px;'
+
+        $light = $this->getThemeLightColor();
+        $linkStyle = $isActive
+            ? 'color:white;background:linear-gradient(135deg,' . $accent . ',' . $light . ');box-shadow:0 3px 10px rgba(0,0,0,0.25);'
             : 'color:rgba(255,255,255,0.72);';
 
-        return '<a href="' . $item->getUrl() . '" title="" class="sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $style . '" ' . $item->getAttributes() . '>' .
-            $this->formatIcon($item->icon) . ' <span class="tw-truncate">' . $item->title . '</span>' .
+        $iconStyle = $isActive
+            ? 'width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,0.2);font-size:12px;'
+            : 'width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,0.08);font-size:12px;';
+
+        return '<a href="' . $item->getUrl() . '" title="" class="sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $linkStyle . '" ' . $item->getAttributes() . '>' .
+            '<span style="' . $iconStyle . '">' . $this->formatIcon($item->icon) . '</span>' .
+            '<span class="tw-truncate">' . $item->title . '</span>' .
             '</a>' . PHP_EOL;
     }
 
@@ -95,17 +117,22 @@ class AdminlteCustomPresenter extends Presenter
     {
         $hasActive = $item->hasActiveOnChild();
         $accent = $this->getThemeAccentColor();
+        $light = $this->getThemeLightColor();
         $parentStyle = $hasActive
-            ? 'color:' . $accent . ';background:rgba(255,255,255,0.05);'
+            ? 'color:white;background:linear-gradient(135deg,' . $accent . ',' . $light . ');box-shadow:0 3px 10px rgba(0,0,0,0.25);'
             : 'color:rgba(255,255,255,0.72);';
 
         $chevron = $hasActive
             ? '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" />'
             : '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" />';
 
-        $dropdownToggle = '<a href="#" title="" class="drop_down sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $parentStyle . '" ' . $item->getAttributes() . '>' .
-            $this->formatIcon($item->icon) .
-            ' <span class="tw-truncate">' . $item->title . '</span>' .
+        $parentIconStyle = $hasActive
+            ? 'width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,0.15);font-size:12px;'
+            : 'width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,0.08);font-size:12px;';
+
+        $dropdownToggle = '<a href="#" title="" class="drop_down sidebar-nav-link tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-all tw-rounded-lg tw-whitespace-nowrap" style="' . $parentStyle . '" ' . $item->getAttributes() . '>' .
+            '<span style="' . $parentIconStyle . '">' . $this->formatIcon($item->icon) . '</span>' .
+            '<span class="tw-truncate">' . $item->title . '</span>' .
             '<svg aria-hidden="true" class="svg" style="width:14px;height:14px;flex-shrink:0;margin-left:auto;color:#64748b;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">' . $chevron . '</svg>' .
             '</a>';
 

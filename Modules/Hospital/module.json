@@ -1,0 +1,10 @@
+{
+  "name": "Hospital",
+  "alias": "hospital",
+  "description": "Hospital Management System - Patients, Triage, Lab, Mortuary",
+  "keywords": ["hospital", "hms", "triage", "lab", "mortuary"],
+  "priority": 0,
+  "providers": ["Modules\\Hospital\\Providers\\HospitalServiceProvider"],
+  "aliases": {},
+  "files": []
+}

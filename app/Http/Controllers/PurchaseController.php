@@ -949,6 +949,15 @@ class PurchaseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function drafts()
+    {
+        if (!auth()->user()->can('purchase.create')) {
+            abort(403, 'Unauthorized');
+        }
+        $business_id = session('user.business_id');
+        return view('purchase.drafts', compact('business_id'));
+    }
+
     public function getProducts()
     {
         if (request()->ajax()) {

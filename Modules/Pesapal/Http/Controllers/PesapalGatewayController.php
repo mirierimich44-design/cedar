@@ -6,8 +6,13 @@ use Illuminate\Routing\Controller;
 use Modules\Pesapal\Entities\PesapalSetting;
 use Modules\Pesapal\Entities\PesapalTransaction;
 use Modules\Pesapal\Utils\PesapalService;
+use App\Transaction;
+use App\TransactionPayment;
+use App\Events\TransactionPaymentAdded;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -15,6 +20,60 @@ use Yajra\DataTables\Facades\DataTables;
 
 class PesapalGatewayController extends Controller
 {
+    protected $transactionUtil;
+
+    public function __construct(TransactionUtil $transactionUtil)
+    {
+        $this->transactionUtil = $transactionUtil;
+    }
+
+    /**
+     * After a Pesapal payment is confirmed, create a TransactionPayment record
+     * in the main ERP and update the transaction's payment status.
+     * Safe to call multiple times — guards against duplicate records.
+     */
+    private function applyPaymentToTransaction(PesapalTransaction $pesapalTx): void
+    {
+        if (!$pesapalTx->transaction_id) {
+            return; // No ERP transaction linked — standalone Pesapal payment
+        }
+
+        // Prevent duplicate payment records for the same Pesapal confirmation
+        $alreadyRecorded = TransactionPayment::where('transaction_id', $pesapalTx->transaction_id)
+            ->where('transaction_no', $pesapalTx->confirmation_code)
+            ->exists();
+
+        if ($alreadyRecorded) {
+            return;
+        }
+
+        $transaction = Transaction::find($pesapalTx->transaction_id);
+        if (!$transaction) {
+            return;
+        }
+
+        $prefix_type = $transaction->type === 'purchase' ? 'purchase_payment' : 'sell_payment';
+        $ref_count   = $this->transactionUtil->setAndGetReferenceCount($prefix_type, $transaction->business_id);
+        $payment_ref = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count, $transaction->business_id);
+
+        $tp = TransactionPayment::create([
+            'transaction_id' => $transaction->id,
+            'business_id'    => $transaction->business_id,
+            'method'         => 'pesapal',
+            'amount'         => $pesapalTx->amount,
+            'transaction_no' => $pesapalTx->confirmation_code,
+            'payment_ref_no' => $payment_ref,
+            'paid_on'        => now()->toDateTimeString(),
+            'created_by'     => $pesapalTx->initiated_by ?? auth()->id(),
+            'payment_for'    => $transaction->contact_id,
+            'note'           => 'Pesapal — ' . $pesapalTx->confirmation_code,
+        ]);
+
+        $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+
+        event(new TransactionPaymentAdded($tp, $transaction->toArray()));
+    }
+
     // -----------------------------------------------------------------------
     // Settings
     // -----------------------------------------------------------------------
@@ -282,6 +341,12 @@ class PesapalGatewayController extends Controller
                             $result['payment_status_description']
                         );
                         $pesapalTx->refresh();
+                        // Apply payment to ERP transaction
+                        try {
+                            $this->applyPaymentToTransaction($pesapalTx);
+                        } catch (\Exception $payEx) {
+                            Log::error('Pesapal: failed to apply payment to transaction', ['error' => $payEx->getMessage()]);
+                        }
                     } elseif (in_array($statusCode, [2, 3])) {
                         // FAILED or REVERSED
                         $pesapalTx->markAsFailed(
@@ -348,6 +413,13 @@ class PesapalGatewayController extends Controller
                     );
                     if (!$pesapalTx->order_tracking_id) {
                         $pesapalTx->update(['order_tracking_id' => $orderTrackingId]);
+                    }
+                    $pesapalTx->refresh();
+                    // Apply payment to ERP transaction
+                    try {
+                        $this->applyPaymentToTransaction($pesapalTx);
+                    } catch (\Exception $payEx) {
+                        Log::error('Pesapal IPN: failed to apply payment to transaction', ['error' => $payEx->getMessage()]);
                     }
                     Log::info('Pesapal IPN: payment completed', [
                         'confirmation_code' => $result['confirmation_code'],

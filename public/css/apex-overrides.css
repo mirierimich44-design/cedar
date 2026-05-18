@@ -507,6 +507,62 @@ table.table-bordered th {
     border-bottom: 1px solid #f1f5f9 !important;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL BUTTON THEMING — all primary/action buttons use theme color
+   ═══════════════════════════════════════════════════════════ */
+
+/* Bootstrap / AdminLTE btn-primary / btn-success / btn-info */
+.btn.btn-primary, .btn.btn-success, .btn.btn-info,
+.btn-primary, .btn-success, .btn-info {
+    background-color: var(--theme-main) !important;
+    border-color: var(--theme-main) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+.btn.btn-primary:hover, .btn.btn-primary:focus, .btn.btn-primary:active,
+.btn.btn-success:hover, .btn.btn-success:focus, .btn.btn-success:active,
+.btn.btn-info:hover,    .btn.btn-info:focus,    .btn.btn-info:active,
+.btn-primary:hover, .btn-success:hover, .btn-info:hover {
+    background-color: var(--theme-hover) !important;
+    border-color: var(--theme-hover) !important;
+    color: #fff !important;
+}
+
+/* DaisyUI tw-dw-btn-primary — force background directly; oklch() with hex is invalid so we bypass it */
+.tw-dw-btn.tw-dw-btn-primary,
+button.tw-dw-btn.tw-dw-btn-primary,
+a.tw-dw-btn.tw-dw-btn-primary {
+    --btn-color: var(--theme-main) !important;
+    --fallback-p: var(--theme-main) !important;
+    background: var(--theme-main) !important;
+    background-color: var(--theme-main) !important;
+    background-image: none !important;
+    border-color: var(--theme-main) !important;
+    color: #fff !important;
+    --tw-text-opacity: 1 !important;
+}
+.tw-dw-btn.tw-dw-btn-primary:hover,
+.tw-dw-btn.tw-dw-btn-primary:focus,
+button.tw-dw-btn.tw-dw-btn-primary:hover,
+button.tw-dw-btn.tw-dw-btn-primary:focus {
+    --btn-color: var(--theme-hover) !important;
+    background: var(--theme-hover) !important;
+    background-color: var(--theme-hover) !important;
+    background-image: none !important;
+    border-color: var(--theme-hover) !important;
+    color: #fff !important;
+}
+
+/* btn-link — use theme color as text */
+.btn-link {
+    color: var(--theme-main) !important;
+}
+.btn-link:hover,
+.btn-link:focus {
+    color: var(--theme-hover) !important;
+    text-decoration: underline;
+}
+
 /* ─── Card Headers & Titles (Pure White) ───────────────── */
 .box-header, .card-header, .box-title, .card-title,
 [class*="box-header"], [class*="card-header"],
@@ -758,6 +814,41 @@ textarea.form-control {
     color: var(--theme-dark, #065f46) !important;
 }
 
+/* ─── jQuery UI Autocomplete — purchase search dropdown ─────── */
+.ui-autocomplete.ui-menu {
+    padding: 8px 0 !important;
+    padding-left: 0 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    margin-top: 3px !important;
+    background: #fff !important;
+    z-index: 99999 !important;
+}
+.ui-autocomplete.ui-menu .ui-menu-item,
+.ui-autocomplete.ui-menu .ui-menu-item > * {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    list-style: none !important;
+}
+.ui-autocomplete.ui-menu .ui-menu-item:last-child > div {
+    border-bottom: none !important;
+}
+.ui-autocomplete.ui-menu .ui-menu-item-wrapper,
+.ui-autocomplete.ui-menu .ui-state-active,
+.ui-autocomplete.ui-menu .ui-state-focus {
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+}
+.ui-autocomplete.ui-menu::-webkit-scrollbar { width: 5px; }
+.ui-autocomplete.ui-menu::-webkit-scrollbar-track { background: #f8fafc; border-radius: 10px; }
+.ui-autocomplete.ui-menu::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
 /* ─── Mobile: prevent dark overlay on sidebar toggle tap ─── */
 .sidebar-overlay,
 .control-sidebar-bg,
@@ -879,4 +970,17 @@ body.sidebar-open::after {
 }
 .side-bar .logo-icon-gradient {
     background: linear-gradient(135deg, var(--theme-main), var(--theme-light)) !important;
+}
+
+/* ── Sidebar nav item hover ──────────────────────────────────────── */
+.sidebar-nav-link:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
+}
+.sidebar-nav-link:hover span[style*="border-radius:6px"] {
+    background: rgba(255,255,255,0.15) !important;
+}
+.sidebar-child-link:hover {
+    background: rgba(255,255,255,0.06) !important;
+    color: #ffffff !important;
 }

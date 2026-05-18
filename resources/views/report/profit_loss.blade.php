@@ -54,7 +54,7 @@
                 <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
                     <i class="fas fa-layer-group" style="color:white;font-size:14px;"></i>
                 </span>
-                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.profit_by_categories_heading', ['default' => 'Profit Breakdown'])</h3>
+                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.profit_by_categories')</h3>
             </div>
 
             {{-- Tabs Nav --}}
