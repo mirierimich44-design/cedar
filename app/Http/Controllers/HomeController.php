@@ -191,6 +191,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $__mark = function(string $label): void {};
         $user = auth()->user();
         if ($user->user_type == 'user_customer') {
             return redirect()->action([\Modules\Crm\Http\Controllers\DashboardController::class, 'index']);
@@ -330,6 +331,7 @@ class HomeController extends Controller
 
         //Get Dashboard widgets from module
         $module_widgets = $this->moduleUtil->getModuleData('dashboard_widget');
+        $__mark('module widgets');
 
         $widgets = [];
 
@@ -370,31 +372,43 @@ class HomeController extends Controller
         $staff_performance_chart->labels($staff_labels)
             ->options($this->__chartOptions(__('lang_v1.total_sales')))
             ->dataset(__('lang_v1.total_sales'), 'bar', $staff_values);
+        $__mark('staff_performance_chart');
 
-        // Profit Margins Chart
-        $labels = [];
-        $profit_values = [];
-        
-        $current_month = \Carbon::parse($fy_start)->startOfMonth();
-        $end_month = \Carbon::parse($fy_end)->startOfMonth();
-        
-        while ($current_month <= $end_month) {
-            $month_label = $current_month->format('M-Y');
-            $labels[] = $month_label;
-            
-            $month_start = $current_month->copy()->startOfMonth()->format('Y-m-d');
-            $month_end = $current_month->copy()->endOfMonth()->format('Y-m-d');
-            
-            $gross_profit_data = $this->transactionUtil->getProfitLossDetails($business_id, null, $month_start, $month_end);
-            $profit_values[] = (float) ($gross_profit_data['gross_profit'] ?? 0);
-            
-            $current_month->addMonth();
-        }
+        // Profit Margins Chart — CACHED for 1 hour per business.
+        // getProfitLossDetails() is expensive (joins transactions + purchases + expenses).
+        // Running it once per month across the FY was taking 100+ seconds on the dashboard.
+        // Cached per (business_id, fy_start, fy_end); invalidate by clearing cache:
+        //   php artisan cache:forget "home_profit_chart_{$business_id}_{$fy_start}_{$fy_end}"
+        $profit_cache_key = "home_profit_chart_{$business_id}_{$fy_start}_{$fy_end}";
+        [$labels, $profit_values] = \Cache::remember($profit_cache_key, now()->addHour(), function () use ($fy_start, $fy_end, $business_id) {
+            $labels        = [];
+            $profit_values = [];
+
+            $current_month = \Carbon::parse($fy_start)->startOfMonth();
+            $end_month     = \Carbon::parse($fy_end)->startOfMonth();
+
+            while ($current_month <= $end_month) {
+                $labels[] = $current_month->format('M-Y');
+
+                $month_start = $current_month->copy()->startOfMonth()->format('Y-m-d');
+                $month_end   = $current_month->copy()->endOfMonth()->format('Y-m-d');
+
+                $gross_profit_data = $this->transactionUtil->getProfitLossDetails($business_id, null, $month_start, $month_end);
+                $profit_values[]   = (float) ($gross_profit_data['gross_profit'] ?? 0);
+
+                $current_month->addMonth();
+            }
+
+            return [$labels, $profit_values];
+        });
+
+        $__mark('profit_margin_loop');
 
         $profit_margin_chart = new CommonChart;
         $profit_margin_chart->labels($labels)
             ->options($this->__chartOptions(__('lang_v1.gross_profit')))
             ->dataset(__('lang_v1.gross_profit'), 'line', $profit_values);
+        $__mark('profit_margin_chart built');
 
         return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin', 'staff_performance_chart', 'profit_margin_chart'));
     }
