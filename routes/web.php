@@ -346,22 +346,38 @@ Route::prefix('saas-admin')->name('saas.admin.')->middleware(['setData', 'auth',
 });
 
 Route::middleware(['setData'])->group(function () {
+    // POS install: no SaaS marketing welcome page — send users to login / home
     Route::get('/', function () {
-        $featuresByCategory = \App\SaasFeature::activeByCategory();
-        $bundles = \App\SaasBundle::with('features')->where('is_active', true)->orderBy('sort_order')->get();
+        if (view()->exists('welcome')) {
+            try {
+                $featuresByCategory = class_exists(\App\SaasFeature::class)
+                    ? \App\SaasFeature::activeByCategory()
+                    : collect();
+                $bundles = class_exists(\App\SaasBundle::class)
+                    ? \App\SaasBundle::with('features')->where('is_active', true)->orderBy('sort_order')->get()
+                    : collect();
+                $categories = [
+                    'core'          => ['label' => 'Core (Always Included)', 'icon' => 'fa-star'],
+                    'inventory'     => ['label' => 'Inventory & Stock',       'icon' => 'fa-boxes'],
+                    'pharmacy'      => ['label' => 'Pharmacy / DDA',          'icon' => 'fa-pills'],
+                    'compliance'    => ['label' => 'Tax & Compliance',        'icon' => 'fa-file-invoice'],
+                    'reporting'     => ['label' => 'Reports & Analytics',     'icon' => 'fa-chart-bar'],
+                    'communication' => ['label' => 'Communication',           'icon' => 'fa-comment-dots'],
+                    'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
+                    'service'       => ['label' => 'Professional Services',   'icon' => 'fa-tools'],
+                ];
 
-        $categories = [
-            'core'          => ['label' => 'Core (Always Included)', 'icon' => 'fa-star'],
-            'inventory'     => ['label' => 'Inventory & Stock',       'icon' => 'fa-boxes'],
-            'pharmacy'      => ['label' => 'Pharmacy / DDA',          'icon' => 'fa-pills'],
-            'compliance'    => ['label' => 'Tax & Compliance',        'icon' => 'fa-file-invoice'],
-            'reporting'     => ['label' => 'Reports & Analytics',     'icon' => 'fa-chart-bar'],
-            'communication' => ['label' => 'Communication',           'icon' => 'fa-comment-dots'],
-            'restaurant'    => ['label' => 'Restaurant',              'icon' => 'fa-utensils'],
-            'service'       => ['label' => 'Professional Services',   'icon' => 'fa-tools'],
-        ];
+                return view('welcome', compact('featuresByCategory', 'bundles', 'categories'));
+            } catch (\Throwable $e) {
+                // fall through to login redirect
+            }
+        }
 
-        return view('welcome', compact('featuresByCategory', 'bundles', 'categories'));
+        if (auth()->check()) {
+            return redirect()->to('/home');
+        }
+
+        return redirect()->route('login');
     });
 
     Auth::routes();
