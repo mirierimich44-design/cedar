@@ -1758,12 +1758,17 @@ class SellController extends Controller
                 ->where('transactions.transaction_date', '<=', $end);
         }
 
-        // Direct sale flag
-        if (request()->has('is_direct_sale')) {
-            $is_direct_sale = request()->is_direct_sale;
-            if ($is_direct_sale == 0) {
+        // Direct sale flag:
+        // 0 = POS counter sales only (is_direct_sale = 0)
+        // 1 = add-sale / direct only (is_direct_sale = 1)
+        // omit / empty = all final sells (POS + direct) — preferred for pharmacy "all sales"
+        if (request()->has('is_direct_sale') && request()->input('is_direct_sale') !== '' && request()->input('is_direct_sale') !== null) {
+            $is_direct_sale = request()->input('is_direct_sale');
+            if ((string) $is_direct_sale === '0') {
                 $query->where('transactions.is_direct_sale', 0);
                 $query->whereNull('transactions.sub_type');
+            } elseif ((string) $is_direct_sale === '1') {
+                $query->where('transactions.is_direct_sale', 1);
             }
         }
 

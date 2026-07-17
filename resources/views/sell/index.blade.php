@@ -3,7 +3,7 @@
 
 @section('css')
 @parent
-@include('layouts.partials.page_modern_css')
+@includeIf('layouts.partials.page_modern_css')
 @endsection
 
 @section('content')
@@ -161,7 +161,11 @@ $(document).ready(function() {
                     d.start_date = $('#sell_list_filter_date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
                     d.end_date   = $('#sell_list_filter_date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
                 }
-                d.is_direct_sale  = 1;
+                // Do NOT force is_direct_sale=1 — that hid POS counter sales from "All sales".
+                // POS list (sale_pos) still sends is_direct_sale=0 for POS-only.
+                if ($('#is_direct_sale').length) {
+                    d.is_direct_sale = $('#is_direct_sale').val();
+                }
                 d.location_id     = $('#sell_list_filter_location_id').val();
                 d.customer_id     = $('#sell_list_filter_customer_id').val();
                 d.payment_status  = $('#sell_list_filter_payment_status').val();
