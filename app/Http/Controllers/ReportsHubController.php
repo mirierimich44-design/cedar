@@ -163,6 +163,25 @@ class ReportsHubController extends Controller
             $groups[] = ['key' => 'people', 'title' => 'People', 'color' => '#0891b2', 'items' => $people];
         }
 
+        // Finance & control (advanced pack)
+        $finance = [];
+        if ($can('profit_loss_report.view') || $can('account.access') || $can('purchase_n_sell_report.view')) {
+            $finance[] = $link(route('reports.financial_statements'), 'Financial statements', 'P&L + simplified balance sheet + cash movement.', 'fa-file-invoice-dollar');
+            $finance[] = $link(route('reports.bank_mpesa_recon'), 'Bank / M-Pesa recon', 'POS payments vs M-Pesa log vs statement total.', 'fa-university');
+            $finance[] = $link(route('reports.multi_period'), 'Multi-period dashboard', 'Sales, gross & net over recent months.', 'fa-chart-bar');
+            $finance[] = $link(route('reports.discount_abuse'), 'Discount abuse', 'Unusual invoice/line discounts by cashier.', 'fa-percentage');
+        }
+        if ($can('stock_report.view')) {
+            $finance[] = $link(route('reports.fefo_compliance'), 'FEFO / batch log', 'Sales that skipped older-expiry batches.', 'fa-pills');
+            $finance[] = $link(route('reports.inventory_valuation'), 'Inventory valuation', 'Formal stock value at cost & sell price.', 'fa-balance-scale');
+        }
+        if (auth()->user()->can('sell.view') || auth()->user()->can('account.access') || auth()->user()->can('business_settings.access') || auth()->user()->can('user.view')) {
+            $finance[] = $link(route('reports.audit_export'), 'Audit log export', 'Who changed what — filter & CSV export.', 'fa-user-secret');
+        }
+        if (! empty($finance)) {
+            $groups[] = ['key' => 'finance', 'title' => 'Finance & control', 'color' => '#be185d', 'items' => $finance];
+        }
+
         // Compliance / other
         $other = [];
         if ($can('tax_report.view')) {
@@ -170,9 +189,6 @@ class ReportsHubController extends Controller
         }
         if ($can('expense_report.view')) {
             $other[] = $link(action([ReportController::class, 'getExpenseReport']), 'Expenses', 'Money spent on expenses.', 'fa-receipt');
-        }
-        if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.access')) {
-            // activity often admin
         }
         if (! empty($other)) {
             $groups[] = ['key' => 'other', 'title' => 'Tax & expenses', 'color' => '#64748b', 'items' => $other];

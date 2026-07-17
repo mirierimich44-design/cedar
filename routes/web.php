@@ -51,6 +51,7 @@ use App\Http\Controllers\SellingPriceGroupController;
 use App\Http\Controllers\SellPosController;
 use App\Http\Controllers\SellReturnController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\SaNomapStoreController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\TaxonomyController;
 use App\Http\Controllers\TaxRateController;
@@ -87,6 +88,151 @@ use Illuminate\Support\Facades\Route;
 */
 
 include_once 'install_r.php';
+
+// ─── TEMPORARY: Stocktake Import Route (DELETE AFTER USE) ─────────────────
+// Access at: /stocktake-import-liyoh2026
+Route::get('/stocktake-import-liyoh2026', function () {
+    header('Content-Type: text/html; charset=utf-8');
+    $output = "<html><head><style>
+        body{font-family:monospace;padding:20px;background:#fafafa;}
+        .ok{color:#16a34a;font-weight:bold;}
+        .warn{color:#f97316;}
+        .err{color:#dc2626;font-weight:bold;background:#fee2e2;padding:10px;border-left:4px solid #dc2626;margin:8px 0;}
+        h2{color:#2563eb;border-bottom:2px solid #ddd;padding-bottom:4px;}
+    </style></head><body><h2>Stocktake Import — ST-20260311-4905</h2><pre>";
+
+    // ⚠ Cleanup: Remove wrongly imported records from transaction 12864
+    $deleted = \DB::table('stocktake_lines')->where('transaction_id', 12864)->delete();
+    $output .= "🧹 Cleaned up {$deleted} wrongly imported records from transaction 12864.\n\n";
+
+    $ref_no = 'ST-20260311-4905';
+
+    $pagesData = [
+        "32" => ["2142"=>50, "2147"=>6, "2149"=>0, "2150"=>0, "2171"=>17, "2172"=>1, "2190"=>1, "2191"=>0, "2195"=>100, "2196"=>3, "3021"=>0, "2961"=>6, "2209"=>0, "2210"=>624, "3028"=>7, "2211"=>1, "2212"=>8, "2213"=>7, "2214"=>131, "2215"=>0],
+        "33" => ["2219"=>0, "2220"=>3, "2227"=>0, "3039"=>0, "2230"=>27, "2232"=>14, "2236"=>7, "2237"=>1, "2947"=>0, "2239"=>0, "2241"=>2, "2243"=>2, "2244"=>715, "2249"=>32, "2944"=>32, "2254"=>0, "2255"=>28, "2260"=>51, "2266"=>59, "2274"=>49],
+        "34" => ["2276"=>7, "2283"=>250, "2284"=>6, "2285"=>0, "2953"=>110, "2307"=>0, "3044"=>0, "2315"=>23, "2316"=>2, "2323"=>1, "2324"=>21, "2329"=>2, "2335"=>1, "2341"=>2, "2347"=>51, "2351"=>5, "2359"=>2, "2970"=>6, "2958"=>6, "2384"=>30],
+        "35" => ["2385"=>1, "2389"=>0, "2391"=>1, "2965"=>277, "2394"=>0, "3073"=>0, "3030"=>0, "3029"=>0, "2405"=>1, "2408"=>0, "2409"=>0, "2410"=>0, "2972"=>1, "2414"=>24, "2417"=>1, "3071"=>0, "2421"=>11, "2428"=>0, "2429"=>2, "2430"=>3],
+        "36" => ["2439"=>2, "2442"=>6, "2447"=>2, "3090"=>1, "2449"=>15, "2451"=>0, "2453"=>10, "3099"=>0, "2459"=>84, "2461"=>0, "2468"=>2, "2470"=>2, "2473"=>0, "3060"=>86, "2490"=>0, "3007"=>1, "2491"=>14, "3043"=>75, "3056"=>38, "2494"=>19],
+        "37" => ["2495"=>0, "2497"=>13, "2499"=>34, "2507"=>2, "2512"=>0, "2515"=>2, "2516"=>0, "2518"=>64, "2521"=>0, "2522"=>5, "2523"=>0, "2524"=>0, "2525"=>0, "2535"=>0, "2539"=>0, "2541"=>0, "2542"=>0, "2552"=>12, "2559"=>30, "2589"=>2],
+        "38" => ["2590"=>2, "2591"=>46, "2596"=>1, "2597"=>1, "2598"=>2, "2599"=>2, "2610"=>5, "2611"=>4, "2612"=>15, "2621"=>0, "3026"=>0, "2630"=>1, "3074"=>1, "3046"=>242, "2635"=>8, "2637"=>2, "2638"=>2, "2639"=>0, "2640"=>0, "2644"=>0],
+        "39" => ["2646"=>0, "2655"=>1, "2657"=>2, "2658"=>2, "2660"=>5, "2661"=>4, "2662"=>2, "2663"=>2, "2665"=>1, "2668"=>1, "2687"=>80, "2688"=>37, "2689"=>23, "3033"=>6, "2697"=>1, "2698"=>1, "2700"=>1, "2701"=>4, "3102"=>13, "2707"=>1],
+        "40" => ["2723"=>0, "2724"=>0, "2726"=>1, "2727"=>2, "2728"=>2, "3049"=>3, "2756"=>67, "2757"=>75, "3075"=>0, "2957"=>0, "2771"=>2, "2981"=>0, "2780"=>0, "2781"=>28, "3051"=>3, "3014"=>0, "2971"=>150, "2798"=>0, "2800"=>154, "2806"=>70],
+        "41" => ["2807"=>0, "2811"=>2, "2815"=>18, "2817"=>0, "2983"=>0, "2832"=>0, "2833"=>0, "2844"=>4, "3001"=>8, "2846"=>1, "2856"=>0, "2858"=>20, "2860"=>0, "2861"=>1, "2863"=>0, "2866"=>0, "2878"=>2, "2882"=>4, "2883"=>2, "2885"=>0],
+        "42" => ["2886"=>9, "2890"=>0, "2895"=>1, "2898"=>3, "3006"=>0, "2899"=>4, "2901"=>2, "2903"=>65, "2904"=>1, "3110"=>0, "2905"=>1, "2911"=>10, "2915"=>2, "2924"=>59, "2925"=>23, "2926"=>22, "2927"=>1, "2928"=>1, "2936"=>13, "2940"=>1],
+        "43" => ["2941"=>0],
+    ];
+
+    try {
+        $stocktake = \DB::table('transactions')
+            ->where('ref_no', $ref_no)
+            ->where('type', 'stocktake')
+            ->first();
+
+        if (!$stocktake) {
+            return response("<div class='err'>❌ Stocktake '{$ref_no}' not found in database.</div></pre></body></html>")->header('Content-Type','text/html');
+        }
+
+        $output .= "✓ Found Stocktake ID: {$stocktake->id} | Location: {$stocktake->location_id} | Date: {$stocktake->transaction_date}\n\n";
+
+        $business_id    = $stocktake->business_id;
+        $location_id    = $stocktake->location_id;
+        $transaction_id = $stocktake->id;
+        $start_date     = $stocktake->transaction_date;
+
+        \DB::beginTransaction();
+        $importedCount = 0;
+        $skipped = [];
+
+        foreach ($pagesData as $page => $counts) {
+            $output .= "Page {$page}: ";
+
+            \DB::table('stocktake_lines')
+                ->where('transaction_id', $transaction_id)
+                ->where('page', $page)
+                ->delete();
+
+            $pageCount = 0;
+            foreach ($counts as $sku => $counted_qty) {
+                if ($counted_qty === null) continue;
+
+                $variation = \DB::table('variations')
+                    ->join('products', 'variations.product_id', '=', 'products.id')
+                    ->where('products.business_id', $business_id)
+                    ->where(function($q) use ($sku) {
+                        $q->where('variations.sub_sku', $sku)->orWhere('products.sku', $sku);
+                    })
+                    ->select('variations.id as variation_id', 'products.id as product_id')
+                    ->first();
+
+                if (!$variation) {
+                    $skipped[] = "Page {$page} SKU {$sku}";
+                    continue;
+                }
+
+                $vld = \DB::table('variation_location_details')
+                    ->where('variation_id', $variation->variation_id)
+                    ->where('location_id', $location_id)
+                    ->first();
+                $system_qty = $vld ? (float)$vld->qty_available : 0.0;
+
+                $purchased = \DB::table('purchase_lines')
+                    ->join('transactions as t','purchase_lines.transaction_id','=','t.id')
+                    ->where('t.business_id', $business_id)
+                    ->where('t.location_id', $location_id)
+                    ->where('t.type','purchase')->where('t.status','received')
+                    ->where('purchase_lines.variation_id', $variation->variation_id)
+                    ->where('t.transaction_date','>=',$start_date)
+                    ->sum('purchase_lines.quantity');
+
+                $sold = \DB::table('transaction_sell_lines')
+                    ->join('transactions as t','transaction_sell_lines.transaction_id','=','t.id')
+                    ->where('t.business_id', $business_id)
+                    ->where('t.location_id', $location_id)
+                    ->where('t.type','sell')->where('t.status','final')
+                    ->where('transaction_sell_lines.variation_id', $variation->variation_id)
+                    ->where('t.transaction_date','>=',$start_date)
+                    ->sum('transaction_sell_lines.quantity');
+
+                $adjusted = (float)$counted_qty + (float)$purchased - (float)$sold;
+                $variance = $adjusted - $system_qty;
+
+                \DB::table('stocktake_lines')->insert([
+                    'transaction_id'   => $transaction_id,
+                    'product_id'       => $variation->product_id,
+                    'variation_id'     => $variation->variation_id,
+                    'system_qty'       => $system_qty,
+                    'counted_qty'      => $counted_qty,
+                    'qty_purchased'    => $purchased,
+                    'qty_sold'         => $sold,
+                    'adjusted_counted' => $adjusted,
+                    'variance'         => $variance,
+                    'page'             => $page,
+                    'counted_by'       => 1,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ]);
+                $pageCount++;
+                $importedCount++;
+            }
+            $output .= "<span class='ok'>{$pageCount} items imported.</span>\n";
+        }
+
+        \DB::commit();
+
+        if (!empty($skipped)) {
+            $output .= "\n<span class='warn'>⚠ SKUs not found (skipped): " . implode(', ', $skipped) . "</span>\n";
+        }
+        $output .= "\n<span class='ok'>🎉 Done! Total imported: {$importedCount} counts.</span>";
+
+    } catch (\Throwable $e) {
+        \DB::rollBack();
+        $output .= "\n<span style='color:#dc2626'>❌ Error: " . $e->getMessage() . "\nFile: " . $e->getFile() . " line " . $e->getLine() . "</span>";
+    }
+
+    $output .= "</pre></body></html>";
+    return response($output)->header('Content-Type','text/html');
+});
+// ─── END TEMPORARY IMPORT ROUTE ────────────────────────────────────────────
 
 // ─── SaaS Public Routes ───────────────────────────────────────────────────
 Route::middleware(['setData'])->group(function () {
@@ -611,6 +757,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/purchases/get_suppliers', [PurchaseController::class, 'getSuppliers']);
     Route::post('/purchases/get_purchase_entry_row', [PurchaseController::class, 'getPurchaseEntryRow']);
     Route::post('/purchases/check_ref_number', [PurchaseController::class, 'checkRefNumber']);
+    Route::post('/purchases/scan-invoice', [PurchaseController::class, 'scanInvoice']);
+    Route::post('/purchases/refresh-fast-movers-mapping', [PurchaseController::class, 'refreshFastMoversMapping']);
     Route::resource('purchases', PurchaseController::class)->except(['show']);
 
     Route::get('/toggle-subscription/{id}', [SellPosController::class, 'toggleRecurringInvoices']);
@@ -709,6 +857,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/trending-products', [ReportController::class, 'getTrendingProducts']);
     Route::get('/reports/expense-report', [ReportController::class, 'getExpenseReport']);
     Route::get('/reports/stock-adjustment-report', [ReportController::class, 'getStockAdjustmentReport']);
+    Route::get('/reports/stock-adjustment-product-report', [ReportController::class, 'getStockAdjustmentProductReport']);
     Route::get('/reports/register-report', [ReportController::class, 'getRegisterReport']);
     Route::get('/reports/sales-representative-report', [ReportController::class, 'getSalesRepresentativeReport']);
     Route::get('/reports/sales-representative-total-expense', [ReportController::class, 'getSalesRepresentativeTotalExpense']);
@@ -734,6 +883,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/items-report', [ReportController::class, 'itemsReport']);
     Route::get('/reports/get-stock-value', [ReportController::class, 'getStockValue']);
     Route::get('/reports/dead-stock', [ReportController::class, 'getDeadStockReport']);
+    Route::get('/reports/fast-movers', [ReportController::class, 'getFastMoversReport']);
     Route::get('/home/morning-digest', [HomeController::class, 'getMorningDigest'])->name('home.morning_digest');
     Route::get('/reports/low-stock-velocity', [ReportController::class, 'getLowStockVelocityReport']);
     Route::get('/reports/customer-credit', [ReportController::class, 'getCustomerCreditReport']);
@@ -741,6 +891,23 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/daily-summary-data', [ReportController::class, 'getDailySummaryData'])->name('reports.daily_summary_data');
     Route::get('/reports/daily-reconciliation', [ReportController::class, 'getDailyReconciliation'])->name('reports.daily_reconciliation');
     Route::get('/reports/purchase-price-variance', [ReportController::class, 'getPurchasePriceVarianceReport']);
+
+    // Pharmacy reports hub (A–C packages)
+    Route::get('/reports', [\App\Http\Controllers\ReportsHubController::class, 'index'])->name('reports.hub');
+    Route::get('/reports/hub', [\App\Http\Controllers\ReportsHubController::class, 'index']);
+    Route::get('/reports/day-close', [\App\Http\Controllers\ReportsHubController::class, 'dayClose'])->name('reports.day_close');
+    Route::get('/reports/ledger-gap', [\App\Http\Controllers\ReportsHubController::class, 'ledgerGap'])->name('reports.ledger_gap');
+    Route::get('/reports/expiry-smart', [\App\Http\Controllers\ReportsHubController::class, 'expirySmart'])->name('reports.expiry_smart');
+    Route::get('/reports/reorder-list', [\App\Http\Controllers\ReportsHubController::class, 'reorderList'])->name('reports.reorder_list');
+
+    // Advanced finance / control reports
+    Route::get('/reports/financial-statements', [\App\Http\Controllers\AdvancedReportsController::class, 'financialStatements'])->name('reports.financial_statements');
+    Route::get('/reports/bank-mpesa-recon', [\App\Http\Controllers\AdvancedReportsController::class, 'bankMpesaRecon'])->name('reports.bank_mpesa_recon');
+    Route::get('/reports/multi-period', [\App\Http\Controllers\AdvancedReportsController::class, 'multiPeriodDashboard'])->name('reports.multi_period');
+    Route::get('/reports/discount-abuse', [\App\Http\Controllers\AdvancedReportsController::class, 'discountAbuse'])->name('reports.discount_abuse');
+    Route::get('/reports/fefo-compliance', [\App\Http\Controllers\AdvancedReportsController::class, 'fefoCompliance'])->name('reports.fefo_compliance');
+    Route::get('/reports/audit-export', [\App\Http\Controllers\AdvancedReportsController::class, 'auditLogExport'])->name('reports.audit_export');
+    Route::get('/reports/inventory-valuation', [\App\Http\Controllers\AdvancedReportsController::class, 'inventoryValuation'])->name('reports.inventory_valuation');
 
     // Lost Sales
     Route::post('/lost-sales', [\App\Http\Controllers\LostSaleController::class, 'store'])->name('lost_sales.store');
@@ -752,15 +919,19 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/', [\App\Http\Controllers\OrderController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\OrderController::class, 'store'])->name('store');
         Route::get('/search/products', [\App\Http\Controllers\OrderController::class, 'searchProducts'])->name('searchProducts');
+        Route::get('/suggested-products', [\App\Http\Controllers\OrderController::class, 'suggestedOrderProducts'])->name('suggestedProducts');
         Route::get('/pos/list', [\App\Http\Controllers\OrderController::class, 'getOrdersForPos'])->name('posOrders');
-        Route::get('/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('show');
+        Route::get('/convert-suppliers', [\App\Http\Controllers\OrderController::class, 'convertSuppliers'])->name('convertSuppliers');
+        // Static / multi-segment routes BEFORE /{id} so they never get swallowed
+        Route::get('/{id}/fetch-details-json', [\App\Http\Controllers\OrderController::class, 'getOrderDetailsJson'])->name('fetchDetailsJson');
         Route::get('/{id}/print', [\App\Http\Controllers\OrderController::class, 'printOrder'])->name('print');
         Route::get('/{id}/receipt', [\App\Http\Controllers\OrderController::class, 'getOrderReceipt'])->name('receipt');
-        Route::post('/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('updateStatus');
-        Route::delete('/{id}', [\App\Http\Controllers\OrderController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/edit', [\App\Http\Controllers\OrderController::class, 'edit'])->name('edit');
+        Route::post('/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::post('/{id}/convert-to-purchase', [\App\Http\Controllers\OrderController::class, 'convertToPurchase'])->name('convertToPurchase');
         Route::put('/{id}', [\App\Http\Controllers\OrderController::class, 'update'])->name('update');
-        Route::get('/{id}/fetch-details-json', [\App\Http\Controllers\OrderController::class, 'getOrderDetailsJson'])->name('fetchDetailsJson');
+        Route::delete('/{id}', [\App\Http\Controllers\OrderController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('show');
     });
 
     // Customer Order Links (shareable order links per contact)
@@ -821,16 +992,22 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('/stock-adjustments/remove-expired-stock/{purchase_line_id}', [StockAdjustmentController::class, 'removeExpiredStock']);
     Route::post('/stock-adjustments/get_product_row', [StockAdjustmentController::class, 'getProductRow']);
-    Route::resource('stock-adjustments', StockAdjustmentController::class);
+    // SA-BYPASS-2026: store goes to brand-new controller (no mapPurchaseSell). Must be before resource.
+    Route::post('/stock-adjustments', [SaNomapStoreController::class, 'store'])->name('stock-adjustments.store');
+    Route::resource('stock-adjustments', StockAdjustmentController::class)->except(['store']);
 
     // Stocktake (Physical Inventory Count)
     Route::get('/stocktake/products', [App\Http\Controllers\StocktakeController::class, 'getProducts'])->name('stocktake.products');
     Route::get('/stocktake/search-products', [App\Http\Controllers\StocktakeController::class, 'searchProducts'])->name('stocktake.searchProducts');
     Route::post('/stocktake/{id}/save-counts', [App\Http\Controllers\StocktakeController::class, 'saveCounts'])->name('stocktake.saveCounts');
+    Route::post('/stocktake/{id}/update-line-count', [App\Http\Controllers\StocktakeController::class, 'updateLineCount'])->name('stocktake.updateLineCount');
     Route::get('/stocktake/{id}/complete', [App\Http\Controllers\StocktakeController::class, 'complete'])->name('stocktake.complete');
     Route::get('/stocktake/{id}/variance-report', [App\Http\Controllers\StocktakeController::class, 'varianceReport'])->name('stocktake.varianceReport');
     Route::get('/stocktake/{id}/print-count-sheet', [App\Http\Controllers\StocktakeController::class, 'printCountSheet'])->name('stocktake.printCountSheet');
     Route::get('/stocktake/{id}/print-verification', [App\Http\Controllers\StocktakeController::class, 'printVerificationSheet'])->name('stocktake.printVerificationSheet');
+    Route::get('/stocktake/get-purchase-quantities', [App\Http\Controllers\StocktakeController::class, 'getPurchaseQuantities'])->name('stocktake.getPurchaseQuantities');
+    Route::get('/stocktake/{id}/get-page-lines', [App\Http\Controllers\StocktakeController::class, 'getPageLines'])->name('stocktake.getPageLines');
+    Route::get('/stocktake/{id}/get-sheet-products', [App\Http\Controllers\StocktakeController::class, 'getSheetProducts'])->name('stocktake.getSheetProducts');
     Route::resource('stocktake', App\Http\Controllers\StocktakeController::class);
 
     Route::get('/cash-register/register-details', [CashRegisterController::class, 'getRegisterDetails']);
@@ -1075,4 +1252,17 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
     Route::get('/sells/invoice-url/{id}', [SellPosController::class, 'showInvoiceUrl']);
     Route::get('/show-notification/{id}', [HomeController::class, 'showNotification']);
     Route::post('/sell/check-invoice-number', [SellController::class, 'checkInvoiceNumber']);
+});
+
+Route::get('/megapay-migrate-liyoh2026', function () {
+    try {
+        $output = '';
+        // Run migrations for the module
+        \Artisan::call('module:migrate', ['module' => 'MegaPay']);
+        $output .= "✓ Migrations executed successfully:\n" . \Artisan::output() . "\n";
+        
+        return "<pre>{$output}🎉 MegaPay module is fully migrated and ready!</pre>";
+    } catch (\Exception $e) {
+        return "<pre>❌ Error: " . $e->getMessage() . "</pre>";
+    }
 });

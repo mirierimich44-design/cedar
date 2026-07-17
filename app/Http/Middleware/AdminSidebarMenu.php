@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Utils\ModuleUtil;
 use Closure;
+use Illuminate\Support\Facades\Route;
 use Menu;
-use Modules\CustomDashboard\Entities\CustomDashboard;
 
 class AdminSidebarMenu
 {
@@ -47,7 +47,7 @@ class AdminSidebarMenu
             <path d="M10 12h4v4h-4z" />
           </svg>', 'active' => request()->segment(1) == 'home'])->order(5);
 
-            if (in_array('ai_analytics', $enabled_modules)) {
+            if (in_array('ai_analytics', $enabled_modules) && Route::has('dashboard.bi')) {
                 $menu->url(route('dashboard.bi'), 'AI Analytics', ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
             <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
@@ -181,37 +181,41 @@ class AdminSidebarMenu
             }
 
             // Cooler Management
-            if (in_array('cooler', $enabled_modules) && (auth()->user()->can('cooler.asset.view') || auth()->user()->can('cooler.dealer.view') || auth()->user()->can('cooler.compliance.view') || auth()->user()->can('cooler.agent.portal'))) {
+            if (
+                in_array('cooler', $enabled_modules)
+                && Route::has('cooler.assets.index')
+                && (auth()->user()->can('cooler.asset.view') || auth()->user()->can('cooler.dealer.view') || auth()->user()->can('cooler.compliance.view') || auth()->user()->can('cooler.agent.portal'))
+            ) {
                 $isCoolerActive = in_array(request()->segment(2), ['assets', 'dealers', 'agreements', 'retrievals', 'compliance', 'reports', 'agent']) && request()->segment(1) == 'cooler';
                 $menu->dropdown(
                     'Cooler Management',
                     function ($sub) {
                         // Agent portal — shown only to agents
-                        if (auth()->user()->can('cooler.agent.portal')) {
+                        if (auth()->user()->can('cooler.agent.portal') && Route::has('cooler.agent.dashboard')) {
                             $sub->url(route('cooler.agent.dashboard'), 'My Portal',
                                 ['icon' => '', 'active' => request()->is('cooler/agent*')]);
                         }
-                        if (auth()->user()->can('cooler.compliance.view')) {
+                        if (auth()->user()->can('cooler.compliance.view') && Route::has('cooler.compliance.dashboard')) {
                             $sub->url(route('cooler.compliance.dashboard'), 'Dashboard',
                                 ['icon' => '', 'active' => request()->is('cooler/compliance*')]);
                         }
-                        if (auth()->user()->can('cooler.asset.view')) {
+                        if (auth()->user()->can('cooler.asset.view') && Route::has('cooler.assets.index')) {
                             $sub->url(route('cooler.assets.index'), 'Cooler Assets',
                                 ['icon' => '', 'active' => request()->is('cooler/assets*')]);
                         }
-                        if (auth()->user()->can('cooler.dealer.view')) {
+                        if (auth()->user()->can('cooler.dealer.view') && Route::has('cooler.dealers.index')) {
                             $sub->url(route('cooler.dealers.index'), 'Customers',
                                 ['icon' => '', 'active' => request()->is('cooler/dealers*')]);
                         }
-                        if (auth()->user()->can('cooler.agreement.view')) {
+                        if (auth()->user()->can('cooler.agreement.view') && Route::has('cooler.agreements.index')) {
                             $sub->url(route('cooler.agreements.index'), 'Agreements',
                                 ['icon' => '', 'active' => request()->is('cooler/agreements*')]);
                         }
-                        if (auth()->user()->can('cooler.retrieval.view')) {
+                        if (auth()->user()->can('cooler.retrieval.view') && Route::has('cooler.retrievals.index')) {
                             $sub->url(route('cooler.retrievals.index'), 'Retrievals',
                                 ['icon' => '', 'active' => request()->is('cooler/retrievals*')]);
                         }
-                        if (auth()->user()->can('cooler.report.view')) {
+                        if (auth()->user()->can('cooler.report.view') && Route::has('cooler.reports')) {
                             $sub->url(route('cooler.reports'), 'Reports',
                                 ['icon' => '', 'active' => request()->is('cooler/reports*')]);
                         }
@@ -549,7 +553,8 @@ class AdminSidebarMenu
             }
 
             // ── Customer Orders (standalone) ───────────────────────────────
-            if (in_array('customer_orders', $enabled_modules) && ($is_admin || auth()->user()->can('orders.view'))) {
+            // Shop orders menu: all logged-in staff (not admin-only)
+            if (in_array('customer_orders', $enabled_modules) && auth()->check()) {
                 $menu->dropdown(
                     __('Customer Orders'),
                     function ($sub) use ($is_admin) {
@@ -729,20 +734,24 @@ class AdminSidebarMenu
             // IP Access Control — admin only, and only if the module is enabled
             $businessId = session('business.id');
             $ipModuleEnabled = $businessId && \App\Models\BusinessFeatureSetting::isEnabled('ip_restriction', $businessId);
-            if ($ipModuleEnabled && ($is_admin || auth()->user()->can('ip_access.access'))) {
+            if ($ipModuleEnabled && Route::has('ip-access.settings') && ($is_admin || auth()->user()->can('ip_access.access'))) {
                 $menu->dropdown(
                     'IP Access Control',
                     function ($sub) {
-                        $sub->url(
-                            route('ip-access.settings'),
-                            'Whitelist & Toggle',
-                            ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'settings']
-                        );
-                        $sub->url(
-                            route('ip-access.logs'),
-                            'Access Logs',
-                            ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'logs']
-                        );
+                        if (Route::has('ip-access.settings')) {
+                            $sub->url(
+                                route('ip-access.settings'),
+                                'Whitelist & Toggle',
+                                ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'settings']
+                            );
+                        }
+                        if (Route::has('ip-access.logs')) {
+                            $sub->url(
+                                route('ip-access.logs'),
+                                'Access Logs',
+                                ['icon' => '', 'active' => request()->segment(1) == 'ip-access' && request()->segment(2) == 'logs']
+                            );
+                        }
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -787,16 +796,19 @@ class AdminSidebarMenu
                 )->order(22);
             }
 
-            // Pesapal menu (card/mobile money gateway)
-            if ($is_admin || auth()->user()->can('pesapal.manage_settings') || auth()->user()->can('pesapal.view_transactions')) {
+            // Pesapal menu — only if module enabled (routes registered)
+            if (
+                Route::has('pesapal.settings')
+                && ($is_admin || auth()->user()->can('pesapal.manage_settings') || auth()->user()->can('pesapal.view_transactions'))
+            ) {
                 $menu->dropdown(
                     'Pesapal',
                     function ($sub) use ($is_admin) {
-                        if ($is_admin || auth()->user()->can('pesapal.manage_settings')) {
+                        if (($is_admin || auth()->user()->can('pesapal.manage_settings')) && Route::has('pesapal.settings')) {
                             $sub->url(route('pesapal.settings'), 'Settings',
                                 ['icon' => '', 'active' => request()->segment(1) == 'pesapal' && request()->segment(2) == 'settings']);
                         }
-                        if ($is_admin || auth()->user()->can('pesapal.view_transactions')) {
+                        if (($is_admin || auth()->user()->can('pesapal.view_transactions')) && Route::has('pesapal.transactions')) {
                             $sub->url(route('pesapal.transactions'), 'Transactions',
                                 ['icon' => '', 'active' => request()->segment(1) == 'pesapal' && request()->segment(2) == 'transactions']);
                         }
@@ -809,16 +821,48 @@ class AdminSidebarMenu
                 )->order(23);
             }
 
-            // KCB Buni menu (B2B/B2C gateway)
-            if ($is_admin || auth()->user()->can('kcb_buni.manage_settings') || auth()->user()->can('kcb_buni.view_transactions')) {
+            // MegaPay menu — only if module enabled
+            if (
+                Route::has('megapay.settings')
+                && ($is_admin || auth()->user()->can('megapay.manage_settings') || auth()->user()->can('megapay.view_transactions'))
+            ) {
+                $menu->dropdown(
+                    'MegaPay',
+                    function ($sub) use ($is_admin) {
+                        if (($is_admin || auth()->user()->can('megapay.manage_settings')) && Route::has('megapay.settings')) {
+                            $sub->url(route('megapay.settings'), 'Settings',
+                                ['icon' => '', 'active' => request()->segment(1) == 'megapay' && request()->segment(2) == 'settings']);
+                        }
+                        if (($is_admin || auth()->user()->can('megapay.view_transactions')) && Route::has('megapay.transactions')) {
+                            $sub->url(route('megapay.transactions'), 'Transactions',
+                                ['icon' => '', 'active' => request()->segment(1) == 'megapay' && request()->segment(2) == 'transactions']);
+                        }
+                        if (($is_admin || auth()->user()->can('megapay.view_transactions')) && Route::has('megapay.quick-pay')) {
+                            $sub->url(route('megapay.quick-pay'), 'Quick Pay Checkout',
+                                ['icon' => '', 'active' => request()->segment(1) == 'megapay' && request()->segment(2) == 'quick-pay']);
+                        }
+                    },
+                    ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <rect x="3" y="5" width="18" height="14" rx="3"/>
+                    <path d="M3 10h18"/><path d="M7 15h2"/>
+                  </svg>', 'active' => request()->segment(1) == 'megapay']
+                )->order(24);
+            }
+
+            // KCB Buni menu — only if module enabled
+            if (
+                Route::has('kcb-buni.settings')
+                && ($is_admin || auth()->user()->can('kcb_buni.manage_settings') || auth()->user()->can('kcb_buni.view_transactions'))
+            ) {
                 $menu->dropdown(
                     'KCB Buni',
                     function ($sub) use ($is_admin) {
-                        if ($is_admin || auth()->user()->can('kcb_buni.manage_settings')) {
+                        if (($is_admin || auth()->user()->can('kcb_buni.manage_settings')) && Route::has('kcb-buni.settings')) {
                             $sub->url(route('kcb-buni.settings'), 'Settings',
                                 ['icon' => '', 'active' => request()->segment(1) == 'kcb-buni' && request()->segment(2) == 'settings']);
                         }
-                        if ($is_admin || auth()->user()->can('kcb_buni.view_transactions')) {
+                        if (($is_admin || auth()->user()->can('kcb_buni.view_transactions')) && Route::has('kcb-buni.transactions')) {
                             $sub->url(route('kcb-buni.transactions'), 'Transactions',
                                 ['icon' => '', 'active' => request()->segment(1) == 'kcb-buni' && request()->segment(2) == 'transactions']);
                         }
@@ -841,13 +885,39 @@ class AdminSidebarMenu
                     __("report.reports"),
                     function ($sub) use ($enabled_modules, $is_admin) {
 
+                        // Hub home (plain-language report groups)
+                        $sub->url(route('reports.hub'), 'Reports home', [
+                            'icon' => '',
+                            'active' => request()->segment(1) == 'reports' && (request()->segment(2) == null || request()->segment(2) == 'hub'),
+                        ]);
+
                         // --- Daily ---
                         if (auth()->user()->can("profit_loss_report.view")) {
                             $sub->dropdown('Daily', function ($s) {
+                                $s->url(route("reports.day_close"), __("Close the day"), ["icon" => "", "active" => request()->segment(2) == "day-close"]);
                                 $s->url(route("reports.daily_summary"), __("Daily Summary"), ["icon" => "", "active" => request()->segment(2) == "daily-summary"]);
                                 $s->url(route("reports.daily_reconciliation"), __("Daily Reconciliation"), ["icon" => "", "active" => request()->segment(2) == "daily-reconciliation"]);
                                 $s->url(route("reports.lost_sales"), __("Lost Sales"), ["icon" => "", "active" => request()->segment(2) == "lost-sales"]);
                                 $s->url(action([\App\Http\Controllers\ReportController::class, "getProfitLoss"]), __("report.profit_loss"), ["icon" => "", "active" => request()->segment(2) == "profit-loss"]);
+                            }, ["icon" => ""]);
+                        }
+
+                        // --- Finance & control (advanced pack) ---
+                        if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view") || auth()->user()->can("stock_report.view")) {
+                            $sub->dropdown('Finance & control', function ($s) {
+                                if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view")) {
+                                    $s->url(route("reports.financial_statements"), "Financial statements", ["icon" => "", "active" => request()->segment(2) == "financial-statements"]);
+                                    $s->url(route("reports.bank_mpesa_recon"), "Bank / M-Pesa recon", ["icon" => "", "active" => request()->segment(2) == "bank-mpesa-recon"]);
+                                    $s->url(route("reports.multi_period"), "Multi-period dashboard", ["icon" => "", "active" => request()->segment(2) == "multi-period"]);
+                                    $s->url(route("reports.discount_abuse"), "Discount abuse", ["icon" => "", "active" => request()->segment(2) == "discount-abuse"]);
+                                }
+                                if (auth()->user()->can("stock_report.view")) {
+                                    $s->url(route("reports.fefo_compliance"), "FEFO / batch log", ["icon" => "", "active" => request()->segment(2) == "fefo-compliance"]);
+                                    $s->url(route("reports.inventory_valuation"), "Inventory valuation", ["icon" => "", "active" => request()->segment(2) == "inventory-valuation"]);
+                                }
+                                if (auth()->user()->can("sell.view") || auth()->user()->can("account.access") || auth()->user()->can("business_settings.access") || auth()->user()->can("user.view")) {
+                                    $s->url(route("reports.audit_export"), "Audit log export", ["icon" => "", "active" => request()->segment(2) == "audit-export"]);
+                                }
                             }, ["icon" => ""]);
                         }
 
@@ -871,7 +941,7 @@ class AdminSidebarMenu
                             if (auth()->user()->can("followups.view")) {
                                 $s->url(action([\App\Http\Controllers\ReportController::class, "getFollowupReport"]), __("lang_v1.followup_report"), ["icon" => "", "active" => request()->segment(2) == "followup-report"]);
                             }
-                            if (auth()->user()->can("orders.view")) {
+                            if (auth()->check()) {
                                 $s->url(action([\App\Http\Controllers\ReportController::class, "getOrdersReport"]), __("lang_v1.pos_orders_report"), ["icon" => "", "active" => request()->segment(2) == "orders-report"]);
                             }
                             if (auth()->user()->can("tax_report.view") && !empty(config("constants.enable_gst_report_india"))) {
@@ -889,18 +959,21 @@ class AdminSidebarMenu
                         // --- Stock ---
                         if (auth()->user()->can("stock_report.view")) {
                             $sub->dropdown('Stock', function ($s) use ($enabled_modules) {
-                                $s->url(action([\App\Http\Controllers\ReportController::class, "getStockReport"]), __("report.stock_report"), ["icon" => "", "active" => request()->segment(2) == "stock-report"]);
+                                $s->url(action([\App\Http\Controllers\ReportController::class, "getStockReport"]), __("Stock on hand"), ["icon" => "", "active" => request()->segment(2) == "stock-report"]);
                                 if (session("business.enable_product_expiry") == 1) {
-                                    $s->url(action([\App\Http\Controllers\ReportController::class, "getStockExpiryReport"]), __("report.stock_expiry_report"), ["icon" => "", "active" => request()->segment(2) == "stock-expiry"]);
+                                    $s->url(action([\App\Http\Controllers\ReportController::class, "getStockExpiryReport"]), __("Expiring medicines"), ["icon" => "", "active" => request()->segment(2) == "stock-expiry"]);
+                                    $s->url(route("reports.expiry_smart"), __("Expiry 30/60/90"), ["icon" => "", "active" => request()->segment(2) == "expiry-smart"]);
                                 }
+                                $s->url(route("reports.ledger_gap"), __("Stock vs purchase ledger"), ["icon" => "", "active" => request()->segment(2) == "ledger-gap"]);
+                                $s->url(route("reports.reorder_list"), __("Reorder list"), ["icon" => "", "active" => request()->segment(2) == "reorder-list"]);
                                 if (in_array("stock_adjustment", $enabled_modules)) {
-                                    $s->url(action([\App\Http\Controllers\ReportController::class, "getStockAdjustmentReport"]), __("report.stock_adjustment_report"), ["icon" => "", "active" => request()->segment(2) == "stock-adjustment-report"]);
+                                    $s->url(action([\App\Http\Controllers\ReportController::class, "getStockAdjustmentReport"]), __("Stock count fixes"), ["icon" => "", "active" => request()->segment(2) == "stock-adjustment-report"]);
                                 }
                                 if (session("business.enable_lot_number") == 1) {
                                     $s->url(action([\App\Http\Controllers\ReportController::class, "getLotReport"]), __("lang_v1.lot_report"), ["icon" => "", "active" => request()->segment(2) == "lot-report"]);
                                 }
-                                $s->url(action([\App\Http\Controllers\ReportController::class, "getLowStockVelocityReport"]), __("report.low_stock_alert"), ["icon" => "", "active" => request()->segment(2) == "low-stock-velocity"]);
-                                $s->url(action([\App\Http\Controllers\ReportController::class, "getDeadStockReport"]), __("report.dead_stock"), ["icon" => "", "active" => request()->segment(2) == "dead-stock"]);
+                                $s->url(action([\App\Http\Controllers\ReportController::class, "getLowStockVelocityReport"]), __("Running out soon"), ["icon" => "", "active" => request()->segment(2) == "low-stock-velocity"]);
+                                $s->url(action([\App\Http\Controllers\ReportController::class, "getDeadStockReport"]), __("Not selling"), ["icon" => "", "active" => request()->segment(2) == "dead-stock"]);
                             }, ["icon" => ""]);
                         }
 
@@ -917,6 +990,7 @@ class AdminSidebarMenu
                                 if (auth()->user()->can("trending_product_report.view")) {
                                     $s->url(action([\App\Http\Controllers\ReportController::class, "getTrendingProducts"]), __("report.trending_products"), ["icon" => "", "active" => request()->segment(2) == "trending-products"]);
                                 }
+                                $s->url(action([\App\Http\Controllers\ReportController::class, "getFastMoversReport"]), "Fast Movers (Top 100)", ["icon" => "", "active" => request()->segment(2) == "fast-movers"]);
                             }, ["icon" => ""]);
                         }
 
@@ -1105,25 +1179,31 @@ class AdminSidebarMenu
             }
 
             // SMS dropdown
-            if (in_array('sms', $enabled_modules) && auth()->user()->can('send_notifications')) {
+            if (in_array('sms', $enabled_modules) && auth()->user()->can('send_notifications') && Route::has('sms.send')) {
                 $menu->dropdown(
                     'SMS',
                     function ($sub) {
-                        $sub->url(
-                            route('sms.send'),
-                            'Send SMS',
-                            ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'send']
-                        );
-                        $sub->url(
-                            route('sms.automated'),
-                            'Automated Messages',
-                            ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'automated']
-                        );
-                        $sub->url(
-                            route('sms.history'),
-                            'SMS History',
-                            ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'history']
-                        );
+                        if (Route::has('sms.send')) {
+                            $sub->url(
+                                route('sms.send'),
+                                'Send SMS',
+                                ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'send']
+                            );
+                        }
+                        if (Route::has('sms.automated')) {
+                            $sub->url(
+                                route('sms.automated'),
+                                'Automated Messages',
+                                ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'automated']
+                            );
+                        }
+                        if (Route::has('sms.history')) {
+                            $sub->url(
+                                route('sms.history'),
+                                'SMS History',
+                                ['icon' => '', 'active' => request()->segment(1) == 'sms' && request()->segment(2) == 'history']
+                            );
+                        }
                         $sub->url(
                             action([\App\Http\Controllers\BusinessController::class, 'getBusinessSettings']),
                             'SMS Settings',
@@ -1164,50 +1244,66 @@ class AdminSidebarMenu
             }
 
             // DDA (Dangerous Drugs Act) Dropdown
-            if (in_array('dda', $enabled_modules) && auth()->user()->can('dda.view')) {
+            if (in_array('dda', $enabled_modules) && auth()->user()->can('dda.view') && Route::has('dda.dashboard')) {
                 $menu->dropdown(
                     'DDA Register',
                     function ($sub) {
-                        $sub->url(
-                            route('dda.dashboard'),
-                            'Dashboard',
-                            ['icon' => '', 'active' => request()->is('dda') && !request()->segment(2)]
-                        );
-                        $sub->url(
-                            route('dda.drugs'),
-                            'DDA Drug List',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'drugs']
-                        );
-                        $sub->url(
-                            route('dda.prescriptions'),
-                            'Prescriptions',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'prescriptions']
-                        );
-                        $sub->url(
-                            route('dda.dispense'),
-                            'Dispense Register',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'dispense']
-                        );
-                        $sub->url(
-                            route('dda.stock'),
-                            'Stock Balance',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'stock']
-                        );
-                        $sub->url(
-                            route('dda.sales'),
-                            'DDA Sales',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'sales']
-                        );
-                        $sub->url(
-                            route('dda.destruction'),
-                            'Destruction Log',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'destruction']
-                        );
-                        $sub->url(
-                            \Illuminate\Support\Facades\Route::has('dda.expired') ? route('dda.expired') : url('/dda/expired'),
-                            'Expired Drugs',
-                            ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'expired']
-                        );
+                        if (Route::has('dda.dashboard')) {
+                            $sub->url(
+                                route('dda.dashboard'),
+                                'Dashboard',
+                                ['icon' => '', 'active' => request()->is('dda') && !request()->segment(2)]
+                            );
+                        }
+                        if (Route::has('dda.drugs')) {
+                            $sub->url(
+                                route('dda.drugs'),
+                                'DDA Drug List',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'drugs']
+                            );
+                        }
+                        if (Route::has('dda.prescriptions')) {
+                            $sub->url(
+                                route('dda.prescriptions'),
+                                'Prescriptions',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'prescriptions']
+                            );
+                        }
+                        if (Route::has('dda.dispense')) {
+                            $sub->url(
+                                route('dda.dispense'),
+                                'Dispense Register',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'dispense']
+                            );
+                        }
+                        if (Route::has('dda.stock')) {
+                            $sub->url(
+                                route('dda.stock'),
+                                'Stock Balance',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'stock']
+                            );
+                        }
+                        if (Route::has('dda.sales')) {
+                            $sub->url(
+                                route('dda.sales'),
+                                'DDA Sales',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'sales']
+                            );
+                        }
+                        if (Route::has('dda.destruction')) {
+                            $sub->url(
+                                route('dda.destruction'),
+                                'Destruction Log',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'destruction']
+                            );
+                        }
+                        if (Route::has('dda.expired')) {
+                            $sub->url(
+                                route('dda.expired'),
+                                'Expired Drugs',
+                                ['icon' => '', 'active' => request()->segment(1) == 'dda' && request()->segment(2) == 'expired']
+                            );
+                        }
                     },
                     ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -1321,9 +1417,13 @@ class AdminSidebarMenu
             });
         }
 
-        //Add menus from modules
-        $moduleUtil = new ModuleUtil;
-        $moduleUtil->getModuleData('modifyAdminMenu');
+        //Add menus from modules (never crash the whole app if a module menu fails)
+        try {
+            $moduleUtil = new ModuleUtil;
+            $moduleUtil->getModuleData('modifyAdminMenu');
+        } catch (\Throwable $e) {
+            \Log::warning('modifyAdminMenu failed: ' . $e->getMessage());
+        }
 
         return $next($request);
     }
