@@ -10,11 +10,12 @@
             <div class="rpt-banner-title">
                 <span class="rpt-banner-icon"><i class="fas fa-chart-line"></i></span>
                 <div>
-                    <h1>@lang('report.profit_loss')</h1>
-                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                    <h1>Profit &amp; loss</h1>
+                    <p class="rpt-subtitle">Are we making money this period? · {{ session()->get('business.name') }}</p>
                 </div>
             </div>
             <div class="rpt-banner-actions no-print">
+                <a href="{{ route('reports.hub') }}" class="rpt-glass-btn"><i class="fa fa-th"></i> All reports</a>
                 <select class="form-control select2" id="profit_loss_location_filter" style="min-width:180px;border-radius:8px;font-size:13px;height:36px;">
                     @foreach ($business_locations as $key => $value)
                         <option value="{{ $key }}">{{ $value }}</option>
@@ -29,15 +30,25 @@
             </div>
         </div>
     </div>
+    <p class="no-print" style="padding:0 12px 8px;margin:0;font-size:13px;color:#64748b">
+        <i class="fa fa-info-circle"></i> Pick a date range and location. Top cards show sales, cost of goods, gross and net profit. Scroll for breakdown by product, category, and more.
+    </p>
 
     {{-- Print-only header --}}
     <div class="print_section">
         <h2>{{ session()->get('business.name') }} - @lang('report.profit_loss')</h2>
     </div>
 
+    <div class="no-print" style="padding:0 12px;">
+        @includeIf('report.partials.export_toolbar', ['table' => '#pl_export_table', 'title' => 'Profit and loss'])
+    </div>
+
     {{-- P&L Data (loaded via AJAX) --}}
     <div style="padding:0 12px;">
         <div class="row" id="pl_data_div">
+            <div class="col-xs-12 text-center text-muted" style="padding:28px 12px">
+                <i class="fa fa-sync fa-spin"></i> Loading profit &amp; loss…
+            </div>
         </div>
     </div>
 
@@ -54,7 +65,7 @@
                 <span style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
                     <i class="fas fa-layer-group" style="color:white;font-size:14px;"></i>
                 </span>
-                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">@lang('lang_v1.profit_by_categories')</h3>
+                <h3 style="color:white;font-weight:700;font-size:15px;margin:0;">Profit by product, category &amp; more</h3>
             </div>
 
             {{-- Tabs Nav --}}
