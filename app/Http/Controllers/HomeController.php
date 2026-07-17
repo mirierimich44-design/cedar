@@ -215,7 +215,7 @@ class HomeController extends Controller
             } catch (\Throwable $e) {
             }
 
-            return view('home.index', compact('owner_ops'));
+            return $this->renderHomeDashboard(compact('owner_ops'));
         }
 
         $fy = $this->businessUtil->getCurrentFinancialYear($business_id);
@@ -429,7 +429,91 @@ class HomeController extends Controller
             \Log::warning('Owner ops strip: '.$e->getMessage());
         }
 
-        return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin', 'staff_performance_chart', 'profit_margin_chart', 'owner_ops'));
+        return $this->renderHomeDashboard(compact(
+            'sells_chart_1',
+            'sells_chart_2',
+            'widgets',
+            'all_locations',
+            'common_settings',
+            'is_admin',
+            'staff_performance_chart',
+            'profit_margin_chart',
+            'owner_ops'
+        ));
+    }
+
+    /**
+     * Render dashboard view, or a safe fallback if blades are missing on server.
+     */
+    protected function renderHomeDashboard(array $data = [])
+    {
+        if (view()->exists('home.index')) {
+            try {
+                return view('home.index', $data);
+            } catch (\Throwable $e) {
+                \Log::error('home.index failed: '.$e->getMessage());
+            }
+        }
+
+        // Fallback: simple working shell so missing views don't 500 the whole app
+        $name = e(session('user.first_name') ?: auth()->user()->first_name ?? 'User');
+        $biz = e(session('business.name') ?: 'Business');
+        $posUrl = url('/pos/create');
+        $reportsUrl = url('/reports');
+        $dayClose = url('/reports/day-close');
+        $logout = url('/logout');
+        $csrf = csrf_token();
+
+        $owner = $data['owner_ops'] ?? null;
+        $sales = $owner['sales_today'] ?? null;
+        $salesHtml = $sales !== null
+            ? '<div class="card"><div class="l">Sales today</div><div class="v">'.number_format((float) $sales, 2).'</div></div>'
+            : '';
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="{$csrf}">
+<title>Home — {$biz}</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f1f5f9;margin:0;padding:24px;color:#0f172a}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:#64748b;margin:0 0 20px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px}
+.card .l{font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b}
+.card .v{font-size:20px;font-weight:800;margin-top:4px}
+a.btn{display:inline-block;background:#0f766e;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;font-weight:700;font-size:13px;margin:0 8px 8px 0}
+a.btn2{background:#334155}
+.note{background:#fff7ed;border:1px solid #fed7aa;padding:12px;border-radius:10px;font-size:13px;color:#9a3412;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Welcome, {$name}</h1>
+  <p class="sub">{$biz} · emergency home (dashboard view missing on server)</p>
+  <div class="grid">{$salesHtml}</div>
+  <div>
+    <a class="btn" href="{$posUrl}">Open POS</a>
+    <a class="btn" href="{$reportsUrl}">Reports</a>
+    <a class="btn" href="{$dayClose}">Day close</a>
+    <a class="btn btn2" href="{$logout}">Logout</a>
+  </div>
+  <div class="note">
+    <strong>Upload this file to restore full dashboard:</strong><br>
+    resources/views/home/index.blade.php<br>
+    Also ensure: resources/views/layouts/app.blade.php exists.
+  </div>
+</div>
+</body>
+</html>
+HTML;
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     /**
