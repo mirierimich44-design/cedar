@@ -46,5 +46,7 @@ Route::prefix('mobile')->group(function () {
         Route::get('/admin/sales-report',     [\App\Http\Controllers\MobilePosController::class, 'adminSalesReport']);
         Route::get('/admin/expenses-summary', [\App\Http\Controllers\MobilePosController::class, 'adminExpensesSummary']);
         Route::post('/admin/stock-transfer',  [\App\Http\Controllers\MobilePosController::class, 'adminStockTransfer']);
+        Route::get('/owner-pack',             [\App\Http\Controllers\MobilePosController::class, 'ownerPack']);
+        Route::get('/day-close-summary',      [\App\Http\Controllers\MobilePosController::class, 'ownerPack']);
     });
 });

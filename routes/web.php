@@ -909,6 +909,16 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/audit-export', [\App\Http\Controllers\AdvancedReportsController::class, 'auditLogExport'])->name('reports.audit_export');
     Route::get('/reports/inventory-valuation', [\App\Http\Controllers\AdvancedReportsController::class, 'inventoryValuation'])->name('reports.inventory_valuation');
     Route::get('/reports/month-end-pack', [\App\Http\Controllers\AdvancedReportsController::class, 'monthEndPack'])->name('reports.month_end_pack');
+    Route::get('/reports/supplier-payables', [\App\Http\Controllers\AdvancedReportsController::class, 'supplierPayables'])->name('reports.supplier_payables');
+
+    // Owner ops pack (deploy, ritual, roles, data quality, notify)
+    Route::get('/reports/deploy-checklist', [\App\Http\Controllers\OwnerOpsController::class, 'deployChecklist'])->name('reports.deploy_checklist');
+    Route::get('/reports/weekly-ritual', [\App\Http\Controllers\OwnerOpsController::class, 'weeklyRitual'])->name('reports.weekly_ritual');
+    Route::get('/reports/roles-guide', [\App\Http\Controllers\OwnerOpsController::class, 'rolesGuide'])->name('reports.roles_guide');
+    Route::get('/reports/data-quality', [\App\Http\Controllers\OwnerOpsController::class, 'dataQuality'])->name('reports.data_quality');
+    Route::get('/reports/month-end-notify', [\App\Http\Controllers\OwnerOpsController::class, 'monthEndNotifyForm'])->name('reports.month_end_notify');
+    Route::post('/reports/month-end-notify', [\App\Http\Controllers\OwnerOpsController::class, 'monthEndNotifySend'])->name('reports.month_end_notify.send');
+    Route::get('/reports/owner-dashboard-data', [\App\Http\Controllers\OwnerOpsController::class, 'ownerDashboardJson'])->name('reports.owner_dashboard_data');
 
     // Lost Sales
     Route::post('/lost-sales', [\App\Http\Controllers\LostSaleController::class, 'store'])->name('lost_sales.store');

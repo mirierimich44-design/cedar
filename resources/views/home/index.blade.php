@@ -16,6 +16,7 @@ $__homeColors = [
 $__hc = $__homeColors[$__homeTc] ?? $__homeColors['primary'];
 @endphp
     <div class="dashboard-fortypos">
+    @includeIf('home.partials.owner_ops_strip')
     <div class="tw-pb-6 xl:tw-pb-0" style="background: linear-gradient(to right, var(--theme-dark), var(--theme-main));">
         <div class="tw-px-5 tw-pt-3">
                     <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">

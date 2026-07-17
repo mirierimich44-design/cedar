@@ -86,7 +86,7 @@ function DashboardTab() {
 
   if (loading) return <Loader />
 
-  const { today = {}, yesterday = {}, by_location = [], by_payment = [] } = data || {}
+  const { today = {}, yesterday = {}, by_location = [], by_payment = [], owner_ops = {} } = data || {}
 
   return (
     <ScrollView
@@ -99,6 +99,17 @@ function DashboardTab() {
       <View style={styles.row2}>
         <StatCard label="Today Sales" value={`Ksh ${fmt(today.total)}`} sub={`${fmtN(today.count)} transactions`} color="#2563eb" />
         <StatCard label="Yesterday" value={`Ksh ${fmt(yesterday.total)}`} sub={`${fmtN(yesterday.count)} transactions`} color="#64748b" />
+      </View>
+
+      {/* Owner pack */}
+      <SectionTitle>Owner snapshot</SectionTitle>
+      <View style={styles.row2}>
+        <StatCard label="Credit due" value={`Ksh ${fmt(owner_ops.credit_due)}`} sub="Open invoices" color="#dc2626" />
+        <StatCard label="Low stock" value={fmtN(owner_ops.low_stock)} sub={`${fmtN(owner_ops.open_tills)} open tills`} color="#d97706" />
+      </View>
+      <View style={styles.row2}>
+        <StatCard label={`Month ${owner_ops.month || ''}`} value={`Ksh ${fmt(owner_ops.month_sales)}`} sub="Sales MTD" color="#059669" />
+        <StatCard label="Change vs yday" value={`${data?.change_pct != null ? data.change_pct + '%' : '—'}`} sub="Revenue trend" color="#7c3aed" />
       </View>
 
       {/* Per location */}

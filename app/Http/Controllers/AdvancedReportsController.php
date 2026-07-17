@@ -1384,4 +1384,87 @@ class AdvancedReportsController extends Controller
             'totals'
         ));
     }
+
+    /**
+     * Supplier payables ageing (mirror of customer credit).
+     */
+    public function supplierPayables(Request $request)
+    {
+        if (! auth()->user()->can('purchase_n_sell_report.view')
+            && ! auth()->user()->can('supplier_report.view')
+            && ! auth()->user()->can('contacts_report.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = $this->bizId($request);
+        $business_locations = BusinessLocation::forDropdown($business_id, true);
+        extract($this->parseRange($request));
+
+        $rows = collect();
+        $totals = [
+            'total_due' => 0.0,
+            'age_0_30' => 0.0,
+            'age_31_60' => 0.0,
+            'age_61_90' => 0.0,
+            'age_90_plus' => 0.0,
+            'count' => 0,
+        ];
+
+        try {
+            $q = DB::table('transactions as t')
+                ->leftJoin('contacts as c', 't.contact_id', '=', 'c.id')
+                ->leftJoin(DB::raw('(SELECT transaction_id, SUM(IF(is_return = 1, -1 * amount, amount)) as total_paid FROM transaction_payments GROUP BY transaction_id) as tp'), 't.id', '=', 'tp.transaction_id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'purchase')
+                ->whereIn('t.status', ['received', 'pending', 'ordered'])
+                ->whereIn('t.payment_status', ['due', 'partial'])
+                ->whereRaw('(t.final_total - COALESCE(tp.total_paid, 0)) > 0.009');
+            if ($location_id) {
+                $q->where('t.location_id', $location_id);
+            }
+
+            $rows = $q->select(
+                't.id',
+                'c.name as supplier_name',
+                'c.mobile',
+                't.ref_no',
+                't.transaction_date',
+                't.final_total',
+                't.payment_status',
+                DB::raw('COALESCE(tp.total_paid, 0) as total_paid'),
+                DB::raw('(t.final_total - COALESCE(tp.total_paid, 0)) as total_due'),
+                DB::raw('DATEDIFF(CURDATE(), DATE(t.transaction_date)) as days_overdue')
+            )
+                ->orderByDesc(DB::raw('(t.final_total - COALESCE(tp.total_paid, 0))'))
+                ->limit(1000)
+                ->get();
+
+            $totals['count'] = $rows->count();
+            $totals['total_due'] = (float) $rows->sum('total_due');
+            foreach ($rows as $r) {
+                $d = (int) $r->days_overdue;
+                $due = (float) $r->total_due;
+                if ($d <= 30) {
+                    $totals['age_0_30'] += $due;
+                } elseif ($d <= 60) {
+                    $totals['age_31_60'] += $due;
+                } elseif ($d <= 90) {
+                    $totals['age_61_90'] += $due;
+                } else {
+                    $totals['age_90_plus'] += $due;
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Supplier payables: '.$e->getMessage());
+        }
+
+        return view('report.advanced.supplier_payables', compact(
+            'business_locations',
+            'start',
+            'end',
+            'location_id',
+            'rows',
+            'totals'
+        ));
+    }
 }

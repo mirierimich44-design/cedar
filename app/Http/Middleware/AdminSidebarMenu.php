@@ -911,6 +911,14 @@ class AdminSidebarMenu
                                     $s->url(route("reports.bank_mpesa_recon"), "Bank / M-Pesa recon", ["icon" => "", "active" => request()->segment(2) == "bank-mpesa-recon"]);
                                     $s->url(route("reports.multi_period"), "Multi-period dashboard", ["icon" => "", "active" => request()->segment(2) == "multi-period"]);
                                     $s->url(route("reports.discount_abuse"), "Discount abuse", ["icon" => "", "active" => request()->segment(2) == "discount-abuse"]);
+                                    $s->url(route("reports.supplier_payables"), "Supplier payables", ["icon" => "", "active" => request()->segment(2) == "supplier-payables"]);
+                                    $s->url(route("reports.weekly_ritual"), "Owner weekly ritual", ["icon" => "", "active" => request()->segment(2) == "weekly-ritual"]);
+                                    $s->url(route("reports.data_quality"), "Data quality", ["icon" => "", "active" => request()->segment(2) == "data-quality"]);
+                                    $s->url(route("reports.month_end_notify"), "Send month-end", ["icon" => "", "active" => request()->segment(2) == "month-end-notify"]);
+                                    $s->url(route("reports.deploy_checklist"), "Deploy checklist", ["icon" => "", "active" => request()->segment(2) == "deploy-checklist"]);
+                                }
+                                if (auth()->user()->can("user.view") || auth()->user()->can("business_settings.access")) {
+                                    $s->url(route("reports.roles_guide"), "Roles & discount caps", ["icon" => "", "active" => request()->segment(2) == "roles-guide"]);
                                 }
                                 if (auth()->user()->can("stock_report.view")) {
                                     $s->url(route("reports.fefo_compliance"), "FEFO / batch log", ["icon" => "", "active" => request()->segment(2) == "fefo-compliance"]);

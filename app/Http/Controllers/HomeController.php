@@ -206,7 +206,15 @@ class HomeController extends Controller
         $is_admin = $this->businessUtil->is_admin(auth()->user());
 
         if (! auth()->user()->can('dashboard.data')) {
-            return view('home.index');
+            $owner_ops = null;
+            try {
+                if ($this->businessUtil->is_admin(auth()->user()) || auth()->user()->can('profit_loss_report.view')) {
+                    $owner_ops = app(\App\Http\Controllers\OwnerOpsController::class)->ownerDashboardData(request());
+                }
+            } catch (\Throwable $e) {
+            }
+
+            return view('home.index', compact('owner_ops'));
         }
 
         $fy = $this->businessUtil->getCurrentFinancialYear($business_id);
@@ -410,7 +418,16 @@ class HomeController extends Controller
             ->dataset(__('lang_v1.gross_profit'), 'line', $profit_values);
         $__mark('profit_margin_chart built');
 
-        return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin', 'staff_performance_chart', 'profit_margin_chart'));
+        $owner_ops = null;
+        try {
+            if ($is_admin || auth()->user()->can('profit_loss_report.view')) {
+                $owner_ops = app(\App\Http\Controllers\OwnerOpsController::class)->ownerDashboardData(request());
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Owner ops strip: '.$e->getMessage());
+        }
+
+        return view('home.index', compact('sells_chart_1', 'sells_chart_2', 'widgets', 'all_locations', 'common_settings', 'is_admin', 'staff_performance_chart', 'profit_margin_chart', 'owner_ops'));
     }
 
     /**

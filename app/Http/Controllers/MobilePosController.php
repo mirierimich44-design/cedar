@@ -490,8 +490,72 @@ class MobilePosController extends Controller
 
         $today_total = $branches->sum('revenue');
 
+        $todayCount = (int) DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereDate('transaction_date', $today)
+            ->count();
+        $yesterdayCount = (int) DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereDate('transaction_date', $yesterday)
+            ->count();
+
+        // Owner pack KPIs (mobile parity)
+        $credit_due = 0.0;
+        try {
+            $credit_due = (float) DB::table('transactions as t')
+                ->leftJoin(DB::raw('(SELECT transaction_id, SUM(IF(is_return=1,-1*amount,amount)) as paid FROM transaction_payments GROUP BY transaction_id) tp'), 't.id', '=', 'tp.transaction_id')
+                ->where('t.business_id', $business_id)
+                ->where('t.type', 'sell')
+                ->where('t.status', 'final')
+                ->whereIn('t.payment_status', ['due', 'partial'])
+                ->selectRaw('COALESCE(SUM(t.final_total - COALESCE(tp.paid,0)),0) as due')
+                ->value('due');
+        } catch (\Throwable $e) {
+        }
+
+        $low_stock = 0;
+        try {
+            $low_stock = (int) DB::table('products as p')
+                ->join('variations as v', 'p.id', '=', 'v.product_id')
+                ->leftJoin('variation_location_details as vld', 'v.id', '=', 'vld.variation_id')
+                ->where('p.business_id', $business_id)
+                ->where('p.enable_stock', 1)
+                ->whereNull('v.deleted_at')
+                ->where(function ($q) {
+                    $q->whereRaw('COALESCE(vld.qty_available,0) <= 0')
+                        ->orWhereRaw('p.alert_quantity > 0 AND COALESCE(vld.qty_available,0) <= p.alert_quantity');
+                })
+                ->distinct('v.id')
+                ->count('v.id');
+        } catch (\Throwable $e) {
+        }
+
+        $open_tills = 0;
+        try {
+            $open_tills = (int) DB::table('cash_registers')
+                ->where('business_id', $business_id)
+                ->where('status', 'open')
+                ->count();
+        } catch (\Throwable $e) {
+        }
+
+        $month = now()->format('Y-m');
+        $mStart = now()->startOfMonth()->toDateString();
+        $mEnd = now()->toDateString();
+        $month_sales = (float) DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->whereBetween('transaction_date', [$mStart.' 00:00:00', $mEnd.' 23:59:59'])
+            ->sum('final_total');
+
+        // Shape expected by AdminScreen.js + richer owner_ops block
         return response()->json([
-            'today'           => $today,
+            'date'            => $today,
             'today_total'     => (float) $today_total,
             'yesterday_total' => (float) $yesterday_total,
             'change_pct'      => $yesterday_total > 0
@@ -499,6 +563,84 @@ class MobilePosController extends Controller
                 : null,
             'branches'        => $branches,
             'payment_methods' => $payments,
+            // AdminScreen.js compatibility
+            'today' => [
+                'total' => (float) $today_total,
+                'count' => $todayCount,
+            ],
+            'yesterday' => [
+                'total' => (float) $yesterday_total,
+                'count' => $yesterdayCount,
+            ],
+            'by_location' => $branches->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'name' => $b->name,
+                    'total' => (float) $b->revenue,
+                    'count' => (int) $b->sales_count,
+                ];
+            })->values(),
+            'by_payment' => $payments,
+            'owner_ops' => [
+                'credit_due' => $credit_due,
+                'low_stock' => $low_stock,
+                'open_tills' => $open_tills,
+                'month' => $month,
+                'month_sales' => $month_sales,
+            ],
+        ]);
+    }
+
+    /**
+     * Mobile: till/day-close snapshot for cashiers + owner.
+     */
+    public function ownerPack(Request $request)
+    {
+        $user = $request->user();
+        $business_id = $user->business_id;
+        $location_id = (int) $request->get('location_id');
+        $today = now()->toDateString();
+
+        $sales = DB::table('transactions')
+            ->where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->where('status', 'final')
+            ->when($location_id, fn ($q) => $q->where('location_id', $location_id))
+            ->whereDate('transaction_date', $today)
+            ->selectRaw('COUNT(*) as count, COALESCE(SUM(final_total),0) as total')
+            ->first();
+
+        $payments = DB::table('transaction_payments as tp')
+            ->join('transactions as t', 't.id', '=', 'tp.transaction_id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->when($location_id, fn ($q) => $q->where('t.location_id', $location_id))
+            ->whereDate(DB::raw('DATE(COALESCE(tp.paid_on, t.transaction_date))'), $today)
+            ->selectRaw('tp.method, COALESCE(SUM(tp.amount),0) as total')
+            ->groupBy('tp.method')
+            ->get();
+
+        $top = DB::table('transaction_sell_lines as tsl')
+            ->join('transactions as t', 'tsl.transaction_id', '=', 't.id')
+            ->join('products as p', 'tsl.product_id', '=', 'p.id')
+            ->where('t.business_id', $business_id)
+            ->where('t.type', 'sell')
+            ->where('t.status', 'final')
+            ->when($location_id, fn ($q) => $q->where('t.location_id', $location_id))
+            ->whereDate('t.transaction_date', $today)
+            ->selectRaw('p.name, SUM(tsl.quantity) as qty, SUM(tsl.quantity * COALESCE(tsl.unit_price_inc_tax,0)) as revenue')
+            ->groupBy('tsl.product_id', 'p.name')
+            ->orderByDesc('qty')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'date' => $today,
+            'sales_count' => (int) ($sales->count ?? 0),
+            'sales_total' => (float) ($sales->total ?? 0),
+            'payments' => $payments,
+            'top_products' => $top,
         ]);
     }
 

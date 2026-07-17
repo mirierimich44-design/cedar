@@ -389,6 +389,18 @@ class SellPosController extends Controller
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
 
+                // Discount cap (D): block invoice discount above user max_sales_discount_percent
+                $discount_block = $this->enforceMaxSalesDiscount($request, $input, $invoice_total);
+                if ($discount_block !== null) {
+                    if (! $is_direct_sale) {
+                        return $discount_block;
+                    }
+
+                    return redirect()
+                        ->action([\App\Http\Controllers\SellController::class, 'index'])
+                        ->with('status', $discount_block);
+                }
+
                 DB::beginTransaction();
 
                 if (empty($request->input('transaction_date'))) {
@@ -1232,6 +1244,17 @@ class SellPosController extends Controller
                     'discount_amount' => $input['discount_amount'] ?? 0,
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+
+                $discount_block = $this->enforceMaxSalesDiscount($request, $input, $invoice_total);
+                if ($discount_block !== null) {
+                    if (! $is_direct_sale) {
+                        return $discount_block;
+                    }
+
+                    return redirect()
+                        ->action([\App\Http\Controllers\SellController::class, 'index'])
+                        ->with('status', $discount_block);
+                }
 
                 if (!empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);
@@ -3138,5 +3161,73 @@ class SellPosController extends Controller
 
         return view('sale_pos.partials.customer_history')
             ->with(compact('transactions'));
+    }
+
+    /**
+     * Enforce max_sales_discount_percent on invoice-level discounts.
+     * Returns error payload array or null if OK.
+     */
+    protected function enforceMaxSalesDiscount(Request $request, array $input, array $invoice_total)
+    {
+        try {
+            $user = auth()->user();
+            if (! $user) {
+                return null;
+            }
+            $cap = $user->max_sales_discount_percent;
+            if ($cap === null || $cap === '') {
+                return null;
+            }
+            $cap = (float) $cap;
+            if ($cap < 0) {
+                return null;
+            }
+
+            $discountType = $input['discount_type'] ?? 'fixed';
+            $discountAmount = (float) ($this->productUtil->num_uf($input['discount_amount'] ?? 0));
+            $subBefore = (float) ($invoice_total['total_before_tax'] ?? $invoice_total['total'] ?? 0);
+
+            // Also sum line-level discounts if present
+            $lineDiscTotal = 0.0;
+            foreach ($input['products'] ?? [] as $p) {
+                $lineAmt = (float) ($this->productUtil->num_uf($p['line_discount_amount'] ?? 0));
+                if ($lineAmt <= 0) {
+                    continue;
+                }
+                $unit = (float) ($this->productUtil->num_uf($p['unit_price'] ?? $p['unit_price_inc_tax'] ?? 0));
+                $qty = (float) ($this->productUtil->num_uf($p['quantity'] ?? 0));
+                $lineBase = $unit * $qty;
+                if (($p['line_discount_type'] ?? '') === 'percentage') {
+                    $lineDiscTotal += $lineBase * $lineAmt / 100;
+                } else {
+                    $lineDiscTotal += $lineAmt;
+                }
+            }
+
+            $invoiceDiscValue = 0.0;
+            if ($discountType === 'percentage') {
+                $invoiceDiscValue = $subBefore * $discountAmount / 100;
+                $effectivePct = $discountAmount;
+            } else {
+                $invoiceDiscValue = $discountAmount;
+                $effectivePct = $subBefore > 0 ? ($discountAmount / $subBefore) * 100 : 0;
+            }
+
+            $combinedValue = $invoiceDiscValue + $lineDiscTotal;
+            $combinedPct = $subBefore > 0 ? ($combinedValue / $subBefore) * 100 : $effectivePct;
+
+            if ($combinedPct > $cap + 0.001) {
+                return [
+                    'success' => 0,
+                    'msg' => 'Discount blocked: your maximum allowed discount is '
+                        .number_format($cap, 2).'%. This sale is '
+                        .number_format($combinedPct, 2).'%. Ask a manager to approve or lower the discount.',
+                ];
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Discount cap check failed: '.$e->getMessage());
+        }
+
+        return null;
     }
 }

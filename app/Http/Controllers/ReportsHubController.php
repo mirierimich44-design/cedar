@@ -171,6 +171,14 @@ class ReportsHubController extends Controller
             $finance[] = $link(route('reports.bank_mpesa_recon'), 'Bank / M-Pesa recon', 'Daily totals, auto-match, unmatched, statement paste.', 'fa-university');
             $finance[] = $link(route('reports.multi_period'), 'Multi-period dashboard', 'Sales, gross & net over recent months.', 'fa-chart-bar');
             $finance[] = $link(route('reports.discount_abuse'), 'Discount abuse', 'Unusual invoice/line discounts by cashier.', 'fa-percentage');
+            $finance[] = $link(route('reports.supplier_payables'), 'Supplier payables', 'Who we owe — 30/60/90 ageing.', 'fa-file-invoice');
+            $finance[] = $link(route('reports.weekly_ritual'), 'Owner weekly ritual', 'Daily / weekly / monthly checklist.', 'fa-list-check');
+            $finance[] = $link(route('reports.data_quality'), 'Data quality', 'Ledger gaps, expiry, negative stock, M-Pesa links.', 'fa-heartbeat');
+            $finance[] = $link(route('reports.month_end_notify'), 'Send month-end SMS/WA', 'Push summary to owner phone.', 'fa-paper-plane');
+            $finance[] = $link(route('reports.deploy_checklist'), 'Deploy checklist', 'What to upload & smoke-test.', 'fa-rocket');
+        }
+        if (auth()->user()->can('user.view') || auth()->user()->can('business_settings.access')) {
+            $finance[] = $link(route('reports.roles_guide'), 'Roles & discount caps', 'Who sees finance + max discount %.', 'fa-user-shield');
         }
         if ($can('stock_report.view')) {
             $finance[] = $link(route('reports.fefo_compliance'), 'FEFO / batch log', 'Sales that skipped older-expiry batches.', 'fa-pills');
