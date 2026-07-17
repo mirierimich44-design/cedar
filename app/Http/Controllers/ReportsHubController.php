@@ -166,8 +166,9 @@ class ReportsHubController extends Controller
         // Finance & control (advanced pack)
         $finance = [];
         if ($can('profit_loss_report.view') || $can('account.access') || $can('purchase_n_sell_report.view')) {
+            $finance[] = $link(route('reports.month_end_pack'), 'Month-end pack', 'One printable pack: P&L, stock, credit, top products.', 'fa-file-alt');
             $finance[] = $link(route('reports.financial_statements'), 'Financial statements', 'P&L + simplified balance sheet + cash movement.', 'fa-file-invoice-dollar');
-            $finance[] = $link(route('reports.bank_mpesa_recon'), 'Bank / M-Pesa recon', 'POS payments vs M-Pesa log vs statement total.', 'fa-university');
+            $finance[] = $link(route('reports.bank_mpesa_recon'), 'Bank / M-Pesa recon', 'Daily totals, auto-match, unmatched, statement paste.', 'fa-university');
             $finance[] = $link(route('reports.multi_period'), 'Multi-period dashboard', 'Sales, gross & net over recent months.', 'fa-chart-bar');
             $finance[] = $link(route('reports.discount_abuse'), 'Discount abuse', 'Unusual invoice/line discounts by cashier.', 'fa-percentage');
         }

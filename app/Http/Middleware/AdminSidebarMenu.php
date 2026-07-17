@@ -906,6 +906,7 @@ class AdminSidebarMenu
                         if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view") || auth()->user()->can("stock_report.view")) {
                             $sub->dropdown('Finance & control', function ($s) {
                                 if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view")) {
+                                    $s->url(route("reports.month_end_pack"), "Month-end pack", ["icon" => "", "active" => request()->segment(2) == "month-end-pack"]);
                                     $s->url(route("reports.financial_statements"), "Financial statements", ["icon" => "", "active" => request()->segment(2) == "financial-statements"]);
                                     $s->url(route("reports.bank_mpesa_recon"), "Bank / M-Pesa recon", ["icon" => "", "active" => request()->segment(2) == "bank-mpesa-recon"]);
                                     $s->url(route("reports.multi_period"), "Multi-period dashboard", ["icon" => "", "active" => request()->segment(2) == "multi-period"]);

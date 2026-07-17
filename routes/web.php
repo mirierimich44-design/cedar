@@ -908,6 +908,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/fefo-compliance', [\App\Http\Controllers\AdvancedReportsController::class, 'fefoCompliance'])->name('reports.fefo_compliance');
     Route::get('/reports/audit-export', [\App\Http\Controllers\AdvancedReportsController::class, 'auditLogExport'])->name('reports.audit_export');
     Route::get('/reports/inventory-valuation', [\App\Http\Controllers\AdvancedReportsController::class, 'inventoryValuation'])->name('reports.inventory_valuation');
+    Route::get('/reports/month-end-pack', [\App\Http\Controllers\AdvancedReportsController::class, 'monthEndPack'])->name('reports.month_end_pack');
 
     // Lost Sales
     Route::post('/lost-sales', [\App\Http\Controllers\LostSaleController::class, 'store'])->name('lost_sales.store');
