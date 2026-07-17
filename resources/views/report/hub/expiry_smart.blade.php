@@ -48,7 +48,7 @@
             <div class="col-sm-4"><div class="info-box bg-red"><span class="info-box-icon"><i class="fa fa-money"></i></span><div class="info-box-content"><span class="info-box-text">Value at risk</span><span class="info-box-number">@format_currency($totalValue)</span></div></div></div>
         </div>
 
-        @include('report.partials.export_toolbar', ['table' => '#expiry_smart_table', 'title' => 'Expiry report'])
+        @includeIf('report.partials.export_toolbar', ['table' => '#expiry_smart_table', 'title' => 'Expiry report'])
 
         <div class="box box-solid">
             <div class="box-body table-responsive">

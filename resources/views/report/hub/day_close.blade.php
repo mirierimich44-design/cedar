@@ -91,7 +91,7 @@
             <button type="button" class="btn btn-default" onclick="window.print()"><i class="fa fa-print"></i> Print</button>
         </form>
 
-        @include('report.partials.export_toolbar', ['table' => '#day_close_export_table', 'title' => 'Day close '.$date])
+        @includeIf('report.partials.export_toolbar', ['table' => '#day_close_export_table', 'title' => 'Day close '.$date])
 
         <div class="dc-kpi">
             <div class="dc-card dc-sales">

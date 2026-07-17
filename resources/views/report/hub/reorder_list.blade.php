@@ -36,7 +36,7 @@
             </select>
         </form>
 
-        @include('report.partials.export_toolbar', ['table' => '#reorder_table', 'title' => 'Reorder list'])
+        @includeIf('report.partials.export_toolbar', ['table' => '#reorder_table', 'title' => 'Reorder list'])
 
         <div class="box box-solid">
             <div class="box-body table-responsive">

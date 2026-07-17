@@ -35,7 +35,7 @@
             </select>
         </form>
 
-        @include('report.partials.export_toolbar', ['table' => '#ledger_gap_table', 'title' => 'Stock ledger gap'])
+        @includeIf('report.partials.export_toolbar', ['table' => '#ledger_gap_table', 'title' => 'Stock ledger gap'])
 
         <div class="box box-solid">
             <div class="box-body table-responsive">

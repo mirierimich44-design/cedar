@@ -9,8 +9,8 @@
             <div class="rpt-banner-title">
                 <span class="rpt-banner-icon"><i class="fas fa-credit-card"></i></span>
                 <div>
-                    <h1>{{ __('lang_v1.customer_credit_report') }}</h1>
-                    <p class="rpt-subtitle">{{ session()->get('business.name') }}</p>
+                    <h1>Customer credit</h1>
+                    <p class="rpt-subtitle">Who still owes money · ageing 0–30 / 31–60 / 61–90 / 90+ · {{ session()->get('business.name') }}</p>
                 </div>
             </div>
         </div>
@@ -41,6 +41,19 @@
 
                 <div class="col-md-3">
                     <div class="form-group">
+                        {!! Form::label('ccr_ageing', 'Ageing bucket:') !!}
+                        <select name="ccr_ageing" id="ccr_ageing" class="form-control">
+                            <option value="">All ages</option>
+                            <option value="0_30">0–30 days</option>
+                            <option value="31_60">31–60 days</option>
+                            <option value="61_90">61–90 days</option>
+                            <option value="90_plus">90+ days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
                         {!! Form::label('ccr_date_filter', __('report.date_range') . ':') !!}
                         {!! Form::text('ccr_date_filter', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'id' => 'ccr_date_filter', 'readonly']); !!}
                     </div>
@@ -49,6 +62,8 @@
             @endcomponent
         </div>
     </div>
+
+    @includeIf('report.partials.export_toolbar', ['table' => '#customer_credit_report_tbl', 'title' => 'Customer credit'])
 
     <div class="row">
         <div class="col-md-12">
@@ -60,6 +75,8 @@
                             <th>@lang('contact.customer')</th>
                             <th>@lang('sale.invoice_no')</th>
                             <th>@lang('messages.date')</th>
+                            <th>Days</th>
+                            <th>Ageing</th>
                             <th>@lang('sale.total_amount')</th>
                             <th>@lang('sale.total_paid')</th>
                             <th>@lang('sale.total_remaining')</th>
@@ -68,7 +85,7 @@
                     </thead>
                     <tfoot>
                         <tr class="bg-gray font-17 footer-total text-center">
-                            <td colspan="3"><strong>@lang('sale.total'):</strong></td>
+                            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
                             <td><span class="display_currency" id="footer_total_amount" data-currency_symbol="true"></span></td>
                             <td><span class="display_currency" id="footer_total_paid" data-currency_symbol="true"></span></td>
                             <td><span class="display_currency" id="footer_total_due" data-currency_symbol="true"></span></td>
@@ -116,6 +133,7 @@ $(document).ready(function() {
             data: function(d) {
                 d.customer_id = $('#ccr_customer_id').val();
                 d.location_id = $('#ccr_location_id').val();
+                d.ageing = $('#ccr_ageing').val();
                 
                 var start = '';
                 var end = '';
@@ -128,9 +146,11 @@ $(document).ready(function() {
             }
         },
         columns: [
-            {data: 'customer_name', name: 'contacts.name'},
+            {data: 'customer_name', name: 'c.name'},
             {data: 'invoice_no', name: 'transactions.invoice_no'},
             {data: 'transaction_date', name: 'transactions.transaction_date'},
+            {data: 'days_overdue', name: 'days_overdue', searchable: false},
+            {data: 'ageing_bucket', name: 'ageing_bucket', orderable: false, searchable: false},
             {data: 'final_total', name: 'transactions.final_total'},
             {data: 'total_paid', name: 'total_paid'},
             {data: 'total_due', name: 'total_due'},
@@ -151,15 +171,13 @@ $(document).ready(function() {
     });
 
     // Reload table on filter change
-    $(document).on('change', '#ccr_customer_id, #ccr_location_id', function() {
+    $(document).on('change', '#ccr_customer_id, #ccr_location_id, #ccr_ageing', function() {
         customer_credit_report_tbl.ajax.reload();
     });
 });
 </script>
-
-
+@endsection
 
 @section('css')
 @include('report.partials.report_modern_css')
-@endsection
 @endsection
