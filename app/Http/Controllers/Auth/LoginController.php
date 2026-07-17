@@ -94,7 +94,77 @@ class LoginController extends Controller
             // preserve demo login passthrough if needed
         }
 
-        return view('auth.login', compact('loginSettings', 'allowRegistration', 'username', 'password'));
+        // Prefer full branded login; fall back if views missing after partial deploy
+        if (view()->exists('auth.login')) {
+            try {
+                return view('auth.login', compact('loginSettings', 'allowRegistration', 'username', 'password'));
+            } catch (\Throwable $e) {
+                \Log::warning('auth.login view failed: '.$e->getMessage());
+            }
+        }
+
+        return $this->emergencyLoginForm($username);
+    }
+
+    /**
+     * Minimal login page with zero Blade layout dependencies.
+     * Used when resources/views/auth/login.blade.php is missing on the server.
+     */
+    protected function emergencyLoginForm($username = '')
+    {
+        $action = url('/login');
+        $csrf = csrf_token();
+        $user = e(old('username', $username));
+        $error = session('error') ?: (session('status.msg') ?? '');
+        $errorHtml = $error ? '<p style="color:#b91c1c;margin:0 0 12px">'.e($error).'</p>' : '';
+        $errors = session('errors');
+        if ($errors && method_exists($errors, 'any') && $errors->any()) {
+            $errorHtml .= '<p style="color:#b91c1c;margin:0 0 12px">'.e($errors->first()).'</p>';
+        }
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{$csrf}">
+<title>Login — Apex POS</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0f766e;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:#fff;border-radius:14px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+h1{margin:0 0 6px;font-size:20px;color:#0f172a}
+p.sub{margin:0 0 18px;font-size:13px;color:#64748b}
+label{display:block;font-size:12px;font-weight:700;margin:0 0 4px;color:#334155}
+input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:12px;font-size:14px}
+button{width:100%;padding:12px;border:0;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+button:hover{background:#0d9488}
+.note{margin-top:14px;font-size:11px;color:#94a3b8;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Apex POS Login</h1>
+  <p class="sub">Emergency login (auth view missing on server — upload auth views after login)</p>
+  {$errorHtml}
+  <form method="post" action="{$action}">
+    <input type="hidden" name="_token" value="{$csrf}">
+    <label>Username</label>
+    <input type="text" name="username" value="{$user}" required autofocus autocomplete="username">
+    <label>Password</label>
+    <input type="password" name="password" required autocomplete="current-password">
+    <label style="font-weight:500;margin-bottom:12px"><input type="checkbox" name="remember" value="1" style="width:auto"> Remember me</label>
+    <button type="submit">Sign in</button>
+  </form>
+  <p class="note">After login works, upload:<br>
+  resources/views/auth/login.blade.php<br>
+  resources/views/layouts/auth2.blade.php</p>
+</div>
+</body>
+</html>
+HTML;
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     /**
@@ -257,49 +327,83 @@ class LoginController extends Controller
     private function logAttempt(Request $request, $user, string $outcome): void
     {
         try {
-            // Device info is local — fast, no external call
-            $agent      = new \Jenssegers\Agent\Agent();
-            $deviceType = 'desktop';
-            if ($agent->isMobile()) $deviceType = 'mobile';
-            elseif ($agent->isTablet()) $deviceType = 'tablet';
+            // Parse User-Agent inline (avoids jenssegers/agent composer dependency,
+            // which isn't installed on every environment).
+            $ua         = $request->userAgent() ?? '';
+            $deviceType = $this->parseDeviceType($ua);
+            $browser    = $this->parseBrowser($ua);
+            $os         = $this->parseOs($ua);
 
             // Resolve business_id — use authenticated user if available,
-            // otherwise look up by username so failed/blocked attempts are still logged
+            // otherwise look up by username so failed/blocked attempts are still logged.
             $businessId = $user?->business_id;
             if (! $businessId) {
-                $attempted = \App\User::where('username', $request->input($this->username()))
-                    ->first();
+                $attempted = \App\User::where('username', $request->input($this->username()))->first();
                 $businessId = $attempted?->business_id;
             }
 
-            // Resolve the user's primary location (first permitted location)
+            // Resolve the user's primary location (first permitted location).
             $locationId = null;
             if ($user && $user->business_id) {
-                $permitted = $user->permitted_locations($user->business_id);
-                if (is_array($permitted) && count($permitted)) {
-                    $locationId = $permitted[0];
+                try {
+                    $permitted = $user->permitted_locations($user->business_id);
+                    if (is_array($permitted) && count($permitted)) {
+                        $locationId = $permitted[0];
+                    }
+                } catch (\Throwable $e) {
+                    // permitted_locations() missing or errored — non-fatal
                 }
             }
 
-            // Write the log immediately (no geo yet — keeps login fast)
+            // Write the log immediately (no geo yet — keeps login fast).
             $log = IpAccessLog::create([
                 'user_id'              => $user?->id,
                 'business_id'          => $businessId,
                 'business_location_id' => $locationId,
                 'username_attempted'   => $request->input($this->username()),
                 'ip_address'           => $request->ip(),
-                'browser'              => $agent->browser() ?: null,
-                'os'                   => $agent->platform() ?: null,
+                'browser'              => $browser,
+                'os'                   => $os,
                 'device_type'          => $deviceType,
                 'outcome'              => $outcome,
             ]);
 
-            // Geo lookup in the background — fills isp/country/city without blocking login
-            \App\Jobs\LookupGeoForLog::dispatch($log->id, $request->ip());
+            // Geo lookup AFTER the HTTP response is sent — never blocks the login.
+            // dispatchAfterResponse() runs the job as a terminating callback,
+            // bypassing QUEUE_CONNECTION=sync (which would otherwise run inline).
+            \App\Jobs\LookupGeoForLog::dispatchAfterResponse($log->id, $request->ip());
 
         } catch (\Throwable $e) {
-            // never break login because of logging failure
+            \Log::error('IpAccessLog failed: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
         }
+    }
+
+    private function parseDeviceType(string $ua): string
+    {
+        if (preg_match('/iPad|Tablet|Kindle|Silk/i', $ua))         return 'tablet';
+        if (preg_match('/Mobile|Android|iPhone|iPod|Opera Mini/i', $ua)) return 'mobile';
+        return 'desktop';
+    }
+
+    private function parseBrowser(string $ua): ?string
+    {
+        if (preg_match('/Edg\//i', $ua))                return 'Edge';
+        if (preg_match('/OPR\/|Opera/i', $ua))          return 'Opera';
+        if (preg_match('/Firefox\//i', $ua))            return 'Firefox';
+        if (preg_match('/Chrome\//i', $ua))             return 'Chrome';
+        if (preg_match('/Safari\//i', $ua))             return 'Safari';
+        if (preg_match('/MSIE|Trident/i', $ua))         return 'IE';
+        return null;
+    }
+
+    private function parseOs(string $ua): ?string
+    {
+        if (preg_match('/Windows NT/i', $ua))           return 'Windows';
+        if (preg_match('/Android/i', $ua))              return 'Android';
+        if (preg_match('/iPhone|iPad|iPod|iOS/i', $ua)) return 'iOS';
+        if (preg_match('/Mac OS X|Macintosh/i', $ua))   return 'macOS';
+        if (preg_match('/Linux/i', $ua))                return 'Linux';
+        return null;
     }
 
 }
