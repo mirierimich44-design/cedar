@@ -10,6 +10,21 @@ use Menu;
 class AdminSidebarMenu
 {
     /**
+     * Safe named route URL — never throws if route missing (avoids site-wide 500).
+     */
+    protected static function safeRoute($name, $fallback = '#')
+    {
+        try {
+            if (Route::has($name)) {
+                return route($name);
+            }
+        } catch (\Throwable $e) {
+        }
+
+        return $fallback;
+    }
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -885,19 +900,29 @@ class AdminSidebarMenu
                     __("report.reports"),
                     function ($sub) use ($enabled_modules, $is_admin) {
 
-                        // Hub home (plain-language report groups)
-                        $sub->url(route('reports.hub'), 'Reports home', [
-                            'icon' => '',
-                            'active' => request()->segment(1) == 'reports' && (request()->segment(2) == null || request()->segment(2) == 'hub'),
-                        ]);
+                        // Hub home (plain-language report groups) — only if route exists
+                        if (Route::has('reports.hub')) {
+                            $sub->url(self::safeRoute('reports.hub'), 'Reports home', [
+                                'icon' => '',
+                                'active' => request()->segment(1) == 'reports' && (request()->segment(2) == null || request()->segment(2) == 'hub'),
+                            ]);
+                        }
 
                         // --- Daily ---
                         if (auth()->user()->can("profit_loss_report.view")) {
                             $sub->dropdown('Daily', function ($s) {
-                                $s->url(route("reports.day_close"), __("Close the day"), ["icon" => "", "active" => request()->segment(2) == "day-close"]);
-                                $s->url(route("reports.daily_summary"), __("Daily Summary"), ["icon" => "", "active" => request()->segment(2) == "daily-summary"]);
-                                $s->url(route("reports.daily_reconciliation"), __("Daily Reconciliation"), ["icon" => "", "active" => request()->segment(2) == "daily-reconciliation"]);
-                                $s->url(route("reports.lost_sales"), __("Lost Sales"), ["icon" => "", "active" => request()->segment(2) == "lost-sales"]);
+                                if (Route::has('reports.day_close')) {
+                                    $s->url(self::safeRoute('reports.day_close'), __("Close the day"), ["icon" => "", "active" => request()->segment(2) == "day-close"]);
+                                }
+                                if (Route::has('reports.daily_summary')) {
+                                    $s->url(self::safeRoute('reports.daily_summary'), __("Daily Summary"), ["icon" => "", "active" => request()->segment(2) == "daily-summary"]);
+                                }
+                                if (Route::has('reports.daily_reconciliation')) {
+                                    $s->url(self::safeRoute('reports.daily_reconciliation'), __("Daily Reconciliation"), ["icon" => "", "active" => request()->segment(2) == "daily-reconciliation"]);
+                                }
+                                if (Route::has('reports.lost_sales')) {
+                                    $s->url(self::safeRoute('reports.lost_sales'), __("Lost Sales"), ["icon" => "", "active" => request()->segment(2) == "lost-sales"]);
+                                }
                                 $s->url(action([\App\Http\Controllers\ReportController::class, "getProfitLoss"]), __("report.profit_loss"), ["icon" => "", "active" => request()->segment(2) == "profit-loss"]);
                             }, ["icon" => ""]);
                         }
@@ -905,27 +930,32 @@ class AdminSidebarMenu
                         // --- Finance & control (advanced pack) ---
                         if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view") || auth()->user()->can("stock_report.view")) {
                             $sub->dropdown('Finance & control', function ($s) {
+                                $add = function ($name, $label, $segment) use ($s) {
+                                    if (Route::has($name)) {
+                                        $s->url(self::safeRoute($name), $label, ["icon" => "", "active" => request()->segment(2) == $segment]);
+                                    }
+                                };
                                 if (auth()->user()->can("profit_loss_report.view") || auth()->user()->can("account.access") || auth()->user()->can("purchase_n_sell_report.view")) {
-                                    $s->url(route("reports.month_end_pack"), "Month-end pack", ["icon" => "", "active" => request()->segment(2) == "month-end-pack"]);
-                                    $s->url(route("reports.financial_statements"), "Financial statements", ["icon" => "", "active" => request()->segment(2) == "financial-statements"]);
-                                    $s->url(route("reports.bank_mpesa_recon"), "Bank / M-Pesa recon", ["icon" => "", "active" => request()->segment(2) == "bank-mpesa-recon"]);
-                                    $s->url(route("reports.multi_period"), "Multi-period dashboard", ["icon" => "", "active" => request()->segment(2) == "multi-period"]);
-                                    $s->url(route("reports.discount_abuse"), "Discount abuse", ["icon" => "", "active" => request()->segment(2) == "discount-abuse"]);
-                                    $s->url(route("reports.supplier_payables"), "Supplier payables", ["icon" => "", "active" => request()->segment(2) == "supplier-payables"]);
-                                    $s->url(route("reports.weekly_ritual"), "Owner weekly ritual", ["icon" => "", "active" => request()->segment(2) == "weekly-ritual"]);
-                                    $s->url(route("reports.data_quality"), "Data quality", ["icon" => "", "active" => request()->segment(2) == "data-quality"]);
-                                    $s->url(route("reports.month_end_notify"), "Send month-end", ["icon" => "", "active" => request()->segment(2) == "month-end-notify"]);
-                                    $s->url(route("reports.deploy_checklist"), "Deploy checklist", ["icon" => "", "active" => request()->segment(2) == "deploy-checklist"]);
+                                    $add('reports.month_end_pack', 'Month-end pack', 'month-end-pack');
+                                    $add('reports.financial_statements', 'Financial statements', 'financial-statements');
+                                    $add('reports.bank_mpesa_recon', 'Bank / M-Pesa recon', 'bank-mpesa-recon');
+                                    $add('reports.multi_period', 'Multi-period dashboard', 'multi-period');
+                                    $add('reports.discount_abuse', 'Discount abuse', 'discount-abuse');
+                                    $add('reports.supplier_payables', 'Supplier payables', 'supplier-payables');
+                                    $add('reports.weekly_ritual', 'Owner weekly ritual', 'weekly-ritual');
+                                    $add('reports.data_quality', 'Data quality', 'data-quality');
+                                    $add('reports.month_end_notify', 'Send month-end', 'month-end-notify');
+                                    $add('reports.deploy_checklist', 'Deploy checklist', 'deploy-checklist');
                                 }
                                 if (auth()->user()->can("user.view") || auth()->user()->can("business_settings.access")) {
-                                    $s->url(route("reports.roles_guide"), "Roles & discount caps", ["icon" => "", "active" => request()->segment(2) == "roles-guide"]);
+                                    $add('reports.roles_guide', 'Roles & discount caps', 'roles-guide');
                                 }
                                 if (auth()->user()->can("stock_report.view")) {
-                                    $s->url(route("reports.fefo_compliance"), "FEFO / batch log", ["icon" => "", "active" => request()->segment(2) == "fefo-compliance"]);
-                                    $s->url(route("reports.inventory_valuation"), "Inventory valuation", ["icon" => "", "active" => request()->segment(2) == "inventory-valuation"]);
+                                    $add('reports.fefo_compliance', 'FEFO / batch log', 'fefo-compliance');
+                                    $add('reports.inventory_valuation', 'Inventory valuation', 'inventory-valuation');
                                 }
                                 if (auth()->user()->can("sell.view") || auth()->user()->can("account.access") || auth()->user()->can("business_settings.access") || auth()->user()->can("user.view")) {
-                                    $s->url(route("reports.audit_export"), "Audit log export", ["icon" => "", "active" => request()->segment(2) == "audit-export"]);
+                                    $add('reports.audit_export', 'Audit log export', 'audit-export');
                                 }
                             }, ["icon" => ""]);
                         }
@@ -971,10 +1001,16 @@ class AdminSidebarMenu
                                 $s->url(action([\App\Http\Controllers\ReportController::class, "getStockReport"]), __("Stock on hand"), ["icon" => "", "active" => request()->segment(2) == "stock-report"]);
                                 if (session("business.enable_product_expiry") == 1) {
                                     $s->url(action([\App\Http\Controllers\ReportController::class, "getStockExpiryReport"]), __("Expiring medicines"), ["icon" => "", "active" => request()->segment(2) == "stock-expiry"]);
-                                    $s->url(route("reports.expiry_smart"), __("Expiry 30/60/90"), ["icon" => "", "active" => request()->segment(2) == "expiry-smart"]);
+                                    if (Route::has('reports.expiry_smart')) {
+                                        $s->url(self::safeRoute('reports.expiry_smart'), __("Expiry 30/60/90"), ["icon" => "", "active" => request()->segment(2) == "expiry-smart"]);
+                                    }
                                 }
-                                $s->url(route("reports.ledger_gap"), __("Stock vs purchase ledger"), ["icon" => "", "active" => request()->segment(2) == "ledger-gap"]);
-                                $s->url(route("reports.reorder_list"), __("Reorder list"), ["icon" => "", "active" => request()->segment(2) == "reorder-list"]);
+                                if (Route::has('reports.ledger_gap')) {
+                                    $s->url(self::safeRoute('reports.ledger_gap'), __("Stock vs purchase ledger"), ["icon" => "", "active" => request()->segment(2) == "ledger-gap"]);
+                                }
+                                if (Route::has('reports.reorder_list')) {
+                                    $s->url(self::safeRoute('reports.reorder_list'), __("Reorder list"), ["icon" => "", "active" => request()->segment(2) == "reorder-list"]);
+                                }
                                 if (in_array("stock_adjustment", $enabled_modules)) {
                                     $s->url(action([\App\Http\Controllers\ReportController::class, "getStockAdjustmentReport"]), __("Stock count fixes"), ["icon" => "", "active" => request()->segment(2) == "stock-adjustment-report"]);
                                 }

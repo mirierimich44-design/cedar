@@ -208,7 +208,8 @@ class HomeController extends Controller
         if (! auth()->user()->can('dashboard.data')) {
             $owner_ops = null;
             try {
-                if ($this->businessUtil->is_admin(auth()->user()) || auth()->user()->can('profit_loss_report.view')) {
+                if (class_exists(\App\Http\Controllers\OwnerOpsController::class)
+                    && ($this->businessUtil->is_admin(auth()->user()) || auth()->user()->can('profit_loss_report.view'))) {
                     $owner_ops = app(\App\Http\Controllers\OwnerOpsController::class)->ownerDashboardData(request());
                 }
             } catch (\Throwable $e) {
@@ -420,7 +421,8 @@ class HomeController extends Controller
 
         $owner_ops = null;
         try {
-            if ($is_admin || auth()->user()->can('profit_loss_report.view')) {
+            if (class_exists(\App\Http\Controllers\OwnerOpsController::class)
+                && ($is_admin || auth()->user()->can('profit_loss_report.view'))) {
                 $owner_ops = app(\App\Http\Controllers\OwnerOpsController::class)->ownerDashboardData(request());
             }
         } catch (\Throwable $e) {

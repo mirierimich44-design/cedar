@@ -375,7 +375,7 @@ class AdvancedReportsController extends Controller
                 'mpesa_like' => (float) $rows->filter(function ($r) {
                     $m = strtolower((string) ($r->method ?? ''));
 
-                    return str_contains($m, 'mpesa') || str_contains($m, 'mobile')
+                    return (strpos($m, 'mpesa') !== false) || (strpos($m, 'mobile') !== false)
                         || in_array($m, ['custom_pay_1', 'custom_pay_2', 'custom_pay_3'], true);
                 })->sum('amount'),
                 'card' => (float) $rows->where('method', 'card')->sum('amount'),
@@ -383,7 +383,7 @@ class AdvancedReportsController extends Controller
                     $m = strtolower((string) ($r->method ?? ''));
 
                     return $m === 'cash' || $m === 'card'
-                        || str_contains($m, 'mpesa') || str_contains($m, 'mobile')
+                        || (strpos($m, 'mpesa') !== false) || (strpos($m, 'mobile') !== false)
                         || in_array($m, ['custom_pay_1', 'custom_pay_2', 'custom_pay_3'], true);
                 })->sum('amount'),
             ];
@@ -429,7 +429,7 @@ class AdvancedReportsController extends Controller
         $posMpesaLikeTotal = (float) $posPayments->filter(function ($r) {
             $m = strtolower((string) ($r->method ?? ''));
 
-            return str_contains($m, 'mpesa') || str_contains($m, 'mobile')
+            return (strpos($m, 'mpesa') !== false) || (strpos($m, 'mobile') !== false)
                 || in_array($m, ['custom_pay_1', 'custom_pay_2', 'custom_pay_3'], true);
         })->sum('amount');
         $mpesaGap = $mpesaTotal + $c2bTotal - $posMpesaLikeTotal;
@@ -489,7 +489,7 @@ class AdvancedReportsController extends Controller
                     continue;
                 }
                 $pk = $posKey($p);
-                if ($pk !== '' && ($pk === $receipt || str_contains($pk, $receipt) || str_contains($receipt, $pk))) {
+                if ($pk !== '' && ($pk === $receipt || strpos($pk, $receipt) !== false || strpos($receipt, $pk) !== false)) {
                     $matched[] = (object) [
                         'how' => 'receipt',
                         'pos' => $p,
