@@ -250,6 +250,6 @@ $(document).ready(function() {
 
 
 @section('css')
-@include('report.partials.report_modern_css')
+@includeIf('report.partials.report_modern_css')
 @endsection
 @endsection

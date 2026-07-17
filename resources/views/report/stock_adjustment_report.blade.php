@@ -114,6 +114,29 @@
             @endcomponent
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            @component('components.widget', ['class' => 'box-primary', 'title' => __('Gains & Losses Breakdown')])
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="stock_adjustment_product_table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>@lang('messages.date')</th>
+                                <th>@lang('purchase.ref_no')</th>
+                                <th>@lang('business.location')</th>
+                                <th>Product</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Value</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            @endcomponent
+        </div>
+    </div>
 	
 
 </section>
@@ -121,7 +144,7 @@
 </div>
 @stop
 @section("css")
-@include("report.partials.report_modern_css")
+@includeIf('report.partials.report_modern_css')
 @endsection
 
 @section('javascript')

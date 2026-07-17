@@ -152,7 +152,7 @@
 @stop
 
 @section('css')
-@include('report.partials.report_modern_css')
+@includeIf('report.partials.report_modern_css')
 @endsection
 
 @section('javascript')

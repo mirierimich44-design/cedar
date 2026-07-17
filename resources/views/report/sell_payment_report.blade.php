@@ -9,17 +9,24 @@
             <div class="rpt-banner-title">
                 <span class="rpt-banner-icon"><i class="fas fa-money-bill-wave"></i></span>
                 <div>
-                    <h1>{{ __("lang_v1.sell_payment_report") }}</h1>
-                    <p class="rpt-subtitle">{{ session()->get("business.name") }}</p>
+                    <h1>Payments received</h1>
+                    <p class="rpt-subtitle">How customers paid · {{ session()->get("business.name") }}</p>
                 </div>
             </div>
         </div>
     </div>
 <section class="content" style="padding:0 12px;">
+    <p class="text-muted no-print" style="margin:0 0 10px;font-size:13px"><i class="fa fa-info-circle"></i> Filter by cashier to see who collected payments. Export with the buttons below the filters.</p>
     <div class="row">
         <div class="col-md-12">
            @component('components.filters', ['title' => __('report.filters')])
               {!! Form::open(['url' => '#', 'method' => 'get', 'id' => 'sell_payment_report_form' ]) !!}
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {!! Form::label('created_by', 'Cashier / user:') !!}
+                        {!! Form::select('created_by', $users ?? [], null, ['class' => 'form-control select2', 'style' => 'width:100%', 'id' => 'created_by', 'placeholder' => __('messages.all')]); !!}
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         {!! Form::label('customer_id', __('contact.customer') . ':') !!}
@@ -91,6 +98,7 @@
                                 <th>@lang('lang_v1.contact_id')</th>
                                 <th>@lang('lang_v1.customer_group')</th>
                                 <th>@lang('lang_v1.payment_method')</th>
+                                <th>Cashier</th>
                                 <th>@lang('sale.sale')</th>
                                 <th>@lang('messages.action')</th>
                             </tr>
@@ -117,7 +125,7 @@
 @endsection
 
 @section("css")
-@include("report.partials.report_modern_css")
+@includeIf('report.partials.report_modern_css')
 @endsection
 
 @section('javascript')
