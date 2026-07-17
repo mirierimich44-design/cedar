@@ -658,28 +658,53 @@ class ReportsHubController extends Controller
         }
 
         $business_id = $request->session()->get('user.business_id');
-        $business_locations = BusinessLocation::forDropdown($business_id, false);
-        $location_id = $request->get('location_id');
-        if (empty($location_id)) {
-            $location_id = array_key_first($business_locations->toArray() ?? []) ?: null;
+        $error = null;
+
+        try {
+            $business_locations = BusinessLocation::forDropdown($business_id, false);
+        } catch (\Throwable $e) {
+            \Log::warning('Reorder locations: '.$e->getMessage());
+            $business_locations = collect();
         }
 
-        $rows = [];
+        // Normalize locations to a simple [id => name] array
+        if ($business_locations instanceof \Illuminate\Support\Collection) {
+            $locArray = $business_locations->toArray();
+        } else {
+            $locArray = (array) $business_locations;
+        }
+
+        $location_id = $request->get('location_id');
+        if (empty($location_id) && ! empty($locArray)) {
+            $location_id = array_key_first($locArray);
+        }
+
+        $rows = collect();
         if ($location_id) {
-            $rows = DB::table('products')
-                ->join('variations', 'products.id', '=', 'variations.product_id')
-                ->leftJoin('variation_location_details as vld', function ($join) use ($location_id) {
-                    $join->on('variations.id', '=', 'vld.variation_id')
-                        ->where('vld.location_id', '=', $location_id);
-                })
-                ->where('products.business_id', $business_id)
-                ->where('products.enable_stock', 1)
-                ->whereNull('variations.deleted_at')
-                ->where(function ($q) {
-                    $q->whereRaw('COALESCE(vld.qty_available, 0) <= 0')
-                        ->orWhereRaw('products.alert_quantity > 0 AND COALESCE(vld.qty_available, 0) <= products.alert_quantity');
-                })
-                ->select(
+            try {
+                $q = DB::table('products')
+                    ->join('variations', 'products.id', '=', 'variations.product_id')
+                    ->leftJoin('variation_location_details as vld', function ($join) use ($location_id) {
+                        $join->on('variations.id', '=', 'vld.variation_id')
+                            ->where('vld.location_id', '=', $location_id);
+                    })
+                    ->where('products.business_id', $business_id)
+                    ->where('products.enable_stock', 1);
+
+                // Soft-deletes column is not always present
+                try {
+                    if (\Schema::hasColumn('variations', 'deleted_at')) {
+                        $q->whereNull('variations.deleted_at');
+                    }
+                } catch (\Throwable $e) {
+                }
+
+                $q->where(function ($w) {
+                    $w->whereRaw('COALESCE(vld.qty_available, 0) <= 0')
+                        ->orWhereRaw('COALESCE(products.alert_quantity, 0) > 0 AND COALESCE(vld.qty_available, 0) <= COALESCE(products.alert_quantity, 0)');
+                });
+
+                $rows = $q->select(
                     'products.id as product_id',
                     'products.name',
                     'products.sku',
@@ -690,15 +715,101 @@ class ReportsHubController extends Controller
                     'variations.sell_price_inc_tax',
                     DB::raw('COALESCE(vld.qty_available, 0) as qty_available'),
                     DB::raw('CASE
-                        WHEN products.alert_quantity > 0 THEN GREATEST(products.alert_quantity - COALESCE(vld.qty_available, 0), 1)
+                        WHEN COALESCE(products.alert_quantity, 0) > 0
+                        THEN GREATEST(products.alert_quantity - COALESCE(vld.qty_available, 0), 1)
                         ELSE 1
                     END as suggest_qty')
                 )
-                ->orderBy('products.name')
-                ->limit(500)
-                ->get();
+                    ->orderBy('products.name')
+                    ->limit(500)
+                    ->get();
+            } catch (\Throwable $e) {
+                \Log::error('Reorder list query failed: '.$e->getMessage(), [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
+                $error = $e->getMessage();
+                $rows = collect();
+            }
         }
 
-        return view('report.hub.reorder_list', compact('business_locations', 'location_id', 'rows'));
+        // Prefer blade; if missing, return simple HTML (avoids View not found 500)
+        if (view()->exists('report.hub.reorder_list')) {
+            try {
+                return view('report.hub.reorder_list', compact(
+                    'business_locations',
+                    'location_id',
+                    'rows',
+                    'error'
+                ));
+            } catch (\Throwable $e) {
+                \Log::error('Reorder list view failed: '.$e->getMessage());
+                $error = $e->getMessage();
+            }
+        }
+
+        return $this->reorderListFallback($business_locations, $location_id, $rows, $error);
+    }
+
+    /**
+     * Minimal HTML reorder list when the blade is missing on the server.
+     */
+    protected function reorderListFallback($business_locations, $location_id, $rows, $error = null)
+    {
+        $biz = e(session('business.name') ?: 'Business');
+        $err = $error ? '<p style="color:#b91c1c"><strong>Error:</strong> '.e($error).'</p>' : '';
+        $opts = '';
+        foreach ($business_locations as $id => $name) {
+            $sel = ((string) $id === (string) $location_id) ? ' selected' : '';
+            $opts .= '<option value="'.e($id).'"'.$sel.'>'.e($name).'</option>';
+        }
+        $body = '';
+        foreach ($rows as $r) {
+            $body .= '<tr>'
+                .'<td>'.e($r->name).'</td>'
+                .'<td>'.e($r->sub_sku ?: $r->sku).'</td>'
+                .'<td>'.e(number_format((float) $r->qty_available, 2)).'</td>'
+                .'<td>'.e(number_format((float) ($r->alert_quantity ?? 0), 2)).'</td>'
+                .'<td><strong>'.e(number_format((float) $r->suggest_qty, 2)).'</strong></td>'
+                .'<td>'.e(number_format((float) ($r->default_purchase_price ?? 0), 2)).'</td>'
+                .'<td>'.e(number_format((float) ($r->sell_price_inc_tax ?? 0), 2)).'</td>'
+                .'</tr>';
+        }
+        if ($body === '') {
+            $body = '<tr><td colspan="7" style="text-align:center;color:#64748b">No low-stock products for this location.</td></tr>';
+        }
+        $action = url('/reports/reorder-list');
+        $pos = url('/pos/create');
+        $hub = url('/reports');
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Reorder list</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f8fafc;margin:0;padding:20px;color:#0f172a}
+.box{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;max-width:1100px;margin:0 auto}
+h1{margin:0 0 8px;font-size:20px}table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid #f1f5f9;text-align:left}th{font-size:11px;text-transform:uppercase;color:#64748b}
+a.btn{display:inline-block;background:#0f766e;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;margin:0 6px 12px 0;font-size:13px;font-weight:700}
+</style></head><body>
+<div class="box">
+  <h1>Reorder list</h1>
+  <p style="color:#64748b;font-size:13px">{$biz}</p>
+  {$err}
+  <a class="btn" href="{$pos}">Open POS</a>
+  <a class="btn" href="{$hub}" style="background:#334155">Reports</a>
+  <form method="get" action="{$action}" style="margin:12px 0">
+    <label>Location </label>
+    <select name="location_id" onchange="this.form.submit()">{$opts}</select>
+  </form>
+  <table>
+    <thead><tr><th>Product</th><th>SKU</th><th>In stock</th><th>Alert</th><th>Suggest qty</th><th>Buy</th><th>Sell</th></tr></thead>
+    <tbody>{$body}</tbody>
+  </table>
+  <p style="font-size:12px;color:#94a3b8;margin-top:12px">Upload resources/views/report/hub/reorder_list.blade.php for full UI.</p>
+</div></body></html>
+HTML;
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
     }
 }

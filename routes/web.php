@@ -928,6 +928,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/supplier-payables', [\App\Http\Controllers\AdvancedReportsController::class, 'supplierPayables'])->name('reports.supplier_payables');
 
     // Owner ops pack (deploy, ritual, roles, data quality, notify)
+    Route::get('/owner-control', [\App\Http\Controllers\OwnerOpsController::class, 'dashboard'])->name('owner.dashboard');
+    Route::get('/owner-control/dashboard', [\App\Http\Controllers\OwnerOpsController::class, 'dashboard']);
     Route::get('/reports/deploy-checklist', [\App\Http\Controllers\OwnerOpsController::class, 'deployChecklist'])->name('reports.deploy_checklist');
     Route::get('/reports/weekly-ritual', [\App\Http\Controllers\OwnerOpsController::class, 'weeklyRitual'])->name('reports.weekly_ritual');
     Route::get('/reports/roles-guide', [\App\Http\Controllers\OwnerOpsController::class, 'rolesGuide'])->name('reports.roles_guide');

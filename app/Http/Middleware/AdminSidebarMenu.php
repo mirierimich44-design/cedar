@@ -62,6 +62,52 @@ class AdminSidebarMenu
             <path d="M10 12h4v4h-4z" />
           </svg>', 'active' => request()->segment(1) == 'home'])->order(5);
 
+            // Owner Control — dedicated dashboard + shortcuts (not on home strip)
+            if ($is_admin || auth()->user()->can('profit_loss_report.view') || auth()->user()->can('account.access') || auth()->user()->can('dashboard.data')) {
+                $menu->dropdown(
+                    'Owner Control',
+                    function ($sub) {
+                        if (Route::has('owner.dashboard')) {
+                            $sub->url(self::safeRoute('owner.dashboard'), 'Owner dashboard', [
+                                'icon' => '',
+                                'active' => request()->segment(1) == 'owner-control',
+                            ]);
+                        }
+                        if (Route::has('reports.day_close')) {
+                            $sub->url(self::safeRoute('reports.day_close'), 'Day close', ['icon' => '', 'active' => request()->segment(2) == 'day-close']);
+                        }
+                        if (Route::has('reports.month_end_pack')) {
+                            $sub->url(self::safeRoute('reports.month_end_pack'), 'Month-end pack', ['icon' => '', 'active' => request()->segment(2) == 'month-end-pack']);
+                        }
+                        if (Route::has('reports.bank_mpesa_recon')) {
+                            $sub->url(self::safeRoute('reports.bank_mpesa_recon'), 'Bank / M-Pesa recon', ['icon' => '', 'active' => request()->segment(2) == 'bank-mpesa-recon']);
+                        }
+                        if (Route::has('reports.reorder_list')) {
+                            $sub->url(self::safeRoute('reports.reorder_list'), 'Reorder list', ['icon' => '', 'active' => request()->segment(2) == 'reorder-list']);
+                        }
+                        if (Route::has('reports.data_quality')) {
+                            $sub->url(self::safeRoute('reports.data_quality'), 'Data quality', ['icon' => '', 'active' => request()->segment(2) == 'data-quality']);
+                        }
+                        if (Route::has('reports.weekly_ritual')) {
+                            $sub->url(self::safeRoute('reports.weekly_ritual'), 'Weekly ritual', ['icon' => '', 'active' => request()->segment(2) == 'weekly-ritual']);
+                        }
+                        if (Route::has('reports.supplier_payables')) {
+                            $sub->url(self::safeRoute('reports.supplier_payables'), 'Supplier payables', ['icon' => '', 'active' => request()->segment(2) == 'supplier-payables']);
+                        }
+                        $sub->url(action([\App\Http\Controllers\ReportController::class, 'getCustomerCreditReport']), 'Customer credit', [
+                            'icon' => '',
+                            'active' => request()->segment(2) == 'customer-credit',
+                        ]);
+                        if (Route::has('reports.hub')) {
+                            $sub->url(self::safeRoute('reports.hub'), 'All reports hub', ['icon' => '', 'active' => request()->segment(1) == 'reports' && request()->segment(2) == null]);
+                        }
+                    },
+                    [
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z" /><path d="M8 7v10" /><path d="M12 12l4 -4" /><path d="M12 12l4 4" /></svg>',
+                    ]
+                );
+            }
+
             if (in_array('ai_analytics', $enabled_modules) && Route::has('dashboard.bi')) {
                 $menu->url(route('dashboard.bi'), 'AI Analytics', ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-shrink-0" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>

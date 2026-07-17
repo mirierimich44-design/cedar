@@ -392,7 +392,126 @@ class OwnerOpsController extends Controller
     }
 
     /**
-     * 5 — Owner dashboard data (for home strip + JSON).
+     * Safe URL helper — never throws if named route missing.
+     */
+    protected function safeUrl(string $name, string $fallbackPath = '/home'): string
+    {
+        try {
+            if (\Illuminate\Support\Facades\Route::has($name)) {
+                return route($name);
+            }
+        } catch (\Throwable $e) {
+        }
+
+        return url($fallbackPath);
+    }
+
+    /**
+     * Full Owner Control dashboard page (sidebar entry).
+     */
+    public function dashboard(Request $request)
+    {
+        if (! $this->isOwnerLike()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $data = $this->ownerDashboardData($request);
+        $tiles = $this->ownerControlTiles();
+
+        if (view()->exists('report.owner.dashboard')) {
+            try {
+                return view('report.owner.dashboard', [
+                    'data' => $data,
+                    'tiles' => $tiles,
+                ]);
+            } catch (\Throwable $e) {
+                \Log::warning('Owner dashboard view: '.$e->getMessage());
+            }
+        }
+
+        return $this->dashboardFallback($data, $tiles);
+    }
+
+    protected function ownerControlTiles(): array
+    {
+        return [
+            ['title' => 'Day close', 'help' => 'Cash, M-Pesa, sales for one date', 'url' => $this->safeUrl('reports.day_close', '/reports/day-close'), 'icon' => 'fa-calendar-check', 'color' => '#059669'],
+            ['title' => 'Month-end pack', 'help' => 'Printable P&L, stock, credit, top products', 'url' => $this->safeUrl('reports.month_end_pack', '/reports/month-end-pack'), 'icon' => 'fa-file-alt', 'color' => '#2563eb'],
+            ['title' => 'Bank / M-Pesa recon', 'help' => 'Match payments to statements', 'url' => $this->safeUrl('reports.bank_mpesa_recon', '/reports/bank-mpesa-recon'), 'icon' => 'fa-university', 'color' => '#7c3aed'],
+            ['title' => 'Financial statements', 'help' => 'P&L + simplified balance sheet', 'url' => $this->safeUrl('reports.financial_statements', '/reports/financial-statements'), 'icon' => 'fa-file-invoice-dollar', 'color' => '#0d9488'],
+            ['title' => 'Multi-period', 'help' => 'Sales & profit by month', 'url' => $this->safeUrl('reports.multi_period', '/reports/multi-period'), 'icon' => 'fa-chart-bar', 'color' => '#0891b2'],
+            ['title' => 'Customer credit', 'help' => 'Who owes us', 'url' => action([ReportController::class, 'getCustomerCreditReport']), 'icon' => 'fa-credit-card', 'color' => '#dc2626'],
+            ['title' => 'Supplier payables', 'help' => 'Who we owe', 'url' => $this->safeUrl('reports.supplier_payables', '/reports/supplier-payables'), 'icon' => 'fa-file-invoice', 'color' => '#ea580c'],
+            ['title' => 'Reorder list', 'help' => 'Low / out of stock', 'url' => $this->safeUrl('reports.reorder_list', '/reports/reorder-list'), 'icon' => 'fa-truck', 'color' => '#d97706'],
+            ['title' => 'Data quality', 'help' => 'Ledger gaps, expiry, M-Pesa links', 'url' => $this->safeUrl('reports.data_quality', '/reports/data-quality'), 'icon' => 'fa-heartbeat', 'color' => '#be185d'],
+            ['title' => 'Discount abuse', 'help' => 'Unusual discounts by cashier', 'url' => $this->safeUrl('reports.discount_abuse', '/reports/discount-abuse'), 'icon' => 'fa-percentage', 'color' => '#b45309'],
+            ['title' => 'Weekly ritual', 'help' => 'Daily / weekly / monthly checklist', 'url' => $this->safeUrl('reports.weekly_ritual', '/reports/weekly-ritual'), 'icon' => 'fa-list-check', 'color' => '#4f46e5'],
+            ['title' => 'Send month-end', 'help' => 'SMS / WhatsApp summary', 'url' => $this->safeUrl('reports.month_end_notify', '/reports/month-end-notify'), 'icon' => 'fa-paper-plane', 'color' => '#0369a1'],
+            ['title' => 'Roles & caps', 'help' => 'Who sees finance + max discount %', 'url' => $this->safeUrl('reports.roles_guide', '/reports/roles-guide'), 'icon' => 'fa-user-shield', 'color' => '#334155'],
+            ['title' => 'Profit & loss', 'help' => 'Full P&L report', 'url' => action([ReportController::class, 'getProfitLoss']), 'icon' => 'fa-chart-line', 'color' => '#047857'],
+            ['title' => 'All reports hub', 'help' => 'Every report in one place', 'url' => $this->safeUrl('reports.hub', '/reports'), 'icon' => 'fa-th', 'color' => '#64748b'],
+            ['title' => 'Deploy checklist', 'help' => 'What is live on this server', 'url' => $this->safeUrl('reports.deploy_checklist', '/reports/deploy-checklist'), 'icon' => 'fa-rocket', 'color' => '#0f766e'],
+        ];
+    }
+
+    protected function dashboardFallback(array $data, array $tiles)
+    {
+        $biz = e(session('business.name') ?: 'Business');
+        $name = e(session('user.first_name') ?: 'Owner');
+        $sales = number_format((float) ($data['sales_today'] ?? 0), 2);
+        $inv = (int) ($data['invoices_today'] ?? 0);
+        $credit = number_format((float) ($data['credit_due'] ?? 0), 2);
+        $low = (int) ($data['low_stock'] ?? 0);
+        $tills = (int) ($data['open_tills'] ?? 0);
+        $exp = (int) ($data['expiring_90d'] ?? 0);
+        $today = e($data['today'] ?? date('Y-m-d'));
+
+        $cards = '';
+        foreach ($tiles as $t) {
+            $cards .= '<a class="tile" href="'.e($t['url']).'" style="--c:'.e($t['color']).'">'
+                .'<span class="ico"><i class="fa '.e($t['icon']).'"></i></span>'
+                .'<strong>'.e($t['title']).'</strong>'
+                .'<small>'.e($t['help']).'</small></a>';
+        }
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Owner Control</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body{font-family:system-ui,sans-serif;background:#f1f5f9;margin:0;padding:20px;color:#0f172a}
+.wrap{max-width:1100px;margin:0 auto}
+h1{margin:0 0 4px;font-size:22px}.sub{color:#64748b;margin:0 0 16px;font-size:13px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:18px}
+.k{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px}
+.k .l{font-size:10px;font-weight:800;text-transform:uppercase;color:#64748b}
+.k .v{font-size:20px;font-weight:800;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.tile{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;text-decoration:none;color:inherit;display:block;border-top:3px solid var(--c,#4f46e5)}
+.tile:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.tile .ico{display:inline-flex;width:34px;height:34px;border-radius:8px;background:var(--c);color:#fff;align-items:center;justify-content:center;margin-bottom:8px}
+.tile strong{display:block;font-size:14px;margin-bottom:4px}
+.tile small{color:#64748b;font-size:12px;line-height:1.35}
+</style></head><body>
+<div class="wrap">
+  <h1>Owner Control</h1>
+  <p class="sub">{$biz} · Hi {$name} · {$today}</p>
+  <div class="kpi">
+    <div class="k"><div class="l">Sales today</div><div class="v">{$sales}</div><small>{$inv} invoices</small></div>
+    <div class="k"><div class="l">Credit due</div><div class="v">{$credit}</div></div>
+    <div class="k"><div class="l">Low stock</div><div class="v">{$low}</div></div>
+    <div class="k"><div class="l">Open tills</div><div class="v">{$tills}</div></div>
+    <div class="k"><div class="l">Expiring 90d</div><div class="v">{$exp}</div></div>
+  </div>
+  <div class="grid">{$cards}</div>
+</div></body></html>
+HTML;
+
+        return response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    /**
+     * Owner dashboard data (KPIs + links).
      */
     public function ownerDashboardData(Request $request): array
     {
@@ -432,16 +551,21 @@ class OwnerOpsController extends Controller
 
         $lowStock = 0;
         try {
-            $lowStock = (int) DB::table('products as p')
+            $lq = DB::table('products as p')
                 ->join('variations as v', 'p.id', '=', 'v.product_id')
                 ->leftJoin('variation_location_details as vld', 'v.id', '=', 'vld.variation_id')
                 ->where('p.business_id', $business_id)
-                ->where('p.enable_stock', 1)
-                ->whereNull('v.deleted_at')
-                ->where(function ($q) {
-                    $q->whereRaw('COALESCE(vld.qty_available,0) <= 0')
-                        ->orWhereRaw('p.alert_quantity > 0 AND COALESCE(vld.qty_available,0) <= p.alert_quantity');
-                })
+                ->where('p.enable_stock', 1);
+            try {
+                if (Schema::hasColumn('variations', 'deleted_at')) {
+                    $lq->whereNull('v.deleted_at');
+                }
+            } catch (\Throwable $e) {
+            }
+            $lowStock = (int) $lq->where(function ($q) {
+                $q->whereRaw('COALESCE(vld.qty_available,0) <= 0')
+                    ->orWhereRaw('COALESCE(p.alert_quantity,0) > 0 AND COALESCE(vld.qty_available,0) <= COALESCE(p.alert_quantity,0)');
+            })
                 ->distinct('v.id')
                 ->count('v.id');
         } catch (\Throwable $e) {
@@ -480,12 +604,12 @@ class OwnerOpsController extends Controller
             'open_tills' => $openTills,
             'expiring_90d' => $expiring,
             'links' => [
-                'day_close' => route('reports.day_close'),
-                'month_end' => route('reports.month_end_pack'),
-                'recon' => route('reports.bank_mpesa_recon'),
+                'day_close' => $this->safeUrl('reports.day_close', '/reports/day-close'),
+                'month_end' => $this->safeUrl('reports.month_end_pack', '/reports/month-end-pack'),
+                'recon' => $this->safeUrl('reports.bank_mpesa_recon', '/reports/bank-mpesa-recon'),
                 'credit' => action([ReportController::class, 'getCustomerCreditReport']),
-                'reorder' => route('reports.reorder_list'),
-                'ritual' => route('reports.weekly_ritual'),
+                'reorder' => $this->safeUrl('reports.reorder_list', '/reports/reorder-list'),
+                'ritual' => $this->safeUrl('reports.weekly_ritual', '/reports/weekly-ritual'),
             ],
         ];
     }
