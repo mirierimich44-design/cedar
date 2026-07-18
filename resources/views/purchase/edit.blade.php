@@ -251,11 +251,18 @@
 
               <hr/>
               <div class="pull-right col-md-5">
-                <table class="pull-right col-md-12">
+                <table class="pull-right col-md-12" style="font-size:14px;">
                   <tr>
                     <th class="col-md-7 text-right">@lang( 'lang_v1.total_items' ):</th>
                     <td class="col-md-5 text-left">
                       <span id="total_quantity" class="display_currency" data-currency_symbol="false"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th class="col-md-7 text-right">@lang( 'purchase.net_total_amount' ):</th>
+                    <td class="col-md-5 text-left">
+                      <span id="total_subtotal" class="display_currency">{{$purchase->total_before_tax/$purchase->exchange_rate}}</span>
+                      <input type="hidden" id="total_subtotal_input" value="{{$purchase->total_before_tax/$purchase->exchange_rate}}" name="total_before_tax">
                     </td>
                   </tr>
                   <tr class="hide">
@@ -263,14 +270,6 @@
                     <td class="col-md-5 text-left">
                       <span id="total_st_before_tax" class="display_currency"></span>
                       <input type="hidden" id="st_before_tax_input" value=0>
-                    </td>
-                  </tr>
-                  <tr class="hide">
-                    <th class="col-md-7 text-right">@lang( 'purchase.net_total_amount' ):</th>
-                    <td class="col-md-5 text-left">
-                      <span id="total_subtotal" class="display_currency">{{$purchase->total_before_tax/$purchase->exchange_rate}}</span>
-                      <!-- This is total before purchase tax-->
-                      <input type="hidden" id="total_subtotal_input" value="{{$purchase->total_before_tax/$purchase->exchange_rate}}" name="total_before_tax">
                     </td>
                   </tr>
                 </table>
@@ -349,8 +348,9 @@
             </div>
         </div>
     @endcomponent
-    @component('components.widget', ['class' => 'box-primary hide'])
-    <div class="row">
+    {{-- Totals / expenses box: must be VISIBLE (was hide — grand total disappeared on edit) --}}
+    @component('components.widget', ['class' => 'box-primary', 'title' => __('purchase.purchase_total')])
+    <div class="row hide">
 {!! Form::hidden('shipping_details', $purchase->shipping_details); !!}
 {!! Form::hidden('shipping_charges', number_format($purchase->shipping_charges/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)); !!}
     </div>
@@ -506,16 +506,94 @@
     <div class="row">
     <div class="col-md-12 text-right">
       {!! Form::hidden('final_total', $purchase->final_total , ['id' => 'grand_total_hidden']); !!}
-      <div class="tw-text-2xl tw-font-bold tw-text-primary tw-mt-4">
+      <div class="tw-text-2xl tw-font-bold tw-text-primary tw-mt-4" style="padding:12px 0;">
         @lang('purchase.purchase_total'): <span id="grand_total" class="display_currency" data-currency_symbol='true'>{{$purchase->final_total}}</span>
       </div>
     </div>
     </div>
     @endcomponent
-  
-    <div class="row">
+
+    {{-- Existing payments (edit does not re-enter payment like create; show status + list) --}}
+    @php
+      $edit_payment_methods = $payment_methods ?? [];
+      $edit_total_paid = 0;
+      if (!empty($purchase->payment_lines)) {
+        foreach ($purchase->payment_lines as $pl) {
+          $edit_total_paid += $pl->amount;
+        }
+      }
+      $edit_due = max(0, ($purchase->final_total ?? 0) - $edit_total_paid);
+    @endphp
+    @component('components.widget', ['class' => 'box-primary', 'title' => __('sale.payment_info')])
+      <div class="row" style="margin-bottom:12px;">
+        <div class="col-sm-4">
+          <strong>@lang('purchase.payment_status'):</strong>
+          <span class="label @if(($purchase->payment_status ?? '') == 'paid') label-success @elseif(($purchase->payment_status ?? '') == 'partial') label-warning @else label-danger @endif">
+            {{ __('lang_v1.' . ($purchase->payment_status ?? 'due')) }}
+          </span>
+        </div>
+        <div class="col-sm-4">
+          <strong>@lang('purchase.total_paid') / Paid:</strong>
+          <span class="display_currency" data-currency_symbol="true">{{ $edit_total_paid }}</span>
+        </div>
+        <div class="col-sm-4">
+          <strong>@lang('purchase.payment_due'):</strong>
+          <span id="payment_due" class="display_currency" data-currency_symbol="true">{{ $edit_due }}</span>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+          <thead>
+            <tr class="bg-light-blue">
+              <th>#</th>
+              <th>@lang('messages.date')</th>
+              <th>@lang('purchase.ref_no')</th>
+              <th>@lang('sale.amount')</th>
+              <th>@lang('sale.payment_mode')</th>
+              <th>@lang('sale.payment_note')</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse(($purchase->payment_lines ?? []) as $payment_line)
+              <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ @format_date($payment_line->paid_on) }}</td>
+                <td>{{ $payment_line->payment_ref_no }}</td>
+                <td><span class="display_currency" data-currency_symbol="true">{{ $payment_line->amount }}</span></td>
+                <td>{{ $edit_payment_methods[$payment_line->method] ?? $payment_line->method }}</td>
+                <td>{{ $payment_line->note ? ucfirst($payment_line->note) : '—' }}</td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="6" class="text-center text-muted">@lang('purchase.no_payments')</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <div class="col-sm-12">
+          @if(auth()->user()->can('purchase.payments') || auth()->user()->can('edit_purchase_payment'))
+            @if(($purchase->payment_status ?? '') != 'paid')
+              <a href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'addPayment'], [$purchase->id]) }}"
+                 class="btn btn-success btn-sm add_payment_modal">
+                <i class="fas fa-money-bill-alt"></i> @lang('purchase.add_payment')
+              </a>
+            @endif
+            <a href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'show'], [$purchase->id]) }}"
+               class="btn btn-info btn-sm view_payment_modal">
+              <i class="fas fa-eye"></i> @lang('purchase.view_payments')
+            </a>
+          @endif
+        </div>
+      </div>
+    @endcomponent
+
+    <div class="row" style="margin:16px 0 24px;">
         <div class="col-sm-12 text-center">
-          <button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">@lang('messages.update')</button>
+          <button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">
+            <i class="fa fa-check"></i> @lang('messages.update')
+          </button>
         </div>
     </div>
 {!! Form::close() !!}

@@ -580,7 +580,8 @@ class PurchaseController extends Controller
                         'purchase_lines.variations.product_variation',
                         'location',
                         'purchase_lines.sub_unit',
-                        'purchase_lines.purchase_order_line'
+                        'purchase_lines.purchase_order_line',
+                        'payment_lines'
                     )
                     ->first();
 
@@ -632,6 +633,8 @@ class PurchaseController extends Controller
                                         ->pluck('ref_no', 'id');
         }
 
+        $payment_methods = $this->productUtil->payment_types($purchase->location_id, true, $business_id);
+
         return view('purchase.edit')
             ->with(compact(
                 'taxes',
@@ -645,7 +648,8 @@ class PurchaseController extends Controller
                 'types',
                 'shortcuts',
                 'purchase_orders',
-                'common_settings'
+                'common_settings',
+                'payment_methods'
             ));
     }
 
@@ -1469,5 +1473,102 @@ class PurchaseController extends Controller
         }
 
         return $output;
+    }
+
+    /**
+     * Scan an invoice image with Kimi AI and return extracted + matched data.
+     */
+    public function scanInvoice(Request $request)
+    {
+        if (!auth()->user()->can('purchase.create')) {
+            return response()->json(['success' => false, 'msg' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'invoice_image' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:10240',
+        ]);
+
+        $business_id = $request->session()->get('user.business_id');
+
+        try {
+            $file = $request->file('invoice_image');
+            $mime = $file->getMimeType();
+            $path = $file->getRealPath();
+
+            $kimi = new \App\Services\KimiInvoiceService($business_id);
+
+            if (!$kimi->hasApiKey()) {
+                return response()->json([
+                    'success' => false,
+                    'msg'     => 'Kimi API key not configured. Go to Settings → Integrations → Artificial Intelligence and add your Kimi API key.',
+                ], 422);
+            }
+
+            $extracted = $kimi->extractFromImage($path, $mime);
+
+            return response()->json(['success' => true, 'data' => $extracted]);
+        } catch (\Throwable $e) {
+            \Log::error('Invoice scan failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'msg' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Refresh the Kimi-powered fast movers → DB product ID mapping cache.
+     */
+    public function refreshFastMoversMapping(Request $request)
+    {
+        if (!auth()->user()->can('stock_report.view')) {
+            return response()->json(['success' => false, 'msg' => 'Unauthorized'], 403);
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+
+        $referenceNames = [
+            'Amoxicillin 500mg','Amoxicillin/Clavulanate 625mg','Augmentin 625mg',
+            'Azithromycin 500mg','Azithromycin suspension','Ceftriaxone',
+            'Cefuroxime 500mg','Metronidazole 400mg','Ciprofloxacin',
+            'Flucloxacillin 500mg','Panadol Advance','Panadol Extra',
+            'Cetamol','Ibuprofen 400mg','Diclofenac injection',
+            'Tramadol','Ponstan Forte','Mara Moja',
+            'Omeprazole','Gaviscon','Eno','Relcer','Buscopan Plus',
+            'Cetirizine','Aerius tabs','Piriton','Salbutamol inhaler',
+            'Benylin with Codeine','Rhinathiol Promethazine','Coldcap',
+            'Postinor','Microgynon FE','Pregnancy test strips',
+            'HIV self-test kits','Full haemogram tests','Urinalysis',
+            'Malaria test kits','H. pylori tests','VDRL strips','Sematide',
+            'Fluconazole 150mg','Flugone','Secnidazole','Orav OZ','Makare',
+            'Clotrimazole pessaries','Candid V3','Gyno Micozol','Dazel Kit','Safe 72',
+            'Normal Saline','Dressing supplies','Surgical spirit','Hydrogen peroxide',
+            'Gauze swabs','Gloves','Syringes','Branulas','IV giving sets','Surgical masks',
+            'Amlodipine','Carditan H','Presartan H','Nifedipine','Furosemide',
+            'Hydrochlorothiazide','Glucomet 500','Glucomet 850','Empaflo M',
+            'Linvesta EMP','Aspirin 75mg','Avastatin','Concor','Levothyroxine',
+            'Carbamazepine','Amitriptyline','Pregabalin','Fluoxetine','Stilnox','Neuro Forte',
+            'Calpol Infant','Babymol','Brustan suspension','Cetamol syrup',
+            'Piriton syrup','Salbutamol syrup','Good Morning syrup',
+            'Feroglobin syrup','Byofer syrup','Gripe Water',
+            'Albendazole tabs','Albendazole syrup','ABZ suspension',
+            'Vitamin C tablets','Healthy C','Ezeevit-C',
+            'Seven Seas','IFAS','Pregnacare','Folic Acid',
+        ];
+
+        try {
+            $kimi = new \App\Services\KimiInvoiceService();
+            $kimi->clearFastMoversCache($business_id);
+            $mapping = $kimi->matchFastMoversToDb($referenceNames, $business_id);
+
+            $matched = collect($mapping)->filter(fn($v) => $v !== null)->count();
+
+            return response()->json([
+                'success' => true,
+                'matched' => $matched,
+                'total'   => count($referenceNames),
+                'mapping' => $mapping,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Fast movers AI mapping failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'msg' => $e->getMessage()], 500);
+        }
     }
 }
