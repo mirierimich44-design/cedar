@@ -165,7 +165,7 @@
                 <input type="hidden" class="row_subtotal_before_tax_hidden" value="{{number_format($purchase_line->quantity * $purchase_line->purchase_price/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)}}">
             </td>
 
-            <td>
+            <td style="vertical-align:middle; padding:10px 8px;">
                 @php
                     $item_tax = $purchase_line->item_tax/$purchase->exchange_rate;
                     $pp_before_tax = $purchase_line->purchase_price/$purchase->exchange_rate;
@@ -174,16 +174,16 @@
                         $item_tax_percent = ($item_tax / $pp_before_tax) * 100;
                     }
                 @endphp
-                <div class="tw-flex tw-flex-col tw-gap-2">
-                    <div class="input-group">
-                        <span class="input-group-addon">%</span>
-                        {!! Form::text('purchases[' . $loop->index . '][item_tax_percent]', number_format($item_tax_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm row_tax_percent input_number', 'placeholder' => 'Tax %']); !!}
-                    </div>
-                    <div class="input-group hide">
-                        <span class="input-group-addon">Amt</span>
-                        {!! Form::text('purchases[' . $loop->index . '][item_tax]', number_format($item_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm row_tax_amount input_number purchase_product_unit_tax', 'placeholder' => 'Tax Amount']); !!}
-                    </div>
-                </div>
+                {!! Form::text('purchases[' . $loop->index . '][item_tax_percent]', number_format($item_tax_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), [
+                    'class' => 'form-control row_tax_percent input_number',
+                    'placeholder' => '0',
+                    'title' => 'Tax percent',
+                    'style' => 'width:100%; text-align:center; font-weight:600; font-size:13px; height:38px; border-radius:8px;',
+                ]); !!}
+                {!! Form::text('purchases[' . $loop->index . '][item_tax]', number_format($item_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), [
+                    'class' => 'form-control row_tax_amount input_number purchase_product_unit_tax hide',
+                    'placeholder' => '0',
+                ]); !!}
                 <select name="purchases[{{ $loop->index }}][purchase_line_tax_id]" class="hide purchase_line_tax_id">
                     <option value="" data-tax_amount="0" selected>@lang('lang_v1.none')</option>
                 </select>

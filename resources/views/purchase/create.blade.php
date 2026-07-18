@@ -279,9 +279,9 @@
 						<col style="min-width:200px; width:22%;">  {{-- Product Name --}}
 						<col style="width:88px;">          {{-- Qty --}}
 						<col style="width:120px;">         {{-- Unit Cost --}}
-						<col style="width:100px;">         {{-- Disc% --}}
+						<col style="width:88px;">          {{-- Disc% --}}
 						<col style="width:110px;">         {{-- Sub Total --}}
-						<col style="width:100px;">         {{-- Tax % --}}
+						<col style="width:88px;">          {{-- Tax % — plain input, no % addon --}}
 						<col style="width:110px;">         {{-- Line Total --}}
 						<col style="display:none;">        {{-- hidden --}}
 						<col style="display:none;">        {{-- hidden --}}

@@ -139,19 +139,17 @@
         {!! Form::hidden('purchases[' . $row_count . '][purchase_price]', $price_fmt, ['class' => 'purchase_unit_cost input_number']) !!}
     </td>
 
-    {{-- ── Col 5: Disc % ───────────────────────────────────────── --}}
-    <td style="vertical-align:middle; padding:6px;">
-        <div class="input-group" style="width:100%;">
-            <span class="input-group-addon" style="font-weight:700; font-size:13px; padding:0 8px; background:#f0f4ff; border-color:#c7d2fe;">%</span>
-            <input type="text"
-                name="purchases[{{ $row_count }}][discount_percent]"
-                value="{{ $disc_fmt }}"
-                class="form-control inline_discounts input_number"
-                placeholder="0"
-                required
-                style="text-align:center; font-weight:700; font-size:15px; height:36px;"
-            >
-        </div>
+    {{-- ── Col 5: Disc % (header shows %; no addon — wider input) ── --}}
+    <td style="vertical-align:middle; padding:10px 8px;">
+        <input type="text"
+            name="purchases[{{ $row_count }}][discount_percent]"
+            value="{{ $disc_fmt }}"
+            class="form-control inline_discounts input_number"
+            placeholder="0"
+            required
+            title="Discount percent"
+            style="width:100%; text-align:center; font-weight:600; font-size:13px; height:38px; border-radius:8px;"
+        >
     </td>
 
     {{-- ── Col 6: Sub Total ────────────────────────────────────── --}}
@@ -160,23 +158,18 @@
         <input type="hidden" class="row_subtotal_before_tax_hidden" value="0">
     </td>
 
-    {{-- ── Col 7: Tax % ────────────────────────────────────────── --}}
-    <td style="vertical-align:middle; padding:6px;">
-        <div class="input-group" style="width:100%;">
-            <span class="input-group-addon" style="font-weight:700; font-size:13px; padding:0 8px; background:#f0f4ff; border-color:#c7d2fe;">%</span>
-            {!! Form::text('purchases[' . $row_count . '][item_tax_percent]', 0, [
-                'class'       => 'form-control row_tax_percent input_number',
-                'placeholder' => '0',
-                'style'       => 'text-align:center; font-weight:700; font-size:15px; height:36px;',
-            ]) !!}
-        </div>
-        <div class="input-group hide" style="margin-top:4px;">
-            <span class="input-group-addon" style="padding:0 6px;">Amt</span>
-            {!! Form::text('purchases[' . $row_count . '][item_tax]', 0, [
-                'class'       => 'form-control row_tax_amount input_number purchase_product_unit_tax',
-                'placeholder' => '0',
-            ]) !!}
-        </div>
+    {{-- ── Col 7: Tax % (header shows %; no addon — wider input) ── --}}
+    <td style="vertical-align:middle; padding:10px 8px;">
+        {!! Form::text('purchases[' . $row_count . '][item_tax_percent]', 0, [
+            'class'       => 'form-control row_tax_percent input_number',
+            'placeholder' => '0',
+            'title'       => 'Tax percent',
+            'style'       => 'width:100%; text-align:center; font-weight:600; font-size:13px; height:38px; border-radius:8px;',
+        ]) !!}
+        {!! Form::text('purchases[' . $row_count . '][item_tax]', 0, [
+            'class' => 'form-control row_tax_amount input_number purchase_product_unit_tax hide',
+            'placeholder' => '0',
+        ]) !!}
         <select name="purchases[{{ $row_count }}][purchase_line_tax_id]" class="hide purchase_line_tax_id">
             <option value="" data-tax_amount="0" selected>@lang('lang_v1.none')</option>
         </select>

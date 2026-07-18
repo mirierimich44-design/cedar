@@ -94,23 +94,15 @@
 #purchase_entry_table .row_tax_percent,
 #purchase_entry_table .profit_percent {
     text-align: center;
-    max-width: 90px;
-    margin: 0 auto;
+    width: 100%;
+    min-width: 72px;
+    max-width: 100%;
 }
-#purchase_entry_table .input-group {
-    max-width: 110px;
-    margin: 0 auto;
-}
-#purchase_entry_table .input-group .form-control {
-    height: 38px;
-    border-radius: 0 8px 8px 0;
-}
-#purchase_entry_table .input-group-addon {
-    border-radius: 8px 0 0 8px;
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-    font-weight: 700;
-    font-size: 12px;
+/* Tax/Disc: full cell width — no % addon squeezing the box */
+#purchase_entry_table td .row_tax_percent,
+#purchase_entry_table td .inline_discounts {
+    display: block;
+    box-sizing: border-box;
 }
 
 /* Money columns */
