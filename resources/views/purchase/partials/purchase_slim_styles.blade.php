@@ -1,4 +1,4 @@
-{{-- Purchase table: classic multi-column layout, well spaced (not sparse slim) --}}
+{{-- Purchase table: classic multi-column, well spaced + sticky headers (page scroll) --}}
 <style>
 /* Search strip */
 .purchase-search-strip,
@@ -6,12 +6,13 @@
     border-radius: 10px;
 }
 
-/* Table base */
+/* Table base — show ALL rows (no max-height clip) */
 #purchase_entry_table {
     width: 100%;
     min-width: 980px;
-    border-collapse: separate;
+    border-collapse: separate !important; /* sticky needs separate, not collapse */
     border-spacing: 0;
+    margin-bottom: 0;
 }
 #purchase_entry_table > thead > tr > th {
     font-size: 11px;
@@ -19,7 +20,7 @@
     text-transform: uppercase;
     letter-spacing: .03em;
     color: #475569;
-    background: #f8fafc !important;
+    background: #f1f5f9 !important;
     border-bottom: 2px solid #e2e8f0 !important;
     vertical-align: middle !important;
     padding: 12px 10px !important;
@@ -29,12 +30,16 @@
     vertical-align: middle !important;
     padding: 12px 10px !important;
     border-color: #eef2f7 !important;
+    background: #fff;
 }
-#purchase_entry_table > tbody > tr:hover {
-    background: #f8fafc;
+#purchase_entry_table > tbody > tr:nth-child(even) > td {
+    background: #fafbfc;
+}
+#purchase_entry_table > tbody > tr:hover > td {
+    background: #f1f5f9;
 }
 
-/* Product column: left-aligned, readable */
+/* Product column: left-aligned */
 #purchase_entry_table td:nth-child(2),
 #purchase_entry_table th:nth-child(2) {
     text-align: left !important;
@@ -64,7 +69,7 @@
 #purchase_entry_table .details-lot-badge  { background: #f59e0b !important; color: #fff !important; }
 #purchase_entry_table .details-exp-badge  { background: #64748b !important; color: #fff !important; }
 
-/* Inputs: even height & spacing */
+/* Inputs */
 #purchase_entry_table .purchase_quantity,
 #purchase_entry_table .purchase_unit_cost_without_discount,
 #purchase_entry_table .purchase_unit_cost,
@@ -97,15 +102,10 @@
     width: 100%;
     min-width: 72px;
     max-width: 100%;
-}
-/* Tax/Disc: full cell width — no % addon squeezing the box */
-#purchase_entry_table td .row_tax_percent,
-#purchase_entry_table td .inline_discounts {
     display: block;
     box-sizing: border-box;
 }
 
-/* Money columns */
 #purchase_entry_table .row_subtotal_before_tax,
 #purchase_entry_table .row_subtotal_after_tax {
     font-weight: 700;
@@ -116,7 +116,6 @@
     color: #1d4ed8;
 }
 
-/* Details button */
 #purchase_entry_table .btn-purchase-details {
     border-radius: 8px;
     padding: 7px 12px;
@@ -133,7 +132,6 @@
     padding: 4px 8px;
 }
 
-/* Tighter header meta */
 .purchase-meta-card .form-group { margin-bottom: 12px; }
 .purchase-meta-card #supplier_address_div {
     font-size: 12px;
@@ -143,44 +141,77 @@
     overflow: hidden;
 }
 
-/* ── Sticky column headers (float while scrolling many lines) ──
-   Scroll lives on .purchase-lines-scroll so thead sticky works. */
-.purchase-lines-scroll {
-    border-radius: 8px;
+/*
+ * Sticky headers — stick to the WINDOW while the PAGE scrolls.
+ * Do NOT use max-height/overflow:auto on a wrapper (that hid rows).
+ * Horizontal overflow only, and overflow-y: visible so sticky works.
+ */
+.purchase-lines-scroll,
+#add_purchase_form .table-responsive:has(#purchase_entry_table) {
+    max-height: none !important;
+    overflow-x: auto;
+    overflow-y: visible;
     border: 1px solid #e2e8f0;
-    max-height: min(62vh, 720px);
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
     background: #fff;
+    /* isolate so sticky is relative to viewport scroll, not a clipped box */
     position: relative;
 }
-.purchase-lines-scroll > #purchase_entry_table,
-.purchase-lines-scroll > .table {
-    margin-bottom: 0;
-}
+
+/* Float header under sticky search strip (~56–80px). Adjust if needed. */
 #purchase_entry_table > thead > tr > th {
+    position: -webkit-sticky;
     position: sticky;
-    top: 0;
-    z-index: 20;
+    top: 72px;
+    z-index: 30;
     background: #f1f5f9 !important;
-    box-shadow: 0 2px 0 #e2e8f0, 0 4px 10px rgba(15, 23, 42, 0.06);
-}
-/* Keep first product column readable while scrolling horizontally */
-#purchase_entry_table > thead > tr > th:nth-child(2) {
-    z-index: 21;
-    left: 0; /* only sticks vertically unless we also sticky left on tbody */
-}
-/* Optional: pin # column slightly when scrolling sideways */
-#purchase_entry_table > thead > tr > th:first-child {
-    z-index: 22;
-    left: 0;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
-/* Fallback if wrapper class missing (create/edit older markup) */
-#add_purchase_form .table-responsive:has(#purchase_entry_table) {
-    max-height: min(62vh, 720px);
-    overflow: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+/* When sticky search strip is present, keep header below it */
+body .content-wrapper #purchase_entry_table > thead > tr > th {
+    top: 72px;
+}
+
+/* Mobile: less offset (no big sticky search) */
+@media (max-width: 767px) {
+    #purchase_entry_table > thead > tr > th {
+        top: 0;
+    }
 }
 </style>
+<script>
+(function () {
+    // Recalculate sticky top so header sits under sticky search bar if present
+    function purchaseStickyHeaderOffset() {
+        var ths = document.querySelectorAll('#purchase_entry_table thead th');
+        if (!ths.length) return;
+        var bar = document.querySelector('#add_purchase_form .tw-sticky, #add_purchase_form .purchase-search-strip');
+        var top = 0;
+        if (bar) {
+            var r = bar.getBoundingClientRect();
+            // if bar is stuck at top of viewport
+            if (r.top <= 1 && r.height) {
+                top = Math.ceil(r.height);
+            } else {
+                top = 0;
+            }
+        }
+        // also account for fixed admin navbar if any
+        var nav = document.querySelector('.main-header, .navbar-static-top, nav.navbar');
+        if (nav && window.getComputedStyle(nav).position === 'fixed') {
+            top += Math.ceil(nav.getBoundingClientRect().height);
+        }
+        ths.forEach(function (th) {
+            th.style.top = top + 'px';
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', purchaseStickyHeaderOffset);
+    } else {
+        purchaseStickyHeaderOffset();
+    }
+    window.addEventListener('scroll', purchaseStickyHeaderOffset, { passive: true });
+    window.addEventListener('resize', purchaseStickyHeaderOffset);
+})();
+</script>
