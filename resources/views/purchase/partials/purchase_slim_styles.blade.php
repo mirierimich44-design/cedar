@@ -143,8 +143,44 @@
     overflow: hidden;
 }
 
-/* Horizontal scroll without crushing columns */
-.table-responsive {
+/* ── Sticky column headers (float while scrolling many lines) ──
+   Scroll lives on .purchase-lines-scroll so thead sticky works. */
+.purchase-lines-scroll {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    max-height: min(62vh, 720px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    position: relative;
+}
+.purchase-lines-scroll > #purchase_entry_table,
+.purchase-lines-scroll > .table {
+    margin-bottom: 0;
+}
+#purchase_entry_table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #f1f5f9 !important;
+    box-shadow: 0 2px 0 #e2e8f0, 0 4px 10px rgba(15, 23, 42, 0.06);
+}
+/* Keep first product column readable while scrolling horizontally */
+#purchase_entry_table > thead > tr > th:nth-child(2) {
+    z-index: 21;
+    left: 0; /* only sticks vertically unless we also sticky left on tbody */
+}
+/* Optional: pin # column slightly when scrolling sideways */
+#purchase_entry_table > thead > tr > th:first-child {
+    z-index: 22;
+    left: 0;
+}
+
+/* Fallback if wrapper class missing (create/edit older markup) */
+#add_purchase_form .table-responsive:has(#purchase_entry_table) {
+    max-height: min(62vh, 720px);
+    overflow: auto;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
 }
 </style>

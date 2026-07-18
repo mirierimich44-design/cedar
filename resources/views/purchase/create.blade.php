@@ -272,7 +272,7 @@
 		@endphp
 		<div class="row">
 			<div class="col-sm-12">
-			<div class="table-responsive" style="overflow-x:auto;">
+			<div class="table-responsive purchase-lines-scroll" role="region" aria-label="Purchase lines">
 				<table class="table table-condensed table-bordered table-th-green text-center table-striped" id="purchase_entry_table" style="width:100%; min-width:1100px;">
 					<colgroup>
 						<col style="width:44px;">          {{-- # --}}
