@@ -9,7 +9,7 @@
 @includeIf('purchase.partials.purchase_slim_styles')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('purchase.edit_purchase') <i class="fa fa-keyboard-o hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@include('purchase.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i></h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('purchase.edit_purchase') <i class="fa fa-keyboard-o hover-q text-muted" aria-hidden="true" data-container="body" data-toggle="popover" data-placement="bottom" data-content="@includeIf('purchase.partials.keyboard_shortcuts_details')" data-html="true" data-trigger="hover" data-original-title="" title=""></i></h1>
 </section>
 
 <!-- Main content -->
@@ -31,7 +31,7 @@
 
   <input type="hidden" id="purchase_id" value="{{ $purchase->id }}">
 
-    @component('components.widget', ['class' => 'box-primary purchase-meta-card'])
+    @component('components.widget', ['class' => 'box-primary'])
         <div class="row">
             <div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif">
               <div class="form-group">
@@ -46,7 +46,9 @@
                   </span>
                 </div>
               </div>
-              <span class="purchase-addr-label">@lang('business.address')</span>
+              <strong>
+                @lang('business.address'):
+              </strong>
               <div id="supplier_address_div">
                 {!! $purchase->contact->contact_address !!}
               </div>
@@ -221,7 +223,7 @@
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
-        <div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] purchase-search-strip">
+        <div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] tw-bg-white tw-shadow-md tw-py-4 tw-mb-4">
             <div class="col-sm-2 text-center">
               <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" data-toggle="modal" data-target="#import_purchase_products_modal">@lang('product.import_products')</button>
             </div>
@@ -247,11 +249,31 @@
             <div class="col-sm-12">
               @include('purchase.partials.edit_purchase_entry_row')
 
-              <div class="hide">
-                <span id="total_st_before_tax" class="display_currency"></span>
-                <input type="hidden" id="st_before_tax_input" value=0>
-                <span id="total_subtotal" class="display_currency">{{$purchase->total_before_tax/$purchase->exchange_rate}}</span>
-                <input type="hidden" id="total_subtotal_input" value="{{$purchase->total_before_tax/$purchase->exchange_rate}}" name="total_before_tax">
+              <hr/>
+              <div class="pull-right col-md-5">
+                <table class="pull-right col-md-12">
+                  <tr>
+                    <th class="col-md-7 text-right">@lang( 'lang_v1.total_items' ):</th>
+                    <td class="col-md-5 text-left">
+                      <span id="total_quantity" class="display_currency" data-currency_symbol="false"></span>
+                    </td>
+                  </tr>
+                  <tr class="hide">
+                    <th class="col-md-7 text-right">@lang( 'purchase.total_before_tax' ):</th>
+                    <td class="col-md-5 text-left">
+                      <span id="total_st_before_tax" class="display_currency"></span>
+                      <input type="hidden" id="st_before_tax_input" value=0>
+                    </td>
+                  </tr>
+                  <tr class="hide">
+                    <th class="col-md-7 text-right">@lang( 'purchase.net_total_amount' ):</th>
+                    <td class="col-md-5 text-left">
+                      <span id="total_subtotal" class="display_currency">{{$purchase->total_before_tax/$purchase->exchange_rate}}</span>
+                      <!-- This is total before purchase tax-->
+                      <input type="hidden" id="total_subtotal_input" value="{{$purchase->total_before_tax/$purchase->exchange_rate}}" name="total_before_tax">
+                    </td>
+                  </tr>
+                </table>
               </div>
 
             </div>
@@ -481,22 +503,20 @@
         </table>
       </div>
     </div>
-    {!! Form::hidden('final_total', $purchase->final_total , ['id' => 'grand_total_hidden']); !!}
+    <div class="row">
+    <div class="col-md-12 text-right">
+      {!! Form::hidden('final_total', $purchase->final_total , ['id' => 'grand_total_hidden']); !!}
+      <div class="tw-text-2xl tw-font-bold tw-text-primary tw-mt-4">
+        @lang('purchase.purchase_total'): <span id="grand_total" class="display_currency" data-currency_symbol='true'>{{$purchase->final_total}}</span>
+      </div>
+    </div>
+    </div>
     @endcomponent
-
-    <div class="purchase-sticky-footer">
-      <div class="psf-stats">
-        <span>@lang('lang_v1.total_items'): <strong><span id="total_quantity" class="display_currency" data-currency_symbol="false">0</span></strong></span>
-      </div>
-      <div class="psf-total">
-        <small>@lang('purchase.purchase_total')</small>
-        <span id="grand_total" class="display_currency" data-currency_symbol='true'>{{$purchase->final_total}}</span>
-      </div>
-      <div class="psf-actions">
-        <button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">
-          <i class="fa fa-check"></i> @lang('messages.update')
-        </button>
-      </div>
+  
+    <div class="row">
+        <div class="col-sm-12 text-center">
+          <button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">@lang('messages.update')</button>
+        </div>
     </div>
 {!! Form::close() !!}
 </section>
@@ -506,7 +526,7 @@
 <div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
   @include('contact.create', ['quick_add' => true])
 </div>
-@include('purchase.partials.import_purchase_products_modal')
+@includeIf('purchase.partials.import_purchase_products_modal')
 @includeIf('purchase.partials.purchase_line_details_modal')
 @endsection
 

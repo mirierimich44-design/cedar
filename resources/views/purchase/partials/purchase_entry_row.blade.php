@@ -35,8 +35,6 @@
     $cost_fmt     = number_format($pp_without_discount, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator);
     $disc_fmt     = number_format($discount_percent,    $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator);
     $price_fmt    = number_format($purchase_price,      $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator);
-
-    $sell_fmt = number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator);
 @endphp
 
 <tr data-row="{{ $row_count }}"
@@ -44,52 +42,42 @@
     @if(!empty($purchase_requisition_line)) data-purchase_requisition_id="{{ $purchase_requisition_line->transaction_id }}" @endif
 >
 
-    {{-- # --}}
-    <td class="text-center ps-col-num">
+    {{-- ── Col 1: # ──────────────────────────────────────────────── --}}
+    <td class="text-center" style="vertical-align:middle;">
         <span class="sr_number"></span>
     </td>
 
-    {{-- Product + badges --}}
-    <td class="ps-col-product text-left">
-        <span class="purchase-product-name">{{ $product->name }}</span>
+    {{-- ── Col 2: Product Name ─────────────────────────────────── --}}
+    <td class="text-left" style="vertical-align:middle; padding:12px 14px;">
+        <strong style="font-size:13px; font-weight:700; color:#0f172a; line-height:1.35;">{{ $product->name }}</strong>
         @if($product->type == 'variable')
-            <span class="purchase-product-sku">(<b>{{ $variation->product_variation->name }}</b>: {{ $variation->name }})</span>
-        @else
-            <span class="purchase-product-sku">{{ $variation->sub_sku }}</span>
+            <br><small>(<b>{{ $variation->product_variation->name }}</b>: {{ $variation->name }})</small>
         @endif
         @if($product->enable_stock == 1)
-            <div class="purchase-product-meta">
+            <br><small class="text-muted" style="white-space:nowrap;">
                 @lang('report.current_stock'):
                 @if(!empty($variation->variation_location_details->first()))
                     {{ @num_format($variation->variation_location_details->first()->qty_available) }}
                 @else 0 @endif
                 {{ $product->unit->short_name }}
-            </div>
+            </small>
         @endif
         @if(!empty($last_purchase_line))
-            <div class="purchase-product-meta">
+            <br><small class="text-muted" style="font-size:10px;">
                 <i class="fa fa-history"></i>
-                Last: @format_currency($last_purchase_line->pp_without_discount)
-                @if($last_purchase_line->discount_percent > 0)
-                    | Disc: {{ @num_format($last_purchase_line->discount_percent) }}%
-                @endif
-            </div>
+                Last: @format_currency($last_purchase_line->pp_without_discount) | Disc: {{ @num_format($last_purchase_line->discount_percent) }}%
+            </small>
         @endif
-        <div class="details-summary-badge" style="margin-top:4px;">
-            <small class="label label-info details-sell-badge" style="@if(empty($variation->sell_price_inc_tax))display:none;@endif">
-                @if(!empty($variation->sell_price_inc_tax))Sell: {{ $sell_fmt }}@endif
-            </small>
-            <small class="label label-warning details-lot-badge" style="@if(empty($lot_number))display:none;@endif">
-                @if(!empty($lot_number))Lot: {{ $lot_number }}@endif
-            </small>
-            <small class="label label-default details-exp-badge" style="@if(empty($exp_date))display:none;@endif">
-                @if(!empty($exp_date))Exp: {{ $exp_date }}@endif
-            </small>
+        {{-- Badge summary after Details saved --}}
+        <div class="details-summary-badge" style="margin-top:3px;">
+            <small class="label label-info    details-sell-badge" style="display:none; margin-right:2px;"></small>
+            <small class="label label-warning details-lot-badge"  style="display:none; margin-right:2px;"></small>
+            <small class="label label-default details-exp-badge"  style="display:none;"></small>
         </div>
     </td>
 
-    {{-- Qty + identity hiddens --}}
-    <td class="ps-col-qty" data-label="Qty">
+    {{-- ── Col 3: Qty + all hidden form fields ─────────────────── --}}
+    <td style="vertical-align:middle; padding:6px;">
         {!! Form::hidden('purchases[' . $row_count . '][product_id]',   $product->id) !!}
         {!! Form::hidden('purchases[' . $row_count . '][variation_id]', $variation->id, ['class' => 'hidden_variation_id']) !!}
         @if(!empty($purchase_order_line))
@@ -113,6 +101,7 @@
                 data-rule-max-value="{{ $max_quantity }}"
                 data-msg-max-value="{{ __('lang_v1.max_quantity_quantity_allowed', ['quantity' => $max_quantity]) }}"
             @endif
+            style="width:100%; max-width:88px; margin:0 auto; text-align:center; font-weight:600; font-size:13px; height:38px; border-radius:8px;"
         >
 
         @if(!empty($sub_units))
@@ -136,59 +125,80 @@
         @endif
     </td>
 
-    {{-- Unit cost (before disc) — main money-in field --}}
-    <td class="ps-col-cost" data-label="Unit Cost">
+    {{-- ── Col 4: Unit Cost ────────────────────────────────────── --}}
+    <td style="vertical-align:middle; padding:6px;">
         <input type="text"
             name="purchases[{{ $row_count }}][pp_without_discount]"
             value="{{ $cost_fmt }}"
             class="form-control purchase_unit_cost_without_discount input_number"
             placeholder="0.00"
             required
+            style="width:100%; text-align:right; font-weight:600; font-size:13px; height:38px; border-radius:8px;"
         >
+        {{-- Hidden: computed unit cost after discount (submitted with form) --}}
         {!! Form::hidden('purchases[' . $row_count . '][purchase_price]', $price_fmt, ['class' => 'purchase_unit_cost input_number']) !!}
     </td>
 
-    {{-- Hidden: Disc % (kept for JS) --}}
-    <td class="hide">
-        <input type="text"
-            name="purchases[{{ $row_count }}][discount_percent]"
-            value="{{ $disc_fmt }}"
-            class="form-control inline_discounts input_number"
-            required
-        >
+    {{-- ── Col 5: Disc % ───────────────────────────────────────── --}}
+    <td style="vertical-align:middle; padding:6px;">
+        <div class="input-group" style="width:100%;">
+            <span class="input-group-addon" style="font-weight:700; font-size:13px; padding:0 8px; background:#f0f4ff; border-color:#c7d2fe;">%</span>
+            <input type="text"
+                name="purchases[{{ $row_count }}][discount_percent]"
+                value="{{ $disc_fmt }}"
+                class="form-control inline_discounts input_number"
+                placeholder="0"
+                required
+                style="text-align:center; font-weight:700; font-size:15px; height:36px;"
+            >
+        </div>
     </td>
 
-    {{-- Hidden: Sub total before tax --}}
-    <td class="hide text-right">
+    {{-- ── Col 6: Sub Total ────────────────────────────────────── --}}
+    <td class="text-right" style="vertical-align:middle; font-size:14px; font-weight:600; padding:6px 10px;">
         <span class="row_subtotal_before_tax display_currency">0</span>
         <input type="hidden" class="row_subtotal_before_tax_hidden" value="0">
     </td>
 
-    {{-- Hidden: Tax % --}}
-    <td class="hide">
-        {!! Form::text('purchases[' . $row_count . '][item_tax_percent]', 0, [
-            'class'       => 'form-control row_tax_percent input_number',
-            'placeholder' => '0',
-        ]) !!}
-        {!! Form::text('purchases[' . $row_count . '][item_tax]', 0, [
-            'class' => 'form-control row_tax_amount input_number purchase_product_unit_tax hide',
-        ]) !!}
+    {{-- ── Col 7: Tax % ────────────────────────────────────────── --}}
+    <td style="vertical-align:middle; padding:6px;">
+        <div class="input-group" style="width:100%;">
+            <span class="input-group-addon" style="font-weight:700; font-size:13px; padding:0 8px; background:#f0f4ff; border-color:#c7d2fe;">%</span>
+            {!! Form::text('purchases[' . $row_count . '][item_tax_percent]', 0, [
+                'class'       => 'form-control row_tax_percent input_number',
+                'placeholder' => '0',
+                'style'       => 'text-align:center; font-weight:700; font-size:15px; height:36px;',
+            ]) !!}
+        </div>
+        <div class="input-group hide" style="margin-top:4px;">
+            <span class="input-group-addon" style="padding:0 6px;">Amt</span>
+            {!! Form::text('purchases[' . $row_count . '][item_tax]', 0, [
+                'class'       => 'form-control row_tax_amount input_number purchase_product_unit_tax',
+                'placeholder' => '0',
+            ]) !!}
+        </div>
         <select name="purchases[{{ $row_count }}][purchase_line_tax_id]" class="hide purchase_line_tax_id">
             <option value="" data-tax_amount="0" selected>@lang('lang_v1.none')</option>
         </select>
     </td>
 
-    {{-- Line total --}}
-    <td class="text-right ps-col-total" data-label="Total">
+    {{-- ── Col 8: Line Total ───────────────────────────────────── --}}
+    <td class="text-right" style="vertical-align:middle; font-size:14px; font-weight:700; color:#1d4ed8; padding:6px 10px;">
         <span class="row_subtotal_after_tax display_currency">0</span>
         <input type="hidden" class="row_subtotal_after_tax_hidden" value="0">
     </td>
 
-    {{-- Compatibility empty cols (create table legacy) --}}
-    <td class="hide"></td>
+    {{-- ══════════════════════════════════════════════════════════
+         HIDDEN COLUMNS — kept for JS / form submission compatibility
+         ══════════════════════════════════════════════════════════ --}}
+
+    {{-- hidden: unit_cost_before_discount (JS compatibility) --}}
     <td class="hide"></td>
 
-    {{-- Net cost / after tax unit --}}
+    {{-- hidden: discount_percent (JS compatibility) --}}
+    <td class="hide"></td>
+
+    {{-- hidden: net cost / purchase_price_inc_tax --}}
     <td class="hide">
         {!! Form::text('purchases[' . $row_count . '][purchase_price_inc_tax]', $dpp_inc_tax, [
             'class'    => 'form-control input-sm purchase_unit_cost_after_tax input_number',
@@ -196,7 +206,7 @@
         ]) !!}
     </td>
 
-    {{-- Margin % --}}
+    {{-- hidden: Margin % --}}
     <td class="hide">
         {!! Form::text('purchases[' . $row_count . '][profit_percent]',
             number_format($variation->profit_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator),
@@ -204,31 +214,31 @@
         ) !!}
     </td>
 
-    {{-- Sell price --}}
+    {{-- hidden: Sell Price --}}
     @if(empty($is_purchase_order))
     <td class="hide">
         @if(session('business.enable_editing_product_from_purchase'))
             {!! Form::text('purchases[' . $row_count . '][default_sell_price]',
-                $sell_fmt,
+                number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator),
                 ['class' => 'form-control input-sm input_number default_sell_price', 'required']
             ) !!}
         @else
             <input type="hidden"
                 name="purchases[{{ $row_count }}][default_sell_price]"
-                value="{{ $sell_fmt }}"
+                value="{{ number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator) }}"
                 class="default_sell_price">
         @endif
     </td>
     @endif
 
-    {{-- Lot --}}
+    {{-- hidden: Lot Number --}}
     @if(session('business.enable_lot_number'))
     <td class="hide">
         {!! Form::text('purchases[' . $row_count . '][lot_number]', $lot_number, ['class' => 'form-control input-sm lot_number_input']) !!}
     </td>
     @endif
 
-    {{-- MFG / EXP --}}
+    {{-- hidden: MFG / EXP dates --}}
     @if(true || session('business.enable_product_expiry'))
     <td class="hide">
         @if(!empty($expiry_period_type))
@@ -239,28 +249,29 @@
             <input type="text" name="purchases[{{ $row_count }}][exp_date]"  value="{{ $exp_date }}"
                 class="form-control input-sm expiry_datepicker exp_date" readonly>
         @else
-            <input type="hidden" name="purchases[{{ $row_count }}][exp_date]" value="" class="exp_date">
+            <input type="hidden" name="purchases[{{ $row_count }}][exp_date]" value="">
         @endif
     </td>
     @endif
 
-    {{-- Details --}}
-    <td class="text-center ps-col-details">
+    {{-- ── Col: Details button ─────────────────────────────────── --}}
+    <td class="text-center" style="vertical-align:middle; padding:4px;">
         <button type="button"
             class="btn btn-sm btn-primary btn-purchase-details"
             data-row="{{ $row_count }}"
             data-product="{{ addslashes($product->name) }}"
             data-variation="{{ ($variation->name !== 'DUMMY') ? addslashes($variation->name) : '' }}"
             title="Edit sell price, margin, lot & expiry"
+            style="border-radius:5px; padding:5px 10px; font-size:12px; white-space:nowrap;"
         >
             <i class="fa fa-pencil"></i> Details
         </button>
     </td>
 
-    {{-- Remove --}}
-    <td class="text-center ps-col-remove">
+    {{-- ── Col: Remove ─────────────────────────────────────────── --}}
+    <td class="text-center" style="vertical-align:middle;">
         <i class="fa fa-times remove_purchase_entry_row text-danger"
-           title="Remove" style="cursor:pointer;"></i>
+           title="Remove" style="cursor:pointer; font-size:18px;"></i>
     </td>
 
 </tr>
