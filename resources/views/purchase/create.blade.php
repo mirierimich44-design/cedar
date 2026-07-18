@@ -6,6 +6,7 @@
 @php
 	$custom_labels = json_decode(session('business.custom_labels'), true);
 @endphp
+@include('purchase.partials.purchase_slim_styles')
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <div class="tw-flex tw-justify-between tw-items-center">
@@ -33,7 +34,7 @@
 	</div>
 
 	{!! Form::open(['url' => action([\App\Http\Controllers\PurchaseController::class, 'store']), 'method' => 'post', 'id' => 'add_purchase_form', 'files' => true ]) !!}
-	@component('components.widget', ['class' => 'box-primary'])
+	@component('components.widget', ['class' => 'box-primary purchase-meta-card'])
 		<div class="row">
 			<div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif">
 				<div class="form-group">
@@ -48,9 +49,7 @@
 						</span>
 					</div>
 				</div>
-				<strong>
-					@lang('business.address'):
-				</strong>
+				<span class="purchase-addr-label">@lang('business.address')</span>
 				<div id="supplier_address_div"></div>
 			</div>
 			<div class="@if(!empty($default_purchase_status)) col-sm-4 @else col-sm-3 @endif">
@@ -240,7 +239,7 @@
 			<a href="{{ route('purchases.drafts') }}" id="draft-discard-btn" style="color:#9ca3af;font-weight:500;text-decoration:none;">View Drafts</a>
 		</div>
 
-<div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] tw-bg-white tw-shadow-md tw-py-4 tw-mb-4">
+<div class="row tw-sticky !tw-sticky tw-top-0 tw-z-[99] purchase-search-strip">
 			<div class="col-sm-12 missing-product-warning">
 			</div>
 			<div class="col-sm-2 text-center">
@@ -271,42 +270,18 @@
 		@endphp
 		<div class="row">
 			<div class="col-sm-12">
-			<div class="table-responsive" style="overflow-x:auto;">
-				<table class="table table-condensed table-bordered table-th-green text-center table-striped" id="purchase_entry_table" style="width:100%; min-width:1020px;">
-					<colgroup>
-						<col style="width:40px;">          {{-- # --}}
-						<col style="min-width:200px;">     {{-- Product Name --}}
-						<col style="width:90px;">          {{-- Qty --}}
-						<col style="width:145px;">         {{-- Unit Cost --}}
-						<col style="width:125px;">         {{-- Disc% --}}
-						<col style="width:115px;">         {{-- Sub Total --}}
-						<col style="width:115px;">         {{-- Tax % --}}
-						<col style="width:115px;">         {{-- Line Total --}}
-						<col style="display:none;">        {{-- hidden --}}
-						<col style="display:none;">        {{-- hidden --}}
-						<col style="display:none;">        {{-- hidden --}}
-						<col style="display:none;">        {{-- hidden --}}
-						<col style="display:none;">        {{-- hidden --}}
-						@if(session('business.enable_lot_number'))
-						<col style="display:none;">        {{-- hidden --}}
-						@endif
-						@if(true || session('business.enable_product_expiry'))
-						<col style="display:none;">        {{-- hidden --}}
-						@endif
-						<col style="width:95px;">          {{-- Details --}}
-						<col style="width:40px;">          {{-- Delete --}}
-					</colgroup>
+			<div class="table-responsive">
+				<table class="table table-condensed table-bordered table-th-green text-center table-striped purchase-slim" id="purchase_entry_table">
 					<thead>
 						<tr>
-							<th>#</th>
+							<th style="width:40px;">#</th>
 							<th class="text-left">@lang('product.product_name')</th>
-							<th>Qty</th>
-							<th>Unit Cost</th>
-							<th>Disc %</th>
-							<th>Sub Total</th>
-							<th>Tax %</th>
-							<th>Line Total</th>
-							{{-- Hidden cols kept for JS compatibility --}}
+							<th style="width:90px;">Qty</th>
+							<th style="width:120px;">Unit Cost</th>
+							<th class="hide">Disc %</th>
+							<th class="hide">Sub Total</th>
+							<th class="hide">Tax %</th>
+							<th style="width:110px;">Line Total</th>
 							<th class="hide">@lang('lang_v1.unit_cost_before_discount')</th>
 							<th class="hide">@lang('lang_v1.discount_percent')</th>
 							<th class="hide">@lang('purchase.net_cost')</th>
@@ -318,39 +293,20 @@
 							@if(true || session('business.enable_product_expiry'))
 								<th class="hide">MFG / EXP</th>
 							@endif
-							<th>Details</th>
-							<th><i class="fa fa-trash" aria-hidden="true"></i></th>
+							<th style="width:100px;">Details</th>
+							<th style="width:40px;"><i class="fa fa-trash" aria-hidden="true"></i></th>
 						</tr>
 					</thead>
 					<tbody></tbody>
 				</table>
 			</div>
 
-				<hr/>
-				<div class="pull-right col-md-5">
-					<table class="pull-right col-md-12">
-						<tr>
-							<th class="col-md-7 text-right">@lang( 'lang_v1.total_items' ):</th>
-							<td class="col-md-5 text-left">
-								<span id="total_quantity" class="display_currency" data-currency_symbol="false"></span>
-							</td>
-						</tr>
-						<tr class="hide">
-							<th class="col-md-7 text-right">@lang( 'purchase.total_before_tax' ):</th>
-							<td class="col-md-5 text-left">
-								<span id="total_st_before_tax" class="display_currency"></span>
-								<input type="hidden" id="st_before_tax_input" value=0>
-							</td>
-						</tr>
-						<tr class="hide">
-							<th class="col-md-7 text-right">@lang( 'purchase.net_total_amount' ):</th>
-							<td class="col-md-5 text-left">
-								<span id="total_subtotal" class="display_currency"></span>
-								<!-- This is total before purchase tax-->
-								<input type="hidden" id="total_subtotal_input" value=0  name="total_before_tax">
-							</td>
-						</tr>
-					</table>
+				{{-- Hidden totals still required by purchase.js --}}
+				<div class="hide">
+					<span id="total_st_before_tax" class="display_currency"></span>
+					<input type="hidden" id="st_before_tax_input" value=0>
+					<span id="total_subtotal" class="display_currency"></span>
+					<input type="hidden" id="total_subtotal_input" value=0 name="total_before_tax">
 				</div>
 
 				<input type="hidden" id="row_count" value="0">
@@ -570,14 +526,7 @@
 				</table>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-md-12 text-right">
-				{!! Form::hidden('final_total', 0 , ['id' => 'grand_total_hidden']); !!}
-						<div class="tw-text-2xl tw-font-bold tw-text-primary tw-mt-4">
-							@lang('purchase.purchase_total'): <span id="grand_total" class="display_currency" data-currency_symbol='true'>0</span>
-						</div>
-			</div>
-		</div>
+		{!! Form::hidden('final_total', 0 , ['id' => 'grand_total_hidden']); !!}
 	@endcomponent
 	@component('components.widget', ['class' => 'box-primary', 'title' => __('purchase.add_payment')])
 		<div class="box-body payment_row">
@@ -588,20 +537,24 @@
 				</div>
 			</div>
 			@include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'show_denomination' => true])
-			<hr>
-			<div class="row">
-				<div class="col-sm-12">
-					<div class="pull-right"><strong>@lang('purchase.payment_due'):</strong> <span id="payment_due">0.00</span></div>
-				</div>
-			</div>
-			<br>
-			<div class="row">
-				<div class="col-sm-12 text-center">
-					<button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
-				</div>
-			</div>
 		</div>
 	@endcomponent
+
+	<div class="purchase-sticky-footer">
+		<div class="psf-stats">
+			<span>@lang('lang_v1.total_items'): <strong><span id="total_quantity" class="display_currency" data-currency_symbol="false">0</span></strong></span>
+			<span>@lang('purchase.payment_due'): <strong><span id="payment_due">0.00</span></strong></span>
+		</div>
+		<div class="psf-total">
+			<small>@lang('purchase.purchase_total')</small>
+			<span id="grand_total" class="display_currency" data-currency_symbol='true'>0</span>
+		</div>
+		<div class="psf-actions">
+			<button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">
+				<i class="fa fa-check"></i> @lang('messages.save')
+			</button>
+		</div>
+	</div>
 
 {!! Form::close() !!}
 </section>
