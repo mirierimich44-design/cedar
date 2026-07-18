@@ -6,7 +6,7 @@
 @php
 	$custom_labels = json_decode(session('business.custom_labels'), true);
 @endphp
-@include('purchase.partials.purchase_slim_styles')
+@includeIf('purchase.partials.purchase_slim_styles')
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <div class="tw-flex tw-justify-between tw-items-center">
@@ -626,7 +626,7 @@
 </div>
 <!-- /.content -->
 
-@include('purchase.partials.purchase_line_details_modal')
+@includeIf('purchase.partials.purchase_line_details_modal')
 @endsection
 
 
@@ -716,7 +716,7 @@
 		}
 	</script>
 	@include('purchase.partials.keyboard_shortcuts')
-	@include('purchase.partials.purchase_line_details_js')
+	@includeIf('purchase.partials.purchase_line_details_js')
 
 	{{-- ── Purchase Invoice Autosave ──────────────────────────────────────────── --}}
 	<script type="text/javascript">
