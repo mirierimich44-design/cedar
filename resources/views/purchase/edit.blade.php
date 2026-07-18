@@ -526,6 +526,7 @@
   @include('contact.create', ['quick_add' => true])
 </div>
 @include('purchase.partials.import_purchase_products_modal')
+@include('purchase.partials.purchase_line_details_modal')
 @endsection
 
 @section('javascript')
@@ -539,4 +540,5 @@
     });
   </script>
   @include('purchase.partials.keyboard_shortcuts')
+  @include('purchase.partials.purchase_line_details_js')
 @endsection

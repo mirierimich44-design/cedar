@@ -24,6 +24,14 @@
 
 	@include('layouts.partials.error')
 
+	{{-- AI Invoice Scanner trigger --}}
+	<div style="margin-bottom:16px;">
+		<button type="button" class="btn btn-info" id="btn_scan_invoice" style="border-radius:8px;font-weight:600;padding:8px 18px;">
+			<i class="fas fa-magic"></i> &nbsp;Scan Invoice with AI
+		</button>
+		<small class="text-muted" style="margin-left:10px;">Upload an invoice image and Kimi AI will extract and match all products automatically.</small>
+	</div>
+
 	{!! Form::open(['url' => action([\App\Http\Controllers\PurchaseController::class, 'store']), 'method' => 'post', 'id' => 'add_purchase_form', 'files' => true ]) !!}
 	@component('components.widget', ['class' => 'box-primary'])
 		<div class="row">
@@ -263,38 +271,61 @@
 		@endphp
 		<div class="row">
 			<div class="col-sm-12">
-				<div class="table-responsive">
-					<table class="table table-condensed table-bordered table-th-green text-center table-striped" id="purchase_entry_table">
-						<thead>
-							<tr>
-								<th>#</th>
-								<th>@lang( 'product.product_name' )</th>
-								<th>Qty</th>
-								<th class="hide">@lang( 'lang_v1.unit_cost_before_discount' )</th>
-								<th class="hide">@lang( 'lang_v1.discount_percent' )</th>
-								<th>Unit Cost / Disc%</th>
-								<th>Sub Total</th>
-								<th>Tax</th>
-								<th class="hide">@lang( 'purchase.net_cost' )</th>
-								<th>Line Total</th>
-								<th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
-									Margin %
-								</th>
-								<th>Sell Price</th>
-								@if(session('business.enable_lot_number'))
-									<th>
-										@lang('lang_v1.lot_number')
-									</th>
-								@endif
-								@if(true || session('business.enable_product_expiry'))
-									<th>MFG / EXP</th>
-								@endif
-								<th><i class="fa fa-trash" aria-hidden="true"></i></th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
+			<div class="table-responsive" style="overflow-x:auto;">
+				<table class="table table-condensed table-bordered table-th-green text-center table-striped" id="purchase_entry_table" style="width:100%; min-width:1020px;">
+					<colgroup>
+						<col style="width:40px;">          {{-- # --}}
+						<col style="min-width:200px;">     {{-- Product Name --}}
+						<col style="width:90px;">          {{-- Qty --}}
+						<col style="width:145px;">         {{-- Unit Cost --}}
+						<col style="width:125px;">         {{-- Disc% --}}
+						<col style="width:115px;">         {{-- Sub Total --}}
+						<col style="width:115px;">         {{-- Tax % --}}
+						<col style="width:115px;">         {{-- Line Total --}}
+						<col style="display:none;">        {{-- hidden --}}
+						<col style="display:none;">        {{-- hidden --}}
+						<col style="display:none;">        {{-- hidden --}}
+						<col style="display:none;">        {{-- hidden --}}
+						<col style="display:none;">        {{-- hidden --}}
+						@if(session('business.enable_lot_number'))
+						<col style="display:none;">        {{-- hidden --}}
+						@endif
+						@if(true || session('business.enable_product_expiry'))
+						<col style="display:none;">        {{-- hidden --}}
+						@endif
+						<col style="width:95px;">          {{-- Details --}}
+						<col style="width:40px;">          {{-- Delete --}}
+					</colgroup>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th class="text-left">@lang('product.product_name')</th>
+							<th>Qty</th>
+							<th>Unit Cost</th>
+							<th>Disc %</th>
+							<th>Sub Total</th>
+							<th>Tax %</th>
+							<th>Line Total</th>
+							{{-- Hidden cols kept for JS compatibility --}}
+							<th class="hide">@lang('lang_v1.unit_cost_before_discount')</th>
+							<th class="hide">@lang('lang_v1.discount_percent')</th>
+							<th class="hide">@lang('purchase.net_cost')</th>
+							<th class="hide">Margin %</th>
+							<th class="hide">Sell Price</th>
+							@if(session('business.enable_lot_number'))
+								<th class="hide">@lang('lang_v1.lot_number')</th>
+							@endif
+							@if(true || session('business.enable_product_expiry'))
+								<th class="hide">MFG / EXP</th>
+							@endif
+							<th>Details</th>
+							<th><i class="fa fa-trash" aria-hidden="true"></i></th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
 				<hr/>
 				<div class="pull-right col-md-5">
 					<table class="pull-right col-md-12">
@@ -581,8 +612,70 @@
 </div>
 
 @include('purchase.partials.import_purchase_products_modal')
+
+{{-- ── Kimi AI Invoice Scanner Modal ──────────────────────────────────── --}}
+<div class="modal fade" id="scan_invoice_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;">
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1;">&times;</button>
+        <h4 class="modal-title"><i class="fas fa-magic"></i> &nbsp;Kimi AI — Invoice Scanner</h4>
+      </div>
+      <div class="modal-body" id="scan_modal_body">
+
+        {{-- Step 1: Upload --}}
+        <div id="scan_step_upload">
+          {{-- label wraps the input so clicking anywhere on the zone opens file picker natively --}}
+          <label for="scan_file_input" id="scan_dropzone" style="border:2px dashed #c7d2fe;border-radius:12px;padding:40px;text-align:center;cursor:pointer;background:#f5f3ff;transition:background .2s;display:block;margin:0;">
+            <i class="fas fa-cloud-upload-alt" style="font-size:40px;color:#6366f1;"></i>
+            <p style="margin:12px 0 4px;font-size:16px;font-weight:600;color:#312e81;">Drop invoice image here</p>
+            <p style="color:#94a3b8;font-size:13px;">or click to browse &mdash; JPG, PNG, WEBP, PDF &mdash; max 10 MB</p>
+            <input type="file" id="scan_file_input" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display:none;">
+          </label>
+          <div id="scan_file_preview" style="display:none;margin-top:12px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <i class="fas fa-file-image" style="color:#6366f1;font-size:20px;"></i>
+              <span id="scan_file_name" style="font-size:13px;font-weight:500;color:#1e293b;flex:1;"></span>
+              <button type="button" id="scan_clear_file" class="btn btn-xs btn-default"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div style="margin-top:16px;text-align:right;">
+            <button type="button" class="btn btn-primary" id="btn_extract_invoice" disabled style="border-radius:8px;padding:8px 22px;font-weight:600;">
+              <i class="fas fa-magic"></i> Extract with Kimi
+            </button>
+          </div>
+        </div>
+
+        {{-- Step 2: Extracting --}}
+        <div id="scan_step_extracting" style="display:none;text-align:center;padding:50px 20px;">
+          <i class="fas fa-robot" style="font-size:48px;color:#6366f1;animation:pulse 1.5s infinite;"></i>
+          <p style="margin-top:16px;font-size:16px;font-weight:600;color:#312e81;">Kimi is reading your invoice…</p>
+          <p style="color:#94a3b8;font-size:13px;">Extracting products, prices, supplier &mdash; usually takes 5–15 seconds</p>
+          <div class="progress" style="margin-top:20px;height:6px;border-radius:3px;">
+            <div class="progress-bar progress-bar-striped active" style="width:100%;background:#6366f1;"></div>
+          </div>
+        </div>
+
+        {{-- Step 3: Review --}}
+        <div id="scan_step_review" style="display:none;">
+          <div id="scan_review_content"></div>
+          <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+            <button type="button" class="btn btn-default" id="btn_rescan"><i class="fas fa-redo"></i> Scan Again</button>
+            <button type="button" class="btn btn-success" id="btn_apply_invoice" style="border-radius:8px;padding:8px 22px;font-weight:600;">
+              <i class="fas fa-check"></i> Apply to Purchase Form
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
 <!-- /.content -->
+
+@include('purchase.partials.purchase_line_details_modal')
 @endsection
+
 
 @section('javascript')
 	<script src="{{ asset('js/purchase.js?v=' . $asset_v) }}"></script>
@@ -670,6 +763,7 @@
 		}
 	</script>
 	@include('purchase.partials.keyboard_shortcuts')
+	@include('purchase.partials.purchase_line_details_js')
 
 	{{-- ── Purchase Invoice Autosave ──────────────────────────────────────────── --}}
 	<script type="text/javascript">
@@ -846,4 +940,339 @@
 		});
 	})();
 	</script>
+
+	{{-- ── Kimi Invoice Scanner JS ──────────────────────────────────────────── --}}
+	<script>
+	$(document).ready(function() {
+	(function() {
+		var scannedData  = null;
+		var selectedFile = null; // holds the File object whether dropped or picked
+
+		// Prevent browser from opening dropped files on the page
+		$(document).on('dragover drop', function(e) { e.preventDefault(); });
+
+		// Open modal
+		$('#btn_scan_invoice').on('click', function() {
+			resetScanModal();
+			$('#scan_invoice_modal').modal('show');
+		});
+
+		// Dropzone drag-and-drop (click handled natively by <label for="scan_file_input">)
+		$('#scan_dropzone').on('dragenter dragover', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).css('background', '#ede9fe').css('border-color', '#6366f1');
+		}).on('dragleave', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).css('background', '#f5f3ff').css('border-color', '#c7d2fe');
+		}).on('drop', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).css('background', '#f5f3ff').css('border-color', '#c7d2fe');
+			var dt   = e.originalEvent.dataTransfer || e.dataTransfer;
+			var file = dt && dt.files && dt.files[0];
+			if (file) setFile(file);
+		});
+
+		$('#scan_file_input').on('change', function() {
+			if (this.files[0]) setFile(this.files[0]);
+			// also sync selectedFile when picked via dialog
+		});
+
+		$('#scan_clear_file').on('click', function(e) {
+			e.preventDefault();
+			selectedFile = null;
+			$('#scan_file_input').val('');
+			$('#scan_file_preview').hide();
+			$('#scan_dropzone').show();
+			$('#btn_extract_invoice').prop('disabled', true);
+		});
+
+		$('#btn_rescan').on('click', function() { resetScanModal(); });
+
+		function setFile(file) {
+			selectedFile = file;
+			$('#scan_file_name').text(file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)');
+			$('#scan_file_preview').show();
+			$('#scan_dropzone').hide();
+			$('#btn_extract_invoice').prop('disabled', false);
+		}
+
+		function resetScanModal() {
+			selectedFile = null;
+			$('#scan_file_input').val('');
+			$('#scan_file_preview').hide();
+			$('#scan_dropzone').show().css({'background': '#f5f3ff', 'border-color': '#c7d2fe'});
+			$('#btn_extract_invoice').prop('disabled', true);
+			$('#scan_step_upload').show();
+			$('#scan_step_extracting').hide();
+			$('#scan_step_review').hide();
+			$('#scan_review_content').html('');
+			scannedData = null;
+		}
+
+		// Extract
+		$('#btn_extract_invoice').on('click', function() {
+			var file = selectedFile;
+			if (!file) { toastr.warning('Please select or drop an invoice file first.'); return; }
+
+			$('#scan_step_upload').hide();
+			$('#scan_step_extracting').show();
+
+			var fd = new FormData();
+			fd.append('invoice_image', file);
+			fd.append('_token', '{{ csrf_token() }}');
+
+			$.ajax({
+				url: '/purchases/scan-invoice',
+				method: 'POST',
+				data: fd,
+				processData: false,
+				contentType: false,
+				timeout: 90000,
+				success: function(res) {
+					$('#scan_step_extracting').hide();
+					if (res.success) {
+						scannedData = res.data;
+						renderReview(res.data);
+						$('#scan_step_review').show();
+					} else {
+						toastr.error('Extraction failed: ' + res.msg);
+						$('#scan_step_upload').show();
+					}
+				},
+				error: function(xhr) {
+					$('#scan_step_extracting').hide();
+					$('#scan_step_upload').show();
+					var msg = xhr.responseJSON ? xhr.responseJSON.msg : 'Server error. Check KIMI_API_KEY.';
+					toastr.error(msg);
+				}
+			});
+		});
+
+		function renderReview(data) {
+			var html = '';
+
+			// ── Header info (editable) ────────────────────────────────────────────
+			html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">';
+			html += headerField('Supplier',   'si_supplier',    data.supplier_name  || '');
+			html += headerField('Invoice #',  'si_ref_no',      data.invoice_number || '');
+			html += headerField('Date',       'si_inv_date',    data.invoice_date   || '');
+			html += '</div>';
+
+			// ── Items table ───────────────────────────────────────────────────────
+			html += '<p style="font-size:12px;color:#64748b;margin-bottom:6px;">'
+				+ '<i class="fas fa-info-circle"></i> '
+				+ 'Search and select the matching system product for each row. Leave blank to skip that row.'
+				+ '</p>';
+			html += '<div style="overflow-x:auto;">';
+			html += '<table class="table table-bordered table-sm" id="si_items_table" style="font-size:12px;">';
+			html += '<thead><tr style="background:#f8fafc;">'
+				+ '<th style="width:28px;">#</th>'
+				+ '<th>Extracted from Invoice</th>'
+				+ '<th style="min-width:180px;">Match System Product</th>'
+				+ '<th style="width:65px;">Qty</th>'
+				+ '<th style="width:85px;">Unit Price</th>'
+				+ '<th style="width:60px;">Disc%</th>'
+				+ '<th style="width:30px;"></th>'
+				+ '</tr></thead><tbody>';
+
+			if (data.items && data.items.length) {
+				data.items.forEach(function(item, i) {
+					html += '<tr data-index="' + i + '">';
+					html += '<td style="color:#94a3b8;text-align:center;">' + (i+1) + '</td>';
+					// Extracted name + pack size
+					html += '<td>'
+						+ '<span style="font-weight:600;color:#1e293b;">' + esc(item.product_name||'') + '</span>'
+						+ (item.pack_size ? '<br><small style="color:#94a3b8;">' + esc(item.pack_size) + '</small>' : '')
+						+ '</td>';
+					// Product search autocomplete
+					html += '<td>'
+						+ '<input type="text" class="form-control input-sm si-product-search" placeholder="Type to search…" autocomplete="off" style="width:100%;">'
+						+ '<input type="hidden" class="si-product-id">'
+						+ '<input type="hidden" class="si-variation-id">'
+						+ '</td>';
+					// Qty / Price / Disc
+					html += '<td><input type="number" class="form-control input-sm si-qty" value="' + (item.quantity||1) + '" min="0.01" step="any"></td>';
+					html += '<td><input type="number" class="form-control input-sm si-price" value="' + (item.unit_price||0) + '" min="0" step="any"></td>';
+					html += '<td><input type="number" class="form-control input-sm si-disc" value="' + (item.discount_percent||0) + '" min="0" max="100" step="any"></td>';
+					html += '<td style="text-align:center;"><button type="button" class="btn btn-xs btn-default si-remove-row" title="Remove row"><i class="fas fa-times text-danger"></i></button></td>';
+					html += '</tr>';
+				});
+			} else {
+				html += '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px;">No line items extracted</td></tr>';
+			}
+
+			html += '</tbody></table></div>';
+
+			// Grand total summary
+			if (data.grand_total) {
+				html += '<div style="text-align:right;font-size:13px;color:#475569;margin-top:6px;">'
+					+ 'Subtotal: <strong>' + (data.subtotal||0) + '</strong>'
+					+ ' &nbsp;|&nbsp; Tax: <strong>' + (data.tax_amount||0) + '</strong>'
+					+ ' &nbsp;|&nbsp; Grand Total: <strong style="font-size:15px;color:#1e293b;">' + data.grand_total + '</strong>'
+					+ '</div>';
+			}
+
+			$('#scan_review_content').html(html);
+
+			// Wire up product autocomplete on each search input
+			$('#si_items_table').find('.si-product-search').each(function() {
+				wireProductSearch($(this));
+			});
+
+			// Remove row button
+			$('#si_items_table').on('click', '.si-remove-row', function() {
+				$(this).closest('tr').remove();
+			});
+		}
+
+		function headerField(label, id, val) {
+			return '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">'
+				+ '<p style="font-size:11px;color:#94a3b8;margin:0 0 4px;text-transform:uppercase;font-weight:600;">' + label + '</p>'
+				+ '<input type="text" id="' + id + '" class="form-control input-sm" value="' + esc(val) + '">'
+				+ '</div>';
+		}
+
+		function wireProductSearch($input) {
+			$input.autocomplete({
+				source: function(req, resp) {
+					$.getJSON('/purchases/get_products', {
+						term:        req.term,
+						location_id: $('#location_id').val(),
+					}, function(data) {
+						resp($.map(data, function(d) {
+							return { label: d.text, value: d.text, product_id: d.product_id, variation_id: d.variation_id };
+						}));
+					});
+				},
+				minLength: 2,
+				select: function(e, ui) {
+					var $row = $(this).closest('tr');
+					$row.find('.si-product-id').val(ui.item.product_id);
+					$row.find('.si-variation-id').val(ui.item.variation_id);
+					$row.css('background', '#f0fdf4');
+				}
+			});
+		}
+
+		function esc(str) {
+			return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+		}
+
+		// Apply to form
+		$('#btn_apply_invoice').on('click', function() {
+			if (!scannedData) return;
+
+			// Set supplier from editable header field
+			var supplierName = $('#si_supplier').val();
+			if (supplierName) {
+				// Try to find existing option, else set as text in the ref field
+				$.getJSON('/purchases/get_suppliers', { q: supplierName }, function(results) {
+					if (results && results.length) {
+						var s = results[0];
+						var opt = new Option(s.text, s.id, true, true);
+						$('#supplier_id').append(opt).trigger('change');
+					}
+				});
+			}
+
+			// Set ref_no
+			var refNo = $('#si_ref_no').val();
+			if (refNo) $('input[name="ref_no"]').val(refNo);
+
+			// Set date
+			var invDate = $('#si_inv_date').val();
+			if (invDate) {
+				var d = moment(invDate);
+				if (d.isValid()) $('#transaction_date').val(d.format(moment_date_format + ' ' + moment_time_format));
+			}
+
+			// Collect rows that have a product matched
+			var rows = [];
+			$('#si_items_table tbody tr').each(function() {
+				var pid = $(this).find('.si-product-id').val();
+				var vid = $(this).find('.si-variation-id').val();
+				if (!pid || !vid) return; // skip rows without a match
+				rows.push({
+					product_id:   parseInt(pid),
+					variation_id: parseInt(vid),
+					quantity:     parseFloat($(this).find('.si-qty').val()) || 1,
+					unit_price:   parseFloat($(this).find('.si-price').val()) || 0,
+					discount:     parseFloat($(this).find('.si-disc').val()) || 0,
+				});
+			});
+
+			$('#scan_invoice_modal').modal('hide');
+
+			if (rows.length === 0) {
+				toastr.warning('No products matched. Search and select system products before applying.');
+				return;
+			}
+
+			toastr.info('Applying ' + rows.length + ' items…', '', {timeOut: 3000});
+			applyRowsSequentially(rows, 0);
+		});
+
+		function applyRowsSequentially(rows, idx) {
+			if (idx >= rows.length) {
+				toastr.success('Invoice applied! Review and submit.');
+				return;
+			}
+			var item = rows[idx];
+			var rowCountBefore = parseInt($('#row_count').val()) || 0;
+
+			$.ajax({
+				method: 'POST',
+				url: '/purchases/get_purchase_entry_row',
+				dataType: 'html',
+				data: {
+					product_id:   item.product_id,
+					variation_id: item.variation_id,
+					row_count:    rowCountBefore,
+					location_id:  $('#location_id').val(),
+					supplier_id:  $('#supplier_id').val(),
+				},
+				success: function(result) {
+					append_purchase_lines(result, rowCountBefore);
+
+					// Give DOM a tick to settle then fill in values
+					setTimeout(function() {
+						var $row = $('#purchase_entry_table tbody tr').last();
+						if ($row.length) {
+							// Quantity
+							if (item.quantity && $row.find('.purchase_quantity').length) {
+								$row.find('.purchase_quantity').val(
+									__number_f(item.quantity)
+								).trigger('change');
+							}
+							// Unit cost without discount
+							if (item.unit_price && $row.find('.purchase_unit_cost_without_discount').length) {
+								$row.find('.purchase_unit_cost_without_discount').val(
+									__number_f(item.unit_price)
+								).trigger('change');
+							}
+							// Discount
+							if (item.discount && $row.find('.purchase_discount').length) {
+								$row.find('.purchase_discount').val(item.discount).trigger('change');
+							}
+						}
+						applyRowsSequentially(rows, idx + 1);
+					}, 300);
+				},
+				error: function() {
+					applyRowsSequentially(rows, idx + 1);
+				}
+			});
+		}
+	})();
+	}); // end document.ready
+	</script>
+	<style>
+	@keyframes pulse {
+		0%,100%{opacity:1;transform:scale(1);}
+		50%{opacity:.7;transform:scale(1.08);}
+	}
+	</style>
 @endsection

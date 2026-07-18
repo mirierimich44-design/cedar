@@ -25,15 +25,18 @@
                     @lang( 'lang_v1.profit_margin' )
                 </th>
                 @if(empty($is_purchase_order))
-                    <th>@lang( 'purchase.unit_selling_price') <small>(@lang('product.inc_of_tax'))</small></th>
+                    <th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
+                        @lang( 'purchase.unit_selling_price') <small>(@lang('product.inc_of_tax'))</small>
+                    </th>
                     @if(session('business.enable_lot_number'))
-                        <th>
+                        <th class="hide">
                             @lang('lang_v1.lot_number')
                         </th>
                     @endif
                     @if(true || session('business.enable_product_expiry'))
-                        <th>@lang('product.mfg_date') / @lang('product.exp_date')</th>
+                        <th class="hide">@lang('product.mfg_date') / @lang('product.exp_date')</th>
                     @endif
+                    <th>Details</th>
                 @endif
                 <th>
                     <i class="fa fa-trash" aria-hidden="true"></i>
@@ -43,13 +46,35 @@
         <tbody>
     <?php $row_count = 0; ?>
     @foreach($purchase->purchase_lines as $purchase_line)
-        <tr @if(!empty($purchase_line->purchase_order_line) && !empty($common_settings['enable_purchase_order'])) data-purchase_order_id="{{$purchase_line->purchase_order_line->transaction_id}}" @endif  @if(!empty($purchase_line->purchase_requisition_line) && !empty($common_settings['enable_purchase_requisition'])) data-purchase_requisition_id="{{$purchase_line->purchase_requisition_line->transaction_id}}" @endif>
+        <tr data-row="{{ $loop->index }}"
+            @if(!empty($purchase_line->purchase_order_line) && !empty($common_settings['enable_purchase_order'])) data-purchase_order_id="{{$purchase_line->purchase_order_line->transaction_id}}" @endif
+            @if(!empty($purchase_line->purchase_requisition_line) && !empty($common_settings['enable_purchase_requisition'])) data-purchase_requisition_id="{{$purchase_line->purchase_requisition_line->transaction_id}}" @endif>
             <td><span class="sr_number"></span></td>
             <td>
                 {{ $purchase_line->product->name }} ({{$purchase_line->variations->sub_sku}})
                 @if( $purchase_line->product->type == 'variable') 
                     <br/>(<b>{{ $purchase_line->variations->product_variation->name}}</b> : {{ $purchase_line->variations->name}})
                 @endif
+                <div class="details-summary-badge" style="margin-top:3px;">
+                    @php
+                        $edit_sp_badge = null;
+                        if(!empty($purchase_line->variations)) {
+                            $edit_sp_badge = $purchase_line->variations->sell_price_inc_tax;
+                            if(!empty($purchase_line->sub_unit->base_unit_multiplier)) {
+                                $edit_sp_badge = $edit_sp_badge * $purchase_line->sub_unit->base_unit_multiplier;
+                            }
+                        }
+                    @endphp
+                    <small class="label label-info details-sell-badge" style="@if(empty($edit_sp_badge))display:none;@endif margin-right:2px;">
+                        @if(!empty($edit_sp_badge))Sell: {{ number_format($edit_sp_badge, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator) }}@endif
+                    </small>
+                    <small class="label label-warning details-lot-badge" style="@if(empty($purchase_line->lot_number))display:none;@endif margin-right:2px;">
+                        @if(!empty($purchase_line->lot_number))Lot: {{ $purchase_line->lot_number }}@endif
+                    </small>
+                    <small class="label label-default details-exp-badge" style="@if(empty($purchase_line->exp_date))display:none;@endif">
+                        @if(!empty($purchase_line->exp_date))Exp: {{ @format_date($purchase_line->exp_date) }}@endif
+                    </small>
+                </div>
             </td>
 
             <td>
@@ -191,22 +216,22 @@
                 ['class' => 'form-control input-sm input_number profit_percent', 'required']); !!}
             </td>
             @if(empty($is_purchase_order))
-            <td>
+            <td class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
                 @if(session('business.enable_editing_product_from_purchase'))
                     {!! Form::text('purchases[' . $loop->index . '][default_sell_price]', number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm input_number default_sell_price', 'required']); !!}
                 @else
                     {{number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)}}
+                    {!! Form::hidden('purchases[' . $loop->index . '][default_sell_price]', number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'default_sell_price']); !!}
                 @endif
-
             </td>
             @if(session('business.enable_lot_number'))
-                <td>
-                    {!! Form::text('purchases[' . $loop->index . '][lot_number]', $purchase_line->lot_number, ['class' => 'form-control input-sm']); !!}
+                <td class="hide">
+                    {!! Form::text('purchases[' . $loop->index . '][lot_number]', $purchase_line->lot_number, ['class' => 'form-control input-sm lot_number_input']); !!}
                 </td>
             @endif
 
             @if(true || session('business.enable_product_expiry'))
-                <td style="text-align: left;">
+                <td class="hide" style="text-align: left;">
                     @php
                         $expiry_period_type = !empty($purchase_line->product->expiry_period_type) ? $purchase_line->product->expiry_period_type : 'month';
                     @endphp
@@ -224,7 +249,6 @@
                         @endphp
                     @endif
 
-                    <b class="@if($hide_mfg) hide @endif"><small>@lang('product.mfg_date'):</small></b>
                     @php
                         $mfg_date = null;
                         $exp_date = null;
@@ -241,7 +265,6 @@
                         </span>
                         {!! Form::text('purchases[' . $loop->index . '][mfg_date]', !empty($mfg_date) ? @format_date($mfg_date) : null, ['class' => 'form-control input-sm expiry_datepicker mfg_date', 'readonly']); !!}
                     </div>
-                    <b><small>@lang('product.exp_date'):</small></b>
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-calendar"></i>
@@ -249,12 +272,22 @@
                         {!! Form::text('purchases[' . $loop->index . '][exp_date]', !empty($exp_date) ? @format_date($exp_date) : null, ['class' => 'form-control input-sm expiry_datepicker exp_date', 'readonly']); !!}
                     </div>
                     @else
-                    <div class="text-center">
-                        @lang('product.not_applicable')
-                    </div>
+                    <input type="hidden" name="purchases[{{ $loop->index }}][exp_date]" value="" class="exp_date">
                     @endif
                 </td>
             @endif
+            <td class="text-center" style="vertical-align:middle; padding:4px;">
+                <button type="button"
+                    class="btn btn-sm btn-primary btn-purchase-details"
+                    data-row="{{ $loop->index }}"
+                    data-product="{{ addslashes($purchase_line->product->name) }}"
+                    data-variation="{{ ($purchase_line->product->type == 'variable' && $purchase_line->variations->name !== 'DUMMY') ? addslashes($purchase_line->variations->name) : '' }}"
+                    title="Edit sell price, margin, lot & expiry"
+                    style="border-radius:5px; padding:5px 10px; font-size:12px; white-space:nowrap;"
+                >
+                    <i class="fa fa-pencil"></i> Details
+                </button>
+            </td>
             @endif
             <td><i class="fa fa-times remove_purchase_entry_row text-danger" title="Remove" style="cursor:pointer;"></i></td>
         </tr>
