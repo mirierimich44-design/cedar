@@ -249,35 +249,56 @@
             <div class="col-sm-12">
               @include('purchase.partials.edit_purchase_entry_row')
 
-              <hr/>
-              <div class="pull-right col-md-5">
-                <table class="pull-right col-md-12" style="font-size:14px;">
-                  <tr>
-                    <th class="col-md-7 text-right">@lang( 'lang_v1.total_items' ):</th>
-                    <td class="col-md-5 text-left">
-                      <span id="total_quantity" class="display_currency" data-currency_symbol="false"></span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th class="col-md-7 text-right">@lang( 'purchase.net_total_amount' ):</th>
-                    <td class="col-md-5 text-left">
-                      <span id="total_subtotal" class="display_currency">{{$purchase->total_before_tax/$purchase->exchange_rate}}</span>
-                      <input type="hidden" id="total_subtotal_input" value="{{$purchase->total_before_tax/$purchase->exchange_rate}}" name="total_before_tax">
-                    </td>
-                  </tr>
-                  <tr class="hide">
-                    <th class="col-md-7 text-right">@lang( 'purchase.total_before_tax' ):</th>
-                    <td class="col-md-5 text-left">
-                      <span id="total_st_before_tax" class="display_currency"></span>
-                      <input type="hidden" id="st_before_tax_input" value=0>
-                    </td>
-                  </tr>
-                </table>
-              </div>
+              {{-- Hidden inputs required by purchase.js (must stay in DOM) --}}
+              <input type="hidden" id="st_before_tax_input" value="0">
+              <input type="hidden" id="total_subtotal_input" value="{{ $purchase->total_before_tax / max($purchase->exchange_rate, 1) }}" name="total_before_tax">
+              <span id="total_st_before_tax" class="hide"></span>
 
             </div>
         </div>
     @endcomponent
+
+    {{-- ALWAYS-VISIBLE totals (not inside .hide widgets) --}}
+    @php
+      $edit_ex = max((float) $purchase->exchange_rate, 1);
+      $edit_net = (float) $purchase->total_before_tax / $edit_ex;
+      $edit_grand = (float) $purchase->final_total;
+      $edit_paid_sum = 0;
+      if (!empty($purchase->payment_lines)) {
+        foreach ($purchase->payment_lines as $__pl) {
+          $edit_paid_sum += (float) $__pl->amount;
+        }
+      }
+      $edit_due_amt = max(0, $edit_grand - $edit_paid_sum);
+    @endphp
+    <div id="purchase_edit_totals_panel" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin:16px 0;box-shadow:0 1px 3px rgba(15,23,42,.06);">
+      <div class="row" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 0;">
+        <div class="col-sm-3 col-xs-6" style="margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">@lang('lang_v1.total_items')</div>
+          <div style="font-size:20px;font-weight:800;color:#0f172a;"><span id="total_quantity">0</span></div>
+        </div>
+        <div class="col-sm-3 col-xs-6" style="margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">@lang('purchase.net_total_amount')</div>
+          <div style="font-size:20px;font-weight:800;color:#0f172a;"><span id="total_subtotal">{{ number_format($edit_net, $currency_precision ?? 2, '.', '') }}</span></div>
+        </div>
+        <div class="col-sm-3 col-xs-6" style="margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">@lang('purchase.purchase_total')</div>
+          <div style="font-size:22px;font-weight:800;color:#1d4ed8;">
+            <span id="grand_total">{{ number_format($edit_grand, $currency_precision ?? 2, '.', '') }}</span>
+          </div>
+          {!! Form::hidden('final_total', $purchase->final_total, ['id' => 'grand_total_hidden']) !!}
+        </div>
+        <div class="col-sm-3 col-xs-6" style="margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em;">@lang('purchase.payment_due')</div>
+          <div style="font-size:20px;font-weight:800;color:#b45309;">
+            <span id="payment_due" data-paid="{{ $edit_paid_sum }}">{{ number_format($edit_due_amt, $currency_precision ?? 2, '.', '') }}</span>
+          </div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">
+            Paid: <span id="purchase_edit_paid_label">{{ number_format($edit_paid_sum, $currency_precision ?? 2, '.', '') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     @component('components.widget', ['class' => 'box-primary hide'])
         <div class="row">
@@ -349,7 +370,7 @@
         </div>
     @endcomponent
     {{-- Totals / expenses box: must be VISIBLE (was hide — grand total disappeared on edit) --}}
-    @component('components.widget', ['class' => 'box-primary', 'title' => __('purchase.purchase_total')])
+    @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.purchase_additional_expense')])
     <div class="row hide">
 {!! Form::hidden('shipping_details', $purchase->shipping_details); !!}
 {!! Form::hidden('shipping_charges', number_format($purchase->shipping_charges/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)); !!}
@@ -503,26 +524,13 @@
         </table>
       </div>
     </div>
-    <div class="row">
-    <div class="col-md-12 text-right">
-      {!! Form::hidden('final_total', $purchase->final_total , ['id' => 'grand_total_hidden']); !!}
-      <div class="tw-text-2xl tw-font-bold tw-text-primary tw-mt-4" style="padding:12px 0;">
-        @lang('purchase.purchase_total'): <span id="grand_total" class="display_currency" data-currency_symbol='true'>{{$purchase->final_total}}</span>
-      </div>
-    </div>
-    </div>
     @endcomponent
 
-    {{-- Existing payments (edit does not re-enter payment like create; show status + list) --}}
+    {{-- Existing payments --}}
     @php
       $edit_payment_methods = $payment_methods ?? [];
-      $edit_total_paid = 0;
-      if (!empty($purchase->payment_lines)) {
-        foreach ($purchase->payment_lines as $pl) {
-          $edit_total_paid += $pl->amount;
-        }
-      }
-      $edit_due = max(0, ($purchase->final_total ?? 0) - $edit_total_paid);
+      $edit_total_paid = $edit_paid_sum ?? 0;
+      $edit_due = $edit_due_amt ?? 0;
     @endphp
     @component('components.widget', ['class' => 'box-primary', 'title' => __('sale.payment_info')])
       <div class="row" style="margin-bottom:12px;">
@@ -533,12 +541,12 @@
           </span>
         </div>
         <div class="col-sm-4">
-          <strong>@lang('purchase.total_paid') / Paid:</strong>
+          <strong>Paid:</strong>
           <span class="display_currency" data-currency_symbol="true">{{ $edit_total_paid }}</span>
         </div>
         <div class="col-sm-4">
           <strong>@lang('purchase.payment_due'):</strong>
-          <span id="payment_due" class="display_currency" data-currency_symbol="true">{{ $edit_due }}</span>
+          <span class="display_currency" data-currency_symbol="true">{{ $edit_due }}</span>
         </div>
       </div>
       <div class="table-responsive">
@@ -613,8 +621,34 @@
   <script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
   <script type="text/javascript">
     $(document).ready( function(){
-      update_table_total();
-      update_grand_total();
+      // On edit there is no payment-amount input — keep already-paid amount for due calc
+      var paid = parseFloat($('#payment_due').attr('data-paid')) || 0;
+      if (!$('input.payment-amount').length && paid >= 0) {
+        // inject a hidden payment-amount so update_grand_total() keeps paid correctly
+        $('<input>', {
+          type: 'hidden',
+          class: 'payment-amount',
+          value: paid
+        }).appendTo('#add_purchase_form');
+        if (typeof __write_number === 'function') {
+          __write_number($('input.payment-amount'), paid, true);
+        }
+      }
+
+      if (typeof update_table_total === 'function') {
+        update_table_total();
+      }
+      if (typeof update_grand_total === 'function') {
+        update_grand_total();
+      }
+      // Force paint totals panel if still empty
+      if ($.trim($('#grand_total').text()) === '' || $('#grand_total').text() === '0') {
+        var gt = $('input#grand_total_hidden').val();
+        if (gt && typeof __currency_trans_from_en === 'function') {
+          var n = typeof __read_number === 'function' ? __read_number($('input#grand_total_hidden'), true) : parseFloat(gt);
+          $('#grand_total').text(__currency_trans_from_en(n, true, true));
+        }
+      }
       __page_leave_confirmation('#add_purchase_form');
     });
   </script>
