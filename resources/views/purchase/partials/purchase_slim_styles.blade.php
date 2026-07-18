@@ -142,9 +142,8 @@
 }
 
 /*
- * Sticky headers — stick to the WINDOW while the PAGE scrolls.
- * Do NOT use max-height/overflow:auto on a wrapper (that hid rows).
- * Horizontal overflow only, and overflow-y: visible so sticky works.
+ * Table wrapper: all rows visible (page scroll). Horizontal scroll only.
+ * Floating header is implemented in purchase_sticky_header_js (clone approach).
  */
 .purchase-lines-scroll,
 #add_purchase_form .table-responsive:has(#purchase_entry_table) {
@@ -154,64 +153,6 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #fff;
-    /* isolate so sticky is relative to viewport scroll, not a clipped box */
     position: relative;
 }
-
-/* Float header under sticky search strip (~56–80px). Adjust if needed. */
-#purchase_entry_table > thead > tr > th {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 72px;
-    z-index: 30;
-    background: #f1f5f9 !important;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-}
-
-/* When sticky search strip is present, keep header below it */
-body .content-wrapper #purchase_entry_table > thead > tr > th {
-    top: 72px;
-}
-
-/* Mobile: less offset (no big sticky search) */
-@media (max-width: 767px) {
-    #purchase_entry_table > thead > tr > th {
-        top: 0;
-    }
-}
 </style>
-<script>
-(function () {
-    // Recalculate sticky top so header sits under sticky search bar if present
-    function purchaseStickyHeaderOffset() {
-        var ths = document.querySelectorAll('#purchase_entry_table thead th');
-        if (!ths.length) return;
-        var bar = document.querySelector('#add_purchase_form .tw-sticky, #add_purchase_form .purchase-search-strip');
-        var top = 0;
-        if (bar) {
-            var r = bar.getBoundingClientRect();
-            // if bar is stuck at top of viewport
-            if (r.top <= 1 && r.height) {
-                top = Math.ceil(r.height);
-            } else {
-                top = 0;
-            }
-        }
-        // also account for fixed admin navbar if any
-        var nav = document.querySelector('.main-header, .navbar-static-top, nav.navbar');
-        if (nav && window.getComputedStyle(nav).position === 'fixed') {
-            top += Math.ceil(nav.getBoundingClientRect().height);
-        }
-        ths.forEach(function (th) {
-            th.style.top = top + 'px';
-        });
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', purchaseStickyHeaderOffset);
-    } else {
-        purchaseStickyHeaderOffset();
-    }
-    window.addEventListener('scroll', purchaseStickyHeaderOffset, { passive: true });
-    window.addEventListener('resize', purchaseStickyHeaderOffset);
-})();
-</script>

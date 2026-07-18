@@ -765,6 +765,7 @@
 	</script>
 	@includeIf('purchase.partials.keyboard_shortcuts')
 	@includeIf('purchase.partials.purchase_line_details_js')
+	@includeIf('purchase.partials.purchase_sticky_header_js')
 
 	{{-- ── Purchase Invoice Autosave ──────────────────────────────────────────── --}}
 	<script type="text/javascript">
